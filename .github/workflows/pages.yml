@@ -46,8 +46,15 @@ jobs:
           test -f dist/pages/index.html
           test -f dist/pages/manifest.webmanifest
           test -f dist/pages/sw.js
-          test -f dist/pages/icon-180.png
+          for g in 180 192 512; do test -f "dist/pages/icon-$g.png"; done
           grep -q 'rel="manifest"' dist/pages/index.html
+          grep -q 'icon-512.png' dist/pages/manifest.webmanifest
+          # Genau EIN apple-touch-icon, und zwar auf eine Datei. Stuenden der
+          # data:-Verweis und der Dateiverweis nebeneinander, waere es Zufall,
+          # welchen iOS nimmt — und den data:-Verweis ignoriert es.
+          test "$(grep -o 'rel="apple-touch-icon"' dist/pages/index.html | wc -l)" = "1"
+          test "$(grep -o 'rel="apple-touch-icon" href="data:' dist/pages/index.html | wc -l)" = "0"
+          grep -q 'href="./icon-180.png"' dist/pages/index.html
           grep -q 'serviceWorker.register' dist/pages/index.html
           grep -q "^const MARKE = 'skyfront-[0-9a-f]\{8\}';" dist/pages/sw.js
           echo "✓ Manifest, Anmeldung und Speichermarke sitzen."

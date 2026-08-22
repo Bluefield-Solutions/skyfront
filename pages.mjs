@@ -23,15 +23,31 @@ mkdirSync(AUS, { recursive: true });
 
 let html = readFileSync('dist/Skyfront.html', 'utf8');
 
-// --- Symbol aus der Huelle loesen ------------------------------------------
-// In der Einzeldatei steckt es als data:-Adresse. Genau die ignoriert iOS beim
-// Ablegen auf dem Startbildschirm — es braucht eine echte Datei unter einer
-// echten Adresse, sonst nimmt Safari einen Bildschirmausschnitt als Symbol.
-const treffer = html.match(/apple-touch-icon[^>]*base64,([A-Za-z0-9+/=]+)/);
-if (!treffer) { console.error('✗ apple-touch-icon nicht gefunden.'); process.exit(1); }
-const symbol = Buffer.from(treffer[1], 'base64');
-writeFileSync(`${AUS}/icon-180.png`, symbol);
-const breite = symbol.readUInt32BE(16), hoehe = symbol.readUInt32BE(20);
+// --- Symbole ----------------------------------------------------------------
+// Als echte Dateien, nicht als data:-Adresse. Genau die ignoriert iOS beim
+// Ablegen auf dem Startbildschirm — es nimmt dann einen Bildschirmausschnitt
+// der Seite als Symbol. Quelle ist web/icon.svg, gebacken von
+// tools/symbol.mjs; hier wird nur kopiert, damit der Pages-Bau ohne Browser
+// auskommt.
+const SYMBOLE = [180, 192, 512];
+const masse = {};
+for (const g of SYMBOLE) {
+  const pfad = `web/icon-${g}.png`;
+  if (!existsSync(pfad)) {
+    console.error(`✗ ${pfad} fehlt — erst \`node tools/symbol.mjs\` laufen lassen.`);
+    process.exit(1);
+  }
+  const png = readFileSync(pfad);
+  // Aus dem PNG-Kopf lesen statt dem Dateinamen glauben: ein falsch
+  // benanntes Symbol meldet iOS nicht, es zeigt einfach das falsche Bild.
+  const breite = png.readUInt32BE(16), hoehe = png.readUInt32BE(20);
+  if (breite !== g || hoehe !== g) {
+    console.error(`✗ ${pfad} ist ${breite}x${hoehe}, erwartet ${g}x${g}.`);
+    process.exit(1);
+  }
+  masse[g] = `${breite}x${hoehe}`;
+  writeFileSync(`${AUS}/icon-${g}.png`, png);
+}
 
 // --- Manifest ---------------------------------------------------------------
 const manifest = {
@@ -44,7 +60,7 @@ const manifest = {
   orientation: 'portrait',
   background_color: '#05080d',
   theme_color: '#05080d',
-  icons: [{ src: './icon-180.png', sizes: `${breite}x${hoehe}`, type: 'image/png', purpose: 'any' }]
+  icons: SYMBOLE.map(g => ({ src: `./icon-${g}.png`, sizes: masse[g], type: 'image/png', purpose: 'any' }))
 };
 writeFileSync(`${AUS}/manifest.webmanifest`, JSON.stringify(manifest, null, 2));
 
@@ -52,10 +68,24 @@ writeFileSync(`${AUS}/manifest.webmanifest`, JSON.stringify(manifest, null, 2));
 // Das data:-Symbol bleibt drin: es schadet nicht und haelt die Einzeldatei
 // weiterhin autark, wenn jemand sie ohne Server oeffnet.
 const marke = createHash('sha1').update(html).digest('hex').slice(0, 8);
+
+// Die data:-Verweise ERSETZEN, nicht ergaenzen. Stuenden beide da, haette iOS
+// die Wahl zwischen einer Adresse, die es ignoriert, und einer Datei — und
+// welche es nimmt, ist nicht verlaesslich. In der autarken Einzeldatei bleibt
+// das data:-Symbol natuerlich, die hat ja keine Nachbardateien.
+let getauscht = 0;
+html = html.replace(
+  /<link rel="apple-touch-icon"[^>]*?href="data:image\/png;base64,[A-Za-z0-9+/=]+"\s*\/?>/,
+  () => { getauscht++; return '<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">'; }
+);
+html = html.replace(
+  /<link rel="icon"[^>]*?href="data:image\/png;base64,[A-Za-z0-9+/=]+"\s*\/?>/,
+  () => { getauscht++; return '<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">'; }
+);
+if (getauscht !== 2) { console.error(`✗ Erwartet 2 data:-Symbolverweise, ${getauscht} getauscht.`); process.exit(1); }
+
 if (!html.includes('<title>')) { console.error('✗ <title> nicht gefunden.'); process.exit(1); }
-html = html.replace('<title>',
-  '<link rel="manifest" href="./manifest.webmanifest">\n' +
-  '  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">\n  <title>');
+html = html.replace('<title>', '<link rel="manifest" href="./manifest.webmanifest">\n  <title>');
 
 const anmeldung = `
 <script>
@@ -92,4 +122,4 @@ writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8').replaceAll('__MA
 writeFileSync(`${AUS}/.nojekyll`, '');
 
 const mb = (Buffer.byteLength(html) / 1048576).toFixed(2);
-console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbol ${breite}×${hoehe} (${(symbol.length/1024).toFixed(1)} KB) · Marke ${marke}`);
+console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbole ${SYMBOLE.join('/')} · Marke ${marke}`);

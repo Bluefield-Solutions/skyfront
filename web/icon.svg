@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="himmel" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0"    stop-color="#2a6ea6"/>
+      <stop offset="0.38" stop-color="#12406b"/>
+      <stop offset="0.72" stop-color="#0a2440"/>
+      <stop offset="1"    stop-color="#050d18"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.40" r="0.58">
+      <stop offset="0"   stop-color="#6fc4f0" stop-opacity="0.42"/>
+      <stop offset="0.55" stop-color="#2a6ea6" stop-opacity="0.14"/>
+      <stop offset="1"   stop-color="#050d18" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.48" r="0.72">
+      <stop offset="0.5" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1"   stop-color="#000" stop-opacity="0.62"/>
+    </radialGradient>
+
+    <!-- Metall, Licht von oben links -->
+    <linearGradient id="mL" x1="1" y1="0.1" x2="0.05" y2="0.9">
+      <stop offset="0"    stop-color="#ffffff"/>
+      <stop offset="0.22" stop-color="#e2ecf7"/>
+      <stop offset="0.55" stop-color="#a4b6c9"/>
+      <stop offset="0.82" stop-color="#65788c"/>
+      <stop offset="1"    stop-color="#445566"/>
+    </linearGradient>
+    <linearGradient id="mR" x1="0" y1="0.1" x2="0.95" y2="0.9">
+      <stop offset="0"    stop-color="#dde7f3"/>
+      <stop offset="0.30" stop-color="#adbecf"/>
+      <stop offset="0.62" stop-color="#77899d"/>
+      <stop offset="1"    stop-color="#36444f"/>
+    </linearGradient>
+    <linearGradient id="korpus" x1="0.12" y1="0" x2="0.9" y2="0.85">
+      <stop offset="0"    stop-color="#ffffff"/>
+      <stop offset="0.18" stop-color="#eaf2fa"/>
+      <stop offset="0.44" stop-color="#bccddd"/>
+      <stop offset="0.68" stop-color="#8194a8"/>
+      <stop offset="0.88" stop-color="#556678"/>
+      <stop offset="1"    stop-color="#3d4b59"/>
+    </linearGradient>
+    <linearGradient id="glas" x1="0.25" y1="0" x2="0.78" y2="1">
+      <stop offset="0"   stop-color="#dffaff"/>
+      <stop offset="0.28" stop-color="#5cc4f2"/>
+      <stop offset="0.68" stop-color="#1f6ea6"/>
+      <stop offset="1"   stop-color="#0d2f4d"/>
+    </linearGradient>
+    <linearGradient id="fahne" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#fff6d8" stop-opacity="0.95"/>
+      <stop offset="0.18" stop-color="#ffcf6a" stop-opacity="0.72"/>
+      <stop offset="0.45" stop-color="#ff8f34" stop-opacity="0.34"/>
+      <stop offset="1"    stop-color="#ff5a1f" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="kern" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#fffdf2"/>
+      <stop offset="0.45" stop-color="#ffdf9a"/>
+      <stop offset="1"   stop-color="#ff9c3a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#himmel)"/>
+  <rect width="1024" height="1024" fill="url(#halo)"/>
+
+  <!-- Fahrtwind: lange, weiche Bahnen statt Striche -->
+  <g fill="#dbeeff" opacity="0.16">
+    <path d="M150 560 h9 v300 h-9 z" opacity="0.8"/>
+    <path d="M232 640 h7 v250 h-7 z" opacity="0.55"/>
+    <path d="M874 560 h9 v300 h-9 z" opacity="0.8"/>
+    <path d="M792 640 h7 v250 h-7 z" opacity="0.55"/>
+  </g>
+
+  <!-- Nachbrenner: weiche Fahnen + heisse Kerne -->
+  <g>
+    <path d="M441 792 L489 792 L474 1024 L456 1024 Z" fill="url(#fahne)"/>
+    <path d="M535 792 L583 792 L568 1024 L550 1024 Z" fill="url(#fahne)"/>
+  </g>
+
+  <!-- Schlagschatten, nach unten rechts versetzt -->
+  <g transform="translate(30,40)" opacity="0.38">
+    <path d="M512 108 L568 330 L596 430 L892 700 L892 762 L604 706 L596 812 L556 848 L468 848 L428 812 L420 706 L132 762 L132 700 L428 430 L456 330 Z" fill="#02070e"/>
+  </g>
+
+  <!-- Tragflaechen -->
+  <path d="M512 452 L892 700 L892 762 L512 700 Z" fill="url(#mR)"/>
+  <path d="M512 452 L132 700 L132 762 L512 700 Z" fill="url(#mL)"/>
+  <!-- Canards -->
+  <path d="M512 300 L706 424 L706 456 L512 396 Z" fill="url(#mR)"/>
+  <path d="M512 300 L318 424 L318 456 L512 396 Z" fill="url(#mL)"/>
+  <!-- Leitwerke -->
+  <path d="M468 626 L404 818 L448 818 L494 654 Z" fill="#8598ac"/>
+  <path d="M556 626 L620 818 L576 818 L530 654 Z" fill="#56687a"/>
+
+  <!-- Duesen -->
+  <path d="M436 760 h58 v92 h-58 z" fill="#2c3946"/>
+  <path d="M530 760 h58 v92 h-58 z" fill="#243039"/>
+  <ellipse cx="465" cy="852" rx="26" ry="13" fill="#fff3cf"/>
+  <ellipse cx="559" cy="852" rx="26" ry="13" fill="#ffe9b4"/>
+  <ellipse cx="465" cy="856" rx="60" ry="42" fill="url(#kern)" opacity="0.55"/>
+  <ellipse cx="559" cy="856" rx="60" ry="42" fill="url(#kern)" opacity="0.55"/>
+
+  <!-- Rumpf: eine geschlossene, kraeftige Form -->
+  <path d="M512 108
+           C 548 190 572 292 580 400
+           C 590 520 588 654 578 764
+           L 446 764
+           C 436 654 434 520 444 400
+           C 452 292 476 190 512 108 Z" fill="url(#korpus)"/>
+
+  <!-- Rueckenkante: gibt dem Rumpf Rundung -->
+  <path d="M512 132 C 536 216 550 330 552 470 C 553 590 550 690 544 758"
+        stroke="#ffffff" stroke-opacity="0.62" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M512 132 C 488 216 474 330 472 470 C 471 590 474 690 480 758"
+        stroke="#0a141d" stroke-opacity="0.34" stroke-width="7" fill="none" stroke-linecap="round"/>
+
+  <!-- Kanzel -->
+  <path d="M512 214 C 542 254 556 316 556 366 C 556 416 538 442 512 442
+           C 486 442 468 416 468 366 C 468 316 482 254 512 214 Z" fill="url(#glas)"/>
+  <path d="M512 232 C 532 264 544 314 544 356 C 526 342 498 342 480 356 C 480 314 492 264 512 232 Z"
+        fill="#f2fdff" opacity="0.55"/>
+
+  <rect width="1024" height="1024" fill="url(#vignette)"/>
+</svg>
