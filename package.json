@@ -1,0 +1,17 @@
+{
+  "name": "skyfront",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Skyfront — rekonstruierter, wieder baubarer Quellcode (autarker Single-File-Build). Kein Build-Framework nötig; Skripte nutzen nur die Node-Standardbibliothek. Playwright ist optional (nur für den Boot-Test).",
+  "scripts": {
+    "build": "node build.mjs",
+    "variants": "node build-variants.mjs",
+    "all": "node build-all.mjs",
+    "package": "node build-all.mjs --zip",
+    "package:master": "node build-all.mjs --zip=master",
+    "release": "node build-all.mjs --zip --boot",
+    "check": "node check.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

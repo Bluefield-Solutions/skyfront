@@ -1,0 +1,703 @@
+<title>Skyfront Balancing-Konsole</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#eef1f6; --panel:#ffffff; --panel-2:#f5f7fb; --edge:#d3dae6;
+    --ink:#16202e; --ink-2:#4a5a70; --muted:#7a8aa0;
+    --accent:#0e8fb8; --accent-soft:#c7ecf6;
+    --amber:#c67a15; --good:#2f9e6b; --hard:#c8543f;
+    --grid:#e2e8f1; --ref:#9aa8bc;
+    --shadow:0 1px 2px rgba(20,32,48,.06),0 8px 24px rgba(20,32,48,.06);
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --disp:'Chakra Petch',system-ui,sans-serif;
+    --body:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0b131f; --panel:#131f2e; --panel-2:#0f1926; --edge:#25384f;
+    --ink:#e9eff7; --ink-2:#a7b7cc; --muted:#7186a0;
+    --accent:#4cc6e0; --accent-soft:#123240;
+    --amber:#e5a24b; --good:#5fc492; --hard:#e0705f;
+    --grid:#1c2c3f; --ref:#5a6d85;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0b131f; --panel:#131f2e; --panel-2:#0f1926; --edge:#25384f;
+    --ink:#e9eff7; --ink-2:#a7b7cc; --muted:#7186a0;
+    --accent:#4cc6e0; --accent-soft:#123240;
+    --amber:#e5a24b; --good:#5fc492; --hard:#e0705f;
+    --grid:#1c2c3f; --ref:#5a6d85;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent)}
+  .wrap{max-width:1240px;margin:0 auto;padding:22px clamp(14px,3vw,34px) 80px}
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;
+    padding:6px 0 20px;border-bottom:1px solid var(--edge);margin-bottom:22px}
+  .brand{display:flex;flex-direction:column;gap:3px}
+  .eyebrow{font-family:var(--disp);text-transform:uppercase;letter-spacing:.22em;
+    font-size:11px;color:var(--accent);font-weight:600}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(24px,3.4vw,34px);
+    margin:0;letter-spacing:.01em;text-wrap:balance}
+  .sub{color:var(--ink-2);max-width:60ch;font-size:14px}
+  .toolbar{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  button{font-family:var(--disp);font-weight:600;letter-spacing:.03em;cursor:pointer;
+    border:1px solid var(--edge);background:var(--panel);color:var(--ink);
+    padding:9px 15px;border-radius:9px;font-size:13px;transition:.15s;white-space:nowrap}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.primary{background:var(--accent);color:#04222c;border-color:var(--accent)}
+  :root[data-theme="dark"] button.primary,
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#04222c}}
+  button.primary:hover{filter:brightness(1.06);color:#04222c}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .presets{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:-6px 0 20px}
+  .presets .pl{font-family:var(--disp);text-transform:uppercase;letter-spacing:.13em;
+    font-size:11px;color:var(--muted);font-weight:700;margin-right:2px}
+  .chip{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.02em;cursor:pointer;
+    border:1px solid var(--edge);background:var(--panel);color:var(--ink);
+    padding:7px 14px;border-radius:20px;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+  .chip:active{transform:translateY(0)}
+  .pnote{font-size:12px;color:var(--muted)}
+  .effects{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 20px;min-height:26px}
+  .effects .el{font-family:var(--disp);text-transform:uppercase;letter-spacing:.13em;font-size:11px;color:var(--muted);font-weight:700;margin-right:2px}
+  .effects .ec{font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:.02em;
+    border:1px solid var(--amber);color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent);
+    padding:3px 10px;border-radius:20px}
+  .effects .none{font-size:12px;color:var(--muted)}
+  .layout{display:grid;grid-template-columns:1fr;gap:20px}
+  @media(min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 400px}}
+  .panel{background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+    box-shadow:var(--shadow)}
+  .aside{display:flex;flex-direction:column;gap:20px}
+  @media(min-width:1000px){.aside{position:sticky;top:16px;align-self:start;
+    max-height:calc(100vh - 32px);overflow:auto}}
+  section.grp{padding:16px 18px;border-bottom:1px solid var(--edge)}
+  section.grp:last-child{border-bottom:0}
+  .grp>h2{font-family:var(--disp);font-size:13px;text-transform:uppercase;
+    letter-spacing:.13em;margin:0 0 3px;color:var(--ink);font-weight:700}
+  .grp>.gd{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+  .fields{display:grid;grid-template-columns:1fr;gap:13px 22px}
+  @media(min-width:560px){.fields.two{grid-template-columns:1fr 1fr}}
+  .fld{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:2px 10px}
+  .fld .lab{font-size:13px;color:var(--ink-2);font-weight:500}
+  .fld .val{font-family:var(--mono);font-size:13px;font-weight:500;
+    font-variant-numeric:tabular-nums;color:var(--ink);
+    display:inline-flex;align-items:center;gap:6px}
+  .fld .val .u{color:var(--muted);font-size:11px}
+  .fld .dot{width:6px;height:6px;border-radius:50%;background:transparent;flex:none}
+  .fld.changed .dot{background:var(--amber)}
+  .fld.changed .lab{color:var(--ink)}
+  .fld input[type=range]{grid-column:1/-1;width:100%;height:22px;margin:1px 0 0;
+    -webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:3px;
+    background:var(--grid)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:3px;background:var(--grid)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:15px;height:15px;border-radius:50%;background:var(--accent);
+    border:2px solid var(--panel);margin-top:-6px;box-shadow:0 0 0 1px var(--edge)}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--panel);box-shadow:0 0 0 1px var(--edge)}
+  .fld.changed input[type=range]::-webkit-slider-thumb{background:var(--amber)}
+  .fld.changed input[type=range]::-moz-range-thumb{background:var(--amber)}
+  /* chart */
+  .chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    padding:15px 18px 0}
+  .chart-head h2{font-family:var(--disp);font-size:13px;text-transform:uppercase;
+    letter-spacing:.13em;margin:0;font-weight:700}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:16px;height:0;border-top-width:2px;border-top-style:solid;display:inline-block}
+  svg{display:block;width:100%;height:auto}
+  .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--edge);border-top:1px solid var(--edge)}
+  .readout .cell{background:var(--panel);padding:11px 14px}
+  .readout .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .readout .v{font-family:var(--disp);font-weight:700;font-size:20px;
+    font-variant-numeric:tabular-nums;margin-top:2px}
+  .readout .v small{font-size:11px;font-weight:500;color:var(--ink-2)}
+  .delta.up{color:var(--hard)} .delta.down{color:var(--good)}
+  .hardline{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;
+    padding:11px 14px;border-top:1px solid var(--edge)}
+  .hardline .hll{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .hardline .hbarw{height:7px;border-radius:4px;background:var(--grid);overflow:hidden}
+  .hardline .hbarw i{display:block;height:100%;border-radius:4px;background:var(--accent);width:0;transition:width .2s}
+  .hardline .hvv{font-family:var(--disp);font-weight:700;font-size:18px;color:var(--accent);font-variant-numeric:tabular-nums}
+  /* export */
+  .exp{padding:15px 18px 18px}
+  .exp h2{font-family:var(--disp);font-size:13px;text-transform:uppercase;
+    letter-spacing:.13em;margin:0 0 4px;font-weight:700}
+  .exp p{font-size:12.5px;color:var(--muted);margin:0 0 11px}
+  textarea{width:100%;height:190px;resize:vertical;font-family:var(--mono);font-size:12px;
+    line-height:1.5;color:var(--ink);background:var(--panel-2);border:1px solid var(--edge);
+    border-radius:10px;padding:11px 12px;white-space:pre;overflow:auto}
+  .exp .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.45}
+  .drop{margin-top:12px;padding:12px 14px;border:1.5px dashed var(--edge);border-radius:10px;
+    font-size:12.5px;color:var(--ink-2);background:var(--panel-2);line-height:1.5;transition:.15s}
+  .drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+  .dtoggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin-bottom:9px;cursor:pointer;user-select:none}
+  .dtoggle input{accent-color:var(--accent);width:15px;height:15px}
+  .costs{padding:10px 18px 16px;display:grid;gap:9px}
+  .crow{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:10px}
+  .crow .cl{font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;line-height:1.25}
+  .crow .cl .c1{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .crow.chi .cl{color:var(--ink);font-weight:600}
+  .crow.chi .bar i{background:var(--amber)}
+  .crow.chi .cv{color:var(--amber);font-weight:700}
+  .crow .bar{height:8px;border-radius:5px;background:var(--grid);overflow:hidden}
+  .crow .bar i{display:block;height:100%;border-radius:5px;background:var(--accent)}
+  .crow .cv{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink);min-width:56px;text-align:right}
+  .costs .tot{border-top:1px solid var(--edge);margin-top:2px;padding-top:9px;display:flex;justify-content:space-between;align-items:baseline}
+  .costs .tot b{font-family:var(--disp);font-size:16px}
+  .costs .tot span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .linklike{border:0;background:none;color:var(--accent);padding:0;font-family:var(--body);
+    font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer}
+  .linklike:hover{color:var(--accent)}
+  .badge{display:inline-block;min-width:20px;text-align:center;font-family:var(--mono);
+    font-size:11px;font-weight:500;background:var(--accent-soft);color:var(--accent);
+    border-radius:20px;padding:1px 8px;vertical-align:middle}
+  .badge.zero{background:var(--panel-2);color:var(--muted)}
+  .diff{padding:6px 18px 16px;max-height:240px;overflow:auto}
+  .diff .empty{color:var(--muted);font-size:12.5px;padding:10px 0}
+  .diff .drow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:baseline;
+    padding:6px 0;border-bottom:1px solid var(--grid)}
+  .diff .drow:last-child{border-bottom:0}
+  .diff .dl{font-size:12.5px;color:var(--ink-2)}
+  .diff .dl b{color:var(--ink);font-weight:600}
+  .diff .dsec{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+  .diff .dv{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;
+    white-space:nowrap;color:var(--ink)}
+  .diff .dv .o{color:var(--muted)}
+  .diff .dv .arr{color:var(--amber);padding:0 3px}
+  .diff .dv .up{color:var(--hard)} .diff .dv .dn{color:var(--good)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;
+    font-family:var(--disp);font-weight:600;font-size:13px;opacity:0;pointer-events:none;
+    transition:.25s;box-shadow:var(--shadow);z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .foot{margin-top:26px;font-size:12px;color:var(--muted);max-width:70ch}
+  code{font-family:var(--mono);font-size:.92em;background:var(--panel-2);
+    padding:1px 5px;border-radius:5px;border:1px solid var(--edge)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="eyebrow">Skyfront · Werkstatt</div>
+      <h1>Balancing-Konsole</h1>
+      <div class="sub">Alle Kernwerte an Reglern einstellen, die Wellen-Kurve live sehen und die fertige <code>balance.js</code> exportieren.</div>
+    </div>
+    <div class="toolbar">
+      <button id="theme" title="Hell/Dunkel">◐ Ansicht</button>
+      <button id="load">⭱ balance.js laden</button>
+      <button id="reset">↺ Original-Werte</button>
+      <button id="copy" class="primary">⧉ balance.js kopieren</button>
+      <input type="file" id="file" accept=".js,text/javascript" hidden>
+    </div>
+  </header>
+
+  <div class="presets">
+    <span class="pl">Vorlagen</span>
+    <button class="chip" data-preset="soft">🕊 Sanfter Einstieg</button>
+    <button class="chip" data-preset="hard">💀 Hardcore</button>
+    <button class="chip" data-preset="arcade">⚡ Arcade-schnell</button>
+    <span class="pnote">setzt mehrere Regler auf ein stimmiges Set (ab Original)</span>
+  </div>
+
+  <div class="effects" id="effects"></div>
+
+  <div class="layout">
+    <main class="panel" id="form"></main>
+
+    <div class="aside">
+      <div class="panel">
+        <div class="chart-head">
+          <h2>Wellen pro Level</h2>
+          <div class="legend">
+            <span><i style="border-color:var(--ref);border-top-style:dashed"></i>Original</span>
+            <span><i style="border-color:var(--accent)"></i>Aktuell</span>
+          </div>
+        </div>
+        <div id="chart"></div>
+        <div class="readout">
+          <div class="cell"><div class="k">Level 1</div><div class="v" id="r1">–</div></div>
+          <div class="cell"><div class="k">Level 120</div><div class="v" id="r120">–</div></div>
+          <div class="cell"><div class="k">Übergang</div><div class="v" id="rx">–</div></div>
+        </div>
+        <div class="hardline"><span class="hll">Härte-Index</span><span class="hbarw"><i id="hbar"></i></span><span class="hvv" id="hval">–</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head" style="padding-bottom:0">
+          <h2>Änderungen <span id="diffcount" class="badge">0</span></h2>
+          <button id="resetdiff" class="linklike" style="font-family:var(--disp);letter-spacing:.03em">zurücksetzen</button>
+        </div>
+        <div id="diff" class="diff"></div>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head" style="padding-bottom:0"><h2>Kosten bis Vollausbau</h2></div>
+        <div id="costs" class="costs"></div>
+      </div>
+
+      <div class="panel exp">
+        <h2>Export</h2>
+        <p>Diesen Text als <code>src/balance.js</code> speichern, dann <code>node build.mjs</code>.</p>
+        <label class="dtoggle"><input type="checkbox" id="delta"> Nur Änderungen (Delta) zeigen</label>
+        <textarea id="out" readonly spellcheck="false"></textarea>
+        <div class="row">
+          <button id="copy2" class="primary">⧉ Kopieren</button>
+          <button id="dl">⭳ Herunterladen</button>
+          <button id="sel">Alles markieren</button>
+        </div>
+        <div class="hint">Tipp: „Kopieren“ funktioniert überall. „Herunterladen“ klappt, wenn du diese Datei lokal im Browser öffnest. Deine Einstellungen bleiben im Browser gespeichert.</div>
+        <div class="drop" id="drop">⭱ Bestehende <code>balance.js</code> hierher ziehen oder <button id="load2" class="linklike">auswählen</button> — die Regler übernehmen deine Werte.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Die Kurve zeigt die echte Formel aus <code>tn()</code>: <code>Wellen = waveBase + ⌊b · waveSlope⌋</code>, wobei <code>b</code> oberhalb Level 50 langsamer wächst. Grau = Original-Spiel (34 / 1.1), farbig = deine aktuellen Werte.</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+// ---- Referenzwerte -------------------------------------------------------
+const ORIG={
+  player:{maxHp:100,fireEveryMs:135,bulletSpeed:780,bombStart:1,bombMax:3,maxPower:10},
+  enemyGeneric:{touchDamage:20,bulletDamage:11,bulletSpeed:300},
+  difficulty:{
+    easy:{enemyDmg:0.8,enemyHp:1.15,fireRate:1.15,reward:1},
+    normal:{enemyDmg:1.15,enemyHp:1.4,fireRate:0.92,reward:1.6},
+    hard:{enemyDmg:1.6,enemyHp:1.75,fireRate:0.68,reward:2.4}},
+  enemyHp:{grunt:3,weaver:6,kamikaze:3,bomber:21,gunship:29,rocketeer:8,elite:50,strafer:4,arcer:14,sniper:9,carrier:62,rotor:90},
+  enemyScore:{grunt:100,weaver:180,kamikaze:220,bomber:400,gunship:520,rocketeer:340,elite:950,strafer:260,arcer:420,sniper:360,carrier:1500,rotor:2200},
+  gadgets:{emp:{cd:24000,unlock:0},shield:{cd:32000,unlock:600},napalm:{cd:28000,unlock:800},drones:{cd:36000,unlock:1000},repair:{cd:42000,unlock:800},chain:{cd:26000,unlock:1200}},
+  weapons:{spread:{unlock:0},focus:{unlock:0},heavy:{unlock:0},laser:{unlock:1400}},
+  curve:{waveBase:34,waveSlope:1.1,spacingBase:2150,spacingSlope:45},
+  upgrades:{power:{max:10},hp:{max:4,costBase:220,costStep:220},bomb:{max:2,costBase:420,costStep:420},wingman:{max:2,costBase:560,costStep:560}},
+  armor:{front:{max:4,costBase:260,costStep:240},rear:{max:4,costBase:240,costStep:220},wing:{max:4,costBase:220,costStep:200},core:{max:3,costBase:340,costStep:320}},
+  bossRush:{every:0},bossHp:{mult:1},corridorAll:0,bossBeamAlways:0
+};
+// Aktueller Auslieferungsstand (Startpunkt der Konsole)
+const CURRENT=JSON.parse(JSON.stringify(ORIG));
+Object.assign(CURRENT.player,{maxHp:120,fireEveryMs:100,bulletSpeed:950,bombStart:2,bombMax:4});
+Object.assign(CURRENT.difficulty.easy,{enemyDmg:0.65,enemyHp:1.0,fireRate:1.3});
+Object.assign(CURRENT.difficulty.hard,{enemyDmg:1.85,enemyHp:2.0,fireRate:0.6});
+Object.assign(CURRENT.enemyHp,{elite:60,carrier:80,rotor:120});
+Object.assign(CURRENT.enemyScore,{elite:1100,carrier:1800,rotor:2600});
+Object.assign(CURRENT.curve,{waveBase:26,waveSlope:1.4,spacingBase:2350,spacingSlope:60});
+
+const ENEMIES=["grunt","weaver","kamikaze","strafer","rocketeer","arcer","sniper","bomber","gunship","elite","carrier","rotor"];
+const GADGETS=[["emp","EMP"],["shield","Schild"],["napalm","Napalm"],["drones","Drohnen"],["repair","Reparatur"],["chain","Blitz"]];
+const WEAPONS=[["spread","Streufächer"],["focus","Fokus"],["heavy","Kanone"],["laser","Laser"]];
+
+// ---- Schema (Regler) -----------------------------------------------------
+const dmgR={min:0.3,max:3,step:0.05,dec:2}, hpR={min:0.5,max:3,step:0.05,dec:2},
+      frR={min:0.3,max:2,step:0.02,dec:2}, rwR={min:0.5,max:5,step:0.1,dec:1};
+function ehp(){return ENEMIES.map(k=>({p:`enemyHp.${k}`,lab:k,min:1,max:300,step:1,dec:0}));}
+function esc(){return ENEMIES.map(k=>({p:`enemyScore.${k}`,lab:k,min:20,max:5000,step:10,dec:0}));}
+const SECTIONS=[
+ {t:"Spieler-Flugzeug",d:"Überlebensfähigkeit und Feuerkraft beim Start.",two:true,f:[
+   {p:"player.maxHp",lab:"Max-HP",min:20,max:400,step:5,dec:0},
+   {p:"player.fireEveryMs",lab:"Feuertakt",min:60,max:400,step:5,dec:0,u:"ms ↓=schneller"},
+   {p:"player.bulletSpeed",lab:"Schusstempo",min:300,max:1400,step:10,dec:0},
+   {p:"player.maxPower",lab:"Max-Feuerlevel",min:1,max:20,step:1,dec:0},
+   {p:"player.bombStart",lab:"Bomben-Start",min:0,max:5,step:1,dec:0},
+   {p:"player.bombMax",lab:"Bomben-Max",min:1,max:9,step:1,dec:0}]},
+ {t:"Gegner allgemein",d:"Gilt für alle Gegner.",two:true,f:[
+   {p:"enemyGeneric.touchDamage",lab:"Kollisionsschaden",min:0,max:80,step:1,dec:0},
+   {p:"enemyGeneric.bulletDamage",lab:"Kugelschaden",min:1,max:50,step:1,dec:0},
+   {p:"enemyGeneric.bulletSpeed",lab:"Kugeltempo",min:120,max:700,step:10,dec:0}]},
+ {t:"Schwierigkeit · Leicht",d:"Multiplikatoren für den Einsteiger-Grad.",two:true,f:[
+   {p:"difficulty.easy.enemyDmg",lab:"Schaden ×",...dmgR},{p:"difficulty.easy.enemyHp",lab:"Gegner-HP ×",...hpR},
+   {p:"difficulty.easy.fireRate",lab:"Feuerrate ×",...frR},{p:"difficulty.easy.reward",lab:"Belohnung ×",...rwR}]},
+ {t:"Schwierigkeit · Normal",d:"Referenz-Grad.",two:true,f:[
+   {p:"difficulty.normal.enemyDmg",lab:"Schaden ×",...dmgR},{p:"difficulty.normal.enemyHp",lab:"Gegner-HP ×",...hpR},
+   {p:"difficulty.normal.fireRate",lab:"Feuerrate ×",...frR},{p:"difficulty.normal.reward",lab:"Belohnung ×",...rwR}]},
+ {t:"Schwierigkeit · Schwer",d:"Multiplikatoren für den harten Grad.",two:true,f:[
+   {p:"difficulty.hard.enemyDmg",lab:"Schaden ×",...dmgR},{p:"difficulty.hard.enemyHp",lab:"Gegner-HP ×",...hpR},
+   {p:"difficulty.hard.fireRate",lab:"Feuerrate ×",...frR},{p:"difficulty.hard.reward",lab:"Belohnung ×",...rwR}]},
+ {t:"Gegner-HP je Typ",d:"Basis-Lebenspunkte der zwölf Gegnertypen.",two:true,f:ehp()},
+ {t:"Gegner-Punkte je Typ",d:"Score bei Abschuss.",two:true,f:esc()},
+ {t:"Gadgets",d:"Cooldown (ms) und Freischaltkosten (Gold).",two:true,f:GADGETS.flatMap(([k,n])=>[
+   {p:`gadgets.${k}.cd`,lab:`${n} · CD`,min:3000,max:90000,step:500,dec:0,u:"ms"},
+   {p:`gadgets.${k}.unlock`,lab:`${n} · Kosten`,min:0,max:5000,step:50,dec:0}])},
+ {t:"Waffen · Freischaltkosten",d:"Gold zum Freischalten der Hauptwaffen.",two:true,f:WEAPONS.map(([k,n])=>
+   ({p:`weapons.${k}.unlock`,lab:n,min:0,max:5000,step:50,dec:0}))},
+ {t:"Spieler-Upgrades (Hangar)",d:"Obergrenzen (max Stufen) und Goldpreise (Basis + Aufschlag je Stufe).",two:true,f:[
+   {p:"upgrades.power.max",lab:"Feuerkraft · max",min:1,max:20,step:1,dec:0},
+   {p:"upgrades.hp.max",lab:"Hülle · max",min:1,max:10,step:1,dec:0},
+   {p:"upgrades.hp.costBase",lab:"Hülle · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"upgrades.hp.costStep",lab:"Hülle · Aufschlag",min:0,max:3000,step:10,dec:0},
+   {p:"upgrades.bomb.max",lab:"Bombe · max",min:1,max:10,step:1,dec:0},
+   {p:"upgrades.bomb.costBase",lab:"Bombe · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"upgrades.bomb.costStep",lab:"Bombe · Aufschlag",min:0,max:3000,step:10,dec:0},
+   {p:"upgrades.wingman.max",lab:"Wingman · max",min:1,max:10,step:1,dec:0},
+   {p:"upgrades.wingman.costBase",lab:"Wingman · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"upgrades.wingman.costStep",lab:"Wingman · Aufschlag",min:0,max:3000,step:10,dec:0}]},
+ {t:"Panzerung (Workshop)",d:"Obergrenzen und Goldpreise der vier Panzerungsteile.",two:true,f:[
+   {p:"armor.front.max",lab:"Front · max",min:1,max:10,step:1,dec:0},
+   {p:"armor.front.costBase",lab:"Front · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"armor.front.costStep",lab:"Front · Aufschlag",min:0,max:3000,step:10,dec:0},
+   {p:"armor.rear.max",lab:"Heck · max",min:1,max:10,step:1,dec:0},
+   {p:"armor.rear.costBase",lab:"Heck · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"armor.rear.costStep",lab:"Heck · Aufschlag",min:0,max:3000,step:10,dec:0},
+   {p:"armor.wing.max",lab:"Flügel · max",min:1,max:10,step:1,dec:0},
+   {p:"armor.wing.costBase",lab:"Flügel · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"armor.wing.costStep",lab:"Flügel · Aufschlag",min:0,max:3000,step:10,dec:0},
+   {p:"armor.core.max",lab:"Kern · max",min:1,max:10,step:1,dec:0},
+   {p:"armor.core.costBase",lab:"Kern · Preis",min:0,max:3000,step:10,dec:0},
+   {p:"armor.core.costStep",lab:"Kern · Aufschlag",min:0,max:3000,step:10,dec:0}]},
+ {t:"Schwierigkeits-Kurve",d:"Formt Wellenzahl & -abstand über die Level (siehe Diagramm).",two:true,f:[
+   {p:"curve.waveBase",lab:"Wellen-Basis",min:10,max:60,step:1,dec:0,u:"früh"},
+   {p:"curve.waveSlope",lab:"Wellen-Anstieg",min:0.5,max:3,step:0.05,dec:2,u:"spät"},
+   {p:"curve.spacingBase",lab:"Abstand-Basis",min:1200,max:3500,step:50,dec:0,u:"ms"},
+   {p:"curve.spacingSlope",lab:"Verdichtung",min:0,max:120,step:5,dec:0}]},
+ {t:"Spezial (Code-Ebene)",d:"Greifen tiefer als Werte: Boss-Kadenz, Boss-Zähigkeit und Korridor-Modus.",two:true,f:[
+   {p:"bossRush.every",lab:"Boss-Rush · alle N Level (0=aus)",min:0,max:10,step:1,dec:0},
+   {p:"bossHp.mult",lab:"Boss-HP ×",min:0.5,max:4,step:0.1,dec:1},
+   {p:"corridorAll",lab:"Korridor überall (0/1)",min:0,max:1,step:1,dec:0},
+   {p:"bossBeamAlways",lab:"Boss-Beam immer an (0/1)",min:0,max:1,step:1,dec:0}]},
+];
+
+// ---- State ---------------------------------------------------------------
+const LS="skf_balance_editor_v1";
+let state=load()||JSON.parse(JSON.stringify(CURRENT));
+function load(){try{const s=localStorage.getItem(LS);return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){}}
+const get=(o,p)=>p.split(".").reduce((a,k)=>a&&a[k],o);
+const set=(o,p,v)=>{const ks=p.split("."),l=ks.pop();ks.reduce((a,k)=>a[k]=a[k]||{},o)[l]=v;};
+const fmt=(v,d)=>d===0?String(Math.round(v)):(+v).toFixed(d).replace(/\.?0+$/,"")||"0";
+
+// ---- Formular rendern ----------------------------------------------------
+const form=document.getElementById("form");
+const inputs=[];
+for(const S of SECTIONS){
+  const sec=document.createElement("section");sec.className="grp";
+  sec.innerHTML=`<h2>${S.t}</h2><div class="gd">${S.d}</div>`;
+  const wrap=document.createElement("div");wrap.className="fields"+(S.two?" two":"");
+  for(const f of S.f){
+    const id="f_"+f.p.replace(/\./g,"_");
+    const el=document.createElement("div");el.className="fld";
+    el.innerHTML=`<span class="lab"><span class="dot"></span>${f.lab}</span>
+      <span class="val"><span id="${id}_v"></span>${f.u?`<span class="u">${f.u}</span>`:""}</span>
+      <input type="range" id="${id}" min="${f.min}" max="${f.max}" step="${f.step}" aria-label="${S.t} – ${f.lab}">`;
+    wrap.appendChild(el);
+    const range=el.querySelector("input"),vspan=el.querySelector("#"+id+"_v");
+    const sync=()=>{const v=get(state,f.p);range.value=v;vspan.textContent=fmt(v,f.dec);
+      el.classList.toggle("changed",Math.abs(v-get(ORIG,f.p))>1e-9);};
+    range.addEventListener("input",()=>{set(state,f.p,parseFloat(range.value));vspan.textContent=fmt(parseFloat(range.value),f.dec);
+      el.classList.toggle("changed",Math.abs(parseFloat(range.value)-get(ORIG,f.p))>1e-9);
+      refresh();});
+    inputs.push({f,sync});
+    sec.appendChild(wrap);
+  }
+  form.appendChild(sec);
+}
+function syncAll(){inputs.forEach(i=>i.sync());}
+
+// ---- Kurve ---------------------------------------------------------------
+const bOf=T=>T<=50?T:50+(T-50)*0.5;
+const waves=(T,base,slope)=>base+Math.floor(bOf(T)*slope);
+function drawChart(){
+  const W=400,H=190,pl=40,pr=14,pt=14,pb=26,iw=W-pl-pr,ih=H-pt-pb;
+  const c=state.curve, maxL=120;
+  let ymax=0;for(let T=1;T<=maxL;T++)ymax=Math.max(ymax,waves(T,c.waveBase,c.waveSlope),waves(T,ORIG.curve.waveBase,ORIG.curve.waveSlope));
+  ymax=Math.ceil(ymax/20)*20;
+  const X=T=>pl+(T-1)/(maxL-1)*iw, Y=v=>pt+ih-(v/ymax)*ih;
+  const path=(base,slope)=>{let d="";for(let T=1;T<=maxL;T++){d+=(T===1?"M":"L")+X(T).toFixed(1)+" "+Y(waves(T,base,slope)).toFixed(1);}return d;};
+  let grid="";for(let g=0;g<=ymax;g+=Math.max(20,Math.round(ymax/4/20)*20)){grid+=`<line x1="${pl}" y1="${Y(g)}" x2="${W-pr}" y2="${Y(g)}" stroke="var(--grid)" stroke-width="1"/><text x="${pl-7}" y="${Y(g)+3.5}" text-anchor="end" font-size="9" fill="var(--muted)" font-family="var(--mono)">${g}</text>`;}
+  let xl="";[1,30,60,90,120].forEach(T=>{xl+=`<text x="${X(T)}" y="${H-8}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="var(--mono)">${T}</text>`;});
+  // Übergang (crossover) finden
+  let cross=null;for(let T=2;T<=maxL;T++){const a=waves(T,ORIG.curve.waveBase,ORIG.curve.waveSlope),b=waves(T,c.waveBase,c.waveSlope);if(cross===null&&b>a){cross=T;break;}}
+  const crossMark=cross?`<line x1="${X(cross)}" y1="${pt}" x2="${X(cross)}" y2="${pt+ih}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>`:"";
+  document.getElementById("chart").innerHTML=
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Wellen pro Level, Original gegen Aktuell">
+      ${grid}${xl}${crossMark}
+      <path d="${path(ORIG.curve.waveBase,ORIG.curve.waveSlope)}" fill="none" stroke="var(--ref)" stroke-width="2" stroke-dasharray="4 4"/>
+      <path d="${path(c.waveBase,c.waveSlope)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    </svg>`;
+  // Readout
+  const w1=waves(1,c.waveBase,c.waveSlope),w1o=waves(1,ORIG.curve.waveBase,ORIG.curve.waveSlope);
+  const w120=waves(120,c.waveBase,c.waveSlope),w120o=waves(120,ORIG.curve.waveBase,ORIG.curve.waveSlope);
+  const d1=w1-w1o,d120=w120-w120o;
+  const dl=(x)=>x===0?"":` <small class="delta ${x>0?"up":"down"}">${x>0?"+":""}${x}</small>`;
+  document.getElementById("r1").innerHTML=w1+dl(d1);
+  document.getElementById("r120").innerHTML=w120+dl(d120);
+  document.getElementById("rx").innerHTML=cross?("L"+cross):"—";
+}
+
+// ---- balance.js erzeugen -------------------------------------------------
+function num(v){return Number.isInteger(v)?String(v):String(+parseFloat(v.toFixed(4)));}
+function genJS(){
+  const s=state, e=s.enemyHp, sc=s.enemyScore, g=s.gadgets, w=s.weapons, c=s.curve, d=s.difficulty, p=s.player, eg=s.enemyGeneric;
+  const dl=k=>`{ enemyDmg: ${num(d[k].enemyDmg)}, enemyHp: ${num(d[k].enemyHp)}, fireRate: ${num(d[k].fireRate)}, reward: ${num(d[k].reward)} }`;
+  const row=(ks)=>ks.map(k=>`${k}: ${num(e[k])}`).join(", ");
+  const rowS=(ks)=>ks.map(k=>`${k}: ${num(sc[k])}`).join(", ");
+  const gl=k=>`    ${k}:${" ".repeat(Math.max(1,7-k.length))}{ cd: ${num(g[k].cd)}, unlock: ${num(g[k].unlock)} },`;
+  const wl=k=>`    ${k}:${" ".repeat(Math.max(1,7-k.length))}{ unlock: ${num(w[k].unlock)} },`;
+  return `/* Skyfront — Balance-Overlay  (erzeugt mit der Balancing-Konsole)
+ * Als src/balance.js speichern, dann:  node build.mjs
+ * Die Zahlen werden beim Bauen gezielt in app.js eingespielt.
+ */
+export const BALANCE = {
+
+  player: {
+    maxHp: ${num(p.maxHp)}, fireEveryMs: ${num(p.fireEveryMs)}, bulletSpeed: ${num(p.bulletSpeed)},
+    bombStart: ${num(p.bombStart)}, bombMax: ${num(p.bombMax)}, maxPower: ${num(p.maxPower)},
+  },
+
+  enemyGeneric: {
+    touchDamage: ${num(eg.touchDamage)}, bulletDamage: ${num(eg.bulletDamage)}, bulletSpeed: ${num(eg.bulletSpeed)},
+  },
+
+  difficulty: {
+    easy:   ${dl("easy")},
+    normal: ${dl("normal")},
+    hard:   ${dl("hard")},
+  },
+
+  enemyHp: {
+    ${row(["grunt","weaver","kamikaze","bomber","gunship"])},
+    ${row(["rocketeer","elite","strafer","arcer","sniper"])},
+    ${row(["carrier","rotor"])},
+  },
+
+  enemyScore: {
+    ${rowS(["grunt","weaver","kamikaze","bomber","gunship"])},
+    ${rowS(["rocketeer","elite","strafer","arcer","sniper"])},
+    ${rowS(["carrier","rotor"])},
+  },
+
+  gadgets: {
+${GADGETS.map(([k])=>gl(k)).join("\n")}
+  },
+
+  weapons: {
+${WEAPONS.map(([k])=>wl(k)).join("\n")}
+  },
+
+  curve: {
+    waveBase: ${num(c.waveBase)}, waveSlope: ${num(c.waveSlope)},
+    spacingBase: ${num(c.spacingBase)}, spacingSlope: ${num(c.spacingSlope)},
+  },
+
+  upgrades: {
+    power:   { max: ${num(s.upgrades.power.max)} },
+    hp:      { max: ${num(s.upgrades.hp.max)}, costBase: ${num(s.upgrades.hp.costBase)}, costStep: ${num(s.upgrades.hp.costStep)} },
+    bomb:    { max: ${num(s.upgrades.bomb.max)}, costBase: ${num(s.upgrades.bomb.costBase)}, costStep: ${num(s.upgrades.bomb.costStep)} },
+    wingman: { max: ${num(s.upgrades.wingman.max)}, costBase: ${num(s.upgrades.wingman.costBase)}, costStep: ${num(s.upgrades.wingman.costStep)} },
+  },
+
+  armor: {
+    front: { max: ${num(s.armor.front.max)}, costBase: ${num(s.armor.front.costBase)}, costStep: ${num(s.armor.front.costStep)} },
+    rear:  { max: ${num(s.armor.rear.max)}, costBase: ${num(s.armor.rear.costBase)}, costStep: ${num(s.armor.rear.costStep)} },
+    wing:  { max: ${num(s.armor.wing.max)}, costBase: ${num(s.armor.wing.costBase)}, costStep: ${num(s.armor.wing.costStep)} },
+    core:  { max: ${num(s.armor.core.max)}, costBase: ${num(s.armor.core.costBase)}, costStep: ${num(s.armor.core.costStep)} },
+  },
+${s.bossRush && s.bossRush.every>0 ? `\n  bossRush: { every: ${num(s.bossRush.every)} },` : ''}${s.bossHp && s.bossHp.mult!=1 ? `\n  bossHp: { mult: ${num(s.bossHp.mult)} },` : ''}${s.corridorAll ? `\n  corridorAll: true,` : ''}${s.bossBeamAlways ? `\n  bossBeamAlways: true,` : ''}
+};
+`;
+}
+// Härte-Index (gleiche Formel wie im Launcher) — grobe Kennzahl.
+function hardness(){
+  const c=state.curve,d=state.difficulty,p=state.player,eg=state.enemyGeneric;
+  const bOf=T=>T<=50?T:50+(T-50)*0.5;
+  const w60=c.waveBase+Math.floor(bOf(60)*c.waveSlope);
+  const bulletP=(eg.bulletSpeed/300)*(0.68/d.hard.fireRate);
+  const be=state.bossRush?state.bossRush.every:0;
+  const hp=state.bossHp?state.bossHp.mult:1;
+  const bossF=be>=1?1+(3/be)*hp:1+0.15*(hp-1);
+  const h=30*(w60/95)*(d.hard.enemyDmg/1.6)*(100/p.maxHp)*(p.fireEveryMs/110)*bulletP*bossF;
+  return Math.max(5,Math.min(99,Math.round(h)));
+}
+function renderHard(){const v=hardness();const el=document.getElementById('hval'),bar=document.getElementById('hbar');
+  if(el)el.textContent=v; if(bar)bar.style.width=v+'%';}
+
+// ---- Refresh / Aktionen --------------------------------------------------
+const out=document.getElementById("out");
+function renderDiff(){
+  const rows=[];
+  for(const S of SECTIONS)for(const f of S.f){
+    const c=get(state,f.p),o=get(ORIG,f.p);
+    if(Math.abs(c-o)>1e-9)rows.push({sec:S.t,lab:f.lab,o,c,dec:f.dec});
+  }
+  const badge=document.getElementById("diffcount");
+  badge.textContent=rows.length;badge.classList.toggle("zero",rows.length===0);
+  const box=document.getElementById("diff");
+  if(!rows.length){box.innerHTML='<div class="empty">Alle Werte auf Original. Bewege einen Regler, um Abweichungen zu sehen.</div>';return;}
+  box.innerHTML=rows.map(r=>{
+    const dir=r.c>r.o?"up":"dn";const ar=r.c>r.o?"↑":"↓";
+    return `<div class="drow"><div><div class="dsec">${r.sec}</div><div class="dl"><b>${r.lab}</b></div></div>`+
+      `<div class="dv"><span class="o">${fmt(r.o,r.dec)}</span><span class="arr">→</span>`+
+      `<span class="${dir}">${fmt(r.c,r.dec)}</span> <span class="${dir}">${ar}</span></div></div>`;
+  }).join("");
+}
+// Delta-Export: nur geänderte Werte, verschachtelt serialisiert.
+function serObj(o,ind){const p='  '.repeat(ind),p2='  '.repeat(ind+1);
+  return '{\n'+Object.keys(o).map(k=>{const v=o[k];const kk=/^[A-Za-z_$][\w$]*$/.test(k)?k:JSON.stringify(k);
+    return p2+kk+': '+(v&&typeof v==='object'?serObj(v,ind+1):num(v,String(v).includes('.')?2:0));}).join(',\n')+'\n'+p+'}';}
+function genDeltaJS(){
+  const d={};let n=0;
+  for(const S of SECTIONS)for(const f of S.f){const c=get(state,f.p),o=get(ORIG,f.p);if(Math.abs(c-o)>1e-9){set(d,f.p,c);n++;}}
+  if(!n) return '/* Keine Abweichungen vom Original. */\nexport const BALANCE = {};\n';
+  return '/* Skyfront — Delta-Balance ('+n+' geänderte Werte; Rest bleibt Original).\n'
+    +' * Als src/balance.js speichern, dann: node build.mjs\n */\nexport const BALANCE = '+serObj(d,0)+';\n';
+}
+const deltaOn=()=>document.getElementById('delta').checked;
+function curOut(){return deltaOn()?genDeltaJS():genJS();}
+
+// Kosten bis Vollausbau je Upgrade-/Panzerungs-Strang.
+function renderCosts(){
+  const s=state, tracks=[];
+  const sumLin=(max,base,step)=>{let t=0;for(let R=0;R<max;R++)t+=base+step*R;return t;};
+  const sumPow=(max)=>{let t=0;for(let R=0;R<max;R++)t+=Math.round(120*Math.pow(1.5,R));return t;};
+  const g=de=>de.toLocaleString('de-DE');
+  tracks.push(['Feuerkraft',sumPow(s.upgrades.power.max),120]);
+  tracks.push(['Hülle',sumLin(s.upgrades.hp.max,s.upgrades.hp.costBase,s.upgrades.hp.costStep),s.upgrades.hp.costBase]);
+  tracks.push(['Bombe',sumLin(s.upgrades.bomb.max,s.upgrades.bomb.costBase,s.upgrades.bomb.costStep),s.upgrades.bomb.costBase]);
+  tracks.push(['Wingman',sumLin(s.upgrades.wingman.max,s.upgrades.wingman.costBase,s.upgrades.wingman.costStep),s.upgrades.wingman.costBase]);
+  for(const [k,lab] of [['front','Front'],['rear','Heck'],['wing','Flügel'],['core','Kern']])
+    tracks.push([lab,sumLin(s.armor[k].max,s.armor[k].costBase,s.armor[k].costStep),s.armor[k].costBase]);
+  const mx=Math.max(1,...tracks.map(t=>t[1])), tot=tracks.reduce((a,t)=>a+t[1],0);
+  const box=document.getElementById('costs');
+  box.innerHTML=tracks.map(([lab,v,first])=>{
+    const hi=v===mx;
+    return `<div class="crow${hi?' chi':''}"><span class="cl">${lab}<span class="c1">1. Stufe ${g(first)}</span></span><span class="bar"><i style="width:${(v/mx*100).toFixed(1)}%"></i></span><span class="cv">${g(v)}</span></div>`;
+  }).join('')+`<div class="tot"><span>Gesamt (alles maxen)</span><b>${g(tot)} <span style="letter-spacing:0">Gold</span></b></div>`;
+}
+function renderEffects(){
+  const s=state,c=[];
+  if(s.bossRush&&s.bossRush.every>0) c.push('🎯 Boss alle '+s.bossRush.every);
+  if(s.bossHp&&s.bossHp.mult!=1) c.push('🛡 Boss-HP ×'+num(s.bossHp.mult,1));
+  if(s.bossBeamAlways) c.push('⚡ Boss-Beam immer');
+  if(s.corridorAll) c.push('▮ Korridor überall');
+  const box=document.getElementById('effects');
+  box.innerHTML='<span class="el">Aktive Effekte</span>'+
+    (c.length?c.map(t=>`<span class="ec">${t}</span>`).join(''):'<span class="none">keine Code-Effekte gesetzt</span>');
+}
+function refresh(){drawChart();renderDiff();renderCosts();renderHard();renderEffects();out.value=curOut();save();}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1600);}
+async function copyText(txt){
+  try{await navigator.clipboard.writeText(txt);return true;}catch(e){}
+  try{out.focus();out.select();const ok=document.execCommand("copy");out.setSelectionRange(0,0);return ok;}catch(e){return false;}
+}
+document.getElementById("copy").onclick=document.getElementById("copy2").onclick=async()=>{
+  toast(await copyText(curOut())?(deltaOn()?"Delta kopiert":"balance.js kopiert"):"Kopieren blockiert – bitte im Textfeld manuell markieren");};
+document.getElementById("sel").onclick=()=>{out.focus();out.select();};
+document.getElementById("delta").onchange=()=>{out.value=curOut();};
+document.getElementById("dl").onclick=()=>{
+  try{const b=new Blob([curOut()],{type:"text/javascript"});const u=URL.createObjectURL(b);
+    const a=document.createElement("a");a.href=u;a.download="balance.js";document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),1500);toast("Download gestartet");}
+  catch(e){toast("Download hier blockiert – bitte kopieren");}};
+const doReset=()=>{state=JSON.parse(JSON.stringify(ORIG));syncAll();refresh();toast("Auf Original-Werte zurückgesetzt");};
+document.getElementById("reset").onclick=doReset;
+document.getElementById("resetdiff").onclick=doReset;
+// Theme toggle
+const root=document.documentElement;
+document.getElementById("theme").onclick=()=>{
+  const cur=root.getAttribute("data-theme");
+  const dark=cur?cur==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  root.setAttribute("data-theme",dark?"light":"dark");drawChart();};
+
+// ---- balance.js einlesen -------------------------------------------------
+// Objekt-Literal aus dem Datei-Text herausschneiden (BALANCE = { … }) via Klammer-Zählung.
+function extractLiteral(text){
+  const i=text.indexOf("BALANCE");
+  const s=text.indexOf("{", i<0?0:i);
+  if(s<0) return null;
+  let depth=0,inStr=false,q="",inLine=false,inBlock=false;
+  for(let k=s;k<text.length;k++){
+    const ch=text[k],nx=text[k+1];
+    if(inLine){if(ch==="\n")inLine=false;continue;}
+    if(inBlock){if(ch==="*"&&nx==="/"){inBlock=false;k++;}continue;}
+    if(inStr){if(ch==="\\"){k++;continue;}if(ch===q)inStr=false;continue;}
+    if(ch==="/"&&nx==="/"){inLine=true;k++;continue;}
+    if(ch==="/"&&nx==="*"){inBlock=true;k++;continue;}
+    if(ch==='"'||ch==="'"||ch==="`"){inStr=true;q=ch;continue;}
+    if(ch==="{")depth++;
+    else if(ch==="}"){depth--;if(depth===0)return text.slice(s,k+1);}
+  }
+  return null;
+}
+function parseBalance(text){
+  const lit=extractLiteral(text);
+  if(!lit) throw new Error("Keine BALANCE-Struktur gefunden");
+  const obj=Function('"use strict";return ('+lit+");")();
+  if(!obj||typeof obj!=="object") throw new Error("Ungültiges Objekt");
+  return obj;
+}
+function applyLoaded(obj){
+  let applied=0,clamped=0;
+  for(const S of SECTIONS)for(const f of S.f){
+    const v=get(obj,f.p);
+    if(typeof v!=="number"||!isFinite(v))continue;
+    let cv=v; if(cv<f.min){cv=f.min;clamped++;} else if(cv>f.max){cv=f.max;clamped++;}
+    set(state,f.p,cv);applied++;
+  }
+  syncAll();refresh();
+  if(applied===0) toast("Keine passenden Werte gefunden");
+  else toast(`${applied} Werte übernommen`+(clamped?` · ${clamped} auf Reglergrenze begrenzt`:""));
+}
+function readFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{try{applyLoaded(parseBalance(String(r.result)));}
+    catch(e){toast("Konnte Datei nicht lesen: "+e.message);}};
+  r.onerror=()=>toast("Datei konnte nicht gelesen werden");
+  r.readAsText(file);
+}
+const fileInput=document.getElementById("file");
+const pick=()=>fileInput.click();
+document.getElementById("load").onclick=pick;
+document.getElementById("load2").onclick=pick;
+fileInput.onchange=()=>{readFile(fileInput.files[0]);fileInput.value="";};
+const drop=document.getElementById("drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();if(ev==="dragleave"&&drop.contains(e.relatedTarget))return;drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)readFile(f);});
+// Ganzseitiges Drop verhindert versehentliches Wegnavigieren
+window.addEventListener("dragover",e=>e.preventDefault());
+window.addEventListener("drop",e=>e.preventDefault());
+
+// ---- Vorlagen ------------------------------------------------------------
+const PRESETS={
+  soft:{name:"Sanfter Einstieg",ov:{
+    player:{maxHp:120,fireEveryMs:100,bulletSpeed:950,bombStart:2,bombMax:4},
+    difficulty:{easy:{enemyDmg:0.65,enemyHp:1.0,fireRate:1.3},hard:{enemyDmg:1.85,enemyHp:2.0,fireRate:0.6}},
+    enemyHp:{elite:60,carrier:80,rotor:120},
+    enemyScore:{elite:1100,carrier:1800,rotor:2600},
+    curve:{waveBase:26,waveSlope:1.4,spacingBase:2350,spacingSlope:60}}},
+  hard:{name:"Hardcore",ov:{
+    player:{maxHp:90,fireEveryMs:140},
+    enemyGeneric:{touchDamage:26,bulletDamage:15,bulletSpeed:360},
+    difficulty:{easy:{enemyDmg:1.0,enemyHp:1.3,fireRate:0.95},normal:{enemyDmg:1.4,enemyHp:1.7,fireRate:0.78},hard:{enemyDmg:2.2,enemyHp:2.4,fireRate:0.5,reward:3}},
+    enemyHp:{grunt:4,weaver:8,gunship:38,bomber:28,elite:70,carrier:100,rotor:150},
+    curve:{waveBase:32,waveSlope:1.8,spacingBase:2000,spacingSlope:85}}},
+  arcade:{name:"Arcade-schnell",ov:{
+    player:{maxHp:110,fireEveryMs:90,bulletSpeed:1050,bombStart:2,bombMax:4},
+    enemyGeneric:{bulletSpeed:260},
+    difficulty:{easy:{enemyDmg:0.7,enemyHp:0.75,fireRate:1.2},normal:{enemyDmg:1.0,enemyHp:0.9,fireRate:1.0},hard:{enemyDmg:1.3,enemyHp:1.1,fireRate:0.85}},
+    enemyHp:{grunt:2,weaver:4,kamikaze:2,strafer:3,gunship:20,bomber:14,elite:36,carrier:44,rotor:64},
+    enemyScore:{grunt:140,weaver:240,kamikaze:300,bomber:520,gunship:680,rocketeer:440,elite:1300,strafer:340,arcer:560,sniper:480,carrier:2000,rotor:3000},
+    curve:{waveBase:30,waveSlope:1.2,spacingBase:1800,spacingSlope:70}}},
+};
+function mergeInto(t,s){for(const k in s){if(s[k]&&typeof s[k]==="object")mergeInto(t[k]=t[k]||{},s[k]);else t[k]=s[k];}}
+function clampState(){for(const S of SECTIONS)for(const f of S.f){let v=get(state,f.p);if(v<f.min)set(state,f.p,f.min);else if(v>f.max)set(state,f.p,f.max);}}
+function applyPreset(key){
+  const P=PRESETS[key];if(!P)return;
+  state=JSON.parse(JSON.stringify(ORIG));mergeInto(state,P.ov);clampState();
+  syncAll();refresh();toast("Vorlage: "+P.name);
+}
+document.querySelectorAll(".chip[data-preset]").forEach(c=>c.onclick=()=>applyPreset(c.dataset.preset));
+
+syncAll();refresh();
+</script>

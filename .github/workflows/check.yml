@@ -1,0 +1,39 @@
+# Skyfront — CI-Check bei jedem Push / Pull Request.
+# Voraussetzung: Die Projektdateien (check.mjs, build.mjs, src/, profiles/ …)
+# liegen im Repo-Wurzelverzeichnis. Liegen sie in einem Unterordner, setze unten
+# bei den run-Steps eine passende working-directory.
+name: Skyfront Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Playwright installieren (für den Boot-Test)
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Check ausführen (Build + Boot-Test)
+        run: node check.mjs
+
+      - name: Prüfbericht in die Job-Zusammenfassung schreiben
+        if: always()
+        run: |
+          if [ -f dist/check-report.md ]; then
+            cat dist/check-report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Kein check-report.md gefunden." >> "$GITHUB_STEP_SUMMARY"
+          fi
