@@ -61487,17 +61487,17 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             fontSize: "12px",
             color: "#eaf6ff",
             fontStyle: "bold"
-          }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(58, 12, f.name.toUpperCase(), {
+          }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(68, 12, f.name.toUpperCase(), {
             fontFamily: "sans-serif",
             fontSize: "11px",
             color: "#ffd85a",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(58, 28, "", {
+          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(68, 28, "", {
             fontFamily: "sans-serif",
             fontSize: "17px",
             color: "#dff0ff",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(58, 50, "", {
+          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(68, 50, "", {
             fontFamily: "sans-serif",
             fontSize: "12px",
             color: "#9fe0c2"

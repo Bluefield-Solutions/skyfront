@@ -3,7 +3,7 @@
 // drumherum (Manifest, Symbol, Dienst-Arbeiter), die iOS zum Ablegen auf dem
 // Startbildschirm braucht.
 //   node pages.mjs
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'fs';
 import { createHash } from 'crypto';
 import { execSync } from 'child_process';
 
@@ -84,8 +84,32 @@ html = html.replace(
 );
 if (getauscht !== 2) { console.error(`✗ Erwartet 2 data:-Symbolverweise, ${getauscht} getauscht.`); process.exit(1); }
 
+// --- iOS-Startbilder --------------------------------------------------------
+// Nur hier, nicht in der Einzeldatei: das sind Nachbardateien, und die autarke
+// HTML hat keine Nachbarn. Ohne sie zeigt iOS beim Start aus dem Symbol weiss,
+// bis die Seite malt — bei 24 MB dauert das.
+const startVerz = 'web/start';
+if (!existsSync(startVerz) || !existsSync('web/startbilder.html')) {
+  console.error('✗ web/start/ oder web/startbilder.html fehlt — erst `node tools/symbol.mjs` laufen lassen.');
+  process.exit(1);
+}
+mkdirSync(`${AUS}/start`, { recursive: true });
+let startZahl = 0, startBytes = 0;
+for (const f of readdirSync(startVerz)) {
+  const png = readFileSync(`${startVerz}/${f}`);
+  writeFileSync(`${AUS}/start/${f}`, png);
+  startZahl++; startBytes += png.length;
+}
+const startVerweise = readFileSync('web/startbilder.html', 'utf8').trim();
+// Jeder Verweis muss eine Datei haben, die es auch gibt — sonst zeigt iOS
+// stumm weiss, und niemand merkt es.
+for (const m of startVerweise.matchAll(/href="\.\/(start\/[^"]+)"/g)) {
+  if (!existsSync(`${AUS}/${m[1]}`)) { console.error(`✗ Startbild ${m[1]} fehlt.`); process.exit(1); }
+}
+
 if (!html.includes('<title>')) { console.error('✗ <title> nicht gefunden.'); process.exit(1); }
-html = html.replace('<title>', '<link rel="manifest" href="./manifest.webmanifest">\n  <title>');
+html = html.replace('<title>',
+  '<link rel="manifest" href="./manifest.webmanifest">\n' + startVerweise + '\n  <title>');
 
 const anmeldung = `
 <script>
@@ -122,4 +146,4 @@ writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8').replaceAll('__MA
 writeFileSync(`${AUS}/.nojekyll`, '');
 
 const mb = (Buffer.byteLength(html) / 1048576).toFixed(2);
-console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbole ${SYMBOLE.join('/')} · Marke ${marke}`);
+console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbole ${SYMBOLE.join('/')} · ${startZahl} Startbilder (${(startBytes/1048576).toFixed(2)} MB) · Marke ${marke}`);

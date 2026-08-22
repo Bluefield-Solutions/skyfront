@@ -47,14 +47,16 @@
   function ensureUI() {
     if (btn || !document.body) return;
     btn = document.createElement('button'); btn.type = 'button';
-    btn.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:99999;'
+    // bottom:10px lag auf dem iPhone im Home-Indikator. env() ist ohne
+    // Safe-Area 0px, auf dem Schreibtisch aendert sich also nichts.
+    btn.style.cssText = 'position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(10px + env(safe-area-inset-bottom));z-index:99999;'
       + 'font:600 13px/1.2 sans-serif;color:#dfe;background:rgba(10,16,26,.72);'
       + 'border:1px solid #2a4c6a;border-radius:10px;padding:8px 10px;'
       + 'backdrop-filter:blur(2px);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent';
     btn.addEventListener('click', function (e) { e.preventDefault(); cycle(); });
     document.body.appendChild(btn);
     btn2 = document.createElement('button'); btn2.type = 'button';
-    btn2.style.cssText = 'position:fixed;left:10px;bottom:48px;z-index:99999;display:none;'
+    btn2.style.cssText = 'position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(48px + env(safe-area-inset-bottom));z-index:99999;display:none;'
       + 'font:600 12px/1.2 sans-serif;color:#cfe;background:rgba(10,16,26,.66);'
       + 'border:1px solid #2a4c6a;border-radius:9px;padding:6px 9px;'
       + 'cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent';

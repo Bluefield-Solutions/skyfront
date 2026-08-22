@@ -57,6 +57,7 @@
     </radialGradient>
   </defs>
 
+  <g id="grund">
   <rect width="1024" height="1024" fill="url(#himmel)"/>
   <rect width="1024" height="1024" fill="url(#halo)"/>
 
@@ -66,6 +67,7 @@
     <path d="M232 640 h7 v250 h-7 z" opacity="0.55"/>
     <path d="M874 560 h9 v300 h-9 z" opacity="0.8"/>
     <path d="M792 640 h7 v250 h-7 z" opacity="0.55"/>
+  </g>
   </g>
 
   <!-- Nachbrenner: weiche Fahnen + heisse Kerne -->
@@ -117,5 +119,5 @@
   <path d="M512 232 C 532 264 544 314 544 356 C 526 342 498 342 480 356 C 480 314 492 264 512 232 Z"
         fill="#f2fdff" opacity="0.55"/>
 
-  <rect width="1024" height="1024" fill="url(#vignette)"/>
+  <g id="schleier"><rect width="1024" height="1024" fill="url(#vignette)"/></g>
 </svg>
