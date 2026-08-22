@@ -1,0 +1,95 @@
+// Baut dist/pages/ — den Master als installierbare Web-App fuer GitHub Pages.
+// Der Einzeldatei-Bau bleibt unangetastet; hier entsteht nur die Huelle
+// drumherum (Manifest, Symbol, Dienst-Arbeiter), die iOS zum Ablegen auf dem
+// Startbildschirm braucht.
+//   node pages.mjs
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
+
+// Ersetzt das LETZTE Vorkommen. Noetig, weil "</body>" auch in Phasers
+// JavaScript steckt (als String im SVG-Lader) — dort eingehaengt ergibt es
+// einen Syntaxfehler, und der Dienst-Arbeiter meldet sich nie an.
+function ersetzeLetztes(text, marke, ersatz) {
+  const i = text.lastIndexOf(marke);
+  if (i < 0) return null;
+  return text.slice(0, i) + ersatz + text.slice(i + marke.length);
+}
+
+const AUS = 'dist/pages';
+if (!existsSync('dist/Skyfront.html')) execSync('node build.mjs', { stdio: 'inherit' });
+rmSync(AUS, { recursive: true, force: true });
+mkdirSync(AUS, { recursive: true });
+
+let html = readFileSync('dist/Skyfront.html', 'utf8');
+
+// --- Symbol aus der Huelle loesen ------------------------------------------
+// In der Einzeldatei steckt es als data:-Adresse. Genau die ignoriert iOS beim
+// Ablegen auf dem Startbildschirm — es braucht eine echte Datei unter einer
+// echten Adresse, sonst nimmt Safari einen Bildschirmausschnitt als Symbol.
+const treffer = html.match(/apple-touch-icon[^>]*base64,([A-Za-z0-9+/=]+)/);
+if (!treffer) { console.error('✗ apple-touch-icon nicht gefunden.'); process.exit(1); }
+const symbol = Buffer.from(treffer[1], 'base64');
+writeFileSync(`${AUS}/icon-180.png`, symbol);
+const breite = symbol.readUInt32BE(16), hoehe = symbol.readUInt32BE(20);
+
+// --- Manifest ---------------------------------------------------------------
+const manifest = {
+  name: 'Skyfront',
+  short_name: 'Skyfront',
+  id: './',
+  start_url: './',
+  scope: './',
+  display: 'standalone',
+  orientation: 'portrait',
+  background_color: '#05080d',
+  theme_color: '#05080d',
+  icons: [{ src: './icon-180.png', sizes: `${breite}x${hoehe}`, type: 'image/png', purpose: 'any' }]
+};
+writeFileSync(`${AUS}/manifest.webmanifest`, JSON.stringify(manifest, null, 2));
+
+// --- Huelle in die Seite einhaengen ----------------------------------------
+// Das data:-Symbol bleibt drin: es schadet nicht und haelt die Einzeldatei
+// weiterhin autark, wenn jemand sie ohne Server oeffnet.
+const marke = createHash('sha1').update(html).digest('hex').slice(0, 8);
+if (!html.includes('<title>')) { console.error('✗ <title> nicht gefunden.'); process.exit(1); }
+html = html.replace('<title>',
+  '<link rel="manifest" href="./manifest.webmanifest">\n' +
+  '  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">\n  <title>');
+
+const anmeldung = `
+<script>
+// Nur ueber http(s) — als lose Datei (file://) gibt es keinen Dienst-Arbeiter.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').then(function (reg) {
+      // MUSS sein. Ohne diesen Aufruf bedient der alte Arbeiter jeden Start
+      // vollstaendig aus dem Speicher, der Browser holt sw.js nie wieder und
+      // das Telefon behaelt die zuerst installierte Fassung fuer immer.
+      // Nachgemessen: ohne update() bleibt die Marke ueber drei Starts alt,
+      // mit update() wechselt sie in unter einer Sekunde.
+      // Ohne Netz schlaegt update() fehl — im Funkloch der Normalfall.
+      // Unbehandelt landet das als Fehler in der Konsole.
+      var still = function () {};
+      reg.update().catch(still);
+      setInterval(function () { reg.update().catch(still); }, 3600000);
+    }).catch(function () {});
+  });
+  // Absichtlich KEIN location.reload() bei Wechsel: das Spiel wuerde mitten
+  // im Lauf 24 MB neu laden. Die neue Fassung greift beim naechsten Start.
+}
+</script>
+</body>`;
+const endeKopf = html.lastIndexOf('</head>');
+const endeLeib = html.lastIndexOf('</body>');
+if (endeLeib < 0 || endeLeib < endeKopf) {
+  console.error('✗ Kein brauchbares </body> gefunden (letztes liegt vor </head>).'); process.exit(1);
+}
+html = ersetzeLetztes(html, '</body>', anmeldung);
+
+writeFileSync(`${AUS}/index.html`, html);
+writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8').replaceAll('__MARKE__', marke));
+writeFileSync(`${AUS}/.nojekyll`, '');
+
+const mb = (Buffer.byteLength(html) / 1048576).toFixed(2);
+console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbol ${breite}×${hoehe} (${(symbol.length/1024).toFixed(1)} KB) · Marke ${marke}`);

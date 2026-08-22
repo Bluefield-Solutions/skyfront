@@ -1,0 +1,72 @@
+# Veroeffentlicht Skyfront als installierbare Web-App auf GitHub Pages.
+#
+# Gebaut wird dist/pages/ — der Master als Einzeldatei, dazu Manifest, Symbol
+# und Dienst-Arbeiter. Erst diese drei machen aus der HTML etwas, das iOS auf
+# den Startbildschirm legen kann.
+#
+# Voraussetzung, einmalig von Hand: Settings → Pages → Source auf
+# "GitHub Actions" stellen. Ohne das schlaegt configure-pages fehl.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Zwei Lieferungen gleichzeitig wuerden sich gegenseitig ueberholen.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Web-App bauen
+        run: npm run pages
+
+      - name: Nachweisen, dass die Huelle wirklich drin ist
+        # Der Einschub landete schon einmal im falschen </body> — mitten in
+        # Phasers JavaScript. Das Ergebnis sah gebaut aus und war kaputt.
+        run: |
+          set -e
+          test -f dist/pages/index.html
+          test -f dist/pages/manifest.webmanifest
+          test -f dist/pages/sw.js
+          test -f dist/pages/icon-180.png
+          grep -q 'rel="manifest"' dist/pages/index.html
+          grep -q 'serviceWorker.register' dist/pages/index.html
+          grep -q "^const MARKE = 'skyfront-[0-9a-f]\{8\}';" dist/pages/sw.js
+          echo "✓ Manifest, Anmeldung und Speichermarke sitzen."
+
+      - name: Pages vorbereiten
+        uses: actions/configure-pages@v5
+
+      - name: Ergebnis hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/pages
+
+  liefern:
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.lieferung.outputs.page_url }}
+    steps:
+      - name: Auf Pages veroeffentlichen
+        id: lieferung
+        uses: actions/deploy-pages@v4
