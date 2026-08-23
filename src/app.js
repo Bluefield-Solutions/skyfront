@@ -58406,12 +58406,12 @@ return new ` + this.key + `();
         strokeW: 2,
         radius: 14,
         depth: 4
-      }), Ci(this, J / 2, 37), this.add.text(J / 2, 68, "🪙 Gold nur als seltener Münz-Drop im Kampf  ·  dafür: Feuerkraft ausbauen", {
+      }), Ci(this, J / 2, 37), this.add.text(J / 2, 75, "🪙 Gold nur als seltener Münz-Drop im Kampf  ·  dafür: Feuerkraft ausbauen", {
         fontFamily: "sans-serif",
         fontSize: "11px",
         color: "#8fb8dc"
       }).setOrigin(.5).setDepth(5);
-      const E = this.add.text(J / 2, 112, "SKYFRONT", {
+      const E = this.add.text(J / 2, 128, "SKYFRONT", {
         fontFamily: "sans-serif",
         fontSize: "58px",
         color: "#eaf6ff",
@@ -58434,14 +58434,14 @@ return new ` + this.key + `();
           })
         }
       } catch (f) {}
-      E.setAlpha(0).setY(90), this.tweens.add({
+      E.setAlpha(0).setY(106), this.tweens.add({
         targets: E,
-        y: 112,
+        y: 128,
         alpha: 1,
         duration: 620,
         ease: "Back.Out"
       });
-      const b = this.add.text(J / 2, 150, "1945 · AIRTRACE", {
+      const b = this.add.text(J / 2, 179, "1945 · AIRTRACE", {
         fontFamily: "sans-serif",
         fontSize: "15px",
         color: "#ffcf6a",
