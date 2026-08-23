@@ -60838,8 +60838,17 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   class Fn extends tt.Physics.Arcade.Image {
     constructor(R, E, b, I = "p_fighter1") {
       super(R, E, b, R.textures.exists(I) ? I : "p_fighter1"), this.maxHp = Ft.maxHp, this.hp = Ft.maxHp, this.invulnUntil = 0, this.powerLevel = 1, this.shieldUntil = 0, this.bombs = Ft.bombStart, this.minX = 30, this.maxX = Number.POSITIVE_INFINITY, R.add.existing(this), R.physics.add.existing(this), this.targetX = E, this.targetY = b;
+      // SKY-070: Jeder Gegner wirft einen Schatten, der Spieler bisher nicht.
+      // Dadurch lag ausgerechnet die Maschine, die man ansieht, flach auf dem
+      // Bild, waehrend alles andere darueber schwebte. Gleicher Versatz wie bei
+      // den Gegnern (7, 12) — Licht von oben links, eine Lichtlogik fuer alles.
+      this.schatten = R.add.image(E, b, this.texture.key).setTintFill(0).setAlpha(.3).setDepth(8);
+      this.rolle = 0;
       const G = this.body;
       G.setSize(16, 40), G.setOffset((this.width - 16) / 2, (this.height - 40) / 2)
+    }
+    setVisible(R) {
+      return this.schatten && this.schatten.setVisible(R), super.setVisible(R)
     }
     setTarget(R, E) {
       const b = Math.max(30, this.minX),
@@ -60855,12 +60864,33 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     hit(R, E) {
       return this.isShielded(R) || this.isInvulnerable(R) ? !1 : (this.hp = Math.max(0, this.hp - E), this.invulnUntil = R + Ft.hitInvulnMs, !0)
     }
-    update(R) {
-      const E = Math.max(30, this.minX),
-        b = Math.min(J - 30, this.maxX);
-      this.targetX = tt.Math.Clamp(this.targetX, E, b), this.x += (this.targetX - this.x) * Ft.speedLerp, this.y += (this.targetY - this.y) * Ft.speedLerp, this.setAlpha(this.isInvulnerable(R) && Math.floor(R / 80) % 2 ? .35 : 1), this.setAngle(Math.sin(R * .006) * 3)
+    update(R, E) {
+      const b = Math.max(30, this.minX),
+        I = Math.min(J - 30, this.maxX);
+      this.targetX = tt.Math.Clamp(this.targetX, b, I);
+      // Der Weg, den die Maschine in DIESEM Bild geht — vor dem Zug gemessen,
+      // denn mit speedLerp = 1 ist die Differenz danach null.
+      const G = this.targetX - this.x;
+      this.x += G * Ft.speedLerp, this.y += (this.targetY - this.y) * Ft.speedLerp, this.setAlpha(this.isInvulnerable(R) && Math.floor(R / 80) % 2 ? .35 : 1);
+      // SKY-100 — Rollwinkel aus der eigenen Bewegung. Ohne ihn wirkt die
+      // Maschine wie ein Schieber: sie faehrt seitwaerts, ohne sich in die
+      // Kurve zu legen.
+      //
+      // Der Seitweg wird durch den Zeitfaktor geteilt, sonst haengt der Winkel
+      // an der Bildrate: bei 120 Hz ist derselbe Fingerzug je Bild halb so
+      // weit, und die Maschine legte sich halb so weit.
+      const v = tt.Math.Clamp((E || 16.667) / 16.667, .25, 3),
+        x = tt.Math.Clamp(G / v * Fn.ROLL_JE_PUNKT, -Fn.ROLL_MAX, Fn.ROLL_MAX);
+      this.rolle += (x - this.rolle) * Math.min(1, Fn.ROLL_TRAEGE * v);
+      // Das ruhige Wiegen bleibt, aber leiser — sonst kaempft es mit der Rolle.
+      this.setAngle(this.rolle + Math.sin(R * .006) * 1.6);
+      const t = this.schatten;
+      t && t.setPosition(this.x + oi.SHADOW_DX, this.y + oi.SHADOW_DY).setScale(this.scaleX, this.scaleY).setAngle(this.angle)
     }
   }
+  Fn.ROLL_MAX = 18;
+  Fn.ROLL_JE_PUNKT = 1.15;
+  Fn.ROLL_TRAEGE = .22;
   const bn = {
       grunt: {
         dur: 0,
@@ -64553,7 +64583,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             this.fpsEma < 46 ? this.qBudget = Math.max(.15, this.qBudget - .12) : this.fpsEma > 56 && b - this.qUpAt > 900 && (this.qBudget = Math.min(1, this.qBudget + .05), this.qUpAt = b), this.qBudget !== a && this.applyBudget()
           }
         }
-        this.trimPools(b), this.player.update(b), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
+        this.trimPools(b), this.player.update(b, this.game.loop.delta), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
         const I = this.echteBildzeit();
         I > this.worstMs && (this.worstMs = I, this.worstMsAt = Math.round((b - this.stageStart) / 100) / 10), I > 33 && this.slowFrames++;
         const G = this.bullets.countActive(!0),
