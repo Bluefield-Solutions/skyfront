@@ -56,6 +56,15 @@ const PROBEN = [
   ['Treffer kostet keine Feuerkraft', '✗', [
     'this.powerLevel = Math.max(this.powerFloor, this.powerLevel - PWR_JE_TREFFER)',
     'this.powerLevel = this.powerLevel'], true, 'kraft'],
+  // Der Spaeher zurueck auf seine alte Groesse: dann ist er wieder kleiner
+  // als jedes Geschoss im Spiel, und die Mindestgroesse muss anschlagen.
+  // Die neun Verlaufskulissen wieder beim Start anlegen: 9,99 MB, die
+  // niemand braucht — und genau das soll die Speicher-Tafel melden.
+  ['Verlaufskulissen wieder auf Vorrat', '✗', [
+    'ht(T, "bg_ocean", 540, 540, (R, E) => gi(R, E, pi.bg_ocean));',
+    'for (const [R, E] of Object.entries(pi)) ht(T, R, 540, 540, (b, I) => gi(b, I, E));'], true, 'speicher'],
+  ['Spaeher zurueck auf 17 Punkte Flaeche', '✗', [
+    'scale: .46,\n      hitScale: .22,', 'scale: .22,'], true, 'form'],
   ['eb_diamond zurueck zur Scheibenform', '✗', [
     'T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()',
     'T.beginPath(), T.arc(I, G, R * .3 + t, 0, 7), T.closePath()'], true, 'form'],
@@ -70,6 +79,7 @@ const torLauf = (statisch, tor = 'farb') => {
   const cmd = tor === 'form' ? ['tools/formen.mjs']
     : tor === 'boden' ? ['tools/untergrund.mjs']
     : tor === 'kraft' ? ['tools/feuerkraft.mjs']
+    : tor === 'speicher' ? ['tools/speicher.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -81,7 +91,7 @@ const torLauf = (statisch, tor = 'farb') => {
 
 // Grundlinie: ohne Eingriff muss das Tor gruen sein, sonst misst hier nichts.
 console.log('Grundlinie …');
-for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['boden', 'Untergrund-Tafel'], ['kraft', 'Feuerkraft']] : [['farb', 'Farbtor']]) {
+for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['boden', 'Untergrund-Tafel'], ['kraft', 'Feuerkraft'], ['speicher', 'Speicher-Tafel']] : [['farb', 'Farbtor']]) {
   const grund = torLauf(!ALLE, tor);
   if (grund.rot) {
     console.error(`✗ Das ${name} ist schon ohne Eingriff rot. Erst das in Ordnung bringen.`);
@@ -111,7 +121,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb'] of PROBEN) {
     console.log(`✗ ${name}: rot, aber nicht durch ${pruefung} — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     const zeile = (r.text.split('\n').find((z) => {
       const x = z.trim();

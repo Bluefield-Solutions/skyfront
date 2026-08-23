@@ -16,6 +16,7 @@
     "formen": "node tools/formen.mjs",
     "untergrund": "node tools/untergrund.mjs",
     "feuerkraft": "node tools/feuerkraft.mjs",
+    "speicher": "node tools/speicher.mjs",
     "schirme": "node tools/schirme.mjs",
     "symbol": "node tools/symbol.mjs",
     "bilder": "node tools/bilder.mjs",

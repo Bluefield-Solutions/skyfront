@@ -54764,7 +54764,8 @@ return new ` + this.key + `();
     scout: {
       hp: 2,
       speed: 200,
-      scale: .22,
+      scale: .46,
+      hitScale: .22,
       tint: 16777215,
       score: 90,
       fireEvery: 0,
@@ -54931,8 +54932,16 @@ return new ` + this.key + `();
     }
   };
 
+  // Legt eine der Verlaufskulissen an, wenn sie zum ersten Mal gebraucht wird.
+  // Gibt zurueck, ob es sie danach gibt.
+  function verlaufTextur(T, R) {
+    return T.textures.exists(R) ? !0 : pi[R] ? (ht(T, R, 540, 540, (E, b) => gi(E, b, pi[R])), !0) : !1
+  }
+
   function Gi(T) {
-    for (const [R, E] of Object.entries(pi)) ht(T, R, 540, 540, (b, I) => gi(b, I, E));
+    // Nur der Rueckfall entsteht sofort — er wird von `sea` und vom
+    // Faerbeweg gebraucht. Die anderen neun auf Zuruf, siehe verlaufTextur.
+    ht(T, "bg_ocean", 540, 540, (R, E) => gi(R, E, pi.bg_ocean));
     ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
       dunkel: "#7fb8dc",
       hell: EIGEN,
@@ -61152,9 +61161,17 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const I = this.cfg.tex || "e_" + R;
         this.setTexture(I), this.clearTint(), this.setTint(this.cfg.tint), this.setScale(this.cfg.scale), this.setAngle(180), this.shadow.setTexture(I).setAngle(180).setScale(this.cfg.scale).setTintFill(0).setAlpha(.3).setVisible(!0);
         const G = this.body;
-        G.setSize(this.width * .5, this.height * .5, !0), this.nextFire = b + this.cfg.fireEvery * (.5 + Math.random() * .6), this.telegraphed = !1, this.strafeDir = E < J / 2 ? 1 : -1, this.positioned = !1, this.holdUntil = 0;
+        G.setSize(this.width * .5 * this.trefferAnteil(), this.height * .5 * this.trefferAnteil(), !0), this.nextFire = b + this.cfg.fireEvery * (.5 + Math.random() * .6), this.telegraphed = !1, this.strafeDir = E < J / 2 ? 1 : -1, this.positioned = !1, this.holdUntil = 0;
         const v = (x = bn[R]) != null ? x : Ln;
         this.entryDur = v.dur, this.entryUntil = b + v.dur, this.entryStyle = v.style, this.entryAmp = v.amp, this.entryReset = v.dur === 0, G.setVelocity(0, this.cfg.speed * v.vy0)
+      }
+      // Wie gross ist der Koerper im Verhaeltnis zum Bild? Normalerweise
+      // eins zu eins. Wer `hitScale` setzt, entkoppelt beides: der Spaeher
+      // wird groesser GEZEICHNET, ohne groesser getroffen zu werden.
+      trefferAnteil() {
+        var R;
+        const E = (R = this.cfg.hitScale) != null ? R : this.cfg.scale;
+        return this.cfg.scale > 0 ? E / this.cfg.scale : 1
       }
       damage(R) {
         this.hp -= R, this.setTintFill(16777215), this.scene.time.delayedCall(45, () => {
@@ -61968,7 +61985,7 @@ dann ausweichen!`, {
         _e(this, I), Ne(this, [I]);
         const G = () => {
           let s = this.sea.texture.key;
-          I !== "bg_ocean" && this.textures.exists(I) ? (this.sea.setTexture(I), this.sea.clearTint(), s = I) : E[b] !== void 0 && this.textures.exists("bg_ocean") ? (this.sea.setTexture("bg_ocean"), this.sea.setTint(E[b]), s = "bg_ocean") : this.textures.exists(I) && (this.sea.setTexture(I), this.sea.clearTint(), s = I);
+          I !== "bg_ocean" && (this.textures.exists(I) || verlaufTextur(this, I)) ? (this.sea.setTexture(I), this.sea.clearTint(), s = I) : E[b] !== void 0 && this.textures.exists("bg_ocean") ? (this.sea.setTexture("bg_ocean"), this.sea.setTint(E[b]), s = "bg_ocean") : this.textures.exists(I) && (this.sea.setTexture(I), this.sea.clearTint(), s = I);
           const o = this.textures.exists(s) ? this.textures.get(s).getSourceImage() : null,
             i = o && o.width ? o.width : J;
           this.sea.setTileScale(J / Math.max(1, i - 2), J / i), this.sea.tilePositionX = 1, this.bodenKey = s

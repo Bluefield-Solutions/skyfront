@@ -44,6 +44,7 @@ npm run farbproben acht Gegenproben zu Farb- und Formentor (-- --alle, ~6 min)
 npm run formen     Silhouettenabstand der Gegnerprojektile
 npm run untergrund Kantenenergie der dreizehn Biome und die Beruhigung
 npm run feuerkraft die Leiter gegen den Wellenplan aller 120 Sektoren
+npm run speicher   was im Gefecht an Texturen im Speicher liegt
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -52,8 +53,8 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-`farbtor` → `formen` → `untergrund` → `feuerkraft` → Boot-Test des Masters →
-`dist/check-report.md`.
+`farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` →
+Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -168,7 +169,22 @@ Jede hat mindestens eine Runde gekostet.
    einem 60-Hz-Geraet alle 200 ms. Das Ersatzfeld, aus dem man die Messzeile
    markiert, waere dem Nutzer unter den Fingern verschwunden. Werte und
    Bedienung gehoeren in getrennte Elemente.
-20. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
+20. **`ht()` loescht und legt neu an — es gibt ein Fenster ohne die Textur.**
+   Der Bildvorrat ersetzt dieselben Schluessel noch einmal, asynchron. Bei
+   2000 ms fehlten fuenf von dreizehn Gegnertexturen; ein Tor, das dann misst,
+   misst acht und meldet gruen. Nicht auf eine FRIST warten, sondern auf
+   STILLSTAND: Bestand und Groessen zwei Runden lang gleich.
+21. **Fuer Speicher ist eine absolute Grenze richtig — als einzige.**
+   Sonst gilt Regel 2. Aber Texturspeicher MISST sich nicht, er RECHNET sich
+   (Breite mal Hoehe mal vier). Derselbe Build gibt auf jedem Rechner
+   dieselbe Zahl; da waere eine anteilige Grenze nur Nebel.
+22. **Bild und Trefferflaeche sind zwei Dinge.** Der Spaeher war 17
+   Anzeigepunkte gross — kleiner als jedes Geschoss. Groesser ZEICHNEN, ohne
+   groesser zu TREFFEN, geht ueber `hitScale`: der Koerper wird um
+   hitScale/scale zurueckgerechnet. So aendert sich am Spiel nichts, was hier
+   ohnehin nicht messbar waere. Nachgerechnet, nicht angenommen: 21 x 32 x
+   0,22 = 4,62 Weltpunkte, danach 10,04 x 15,3 x 0,46 = 4,62.
+23. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
    zeichnet weiter, bewegt aber nichts. Ohne das misst der Vergleich die
    Bewegung des Untergrunds: die erste Messung der Beruhigungsschicht meldete
    -24 % Kantenenergie, obwohl die Schicht mit Deckkraft 0 unsichtbar war.
@@ -188,7 +204,7 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
 tools/             boot · bildtor · farbtor · formen · untergrund · feuerkraft
-                   farbproben · schirme · symbol · bilder
+                   speicher · farbproben · schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```

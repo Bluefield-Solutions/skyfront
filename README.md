@@ -37,7 +37,8 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Silhouettenabstand** | `npm run formen` — Deckung und Breitenprofil der Gegnerprojektile |
 | **Untergrund-Tafel** | `npm run untergrund` — Kantenenergie der 13 Biome und die Beruhigung |
 | **Feuerkraft-Leiter** | `npm run feuerkraft` — Erreichbarkeit über alle 120 Sektoren + Mechanik im Gefecht |
-| **Gegenproben** | `npm run farbproben` — elf eingebaute Fehler, jeder muss anschlagen |
+| **Speicher-Tafel** | `npm run speicher` — Texturen im Gefecht, mit Grenze |
+| **Gegenproben** | `npm run farbproben` — dreizehn eingebaute Fehler, jeder muss anschlagen |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
 | **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
@@ -82,7 +83,8 @@ project/
 │  ├─ formen.mjs    ← Silhouettenabstand der Gegnerprojektile
 │  ├─ untergrund.mjs ← wie unruhig ist jedes Biom?
 │  ├─ feuerkraft.mjs ← ist die Feuerkraft-Leiter erreichbar, und gibt es sie?
-│  ├─ farbproben.mjs ← elf Gegenproben zu allen vieren
+│  ├─ speicher.mjs  ← was im Gefecht an Texturen im Speicher liegt
+│  ├─ farbproben.mjs ← dreizehn Gegenproben zu allen fünfen
 │  ├─ schirme.mjs   ← jeden Bildschirm aufnehmen und nachmessen
 │  ├─ symbol.mjs    ← icon.svg → App-Symbole + 11 iOS-Startbilder
 │  └─ bilder.mjs    ← WebP-Bahnen neu codieren (q78)

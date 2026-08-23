@@ -87,6 +87,19 @@ if (ok) {
   }
 }
 
+// Speicher: auf iOS beendet Safari eine Seite, die zu viel Grafikspeicher
+// haelt, ohne Vorwarnung. Die teuerste Zeile war eine, die niemand sah.
+let memZeile = '';
+if (ok) {
+  try {
+    step('Speicher (Texturen im Gefecht)', 'node tools/speicher.mjs');
+    memZeile = '| Speicher (Texturen) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    memZeile = '| Speicher (Texturen) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -112,7 +125,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');
