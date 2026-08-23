@@ -54310,6 +54310,22 @@ return new ` + this.key + `();
   const tt = Nt(Li),
     J = 540,
     rt = 960,
+    // SKY-003 — Zeitfaktor. Bis hierher rechneten zehn Bahnenlaeufe und acht
+    // Gegnerbewegungen JE BILD statt je Sekunde. Gemessen: 1,61 Punkte je Bild
+    // bei einfacher und bei sechsfacher CPU-Drosselung — also 5 gegen 3 Punkte
+    // je Sekunde. Auf einem 120-Hz-iPhone lief die Welt doppelt so schnell wie
+    // auf 60 Hz, waehrend die Gegner ueber die Arcade-Physik korrekt blieben:
+    // der Untergrund raste, die Gegner schlichen.
+    //
+    // Der Faktor kommt aus dem GEGLAETTETEN delta, nicht aus rawDelta. Die
+    // Physik rechnet mit dem geglaetteten Wert; wer die Welt mit dem rohen
+    // bewegte, holte sich die Entkopplung sofort zurueck. (Fuers MESSEN gilt
+    // das Gegenteil, siehe echteBildzeit().)
+    //
+    // Untere Grenze 8 ms, damit ein einzelnes sehr kurzes Bild nichts
+    // einfriert; obere Grenze 50 ms, damit ein Ruckler die Welt nicht
+    // teleportiert und schnelle Geschosse nicht durch Gegner hindurchspringen.
+    ZF = T => tt.Math.Clamp(T || 16.667, 8, 50) / 16.667,
     Ft = {
       speedLerp: 1,
       scale: .56,
@@ -58621,8 +58637,8 @@ return new ` + this.key + `();
           })
         }
     }
-    update() {
-      this.sea && (this.sea.tilePositionY -= .6)
+    update(R, E) {
+      this.sea && (this.sea.tilePositionY -= .6 * ZF(E))
     }
   }
   class un extends tt.Scene {
@@ -61010,15 +61026,19 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       deactivate() {
         this.shadow.setVisible(!1), this.disableBody(!0, !0)
       }
-      update() {
+      update(zeit, dlt) {
         var b;
         if (!this.active) return;
+        // SKY-003 — auch die Gegner bewegten sich seitlich JE BILD. Die Gruppe
+        // uebergibt (Zeit, Delta) von selbst; R und E sind im Rumpf schon
+        // vergeben, deshalb eigene Namen.
+        const zf = ZF(dlt);
         this.shadow.setPosition(this.x + Ae.SHADOW_DX, this.y + Ae.SHADOW_DY).setScale(this.scaleX, this.scaleY).setAlpha(.3);
         const R = this.body,
           E = this.scene.time.now;
         if (E < this.entryUntil) {
-          if (this.entryStyle === "bank") this.x += Math.sin(E * .006 + this.phase) * this.entryAmp;
-          else if (this.entryStyle === "swoop") this.x += this.strafeDir * this.entryAmp;
+          if (this.entryStyle === "bank") this.x += Math.sin(E * .006 + this.phase) * this.entryAmp * zf;
+          else if (this.entryStyle === "swoop") this.x += this.strafeDir * this.entryAmp * zf;
           else if (this.entryStyle === "arc") {
             const I = this.entryDur ? (this.entryUntil - E) / this.entryDur : 0;
             R.setVelocityY(this.cfg.speed * (.3 + 1.7 * I))
@@ -61026,11 +61046,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           this.x = tt.Math.Clamp(this.x, 18, J - 18), this.y > rt + 60 && this.deactivate();
           return
         }
-        if (this.entryReset || (R.setVelocityY(this.cfg.speed), this.entryReset = !0), this.kind === "weaver") this.x += Math.sin(this.y * .02 + this.phase) * 2.2;
+        if (this.entryReset || (R.setVelocityY(this.cfg.speed), this.entryReset = !0), this.kind === "weaver") this.x += Math.sin(this.y * .02 + this.phase) * 2.2 * zf;
         else if (this.kind === "kamikaze") {
           const I = Number((b = this.scene.registry.get("px")) != null ? b : this.x);
-          this.x += tt.Math.Clamp(I - this.x, -2.6, 2.6), R.setVelocityY(this.cfg.speed)
-        } else this.kind === "elite" ? this.y >= 150 && (R.setVelocityY(0), this.x = J / 2 + Math.sin(this.scene.time.now * .001 + this.phase) * 120) : this.kind === "gunship" ? this.x += Math.sin(this.y * .01 + this.phase) * 1.1 : this.kind === "rocketeer" ? this.y >= 140 && (R.setVelocityY(this.cfg.speed * .15), this.x += Math.sin(this.scene.time.now * .0016 + this.phase) * 1.4) : this.kind === "strafer" ? (this.x += this.strafeDir * 3, this.x < 40 ? this.strafeDir = 1 : this.x > J - 40 && (this.strafeDir = -1)) : this.kind === "arcer" ? this.y >= 120 && (R.setVelocityY(this.cfg.speed * .1), this.x += Math.sin(this.scene.time.now * .0011 + this.phase) * 1.7) : this.kind === "sniper" ? (!this.positioned && this.y >= 150 && (this.positioned = !0, this.holdUntil = E + 2600, R.setVelocityY(0)), this.positioned && E > this.holdUntil && R.setVelocityY(this.cfg.speed)) : this.kind === "carrier" ? this.y >= 168 && (R.setVelocityY(this.cfg.speed * .08), this.x += Math.sin(this.scene.time.now * 7e-4 + this.phase) * 1.5) : this.kind === "rotor" && (this.y >= 170 && (R.setVelocityY(0), this.x = J / 2 + Math.sin(E * 9e-4 + this.phase) * 140), this.rotation += .22, this.shadow.setRotation(this.rotation));
+          this.x += tt.Math.Clamp(I - this.x, -2.6 * zf, 2.6 * zf), R.setVelocityY(this.cfg.speed)
+        } else this.kind === "elite" ? this.y >= 150 && (R.setVelocityY(0), this.x = J / 2 + Math.sin(this.scene.time.now * .001 + this.phase) * 120) : this.kind === "gunship" ? this.x += Math.sin(this.y * .01 + this.phase) * 1.1 * zf : this.kind === "rocketeer" ? this.y >= 140 && (R.setVelocityY(this.cfg.speed * .15), this.x += Math.sin(this.scene.time.now * .0016 + this.phase) * 1.4 * zf) : this.kind === "strafer" ? (this.x += this.strafeDir * 3 * zf, this.x < 40 ? this.strafeDir = 1 : this.x > J - 40 && (this.strafeDir = -1)) : this.kind === "arcer" ? this.y >= 120 && (R.setVelocityY(this.cfg.speed * .1), this.x += Math.sin(this.scene.time.now * .0011 + this.phase) * 1.7 * zf) : this.kind === "sniper" ? (!this.positioned && this.y >= 150 && (this.positioned = !0, this.holdUntil = E + 2600, R.setVelocityY(0)), this.positioned && E > this.holdUntil && R.setVelocityY(this.cfg.speed)) : this.kind === "carrier" ? this.y >= 168 && (R.setVelocityY(this.cfg.speed * .08), this.x += Math.sin(this.scene.time.now * 7e-4 + this.phase) * 1.5 * zf) : this.kind === "rotor" && (this.y >= 170 && (R.setVelocityY(0), this.x = J / 2 + Math.sin(E * 9e-4 + this.phase) * 140), this.rotation += .22 * zf, this.shadow.setRotation(this.rotation));
         this.y > rt + 60 && this.deactivate()
       }
     };
@@ -64521,9 +64541,10 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         }
       }
       update() {
-        this.swell.tilePositionY -= .55, this.swell.tilePositionX = Math.sin(this.time.now * 18e-5) * 24, this.sea.tilePositionY -= 1.2 / (this.sea.tileScaleY || 1), this.sunglint.tilePositionY -= 1.7, this.sunglint.tilePositionX = Math.sin(this.time.now * 6e-4) * 10;
+        const zf = ZF(this.game.loop.delta);
+        this.swell.tilePositionY -= .55 * zf, this.swell.tilePositionX = Math.sin(this.time.now * 18e-5) * 24, this.sea.tilePositionY -= 1.2 * zf / (this.sea.tileScaleY || 1), this.sunglint.tilePositionY -= 1.7 * zf, this.sunglint.tilePositionX = Math.sin(this.time.now * 6e-4) * 10;
         const R = this.sunGlintTarget * (.8 + Math.sin(this.time.now * .003) * .2);
-        if (this.sunglint.setAlpha(this.sunglint.alpha + (R - this.sunglint.alpha) * .05), this.clouds.tilePositionY -= 4.2, this.rain.tilePositionY -= 26, this.rain.tilePositionX -= 8, this.rain.setAlpha(this.rain.alpha + (this.rainTarget - this.rain.alpha) * .04), this.fog.tilePositionY -= .5, this.fog.tilePositionX = Math.sin(this.time.now * 3e-4) * 20, this.fog.setAlpha(this.fog.alpha + (this.fogTarget - this.fog.alpha) * .03), this.lightningOn && !this.over && this.time.now > this.nextLightning) {
+        if (this.sunglint.setAlpha(this.sunglint.alpha + (R - this.sunglint.alpha) * Math.min(1, .05 * zf)), this.clouds.tilePositionY -= 4.2 * zf, this.rain.tilePositionY -= 26 * zf, this.rain.tilePositionX -= 8 * zf, this.rain.setAlpha(this.rain.alpha + (this.rainTarget - this.rain.alpha) * Math.min(1, .04 * zf)), this.fog.tilePositionY -= .5 * zf, this.fog.tilePositionX = Math.sin(this.time.now * 3e-4) * 20, this.fog.setAlpha(this.fog.alpha + (this.fogTarget - this.fog.alpha) * Math.min(1, .03 * zf)), this.lightningOn && !this.over && this.time.now > this.nextLightning) {
           this.nextLightning = this.time.now + 3e3 + Math.random() * 4500;
           const p = () => this.cameras.main.flash(160, 150, 170, 215, !1);
           p(), Math.random() < .5 && this.time.delayedCall(170, p), this.time.delayedCall(180 + Math.random() * 460, () => {
@@ -64547,7 +64568,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             n = 26,
             e = r + n * (.5 + .5 * Math.sin(p * 55e-5)),
             s = r + n * (.5 + .5 * Math.sin(p * 55e-5 + 2.3));
-          this.wallL.tilePositionY -= 2.1, this.wallR.tilePositionY -= 2.1, this.wallL.x = e - a, this.wallR.x = J - s, this.player.minX = e + 18, this.player.maxX = J - s - 18
+          this.wallL.tilePositionY -= 2.1 * zf, this.wallR.tilePositionY -= 2.1 * zf, this.wallL.x = e - a, this.wallR.x = J - s, this.player.minX = e + 18, this.player.maxX = J - s - 18
         }
         this.decor.getChildren().forEach(p => {
           var r;
