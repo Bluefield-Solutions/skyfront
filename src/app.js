@@ -58401,7 +58401,7 @@ return new ` + this.key + `();
         depth: 4
       }), Ci(this, J / 2, 37), this.add.text(J / 2, 75, "🪙 Gold nur als seltener Münz-Drop im Kampf  ·  dafür: Feuerkraft ausbauen", {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#8fb8dc"
       }).setOrigin(.5).setDepth(5);
       const E = this.add.text(J / 2, 128, "SKYFRONT", {
@@ -58497,7 +58497,7 @@ return new ` + this.key + `();
         fontStyle: "bold"
       }).setOrigin(.5).setDepth(7), this.add.text(J / 2, G - 118, "TIPPEN → HANGAR (umbauen)", {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#8fb8dc",
         fontStyle: "bold"
       }).setOrigin(.5).setDepth(5), v.zone.on("pointerover", () => v.redraw(5935296, 3)), v.zone.on("pointerout", () => v.redraw(3103362, 2)), v.zone.on("pointerdown", () => this.go("Hangar"));
@@ -58578,7 +58578,7 @@ return new ` + this.key + `();
         }).setOrigin(.5).setDepth(10),
         r = this.add.text(R, E + 22, I, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#dfeaf6",
           fontStyle: "bold"
         }).setOrigin(.5).setDepth(10);
@@ -58681,7 +58681,7 @@ return new ` + this.key + `();
         p = t.length < 3 ? "  ·  Mittel/Schwer freischalten" : "";
       this.add.text(J / 2, 366, l[x] + p, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#a8c8e0"
       }).setOrigin(.5), Rt(this, J / 2, 470, J - 44, 172, {
         fill: 1057849,
@@ -58735,7 +58735,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }), this.add.text(42, 796, a ? "alle Level/Grade/Ausrüstung frei" : "aus — normaler Fortschritt", {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: a ? "#e0b878" : "#8fa4b6"
       }), Tt(this, J - 100, 790, 148, 48, a ? "AN" : "aus", {
         fontSize: 18,
@@ -58787,7 +58787,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         I = b ? `·  nächste Freischaltung bei ${b.stars} ★` : "·  alles freigeschaltet";
       if (this.add.text(J / 2, 88, `★ ${E}   ${I}`, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#ffe27a"
         }).setOrigin(.5).setDepth(78), R.length) {
         const t = this.add.text(J / 2, 108, `🏅 ${R[R.length-1]}`, {
@@ -58828,7 +58828,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       if (this.add.text(E, b + 26, I.name, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: x ? "#bfefff" : G ? "#9fe8c6" : "#cfe3ff",
           fontStyle: "bold"
         }).setOrigin(.5), G) {
@@ -58844,7 +58844,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     statBar(R, E, b, I, G) {
       this.add.text(R, E, b, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#a8c4da",
         fontStyle: "bold"
       }).setOrigin(0, .5);
@@ -58894,7 +58894,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }).setOrigin(0, .5), this.statBar(t + 128, l + 78, "Schaden", E.bulletDamage / 6, 16751194), this.statBar(t + 128, l + 100, "Hülle", (E.hpMod + 20) / 60, 6279306), this.statBar(t + 128, l + 122, "Tempo", (250 - E.fireEvery) / 160, 8380671), this.add.text(t + 12, l + 152, `${E.desc}`, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#cfe3ff",
         wordWrap: {
           width: p - 24
@@ -58906,7 +58906,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       this.add.text(t + 32, l + 182, E.passive, {
         fontFamily: "sans-serif",
-        fontSize: "11.5px",
+        fontSize: "13px",
         color: "#ffd85a",
         fontStyle: "bold",
         wordWrap: {
@@ -58956,7 +58956,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }), this.add.text(36, E + 9, b.desc, {
         fontFamily: "sans-serif",
-        fontSize: "12.5px",
+        fontSize: "13px",
         color: "#a0bccf"
       });
       let x = "";
@@ -59097,7 +59097,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       fontStyle: "bold"
     }).setOrigin(0, .5).setScrollFactor(0).setDepth(79), T.add.text(J / 2 + b / 2 - 12, E, `${x}  ·  ${R.where} ›`, {
       fontFamily: "sans-serif",
-      fontSize: "12.5px",
+      fontSize: "13px",
       color: G ? "#ffd85a" : "#e8b07a",
       fontStyle: "bold"
     }).setOrigin(1, .5).setScrollFactor(0).setDepth(79), v.on("pointerover", () => v.setFillStyle(G ? 1460271 : 3024928, .96)), v.on("pointerout", () => v.setFillStyle(G ? 1194540 : 2367256, .92)), v.on("pointerdown", () => T.scene.start(R.scene))
@@ -59130,12 +59130,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         for (let t = 0; t < v; t++) x += t < G ? "●" : "○";
         this.add.text(b, I - 8, bt[E].short, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#9fd0ee",
           fontStyle: "bold"
         }).setOrigin(.5), this.add.text(b, I + 8, x, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: G > 0 ? "#9fe0c2" : "#5a708a"
         }).setOrigin(.5)
       }), Ei.forEach((E, b) => this.armorRow(E, 336 + b * 80)), ti(this), Re(this, "workshop")
@@ -59154,14 +59154,14 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }), this.add.text(36, E + 14, b.desc, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#8fb0cc"
       });
       let x = "";
       for (let r = 0; r < b.max; r++) x += r < I ? "●" : "○";
       this.add.text(36, E + 32, `Stufe ${I}/${b.max}  ${x}`, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#9fe0c2"
       });
       const t = 2 + I,
@@ -59194,7 +59194,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         super("Arsenal")
       }
       slotTab(R, E, b, I, G, v) {
-        const p = Rt(this, R, 510, 104, 26, {
+        const p = Rt(this, R, 526, 104, 26, {
           fill: I ? 1194540 : 991542,
           alpha: I ? .95 : .85,
           stroke: I ? 3791242 : G ? 2772074 : 6965802,
@@ -59209,9 +59209,9 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           const r = b && b !== "none" ? It[b] : null;
           a = `S${E}: ${r?r.short:"leer"}`
         }
-        this.add.text(R, 510, a, {
+        this.add.text(R, 526, a, {
           fontFamily: "sans-serif",
-          fontSize: "10.5px",
+          fontSize: "13px",
           color: I ? "#9fe8c6" : G ? "#cfe3ff" : "#e8c07a",
           fontStyle: "bold"
         }).setOrigin(.5), p.on("pointerdown", v)
@@ -59234,21 +59234,21 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           const s = e % 2 === 0 ? 146 : 394,
             o = 158 + Math.floor(e / 2) * 82;
           this.primCard(s, o, n, E === n)
-        }), this.add.text(28, 330, "SEKUNDÄR-SLOT", {
+        }), this.add.text(28, 322, "SEKUNDÄR-SLOT", {
           fontFamily: "sans-serif",
           fontSize: "14px",
           color: "#9fd0ee",
           fontStyle: "bold"
         });
         const b = q.secondary();
-        gn.forEach((n, e) => this.secCard(96 + e * 174, 392, n, b === n));
+        gn.forEach((n, e) => this.secCard(96 + e * 174, 398, n, b === n));
         const I = q.upg("sec");
         if (b !== "none") {
           const n = I >= 3,
             e = mn(I);
-          Rt(this, J / 2, 470, J - 36, 60, {
+          Rt(this, J / 2, 486, J - 36, 60, {
             radius: 12
-          }), this.add.text(36, 452, "Sekundär-Stufe", {
+          }), this.add.text(36, 468, "Sekundär-Stufe", {
             fontFamily: "sans-serif",
             fontSize: "16px",
             color: "#eaf6ff",
@@ -59256,13 +59256,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           });
           let s = "";
           for (let i = 0; i < 3; i++) s += i < I ? "●" : "○";
-          this.add.text(36, 476, `Stufe ${I}/3  ${s}`, {
+          this.add.text(36, 492, `Stufe ${I}/3  ${s}`, {
             fontFamily: "sans-serif",
-            fontSize: "12px",
+            fontSize: "13px",
             color: "#9fe0c2"
           });
           const o = !n && q.gold() >= e;
-          Tt(this, J - 86, 470, 120, 44, n ? "MAX" : `${e} G`, {
+          Tt(this, J - 86, 486, 120, 44, n ? "MAX" : `${e} G`, {
             fontSize: 15,
             fill: n ? 3817285 : o ? 1929144 : 5910319,
             radius: 11,
@@ -59270,12 +59270,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
               n || q.spendGold(e) && (q.setUpg("sec", I + 1), this.scene.restart())
             }
           })
-        } else this.add.text(J / 2, 466, "Wähle ein Sekundär-System, um es aufzurüsten.", {
+        } else this.add.text(J / 2, 482, "Wähle ein Sekundär-System, um es aufzurüsten.", {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#8fb0cc"
         }).setOrigin(.5);
-        this.add.text(28, 512, "SPEZIAL-SLOTS", {
+        this.add.text(28, 528, "SPEZIAL-SLOTS", {
           fontFamily: "sans-serif",
           fontSize: "14px",
           color: "#9fd0ee",
@@ -59293,13 +59293,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         });
         const l = t === 1 ? x : v,
           p = l && l !== "none" ? l : null;
-        if (zi.forEach((n, e) => this.gadgetCard(54 + e * 88, 566, n, p === n, t, v, x)), p) {
+        if (zi.forEach((n, e) => this.gadgetCard(54 + e * 88, 582, n, p === n, t, v, x)), p) {
           const n = It[p],
             e = q.gadgetLevel(p),
             s = n.cd * vi(e);
-          this.add.text(J / 2, 628, `Slot ${t+1} · ${n.name}: ${n.desc}  ·  Abklingzeit ${(s/1e3).toFixed(1)} s`, {
+          this.add.text(J / 2, 644, `Slot ${t+1} · ${n.name}: ${n.desc}  ·  Abklingzeit ${(s/1e3).toFixed(1)} s`, {
             fontFamily: "sans-serif",
-            fontSize: "12.5px",
+            fontSize: "13px",
             color: "#dfeaf6",
             align: "center",
             wordWrap: {
@@ -59309,9 +59309,9 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           const o = e >= Me,
             i = di(e),
             h = 3 + e * 2;
-          Rt(this, J / 2, 676, J - 36, 50, {
+          Rt(this, J / 2, 692, J - 36, 50, {
             radius: 11
-          }), this.add.text(36, 662, "Gadget-Stufe", {
+          }), this.add.text(36, 678, "Gadget-Stufe", {
             fontFamily: "sans-serif",
             fontSize: "14px",
             color: "#eaf6ff",
@@ -59319,13 +59319,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           });
           let f = "";
           for (let u = 0; u < Me; u++) f += u < e ? "●" : "○";
-          this.add.text(36, 682, `Stufe ${e}/${Me}  ${f}  ·  −CD & +Wirkung`, {
+          this.add.text(36, 698, `Stufe ${e}/${Me}  ${f}  ·  −CD & +Wirkung`, {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "13px",
             color: "#9fe0c2"
           });
           const d = !o && q.canAfford(i, h);
-          Tt(this, J - 86, 676, 120, 40, o ? "MAX" : `${i}G ⚙${h}`, {
+          Tt(this, J - 86, 692, 120, 40, o ? "MAX" : `${i}G ⚙${h}`, {
             fontSize: 15,
             fill: o ? 3817285 : d ? 1929144 : 5910319,
             radius: 10,
@@ -59333,9 +59333,9 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
               o || q.spend(i, h) && (q.setGadgetLevel(p, e + 1), this.scene.restart())
             }
           })
-        } else this.add.text(J / 2, 660, "Slot 2 ist leer — tippe unten ein Spezial an, um es Slot 2 zuzuweisen.", {
+        } else this.add.text(J / 2, 676, "Slot 2 ist leer — tippe unten ein Spezial an, um es Slot 2 zuzuweisen.", {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#8fb0cc",
           align: "center",
           wordWrap: {
@@ -59344,7 +59344,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }).setOrigin(.5);
         const a = q.synergies(),
           r = He.filter(n => a.has(n.key)).length;
-        Tt(this, J / 2, 726, J - 44, 42, `Synergien ansehen   (${r} aktiv)`, {
+        Tt(this, J / 2, 742, J - 44, 42, `Synergien ansehen   (${r} aktiv)`, {
           fontSize: 15,
           fill: r > 0 ? 2055994 : 2375772,
           radius: 12,
@@ -59375,14 +59375,14 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }
         this.add.text(R, E + 6, t.short, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#eaf6ff",
           fontStyle: "bold"
         }).setOrigin(.5);
         const n = I ? "✓" : p ? `in S${G===0?2:1}` : l ? "•" : `${t.unlockCost}G`;
         this.add.text(R, E + 26, n, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: I ? "#9fe0c2" : p ? "#e8c07a" : l ? "#cfe3ff" : "#e8c07a",
           fontStyle: "bold"
         }).setOrigin(.5), r.on("pointerdown", () => {
@@ -59452,7 +59452,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontStyle: "bold"
         }), this.add.text(R - 108, E - 2, G.desc, {
           fontFamily: "sans-serif",
-          fontSize: "10.5px",
+          fontSize: "13px",
           color: "#8fb0cc",
           wordWrap: {
             width: 216
@@ -59461,7 +59461,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const l = I ? "✓ Aktiv" : v ? "wählen" : `🔒 ${G.unlockCost} G`;
         this.add.text(R - 108, E + 22, l, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: I ? "#9fe0c2" : v ? "#cfe3ff" : "#e8c07a",
           fontStyle: "bold"
         }), t.on("pointerdown", () => {
@@ -59471,14 +59471,14 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       secCard(R, E, b, I) {
         const G = Fe[b],
           v = q.secondaryUnlocked(b),
-          t = Rt(this, R, E, 168, 92, {
+          t = Rt(this, R, E, 168, 104, {
             stroke: I ? 3791242 : v ? 2772074 : 6965802,
             strokeW: I ? 3 : 1,
             radius: 12
           }).zone.setInteractive({
             useHandCursor: !0
           });
-        this.add.text(R, E - 30, G.name, {
+        this.add.text(R, E - 42, G.name, {
           fontFamily: "sans-serif",
           fontSize: "14px",
           color: "#eaf6ff",
@@ -59487,9 +59487,9 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           wordWrap: {
             width: 156
           }
-        }).setOrigin(.5, 0), this.add.text(R, E + 2, G.desc, {
+        }).setOrigin(.5, 0), this.add.text(R, E - 20, G.desc, {
           fontFamily: "sans-serif",
-          fontSize: "9.5px",
+          fontSize: "13px",
           color: "#8fb0cc",
           align: "center",
           wordWrap: {
@@ -59499,7 +59499,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const l = I ? "✓ Aktiv" : v ? "wählen" : `🔒 ${G.unlockCost} G`;
         this.add.text(R, E + 34, l, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: I ? "#9fe0c2" : v ? "#cfe3ff" : "#e8c07a",
           fontStyle: "bold"
         }).setOrigin(.5), t.on("pointerdown", () => {
@@ -59554,12 +59554,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         s = this.add.graphics();
       s.fillStyle(661542, .9).fillRoundedRect(a - 2, r - 2, n + 4, e + 4, 6), s.fillStyle(1323082, 1).fillRoundedRect(a, r, n, e, 5), s.fillStyle(16765498, 1).fillRoundedRect(a, r, Math.max(6, n * (p ? l / p : 0)), e, 5), this.add.text(J / 2, r + e / 2, `★ ${l} / ${p}`, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#1a1206",
         fontStyle: "bold"
       }).setOrigin(.5), this.add.text(J / 2, 112, `Kapitel ${I+1} von ${se.length}${I<b||I>0?"   ·   wischen ↔ oder ‹ ›":""}`, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#9fd0ee"
       }).setOrigin(.5);
       const o = 150,
@@ -59614,7 +59614,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       this.add.text(42, 20, `${m}  ·  Stufe ${y.level}`, {
         fontFamily: "sans-serif",
-        fontSize: "10.5px",
+        fontSize: "13px",
         color: "#eaf6ff",
         fontStyle: "bold"
       }).setOrigin(0, .5);
@@ -59693,14 +59693,14 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontStyle: "bold"
         }).setOrigin(.5), v && this.add.text(R, E - 20, `${"★".repeat(t)}${"☆".repeat(3-t)}`, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#ffd23a"
         }).setOrigin(.5), l > 0) {
         const o = ["", "L", "M", "S"][l],
           i = [0, 3046706, 1929144, 11680314][l];
         this.add.circle(R + 24, E - 24, 11, i).setStrokeStyle(2, 661026), this.add.text(R + 24, E - 24, o, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#ffffff",
           fontStyle: "bold"
         }).setOrigin(.5)
@@ -59709,7 +59709,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         s = Math.min(140, e.length * 6.6 + 14);
       if (this.add.rectangle(R, E + 46, s, 18, 463132, .7).setStrokeStyle(1, 2243150), this.add.text(R, E + 46, e, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: v ? "#dfeefc" : "#6f8296",
           fontStyle: "bold",
           align: "center"
@@ -59818,7 +59818,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       };
       this.add.text(J / 2, 286, e[this.sel], {
         fontFamily: "sans-serif",
-        fontSize: "11.5px",
+        fontSize: "13px",
         color: "#bcd6ee",
         align: "center",
         wordWrap: {
@@ -59826,7 +59826,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }
       }).setOrigin(.5), this.add.text(J / 2, 322, "— GEGNER IN DIESEM LEVEL —", {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#9fd0ee",
         fontStyle: "bold"
       }).setOrigin(.5);
@@ -59855,7 +59855,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         m = It[q.gadget()] || It.emp;
       this.add.image(80, 576, kt(q.plane())).setScale(.56).setTint(c.tint), this.add.text(124, 552, "AUSRÜSTUNG", {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#9fd0ee",
         fontStyle: "bold"
       }), this.add.text(124, 570, `${c.name}  ·  ${A}`, {
@@ -59865,7 +59865,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }), this.add.text(124, 590, `Gadget: ${m.icon} ${m.name}`, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#cfe3ff"
       }), this.miniButton(J / 2 - 96, 628, 176, 36, "✈ Flugzeug", 2775686, () => this.scene.start("Hangar")), this.miniButton(J / 2 + 96, 628, 176, 36, "⚙ Ausrüstung", 6961798, () => this.scene.start("Loadout")), Tt(this, J / 2, rt - 106, 320, 68, "▶  SPIELEN", {
         fontSize: 22,
@@ -59902,7 +59902,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }).setOrigin(.5), this.add.text(R, E + 32, G ? t === 2 ? "erst Leicht gewinnen" : "erst Mittel gewinnen" : `Belohnung ×${x.reward.toFixed(1)}`, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: G ? "#c9a15a" : "#bfe0ff",
         fontStyle: "bold"
       }).setOrigin(.5), !G && v >= t && this.add.text(R + 58, E - 58, "✓", {
@@ -59939,7 +59939,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         };
       this.textures.exists(G) && this.add.image(R, E - 6, G).setScale((x = v[I.cls]) != null ? x : .55).setTint(I.tint), this.add.text(R, E + 22, I.role, {
         fontFamily: "sans-serif",
-        fontSize: "8.5px",
+        fontSize: "13px",
         color: "#cfe3ff",
         fontStyle: "bold",
         align: "center",
@@ -59959,12 +59959,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontSize: "20px"
       }).setOrigin(.5).setAlpha(v ? 1 : .6), this.add.text(R + 8, E - 10, I, {
         fontFamily: "sans-serif",
-        fontSize: "12.5px",
+        fontSize: "13px",
         color: v ? "#9fe8c6" : "#cfe3ff",
         fontStyle: "bold"
       }).setOrigin(.5), this.add.text(R + 8, E + 8, G, {
         fontFamily: "sans-serif",
-        fontSize: "9.5px",
+        fontSize: "13px",
         color: v ? "#7fe0b0" : "#8fb0cc"
       }).setOrigin(.5), v && this.add.text(R + 54, E - 18, "✓", {
         fontFamily: "sans-serif",
@@ -59994,7 +59994,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       this.add.rectangle(0, 0, J, rt, 331804, .86).setOrigin(0, 0), this.textures.exists("vignette") && this.add.image(J / 2, rt / 2, "vignette"), Pe(this, "AUSRÜSTUNG"), this.add.text(J / 2, 86, "Tippe dein Flugzeug für Werte · unten die Bereiche wechseln", {
         fontFamily: "sans-serif",
-        fontSize: "11.5px",
+        fontSize: "13px",
         color: "#8fb0cc"
       }).setOrigin(.5).setDepth(80);
       const R = wt[q.plane()] || wt.falcon,
@@ -60088,7 +60088,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         });
       this.add.text(J / 2 - b / 2 + 16, E - 15, `💡 EMPFEHLUNG${R.note?"  ·  "+R.note:""}`, {
         fontFamily: "sans-serif",
-        fontSize: "10px",
+        fontSize: "13px",
         color: I ? "#9fe8c6" : "#e8c07a",
         fontStyle: "bold"
       }).setOrigin(0, .5).setDepth(7);
@@ -60096,7 +60096,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         t = I ? `${R.cost} G${x}` : `noch ${R.cost-q.gold()} G sparen`;
       this.add.text(J / 2 - b / 2 + 16, E + 6, `${R.label} — ${R.detail}`, {
         fontFamily: "sans-serif",
-        fontSize: "12.5px",
+        fontSize: "13px",
         color: "#eaf6ff",
         fontStyle: "bold",
         wordWrap: {
@@ -60104,12 +60104,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }
       }).setOrigin(0, .5).setDepth(7), this.add.text(J / 2 + b / 2 - 16, E - 14, t, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: I ? "#ffd85a" : "#e8b07a",
         fontStyle: "bold"
       }).setOrigin(1, .5).setDepth(7), this.add.text(J / 2 + b / 2 - 16, E + 8, `→ ${R.where}`, {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#9fd0ee",
         fontStyle: "bold"
       }).setOrigin(1, .5).setDepth(7), v.on("pointerover", () => this.tweens.add({
@@ -60144,7 +60144,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }).setOrigin(.5).setDepth(122)), r += 34, p.push(this.add.text(J / 2, r, "Unten sind vier Bereiche – ein Tipp springt direkt hin:", {
         fontFamily: "sans-serif",
-        fontSize: "12.5px",
+        fontSize: "13px",
         color: "#bcd6ec",
         align: "center",
         wordWrap: {
@@ -60166,15 +60166,15 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontStyle: "bold"
       }).setOrigin(0, .5).setDepth(122)), p.push(this.add.text(a + 34, r + 10, h, {
         fontFamily: "sans-serif",
-        fontSize: "11.5px",
+        fontSize: "13px",
         color: "#cfe3ff",
         wordWrap: {
           width: I - 96
         }
-      }).setOrigin(0, 0).setDepth(122)), r += 56;
+      }).setOrigin(0, 0).setDepth(122)), r += 66;
       r += 4, p.push(this.add.text(J / 2, r, "💡 Die grüne Leiste unten empfiehlt dir den lohnendsten nächsten Kauf.", {
         fontFamily: "sans-serif",
-        fontSize: "12px",
+        fontSize: "13px",
         color: "#ffd85a",
         align: "center",
         fontStyle: "bold",
@@ -60221,7 +60221,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         e = tt.Display.Color.IntegerToColor(t).brighten(28).color;
       this.add.text(R, E - a / 2 + 13, I, {
         fontFamily: "sans-serif",
-        fontSize: "11px",
+        fontSize: "13px",
         color: "#9fd0ee",
         fontStyle: "bold"
       }).setOrigin(.5).setDepth(5), this.add.text(R - p / 2 + 20, E - 6, b, {
@@ -60544,13 +60544,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const R = Mi(Wt.all());
         if (this.add.text(J / 2, 96, `Schaden ×${R.dmgMul.toFixed(2)}  ·  Krit ${(R.critChance*100).toFixed(0)}% ×${R.critMult.toFixed(2)}  ·  Panzerbr. ×${R.pierceMul.toFixed(2)}`, {
             fontFamily: "sans-serif",
-            fontSize: "12.5px",
+            fontSize: "13px",
             color: "#9fe0c2"
           }).setOrigin(.5), R.sets.length) {
           const l = R.sets.map(p => `★ ${je[p.key].short} ${p.pieces}/3 (${p.pieces>=3?je[p.key].desc3:je[p.key].desc2})`).join("   ");
           this.add.text(J / 2, 115, l, {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "13px",
             color: "#ffd23a",
             fontStyle: "bold",
             align: "center",
@@ -60560,7 +60560,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           }).setOrigin(.5)
         } else this.add.text(J / 2, 115, "Themen-Sets: 2+ Module desselben Sets → Bonus", {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#7f93a8",
           align: "center",
           wordWrap: {
@@ -60570,7 +60570,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set: alle 3 Slots"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>qt[l].name).join(", "):"Tier-Bonus per angelegter Seltenheit"}`;
         this.add.text(J / 2, 131, E, {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: R.fullSet || R.tiers.length ? "#9fe0c2" : "#66788c"
         }).setOrigin(.5);
         for (let l = 0; l < Pn; l++) {
@@ -60590,17 +60590,17 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             });
           this.add.text(p, a - 34, `${r.icon} ${r.short}`, {
             fontFamily: "sans-serif",
-            fontSize: "10px",
+            fontSize: "13px",
             color: "#9fd0ee",
             fontStyle: "bold"
           }).setOrigin(.5), n ? (this.add.text(p, a - 14, `${qt[n.rarity].name}  ${this.lvlTxt(n)}`, {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "13px",
             color: "#" + e.toString(16).padStart(6, "0"),
             fontStyle: "bold"
           }).setOrigin(.5), this.add.text(p, a + 14, this.statLine(n), {
             fontFamily: "sans-serif",
-            fontSize: "8.5px",
+            fontSize: "13px",
             color: "#cfe3ff",
             align: "center",
             wordWrap: {
@@ -60627,7 +60627,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontStyle: "bold"
         }), b.length === 0 && this.add.text(J / 2, 310, "Leer — schließe Level ab, um Module zu erbeuten.", {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#8fb0cc"
         }).setOrigin(.5), b.slice(v, v + I).forEach((l, p) => {
           const a = 296 + p * 64,
@@ -60643,12 +60643,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             });
           this.add.text(30, a - 14, `${r.name}  ·  ${this.lvlTxt(l)}`, {
             fontFamily: "sans-serif",
-            fontSize: "12px",
+            fontSize: "13px",
             color: "#" + r.color.toString(16).padStart(6, "0"),
             fontStyle: "bold"
           }), this.add.text(30, a + 8, this.statLine(l), {
             fontFamily: "sans-serif",
-            fontSize: "9.5px",
+            fontSize: "13px",
             color: "#cfe3ff",
             wordWrap: {
               width: J - 90
@@ -60701,11 +60701,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontStyle: "bold"
         }).setOrigin(.5).setDepth(52)), I(this.add.text(G, v - 148, `${this.lvlTxt(R)}  ·  Slot: ${p.short}`, {
           fontFamily: "sans-serif",
-          fontSize: "12px",
+          fontSize: "13px",
           color: "#cfe3ff"
         }).setOrigin(.5).setDepth(52)), I(this.add.text(G, v - 130, `${a.name}  (${a.desc2} bei 2 · ${a.desc3} bei 3)`, {
           fontFamily: "sans-serif",
-          fontSize: "10px",
+          fontSize: "13px",
           color: "#" + a.color.toString(16).padStart(6, "0"),
           fontStyle: "bold"
         }).setOrigin(.5).setDepth(52)), ni.filter(u => R.stats[u]).forEach((u, c) => {
@@ -61435,12 +61435,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           color: "#7fb0d8"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101), this.add.text(this.ultPos.x, this.ultPos.y + 18, "STURM", {
           fontFamily: "sans-serif",
-          fontSize: "8.5px",
+          fontSize: "13px",
           color: "#cfe3ff",
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101), this.ultRing = this.add.graphics().setScrollFactor(0).setDepth(101), (u = this.input.keyboard) == null || u.on("keydown-Q", () => this.useUltimate()), this.dbgOn = Bt("dbg", "0") === "1", this.dbgText = this.add.text(6, 150, "", {
           fontFamily: "monospace",
-          fontSize: "10px",
+          fontSize: "13px",
           color: "#9effc0",
           backgroundColor: "rgba(0,0,0,0.55)"
         }).setScrollFactor(0).setDepth(200).setVisible(this.dbgOn), this.dbgSpark = this.add.graphics().setScrollFactor(0).setDepth(200).setVisible(this.dbgOn), (c = this.input.keyboard) == null || c.on("keydown-F3", () => this.toggleDbg()), (g = this.input.keyboard) == null || g.on("keydown-F4", () => this.downloadReport()), this.input.addPointer(2), this.input.on("pointerdown", () => {
@@ -61472,31 +61472,31 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const f = this.rankInfo();
         if (this.add.image(38, 38, "pilot").setScrollFactor(0).setDepth(101), this.add.circle(55, 55, 11, 1385526, .96).setStrokeStyle(2, this.planeLvl >= 6 ? 16765498 : 8376575).setScrollFactor(0).setDepth(102), this.add.text(55, 55, String(this.planeLvl), {
             fontFamily: "sans-serif",
-            fontSize: "12px",
+            fontSize: "13px",
             color: "#eaf6ff",
             fontStyle: "bold"
           }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(77, 16, f.name.toUpperCase(), {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "13px",
             color: "#ffd85a",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(77, 30, "", {
+          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(77, 35, "", {
             fontFamily: "sans-serif",
             fontSize: "17px",
             color: "#dff0ff",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(77, 54, "", {
+          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(77, 58, "", {
             fontFamily: "sans-serif",
-            fontSize: "12px",
+            fontSize: "13px",
             color: "#9fe0c2"
           }).setScrollFactor(0).setDepth(101), this.xpBaseStored = q.planeXp(q.plane()), this.xpLabelText = this.add.text(16, 93, "", {
             fontFamily: "sans-serif",
-            fontSize: "12px",
+            fontSize: "13px",
             color: "#9fe0c2",
             fontStyle: "bold"
           }).setScrollFactor(0).setDepth(101), this.xpNeedText = this.add.text(214, 93, "", {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "13px",
             color: "#8fb8dc",
             fontStyle: "bold"
           }).setOrigin(1, 0).setScrollFactor(0).setDepth(101), this.add.rectangle(16, 117, 198, 8, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101), this.xpBarFill = this.add.rectangle(17, 117, 196, 6, 3791242, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102), this.comboText = this.add.text(16, 134, "", {
@@ -61516,12 +61516,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             color: "#bcd6ee"
           }).setOrigin(.5, 0).setScrollFactor(0).setDepth(100), this.objText = this.add.text(J / 2, 40, "", {
             fontFamily: "sans-serif",
-            fontSize: "12.5px",
+            fontSize: "13px",
             color: "#eaf6ff",
             fontStyle: "bold"
           }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101), this.cdText = this.add.text(J / 2, 61, "", {
             fontFamily: "sans-serif",
-            fontSize: "12.5px",
+            fontSize: "13px",
             color: "#ffd98a",
             fontStyle: "bold"
           }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101).setStroke("#2a1c08", 3), this.bombText = this.add.text(this.bomb.x + 26, this.bomb.y + 16, "", {
@@ -62759,7 +62759,7 @@ ${R.label}`, {
         const v = R >= 3 ? 12607743 : 16722474;
         this.bossGlow = this.add.image(this.boss.x, this.boss.y, "spark").setTint(v).setBlendMode(tt.BlendModes.ADD).setDepth(11), this.bossBar = this.add.graphics().setScrollFactor(0).setDepth(103), this.bossHpText = this.add.text(J - 18, 108, "", {
           fontFamily: "sans-serif",
-          fontSize: "11px",
+          fontSize: "13px",
           color: "#ffd7d7",
           fontStyle: "bold"
         }).setOrigin(1, .5).setScrollFactor(0).setDepth(104).setStroke("#2a0808", 3), this.bossWeak = this.add.graphics().setDepth(12);
@@ -63325,7 +63325,7 @@ ${G}`, {
           }).setOrigin(.5).setScrollFactor(0).setDepth(101);
         this.add.text(E.x, E.y + 18, v.short, {
           fontFamily: "sans-serif",
-          fontSize: "8.5px",
+          fontSize: "13px",
           color: "#cfe3ff",
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101);
@@ -63856,7 +63856,7 @@ ${n}` : "", {
             }).setOrigin(.5).setScrollFactor(0).setDepth(103),
             S = this.add.text(v, f + 11, m, {
               fontFamily: "sans-serif",
-              fontSize: "11px",
+              fontSize: "13px",
               color: "#cfe3ff"
             }).setOrigin(.5).setScrollFactor(0).setDepth(103);
           [c, d, u, y, S].forEach(M => {
@@ -64384,7 +64384,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             l = t[Math.min(x, t.length - 1)];
           this.comboBar.fillStyle(1318956, .85).fillRoundedRect(G - 1, v - 1, I + 2, 7, 3), this.comboBar.fillStyle(l, 1).fillRoundedRect(G, v, Math.max(2, I * b), 5, 2.5)
         }
-        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .46).fillRoundedRect(8, 8, 224, 118, 9);
+        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .72).fillRoundedRect(8, 8, 224, 118, 9);
         const E = this.player ? this.player.hp / this.player.maxHp : 1;
         if (this.drawAmmoBelt(16, 74, 198, 13, E), this.updateXpHud(), this.objText) {
           const I = J / 2 - 78,

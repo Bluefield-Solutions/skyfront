@@ -25,9 +25,14 @@ const RAND = 6;                      // so weit darf etwas ueber den Rand ragen
 const WINZIG = 4;                    // kleiner als das ist kein Layout, sondern ein Punkt
 const UEBER_Y = 6;                   // so viel Hoehe braucht eine echte Zeilenkollision
 
-// Reihenfolge wie im Spiel durchlaufen. Boot ist der Vorlader, Pause und Game
-// brauchen ein laufendes Gefecht — die bleiben aussen vor.
+// Reihenfolge wie im Spiel durchlaufen. Boot ist nur der Vorlader, Pause
+// braucht ein laufendes Gefecht.
 const SZENEN = ['Menu', 'Options', 'Hangar', 'Workshop', 'Arsenal', 'Levels', 'Briefing', 'Loadout', 'Gear'];
+// Das Gefecht laesst sich nicht einfach starten wie ein Menue — es muss
+// gespielt werden. Und darin zaehlt nur der HUD: Schadenszahlen und
+// Aufsammel-Texte fliegen durchs Bild und duerfen sich ueberlappen, das ist
+// ihre Art. Der HUD liegt auf Tiefe 95 und darueber, gemessen.
+const HUD_TIEFE = 90;
 
 let chromium;
 try { ({ chromium } = await import('playwright')); }
@@ -52,6 +57,54 @@ const layout = await seite.evaluate(() => {
 const massstab = ANZEIGE / layout.W;
 console.log(`  Layoutraum ${layout.W} x ${layout.H} (Kamerazoom ${layout.zoom}) → ${massstab.toFixed(3)} Anzeigepunkte je Layoutpunkt\n`);
 
+// Beurteilt eine aufgenommene Szene. Drei Fragen, in dieser Reihenfolge:
+// was ragt aus dem Bild, was ist zu klein, was liegt uebereinander.
+function pruefe(key, z, neueFehler) {
+  if (neueFehler.length) befunde.push(`${key}: ${neueFehler.length} Laufzeitfehler — ${neueFehler[0].slice(0, 100)}`);
+
+  // 1. Was ragt aus dem Bild? Ein Stueck von 1 x 1 Punkt ist kein Layout —
+  //    das sind ausgeraeumte Vorratseintraege und Partikelquellen, die
+  //    ausserhalb sitzen duerfen.
+  // Was den ganzen Schirm ueberdeckt, ragt nicht heraus, sondern deckt —
+  // Blenden und Vignetten sind mit Absicht groesser als das Feld.
+  const deckend = (s) => s.x <= 0 && s.y <= 0 && s.x + s.w >= z.W && s.y + s.h >= z.H;
+  const raus = z.stuecke.filter(s => s.w >= WINZIG && s.h >= WINZIG && !deckend(s) &&
+    (s.x < -RAND / massstab || s.y < -RAND / massstab || s.x + s.w > z.W + RAND / massstab || s.y + s.h > z.H + RAND / massstab));
+  for (const s of raus.slice(0, 4)) {
+    befunde.push(`${key}: ${s.art}${s.text ? ' „' + s.text + '"' : ''} ragt aus dem Bild (${s.x},${s.y} ${s.w}x${s.h}, Feld ${z.W}x${z.H})`);
+  }
+
+  // 2. Welche Schrift ist auf dem Telefon zu klein? Kein Befund, sondern ein
+  //    Hinweis: eine kleine Schrift kann Absicht sein, eine ueberlappende nie.
+  const winzig = z.stuecke.filter(s => s.gr > 0 && s.gr * massstab < SCHRIFT_MIN && s.text.trim());
+  for (const s of winzig) {
+    hinweise.push(`${key}: „${s.text}" misst ${(s.gr * massstab).toFixed(1)} Anzeigepunkte (Richtwert ${SCHRIFT_MIN})`);
+  }
+
+  // 3. Welche Schriften liegen uebereinander? Nur Text gegen Text — Text auf
+  //    einer Flaeche ist Absicht, Text auf Text ist es nie.
+  const texte = z.stuecke.filter(s => s.art === 'Text' && s.text.trim() && s.w > 0 && s.h > 0);
+  const paare = [];
+  for (let i = 0; i < texte.length; i++) for (let j = i + 1; j < texte.length; j++) {
+    const a = texte[i], b = texte[j];
+    const ux = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+    const uy = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+    // Vier Punkte Hoehe sind Unterlaengen oder eine Tafel ueber einer
+    // Hintergrundzeile — beides Absicht. Die echten Kollisionen im
+    // Modul-Schirm massen 8 Punkte Hoehe, die bleiben.
+    if (ux > 3 && uy >= UEBER_Y) {
+      const anteil = (ux * uy) / Math.min(a.w * a.h, b.w * b.h);
+      if (anteil > 0.12) paare.push({ a, b, anteil, ux, uy });
+    }
+  }
+  for (const p of paare.slice(0, 4)) {
+    befunde.push(`${key}: „${p.a.text}" und „${p.b.text}" ueberlappen zu ${(p.anteil * 100).toFixed(0)} % (${p.ux}x${p.uy} Punkte)`);
+  }
+
+  const kleinste = winzig.reduce((m, s) => Math.min(m, s.gr * massstab), 99);
+  console.log(`  ${key.padEnd(10)} ${String(z.stuecke.length).padStart(3)} Stuecke · ${raus.length} ueber den Rand · ${String(winzig.length).padStart(2)} unter ${SCHRIFT_MIN} Punkten${winzig.length ? ' (kleinste ' + kleinste.toFixed(1) + ')' : ''} · ${paare.length} Ueberlappung(en)`);
+}
+
 const befunde = [];   // das ist kaputt
 const hinweise = [];  // das ist eine Entscheidung, kein Fehler
 for (const key of SZENEN) {
@@ -63,6 +116,30 @@ for (const key of SZENEN) {
     return true;
   }, key);
   await seite.waitForTimeout(2200);
+
+  // Einmalige Einweisungen wegtippen. Solange eine steht, ist der Schirm
+  // darunter nicht sichtbar — und alles, was das Werkzeug dann an
+  // "Ueberlappungen" faende, waere in Wahrheit verdeckter Hintergrund.
+  const knopf = await seite.evaluate((key) => {
+    const s = window.__game.scene.getScene(key);
+    if (!s || !s.scene.isActive()) return null;
+    let treffer = null;
+    const geh = (l) => l.forEach(o => {
+      if (o.list && o.type === 'Container') return geh(o.list);
+      if (o.type === 'Text' && /^(Verstanden|Alles klar|OK)$/.test((o.text || '').trim())) {
+        const b = o.getBounds();
+        treffer = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+      }
+    });
+    geh(s.children.list);
+    return treffer;
+  }, key);
+  if (knopf) {
+    const c = await seite.evaluate(() => { const g = window.__game, k = g.canvas.getBoundingClientRect(); return { x: k.x, y: k.y, m: k.width / (g.renderer.width / (g.scene.scenes.find(s => s.scene.isActive()).cameras.main.zoom || 1)) }; });
+    await seite.touchscreen.tap(c.x + knopf.x * c.m, c.y + knopf.y * c.m);
+    await seite.waitForTimeout(900);
+    console.log(`  (i) ${key}: Einweisung weggetippt, gemessen wird der Schirm darunter`);
+  }
 
   const z = await seite.evaluate((key) => {
     const g = window.__game;
@@ -90,48 +167,55 @@ for (const key of SZENEN) {
   }, key);
 
   if (z.fehlt) { befunde.push(`${key}: Szene laesst sich nicht starten`); continue; }
-  const neu = laufFehler.slice(vorher);
-  if (neu.length) befunde.push(`${key}: ${neu.length} Laufzeitfehler — ${neu[0].slice(0, 100)}`);
-
-  // 1. Was ragt aus dem Bild?
-  // Ein Bild von 1 x 1 Punkt ist kein Layout — das sind ausgeraeumte
-  // Vorratseintraege und Partikelquellen, die ausserhalb sitzen duerfen.
-  const raus = z.stuecke.filter(s => s.w >= WINZIG && s.h >= WINZIG &&
-    (s.x < -RAND / massstab || s.y < -RAND / massstab || s.x + s.w > z.W + RAND / massstab || s.y + s.h > z.H + RAND / massstab));
-  for (const s of raus.slice(0, 4)) {
-    befunde.push(`${key}: ${s.art}${s.text ? ' „' + s.text + '"' : ''} ragt aus dem Bild (${s.x},${s.y} ${s.w}x${s.h}, Feld ${z.W}x${z.H})`);
-  }
-
-  // 2. Welche Schrift ist auf dem Telefon zu klein?
-  // Kein Befund, sondern ein Hinweis: eine kleine Schrift kann Absicht sein
-  // (Beschriftungen in Grossbuchstaben), eine ueberlappende nie.
-  const winzig = z.stuecke.filter(s => s.gr > 0 && s.gr * massstab < SCHRIFT_MIN && s.text.trim());
-  for (const s of winzig.slice(0, 3)) {
-    hinweise.push(`${key}: „${s.text}" misst ${(s.gr * massstab).toFixed(1)} Anzeigepunkte (Richtwert ${SCHRIFT_MIN})`);
-  }
-
-  // 3. Welche Schriften liegen uebereinander? Nur Text gegen Text — Text auf
-  //    einer Flaeche ist Absicht, Text auf Text ist es nie.
-  const texte = z.stuecke.filter(s => s.art === 'Text' && s.text.trim() && s.w > 0 && s.h > 0);
-  const paare = [];
-  for (let i = 0; i < texte.length; i++) for (let j = i + 1; j < texte.length; j++) {
-    const a = texte[i], b = texte[j];
-    const ux = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
-    const uy = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
-    // Vier Punkte Hoehe sind Unterlaengen oder eine Tafel, die ueber einer
-    // Hintergrundzeile liegt — beides Absicht. Die echten Kollisionen im
-    // Modul-Schirm massen 8 Punkte Hoehe, die bleiben.
-    if (ux > 3 && uy >= UEBER_Y) {
-      const anteil = (ux * uy) / Math.min(a.w * a.h, b.w * b.h);
-      if (anteil > 0.12) paare.push({ a, b, anteil, ux, uy });
-    }
-  }
-  for (const p of paare.slice(0, 4)) {
-    befunde.push(`${key}: „${p.a.text}" und „${p.b.text}" ueberlappen zu ${(p.anteil * 100).toFixed(0)} % (${p.ux}x${p.uy} Punkte)`);
-  }
-
-  console.log(`  ${key.padEnd(10)} ${String(z.stuecke.length).padStart(3)} Stuecke · ${raus.length} ueber den Rand · ${winzig.length} zu klein · ${paare.length} Ueberlappung(en)`);
+  pruefe(key, z, laufFehler.slice(vorher));
   if (BILDER) writeFileSync(`dist/schirme/${key}.png`, await seite.screenshot({ clip: r }));
+}
+
+// Und jetzt das Gefecht. Es wird gespielt, nicht gestartet.
+{
+  const vorher = laufFehler.length;
+  await seite.evaluate(() => {
+    const g = window.__game;
+    g.scene.scenes.forEach(s => { if (s.scene.isActive()) g.scene.stop(s.scene.key); });
+    g.scene.start('Menu');
+  });
+  await seite.waitForTimeout(2200);
+  await seite.touchscreen.tap(r.x + 0.5 * r.width, r.y + 0.711 * r.height);
+  let drin = false;
+  for (let i = 0; i < 60; i++) {
+    if (await seite.evaluate(() => window.__game.scene.scenes.some(s => s.scene.key === 'Game' && s.scene.isActive()))) { drin = true; break; }
+    await seite.waitForTimeout(250);
+  }
+  if (!drin) befunde.push('Gefecht: kommt nicht ins Spiel');
+  else {
+    // Die Einblendung "ENDLOS-MODUS" steht die ersten Sekunden ueber allem.
+    // Sie ist Absicht und ginge sonst als Ueberlappung durch.
+    await seite.waitForTimeout(6000);
+    const z = await seite.evaluate((tiefe) => {
+      const g = window.__game, s = g.scene.getScene('Game'), c = s.cameras.main;
+      const stuecke = [];
+      const geh = (liste) => {
+        for (const o of liste) {
+          if (o.visible === false || (o.alpha !== undefined && o.alpha < 0.05)) continue;
+          if (o.list && o.type === 'Container') { geh(o.list); continue; }
+          if ((o.depth || 0) < tiefe) continue;
+          let b = null;
+          try { b = o.getBounds ? o.getBounds() : null; } catch (e) {}
+          if (!b || !isFinite(b.x)) continue;
+          stuecke.push({
+            art: o.type,
+            text: (typeof o.text === 'string' ? o.text : '').slice(0, 40),
+            gr: o.style && o.style.fontSize ? parseFloat(o.style.fontSize) * (o.scaleY || 1) : 0,
+            x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height),
+          });
+        }
+      };
+      geh(s.children.list);
+      return { W: g.renderer.width / (c.zoom || 1), H: g.renderer.height / (c.zoom || 1), stuecke };
+    }, HUD_TIEFE);
+    pruefe('Gefecht', z, laufFehler.slice(vorher));
+    if (BILDER) writeFileSync('dist/schirme/Gefecht.png', await seite.screenshot({ clip: r }));
+  }
 }
 
 await browser.close();
