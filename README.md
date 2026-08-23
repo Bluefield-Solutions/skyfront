@@ -4,7 +4,19 @@ Dieses Projekt ist der aus dem ausgelieferten Single-File-Build
 (`Skyfront.html`) **zurückgewonnene, wieder baubare Quellcode**.
 Es ist kein Original-TypeScript-Projekt mehr, sondern der entpackte,
 lesbar formatierte JavaScript-Stand des Builds – aber: **man kann ihn
-bearbeiten und wieder zu einer autarken HTML-Datei zusammenbauen.**
+bearbeiten und wieder zusammenbauen.**
+
+Aus demselben Quellcode entstehen **zwei** Auslieferungen:
+
+| | `dist/Skyfront.html` | `dist/pages/` |
+|---|---|---|
+| Was | eine Datei, alle Bilder inline | Web-App mit Nachbardateien |
+| Größe | 14,95 MB | index.html 2,93 MB + 68 Bilder (9,2 MB) + 11 Startbilder (2,2 MB) |
+| Wofür | weitergeben, Mail, USB-Stick | GitHub Pages, iPhone-Startbildschirm, offline |
+| Befehl | `npm run build` | `npm run pages` |
+
+**Autark heißt autark:** in der Einzeldatei sind weiterhin alle 71 Bilder
+`data:`-Adressen, keine einzige Datei-Adresse — das prüft der Bau selbst.
 
 ## Schnellstart (nach einer Pause in 30 Sekunden wieder drin)
 
@@ -16,9 +28,13 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Alle Varianten + Launcher** | `node build-variants.mjs` → `dist/Skyfront-*.html` + `dist/index.html` |
 | **Beides auf einmal** | `node build-all.mjs` |
 | **Verteilbares Paket** | `node build-all.mjs --zip` → `Skyfront-dist.zip` (Launcher + alle Varianten) |
-| **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~16 MB, eine Datei) |
+| **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~15 MB, eine Datei) |
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
-| **CI-Check (nur prüfen)** | `node check.mjs` → baut + bootet, Exit-Code + `dist/check-report.md` (Markdown-Tabelle, z. B. für PR-Kommentar) |
+| **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
+| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, `dist/check-report.md` (~2 min) |
+| **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab |
+| **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
+| **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
 | **Balance im Code ändern** | Zahl in `src/balance.js` ändern, dann `node build.mjs` |
 | **Neue Variante** | Profil in `profiles/<Name>.js` ablegen (Format wie `balance.js`, optional `export const META`), dann `node build-variants.mjs` |
@@ -26,8 +42,14 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 
 Merksätze: `intensity` im Stage-Array ist **wirkungslos** (die echte
 Schwierigkeit steckt in der Wellen-Formel `tn` bzw. `curve` in `balance.js`);
-`src/assets.js` ist **auto-generiert**, nie von Hand editieren; jeder Build ist
-**autark** (0 externe Referenzen).
+`src/assets.js` ist **auto-generiert**, nie von Hand editieren (ein Eintrag darf
+geleert, aber nicht entfernt werden — die Nummern sind Positionen, die `app.js`
+direkt anspringt); die Einzeldatei ist **autark** (0 externe Referenzen).
+
+Und einer, der schon einmal Faktor zwei gekostet hat: **der Layoutraum ist
+540 × 960, der Puffer 1080 × 1920** — die Kameras haben Zoom 2. `getBounds()`
+liefert Layoutpunkte. Wer sie mit `renderer.width` vergleicht, misst doppelt so
+groß, wie es ist.
 
 ## Ordnerstruktur
 
@@ -47,10 +69,23 @@ project/
 ├─ build-all.mjs    ← baut Master + alle Varianten (--zip = verteilbares Paket)
 ├─ check.mjs        ← CI-Check: baut + bootet + Exit-Code (kein Paket)
 ├─ zip.mjs          ← reiner-Node ZIP-Writer (für --zip, keine npm-Abhängigkeit)
+├─ pages.mjs        ← baut die Web-App aus der fertigen Einzeldatei
+├─ tools/
+│  ├─ boot.mjs      ← gemeinsamer Boot-Test
+│  ├─ bildtor.mjs   ← sieht das Spiel so aus, wie es soll?
+│  ├─ schirme.mjs   ← jeden Bildschirm aufnehmen und nachmessen
+│  ├─ symbol.mjs    ← icon.svg → App-Symbole + 11 iOS-Startbilder
+│  └─ bilder.mjs    ← WebP-Bahnen neu codieren (q78)
+├─ web/
+│  ├─ icon.svg      ← ★ QUELLE des Symbols (#grund / #maschine / #schleier)
+│  ├─ sw.js         ← Dienst-Arbeiter (Vorlage)
+│  ├─ icon-*.png    ← gebacken, eingecheckt
+│  └─ start/        ← die elf Startbilder, gebacken, eingecheckt
 ├─ profiles/        ← ein Profil je Variante (Format wie src/balance.js)
 │  ├─ Master.js · Arcade.js · Hardcore.js
 └─ dist/
-   └─ Skyfront.html, Skyfront-Master.html, Skyfront-Arcade.html … (Ergebnisse)
+   ├─ Skyfront.html, Skyfront-Master.html … (Einzeldateien)
+   └─ pages/        ← die Web-App
 ```
 
 ## Bauen
@@ -81,9 +116,9 @@ Konsole exportieren). Beispiel-Ausgabe:
 
 ```
 Baue 3 Variante(n) aus profiles/ …
-  ✓ dist/Skyfront-Arcade.html   (24.18 MB · 38 Werte geändert)
-  ✓ dist/Skyfront-Hardcore.html (24.18 MB · 24 Werte geändert)
-  ✓ dist/Skyfront-Master.html   (24.18 MB · 19 Werte geändert)
+  ✓ dist/Skyfront-Arcade.html   (14.95 MB · 38 Werte geändert)
+  ✓ dist/Skyfront-Hardcore.html (14.95 MB · 24 Werte geändert)
+  ✓ dist/Skyfront-Master.html   (14.95 MB · 19 Werte geändert)
 Fertig: 3/3 Variante(n) in dist/.
 ```
 
@@ -113,17 +148,79 @@ mit wie vielen Fehlern startete) — und legt ihn dem Release-Paket bei.
 
 ### CI (GitHub Actions)
 
-`.github/workflows/check.yml` ist ein fertiger Workflow: bei jedem Push/PR
-installiert er Node + Playwright, führt `node check.mjs` aus und hängt den
-Markdown-Bericht (`dist/check-report.md`) an die Job-Zusammenfassung. Wird der
-Check rot, ist der Build/Boot nicht sauber. Voraussetzung: die Projektdateien
-liegen im Repo-Wurzelverzeichnis (sonst `working-directory` in der YAML anpassen).
+Zwei Workflows:
+
+- **`check.yml`** läuft bei jedem Push/PR: Node + Playwright, `node check.mjs`,
+  Markdown-Bericht in die Job-Zusammenfassung. Der Prüfschritt braucht rund
+  vier Minuten — Master und elf Varianten bauen und starten, dazu das Bildtor.
+- **`pages.yml`** läuft bei Push auf `main`: `npm run pages`, danach eine
+  Reihe Nachweise (Manifest da, genau EIN `apple-touch-icon` und zwar auf eine
+  Datei, elf Startbilder mit elf Dateien, `index.html` unter 5 MB, der
+  Dienst-Arbeiter kennt genau so viele Bilder wie danebenliegen), dann
+  Veröffentlichung. **Einmalig von Hand nötig:** Settings → Pages → Source auf
+  „GitHub Actions".
+
+Voraussetzung: die Projektdateien liegen im Repo-Wurzelverzeichnis (sonst
+`working-directory` in der YAML anpassen).
+
+### Was die Torkette NICHT prüft
+
+Sie prüft, dass etwas funktioniert — nicht, ob es gut aussieht. Zwei
+Werkzeuge stehen deshalb daneben und verlangen einen Blick:
+
+- **`npm run bildtor`** startet ein Gefecht je Modifikator-Modus, zieht die
+  Maschine hoch und runter und sucht harte Querkanten im mittleren Band. Genau
+  das war der Nebel-Fehler: ein Bild, das den Schirm nicht deckt, hinterlässt
+  eine wandernde Kante. Das Tor hängt in `check.mjs`.
+  Zwei Dinge daran sind teuer erkauft: die Grenze ist **anteilig** (auf GitHub
+  misst dieselbe heile Szene deutlich höher als lokal), und geurteilt wird über
+  das **Maximum**, nicht den Median — der kaputte Nebel zeigt sich in genau
+  einem von fünf Bildern.
+- **`npm run schirme`** startet jede der neun Menü-Szenen einzeln und misst
+  nach: was ragt aus dem Bild, was liegt übereinander, was ist auf dem Telefon
+  zu klein. Überlappungen sind Befund, kleine Schrift nur ein Hinweis.
 
 Zusätzlich schreibt der Batch ein **Launcher-Menü** `dist/index.html`, das alle
 gebauten Varianten mit Namen, Kurzbeschreibung und „Spielen"-Link auflistet —
 `dist/index.html` öffnen und direkt losfliegen. Die Beschreibung/Farbe je Karte
 kommt aus einem optionalen `export const META = { title, tag, accent, desc }`
 im jeweiligen Profil (fehlt es, wird der Dateiname genommen).
+
+## Die Web-App (pages.mjs)
+
+`npm run pages` baut `dist/pages/` aus der fertigen Einzeldatei. Der
+Einzeldatei-Bau wird dabei nicht angefasst — sein Ergebnis wird auseinander-
+genommen:
+
+- **68 der 71 Bilder** werden zu echten Dateien in `bilder/`. Drei bleiben
+  drin: `__SKFA[0]` und `[2]` sind **Bruchstücke**, die Phaser im Code per `+`
+  aneinanderhängt — als Datei wären sie Unsinn; `[1]` ist Phasers weißes
+  Ersatzbild, gebraucht beim Hochfahren, bevor ein Lader läuft. Erkannt wird
+  das am Bild selbst (PNG endet auf `IEND`, JPEG auf `FFD9`, WebP beginnt mit
+  `RIFF`/`WEBP`), nicht am Präfix: ein abgeschnittenes Bild als Datei fiele
+  sonst erst auf dem Telefon auf.
+- **Manifest**, `standalone`, hochkant verriegelt.
+- **Genau ein `apple-touch-icon`**, und zwar auf eine Datei. Den
+  `data:`-Verweis ignoriert iOS beim Ablegen auf dem Startbildschirm — es nimmt
+  dann einen Bildschirmausschnitt der Seite als Symbol.
+- **Elf `apple-touch-startup-image`**. Sie entstehen aus **derselben Hülle**
+  wie das Spiel, nur in Gerätegröße; deshalb ist der Übergang vom Startbild zur
+  Seite unsichtbar. Roh 10,34 MB, mit 128-Farben-Palette 2,17 MB.
+- **Dienst-Arbeiter** (`web/sw.js`): legt jedes abgerufene Bild ab, UND die
+  Seite stößt ein Nachladen der übrigen an — aber **nur, wenn sie vom
+  Startbildschirm gestartet wurde** (`display-mode: standalone` bzw.
+  `navigator.standalone`). Wer nur im Browser vorbeischaut, zieht nicht
+  ungefragt 9 MB über Mobilfunk.
+- **Speichermarke** aus Inhalts- UND Bilder-Prüfsumme. Ohne den zweiten Teil
+  blieb sie unverändert, als die Bilder von 15,75 auf 9,13 MB schrumpften — auf
+  dem Telefon wären für immer die alten Bilder geblieben.
+
+Das App-Symbol kommt aus **einer** Quelle: `web/icon.svg`, gegliedert in
+`#grund` / `#maschine` / `#schleier`. `npm run symbol` backt daraus die vier
+PNG-Größen, das freigestellte Logo für den Ladeschirm (Grund und Schleier
+ausgeblendet) und die elf Startbilder — und trägt das 180er zusätzlich als
+`data:`-Adresse in `index.head.html` ein, damit die autarke Einzeldatei
+dasselbe Symbol zeigt, ohne eine zweite Datei zu brauchen.
 
 ## Balance einstellen ohne Code-Suche (src/balance.js)
 
@@ -152,7 +249,7 @@ das Falsche zu bauen).
 $ node build.mjs
   balance: player.maxHp  100 -> 250
   balance: enemyHp.grunt  3 -> 9
-dist/Skyfront.html geschrieben: 24.18 MB +Modifikator (2 Balance-Werte geändert)
+dist/Skyfront.html geschrieben: 14.95 MB +Modifikator (2 Balance-Werte geändert)
 ```
 
 Für alles jenseits dieser Kernwerte editierst du weiter direkt in `app.js`

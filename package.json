@@ -6,15 +6,17 @@
   "description": "Skyfront — rekonstruierter, wieder baubarer Quellcode (autarker Single-File-Build). Kein Build-Framework nötig; Skripte nutzen nur die Node-Standardbibliothek. Playwright wird nur für den Boot-Test gebraucht.",
   "scripts": {
     "build": "node build.mjs",
+    "pages": "node build.mjs && node pages.mjs",
     "variants": "node build-variants.mjs",
     "all": "node build-all.mjs",
-    "pages": "node build.mjs && node pages.mjs",
-    "package": "node build-all.mjs --zip",
-    "package:master": "node build-all.mjs --zip=master",
-    "release": "node build-all.mjs --zip --boot",
     "check": "node check.mjs",
     "bildtor": "node tools/bildtor.mjs",
-    "schirme": "node tools/schirme.mjs"
+    "schirme": "node tools/schirme.mjs",
+    "symbol": "node tools/symbol.mjs",
+    "bilder": "node tools/bilder.mjs",
+    "package": "node build-all.mjs --zip",
+    "package:master": "node build-all.mjs --zip=master",
+    "release": "node build-all.mjs --zip --boot"
   },
   "engines": {
     "node": ">=18"
