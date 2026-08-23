@@ -351,10 +351,21 @@ if (/BlendModes\.ADD\)\.setScale\(I \* this\.bulletScaleMul\)/.test(quelle))
 // einem Fehler.
 const GERENDERT = !process.argv.includes('--nurstatisch');
 const SATT_F = 0.25;           // darunter ist ein Pixel Glanzlicht oder Rand
-// So viel der sichtbaren Flaeche muss das eigene Signal tragen, und so viel
-// darf hoechstens das der anderen Seite tragen. Gemessen an den siebzehn
-// Texturen: Gefahr traegt 45 bis 77 %, Eigenfeuer 63 bis 88 %.
-const DECKUNG_GEFAHR = 0.35, DECKUNG_EIGEN = 0.45;
+// Grenzen anteilig, nie absolut — dieselbe Regel, an der der Bildtor schon
+// einmal auf GitHub rot lief. Feste 35 % / 45 % waeren hier genauso falsch:
+// bullet_spread und bullet_focus messen 48 %, das sind 1,07x Abstand. Ein
+// anderer Chromium mit anderer Kantenglaettung kippt das.
+//
+// Bezug ist deshalb der MEDIAN der eigenen Kategorie: ein Projektil, dessen
+// Kennfarbe im Bild nicht ankommt, faellt gegen seine elf Geschwister auf,
+// ganz gleich wie hoch die Umgebung insgesamt misst. Gegengeprobt an der
+// alten eb_needle: 23 % gegen einen Median von 67 % — sie faellt weiterhin.
+const DECKUNG_ANTEIL = 0.6;
+// Und ein letzter Halt, falls ALLE Texturen kaputt sind und es keinen
+// gesunden Median mehr gibt. Weit weg von allem je Gemessenen (48 bis 75 %).
+const DECKUNG_NOT = 0.2;
+// Diese hier bleibt absolut: sie ist eine Obergrenze, und eine Obergrenze,
+// die mit dem Gemessenen mitwandert, waere gar keine. Gemessen 0 bis 10 %.
 const VERWECHSELBAR_MAX = 0.15;
 if (GERENDERT) {
   const { existsSync } = await import('node:fs');
@@ -386,7 +397,7 @@ if (GERENDERT) {
         }, [...GEGNER_TEX, ...SPIELER_TEX]);
         await browser.close();
         console.log(`F  Am gebauten Spiel gezaehlt · Gefahr = warm und satt, Eigenfeuer = hell`);
-        const zeilen = [];
+        const gemessen = [];
         for (const k of [...GEGNER_TEX, ...SPIELER_TEX]) {
           const d = roh[k];
           if (!d) { melde(`F: Textur ${k} im gebauten Spiel nicht vorhanden`); continue; }
@@ -414,16 +425,23 @@ if (GERENDERT) {
             if (gegnerSeite) { if (warm) eigenSignal++; else if (hell) verwechselbar++; }
             else { if (hell) eigenSignal++; else if (warm) verwechselbar++; }
           }
-          const deckung = sichtbar ? eigenSignal / sichtbar : 0;
-          const falsch = sichtbar ? verwechselbar / sichtbar : 0;
-          zeilen.push(`${k.padEnd(14)} ${gegnerSeite ? 'Gefahr' : 'Eigen '} eigenes Signal ${(deckung * 100).toFixed(0).padStart(3)} % · verwechselbar ${(falsch * 100).toFixed(0).padStart(3)} %`);
-          const grenze = gegnerSeite ? DECKUNG_GEFAHR : DECKUNG_EIGEN;
-          if (deckung < grenze)
-            melde(`F: ${k} — eigenes Signal auf nur ${(deckung * 100).toFixed(0)} % der sichtbaren Flaeche (Grenze ${(grenze * 100).toFixed(0)} %)`);
-          if (falsch > VERWECHSELBAR_MAX)
-            melde(`F: ${k} — ${(falsch * 100).toFixed(0)} % der Flaeche traegt das Signal der anderen Seite (Grenze ${(VERWECHSELBAR_MAX * 100).toFixed(0)} %)`);
+          gemessen.push({ k, gegnerSeite, deckung: sichtbar ? eigenSignal / sichtbar : 0, falsch: sichtbar ? verwechselbar / sichtbar : 0 });
         }
-        for (const z of zeilen) console.log('   ' + z);
+        const median = (l) => { const a = [...l].sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : 0; };
+        for (const seite of [true, false]) {
+          const teil = gemessen.filter((m) => m.gegnerSeite === seite);
+          if (!teil.length) continue;
+          const med = median(teil.map((m) => m.deckung));
+          const grenze = Math.max(DECKUNG_NOT, med * DECKUNG_ANTEIL);
+          console.log(`   ${seite ? 'Gefahr    ' : 'Eigenfeuer'} Median ${(med * 100).toFixed(0)} % → Grenze ${(grenze * 100).toFixed(0)} %`);
+          for (const m of teil) {
+            console.log(`     ${m.k.padEnd(14)} eigenes Signal ${(m.deckung * 100).toFixed(0).padStart(3)} % · verwechselbar ${(m.falsch * 100).toFixed(0).padStart(3)} %`);
+            if (m.deckung < grenze)
+              melde(`F: ${m.k} — eigenes Signal auf nur ${(m.deckung * 100).toFixed(0)} % der sichtbaren Flaeche (Median der Kategorie ${(med * 100).toFixed(0)} %, Grenze ${(grenze * 100).toFixed(0)} %)`);
+            if (m.falsch > VERWECHSELBAR_MAX)
+              melde(`F: ${m.k} — ${(m.falsch * 100).toFixed(0)} % der Flaeche traegt das Signal der anderen Seite (Grenze ${(VERWECHSELBAR_MAX * 100).toFixed(0)} %)`);
+          }
+        }
       } catch (e) {
         await browser.close().catch(() => {});
         melde('F: gerenderte Pruefung fehlgeschlagen — ' + e.message);
