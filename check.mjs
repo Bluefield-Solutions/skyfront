@@ -31,6 +31,22 @@ if (ok) {
   }
 }
 
+// Farbtor: prueft, dass sich die drei Farbbaender nicht ueberschneiden —
+// Gefahr, Eigenfeuer, Aufsammler. Der Bildtor sieht den ganzen Schirm, das
+// Farbtor sieht die einzelnen Projektile, und zwar gerendert: es zaehlt die
+// Pixel des gebauten Spiels. Die Gegenproben dazu stehen in
+// tools/farbproben.mjs.
+let farbZeile = '';
+if (ok) {
+  try {
+    step('Farbtor (Gefahr · Eigenfeuer · Aufsammler)', 'node tools/farbtor.mjs');
+    farbZeile = '| Farbtor (17 Projektile) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    farbZeile = '| Farbtor (17 Projektile) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -56,7 +72,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');

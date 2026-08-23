@@ -33,11 +33,14 @@ Autark heisst autark: in der Einzeldatei sind alle 71 Bilder weiterhin
 ## Befehle
 
 ```
-npm run check      die Torkette: bauen, alle zwoelf starten, Bildtor
+npm run check      die Torkette: bauen, alle zwoelf starten, Bildtor, Farbtor
                    ~2,5 min oertlich, ~4 min auf GitHub
 npm run build      Einzeldatei
 npm run pages      Web-App (Manifest, Symbol, Startbilder, Dienst-Arbeiter)
 npm run bildtor    sieht das Spiel so aus, wie es soll?  (-- --bilder legt sie ab)
+npm run farbtor    drei Farbbaender: Gefahr, Eigenfeuer, Aufsammler
+                   (-- --nurstatisch laesst den Browserteil weg, ~2 s)
+npm run farbproben sieben Gegenproben zum Farbtor (-- --alle, ~4 min)
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -46,7 +49,7 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-Boot-Test des Masters → `dist/check-report.md`.
+`farbtor` → Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -90,10 +93,17 @@ Jede hat mindestens eine Runde gekostet.
    Zoom 2. `getBounds()` liefert Layoutpunkte. Wer sie mit `renderer.width`
    vergleicht, misst doppelt so gross — das erzeugte einmal 300
    Phantom-Befunde und machte die Randpruefung wirkungslos.
-8. **Kein Tor ersetzt den Blick.** Die Torkette prueft, dass etwas
-   funktioniert, nicht ob es gut aussieht. Der zu schwache HUD-Untergrund
-   (Deckkraft 0,46 ueber heller Stadtkulisse) fiel bei keinem Tor auf,
-   sondern beim Ansehen einer Aufnahme.
+8. **Kein Tor ersetzt den Blick — und was der Blick findet, wird ein Tor.**
+   Die Torkette prueft, dass etwas funktioniert, nicht ob es gut aussieht. Der
+   zu schwache HUD-Untergrund (Deckkraft 0,46 ueber heller Stadtkulisse) fiel
+   bei keinem Tor auf, sondern beim Ansehen einer Aufnahme. Zuletzt (v2 des
+   Farbtors) genauso: `eb_needle`, `eb_bolt` und `eb_diamond` trugen die
+   richtige Kennfarbe an den Raendern und ein breites weisses Band in der
+   Mitte — auf dem Kontaktbogen lasen sie sich als EIGENES Feuer, alle
+   statischen Pruefungen waren gruen. Der zweite Teil des Satzes ist der
+   wichtigere: der Befund ist erst erledigt, wenn er gemessen wird. Aus dem
+   Blick wurde Pruefung F, die die Pixel des gebauten Spiels zaehlt (alte
+   Nadel 23 % eigenes Signal, neue 73 %).
 9. **`src/assets.js` ist auto-generiert.** Ein Eintrag darf **geleert**, aber
    nie **entfernt** werden — die Nummern sind Positionen, die `app.js` direkt
    anspringt.
@@ -102,6 +112,21 @@ Jede hat mindestens eine Runde gekostet.
    meldet jede Unterschreitung.
 11. **`intensity` im Stage-Array ist wirkungslos.** Die echte Schwierigkeit
    steckt in der Wellen-Formel `tn` bzw. der `curve` in `balance.js`.
+12. **Ein Abnahmekriterium muss an der richtigen Stelle messen.** Das Audit
+   verlangte fuer SKY-020 „Kontrast der Gegnerkugel gegen den Untergrund
+   >= 3:1". Gerechnet gegen den Median-Untergrund faellt `#ff3a2a` auf sieben
+   von dreizehn Biomen durch — obwohl die Kugel dort tadellos zu sehen ist.
+   Eine Kugel hat drei Schichten: weisser Kern, Kennfarbe, dunkler Rand.
+   **Gefunden** wird sie ueber Kern und Rand, **eingeordnet** ueber die
+   Kennfarbe. Wer beides in eine Zahl presst, misst keines von beiden. Wenn
+   ein Kriterium nicht erreichbar scheint, erst pruefen, ob es die richtige
+   Frage stellt — nicht die Grenze senken, bis die eigene Leistung
+   hineinpasst.
+13. **Additiv gemischt heisst: es gibt keinen dunklen Rand.** `BlendModes.ADD`
+   kann nur aufhellen. Die vier Spielergeschosse waren deshalb ueber heller
+   Kulisse bei 2,7 bis 2,9:1 — sie hatten keinen Rand, weil ein Rand dort
+   gar nicht ankommen konnte. Das Leuchten gehoert in Spur und
+   Muendungsfeuer, nicht in den Koerper.
 
 ---
 
@@ -115,7 +140,7 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
-tools/             boot · bildtor · schirme · symbol · bilder
+tools/             boot · bildtor · farbtor · farbproben · schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```

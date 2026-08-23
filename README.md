@@ -31,8 +31,10 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~15 MB, eine Datei) |
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
 | **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
-| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, `dist/check-report.md` (~2 min) |
+| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, Farbtor, `dist/check-report.md` (~3 min) |
 | **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab |
+| **Nur das Farbtor** | `npm run farbtor` — mit `-- --nurstatisch` ohne Browser (~2 s) |
+| **Gegenproben zum Farbtor** | `npm run farbproben` — sieben eingebaute Fehler, jeder muss anschlagen |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
 | **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
@@ -73,6 +75,8 @@ project/
 ├─ tools/
 │  ├─ boot.mjs      ← gemeinsamer Boot-Test
 │  ├─ bildtor.mjs   ← sieht das Spiel so aus, wie es soll?
+│  ├─ farbtor.mjs   ← Gefahr, Eigenfeuer, Aufsammler: drei getrennte Bänder
+│  ├─ farbproben.mjs ← sieben Gegenproben dazu
 │  ├─ schirme.mjs   ← jeden Bildschirm aufnehmen und nachmessen
 │  ├─ symbol.mjs    ← icon.svg → App-Symbole + 11 iOS-Startbilder
 │  └─ bilder.mjs    ← WebP-Bahnen neu codieren (q78)
@@ -176,6 +180,16 @@ Werkzeuge stehen deshalb daneben und verlangen einen Blick:
   misst dieselbe heile Szene deutlich höher als lokal), und geurteilt wird über
   das **Maximum**, nicht den Median — der kaputte Nebel zeigt sich in genau
   einem von fünf Bildern.
+- **`npm run farbtor`** nimmt sich die siebzehn Projektiltexturen einzeln vor.
+  Drei Kategorien haben je ein reserviertes Farbband — Gefahr (Gegnerfeuer),
+  Eigenfeuer (Spielerfeuer), Aufsammler —, und keines darf ins andere ragen.
+  Sechs Prüfungen: gemeinsame Farbwerte, Farbtonabstand, Graustufenabstand,
+  Kontrast gegen die dreizehn Biome, Schichtaufbau (heller Kern, dunkler Rand),
+  und zum Schluss eine, die **die Pixel des gebauten Spiels zählt**. Die letzte
+  ist die wichtigste: die fünf davor waren alle grün, während drei Gegnerkugeln
+  ein so breites weißes Mittelband trugen, dass sie sich als eigenes Feuer
+  lasen. `npm run farbproben` baut sieben Fehler ein und verlangt, dass jeder
+  gefunden wird.
 - **`npm run schirme`** startet jede der neun Menü-Szenen einzeln und misst
   nach: was ragt aus dem Bild, was liegt übereinander, was ist auf dem Telefon
   zu klein. Überlappungen sind Befund, kleine Schrift nur ein Hinweis.

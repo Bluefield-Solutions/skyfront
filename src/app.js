@@ -54326,6 +54326,10 @@ return new ` + this.key + `();
     // einfriert; obere Grenze 50 ms, damit ein Ruckler die Welt nicht
     // teleportiert und schnelle Geschosse nicht durch Gegner hindurchspringen.
     ZF = T => tt.Math.Clamp(T || 16.667, 8, 50) / 16.667,
+    GEFAHR = "#ff3a2a",
+    GEFAHR_N = 16726570,
+    EIGEN = "#bfefff",
+    EIGEN_N = 12578815,
     Ft = {
       speedLerp: 1,
       scale: .56,
@@ -54478,28 +54482,28 @@ return new ` + this.key + `();
         name: "Streufächer",
         kind: "spread",
         desc: "Breite Deckung gegen Pulks",
-        tint: 10479871,
+        tint: 8378623,
         unlockCost: 0
       },
       focus: {
         name: "Fokus-Strahl",
         kind: "focus",
         desc: "Enge Säule, hoher Einzelschaden",
-        tint: 16773792,
+        tint: 12578815,
         unlockCost: 0
       },
       heavy: {
         name: "Schwere Kanone",
         kind: "heavy",
         desc: "Wenige, durchschlagende Geschosse",
-        tint: 16756832,
+        tint: 10465535,
         unlockCost: 0
       },
       laser: {
         name: "Laser",
         kind: "laser",
         desc: "Dauerstrahl – konstanter Schaden im Kegel",
-        tint: 16734842,
+        tint: 13215999,
         unlockCost: 1400
       }
     },
@@ -54590,7 +54594,7 @@ return new ` + this.key + `();
         bulletDamage: 2,
         hpMod: 0,
         weapon: "spread",
-        bulletTint: 10479871,
+        bulletTint: 8378623,
         desc: "Breiter Streuschuss · ausgewogen",
         passive: "Vorrat: +1 Start-Bombe",
         unlockCost: 0
@@ -54602,7 +54606,7 @@ return new ` + this.key + `();
         bulletDamage: 3,
         hpMod: -20,
         weapon: "focus",
-        bulletTint: 16773792,
+        bulletTint: 12578815,
         desc: "Fokus-Strahl · stark, wenig HP",
         passive: "Scharfschütze: +15 % Bossschaden",
         unlockCost: 750
@@ -54614,7 +54618,7 @@ return new ` + this.key + `();
         bulletDamage: 5,
         hpMod: 20,
         weapon: "heavy",
-        bulletTint: 16756832,
+        bulletTint: 10465535,
         desc: "Schwere Durchschlags-Kanonen",
         passive: "Durchschlag: Kugeln +1 Gegner",
         unlockCost: 1300
@@ -54626,7 +54630,7 @@ return new ` + this.key + `();
         bulletDamage: 3,
         hpMod: 0,
         weapon: "laser",
-        bulletTint: 16734842,
+        bulletTint: 13215999,
         desc: "Laser-Dauerstrahl · konstanter Schaden",
         passive: "Fokuslinse: breiterer Laser +20 % Schaden",
         unlockCost: 1600
@@ -54638,7 +54642,7 @@ return new ` + this.key + `();
         bulletDamage: 6,
         hpMod: 40,
         weapon: "heavy",
-        bulletTint: 16765088,
+        bulletTint: 10465535,
         desc: "Panzer-Bomber · extrem zäh, langsam",
         passive: "Bollwerk: −35 % Kollision, −15 % Kugelschaden",
         unlockCost: 2400
@@ -54871,7 +54875,13 @@ return new ` + this.key + `();
 
   function Gi(T) {
     for (const [R, E] of Object.entries(pi)) ht(T, R, 540, 540, (b, I) => gi(b, I, E));
-    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ff8a3a", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#e0405a", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "bullet_e", 28, 28, (R, E, b) => bs(R, E, b, "#ff2e9a", "#08060e")), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, "#ff2e9a")), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, "#37e0ff")), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, "#6bff8f")), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, "#ffab3a")), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, "#c58bff")), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, "#4fe6c8")), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, "#ffe23a")), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, "#ff8ad0")), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, "#ff7a2a")), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, "#ff4d4d")), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), mi(T, "spark", 16765562, 12), mi(T, "smoke", 9080726, 16), ht(T, "e_grunt", 64, 64, os), ht(T, "e_weaver", 64, 64, hs), ht(T, "e_bomber", 64, 64, ls), ht(T, "e_kamikaze", 64, 64, fs), ht(T, "e_elite", 64, 64, us), ht(T, "e_carrier", 64, 64, vs), ht(T, "e_rotor", 64, 64, as), ht(T, "e_scout", 64, 64, cs), ht(T, "e_strafer", 64, 64, ps), ht(T, "e_arcer", 64, 64, gs), ht(T, "e_sniper", 64, 64, ms), ht(T, "e_rocketeer", 64, 64, As), ht(T, "boss2", 300, 260, xs), ht(T, "boss3", 300, 260, ys), ht(T, "p_falcon", 132, 156, (R, E) => Ss(R, E)), ht(T, "p_viper", 132, 156, (R, E) => Ts(R, E)), ht(T, "p_tempest", 132, 156, (R, E) => Ps(R, E)), ht(T, "p_komet", 132, 156, (R, E) => Rs(R, E)), ht(T, "p_goliath", 132, 156, (R, E) => Cs(R, E)), ht(T, "pilot", 48, 48, ds), ht(T, "shimmer", 540, 540, $i), ht(T, "swell", 540, 540, _i), ht(T, "gradeTop", 540, 960, ts), ht(T, "gradeBot", 540, 960, es), ht(T, "swellBig", 540, 960, is), ht(T, "rain", 540, 540, Zi), ht(T, "fog", 540, 540, qi), ht(T, "carrier", 170, 430, ss), ht(T, "warship", 96, 240, ns), ht(T, "island", 230, 230, Vi), ht(T, "volcano", 230, 240, ji), ht(T, "iceberg", 180, 190, Ui), ht(T, "bunker", 130, 130, Wi), ht(T, "flaktower", 78, 78, Xi), ht(T, "rockettower", 82, 82, Hi), ht(T, "turret_city", 88, 88, Ki), ht(T, "turret_desert", 96, 96, Qi), ht(T, "turret_snow", 92, 92, Ji), ht(T, "turret_alps", 100, 100, ki), ht(T, "canyonwallL", 96, 480, (R, E, b) => ci(R, E, b, "L")), ht(T, "canyonwallR", 96, 480, (R, E, b) => ci(R, E, b, "R")), ht(T, "wallgun", 76, 76, Di), ht(T, "chokerock", 150, 200, Ni)
+    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "bullet_e", 28, 28, (R, E, b) => bs(R, E, b, GEFAHR, "#08060e")), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
+      dunkel: "#7fb8dc",
+      hell: EIGEN,
+      flosse: "#9fd0ee",
+      flamme: "#eafcff",
+      rauch: "rgba(120,220,255,0)"
+    })), mi(T, "spark", 16765562, 12), mi(T, "smoke", 9080726, 16), ht(T, "e_grunt", 64, 64, os), ht(T, "e_weaver", 64, 64, hs), ht(T, "e_bomber", 64, 64, ls), ht(T, "e_kamikaze", 64, 64, fs), ht(T, "e_elite", 64, 64, us), ht(T, "e_carrier", 64, 64, vs), ht(T, "e_rotor", 64, 64, as), ht(T, "e_scout", 64, 64, cs), ht(T, "e_strafer", 64, 64, ps), ht(T, "e_arcer", 64, 64, gs), ht(T, "e_sniper", 64, 64, ms), ht(T, "e_rocketeer", 64, 64, As), ht(T, "boss2", 300, 260, xs), ht(T, "boss3", 300, 260, ys), ht(T, "p_falcon", 132, 156, (R, E) => Ss(R, E)), ht(T, "p_viper", 132, 156, (R, E) => Ts(R, E)), ht(T, "p_tempest", 132, 156, (R, E) => Ps(R, E)), ht(T, "p_komet", 132, 156, (R, E) => Rs(R, E)), ht(T, "p_goliath", 132, 156, (R, E) => Cs(R, E)), ht(T, "pilot", 48, 48, ds), ht(T, "shimmer", 540, 540, $i), ht(T, "swell", 540, 540, _i), ht(T, "gradeTop", 540, 960, ts), ht(T, "gradeBot", 540, 960, es), ht(T, "swellBig", 540, 960, is), ht(T, "rain", 540, 540, Zi), ht(T, "fog", 540, 540, qi), ht(T, "carrier", 170, 430, ss), ht(T, "warship", 96, 240, ns), ht(T, "island", 230, 230, Vi), ht(T, "volcano", 230, 240, ji), ht(T, "iceberg", 180, 190, Ui), ht(T, "bunker", 130, 130, Wi), ht(T, "flaktower", 78, 78, Xi), ht(T, "rockettower", 82, 82, Hi), ht(T, "turret_city", 88, 88, Ki), ht(T, "turret_desert", 96, 96, Qi), ht(T, "turret_snow", 92, 92, Ji), ht(T, "turret_alps", 100, 100, ki), ht(T, "canyonwallL", 96, 480, (R, E, b) => ci(R, E, b, "L")), ht(T, "canyonwallR", 96, 480, (R, E, b) => ci(R, E, b, "R")), ht(T, "wallgun", 76, 76, Di), ht(T, "chokerock", 150, 200, Ni)
   }
 
   function Di(T, R, E) {
@@ -55747,36 +55757,67 @@ return new ` + this.key + `();
     ], zt(T, E - 26, E + 26)), ze(T, E - 26, 78, 52, 18), Yt(T, E, 26, 148), Lt(T, E, 64, 9), T.fillStyle = "#3a444f", T.fillRect(E - 8, 22, 16, 8)
   }
 
+  // Ein Spielergeschoss ist ein Koerper, kein Leuchten.
+  //
+  // Bis hierher war es beides nicht: die vier Texturen waren reine
+  // Hell-Verlaeufe und wurden additiv gezeichnet. Additiv heisst, dass der
+  // Grund nur heller werden kann — auf hellem Grund laeuft das Geschoss in
+  // die Saettigung und verliert genau dort seinen Kontrast, wo man ihn
+  // braucht. Gemessen am Median-Untergrund der dreizehn Biome:
+  // Wueste 2,89:1, Schnee 2,83:1, Frost 2,73:1 — alle unter der 3:1-Marke.
+  //
+  // Jetzt traegt jedes Geschoss denselben dunklen Rand wie die Gegnerkugeln,
+  // und der Koerper wird normal gezeichnet. Der Rand ist das, was den
+  // Kontrast traegt; der additive Anteil bleibt in Spur und Muendungsfeuer.
+  function pt(T, R, E, form) {
+    const rand = Math.max(1.2, Math.min(R, E) * .085),
+      kx = 1 - 2 * rand / R,
+      ky = 1 - 2 * rand / E,
+      innen = (fx, fy, stil) => {
+        T.save(), T.translate(R / 2, E / 2), T.scale(fx, fy), T.translate(-R / 2, -E / 2), T.fillStyle = stil, form(), T.fill(), T.restore()
+      };
+    Zt(T, R / 2, E / 2, Math.min(R, E) * .78), T.fillStyle = "#0a0f18", form(), T.fill();
+    const g = T.createLinearGradient(0, 0, 0, E);
+    g.addColorStop(0, "#ffffff"), g.addColorStop(.42, EIGEN), g.addColorStop(1, "#5f9ecf"), innen(kx, ky, g), innen(kx * .44, ky * .72, "rgba(255,255,255,0.95)")
+  }
+
   function Os(T, R, E) {
-    const b = T.createLinearGradient(0, 0, 0, E);
-    b.addColorStop(0, "rgba(180,245,255,0.9)"), b.addColorStop(.35, "rgba(80,200,255,0.6)"), b.addColorStop(1, "rgba(40,150,255,0)"), T.fillStyle = b, T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R, E * .5), T.lineTo(R * .7, E), T.lineTo(R * .3, E), T.lineTo(0, E * .5), T.closePath(), T.fill();
-    const I = T.createLinearGradient(0, 0, 0, E);
-    I.addColorStop(0, "rgba(255,255,255,1)"), I.addColorStop(.4, "rgba(200,250,255,0.95)"), I.addColorStop(1, "rgba(120,220,255,0)"), T.fillStyle = I;
-    const G = R * .42;
-    T.beginPath(), T.moveTo(R / 2, E * .04), T.lineTo(R / 2 + G / 2, E * .5), T.lineTo(R / 2, E * .9), T.lineTo(R / 2 - G / 2, E * .5), T.closePath(), T.fill()
+    pt(T, R, E, () => {
+      T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R, E * .5), T.lineTo(R * .7, E), T.lineTo(R * .3, E), T.lineTo(0, E * .5), T.closePath()
+    })
   }
 
   function Es(T, R, E) {
-    const b = T.createLinearGradient(0, 0, 0, E);
-    b.addColorStop(0, "rgba(255,255,255,0.9)"), b.addColorStop(.5, "rgba(200,240,255,0.55)"), b.addColorStop(1, "rgba(150,220,255,0)"), T.fillStyle = b, T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R, E * .62), T.lineTo(R * .62, E), T.lineTo(R / 2, E * .8), T.lineTo(R * .38, E), T.lineTo(0, E * .62), T.closePath(), T.fill(), T.fillStyle = "rgba(255,255,255,0.98)", T.beginPath(), T.moveTo(R / 2, E * .12), T.lineTo(R * .74, E * .6), T.lineTo(R / 2, E * .74), T.lineTo(R * .26, E * .6), T.closePath(), T.fill()
+    pt(T, R, E, () => {
+      T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R, E * .62), T.lineTo(R * .62, E), T.lineTo(R / 2, E * .8), T.lineTo(R * .38, E), T.lineTo(0, E * .62), T.closePath()
+    })
   }
 
   function ws(T, R, E) {
-    const b = T.createLinearGradient(0, 0, 0, E);
-    b.addColorStop(0, "rgba(255,255,255,0.95)"), b.addColorStop(.5, "rgba(210,245,255,0.5)"), b.addColorStop(1, "rgba(150,220,255,0)"), T.fillStyle = b, T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R * .72, E * .5), T.lineTo(R / 2, E), T.lineTo(R * .28, E * .5), T.closePath(), T.fill(), T.fillStyle = "rgba(255,255,255,1)", T.fillRect(R / 2 - 1.5, E * .06, 3, E * .86)
+    pt(T, R, E, () => {
+      T.beginPath(), T.moveTo(R / 2, 0), T.lineTo(R * .92, E * .42), T.lineTo(R * .76, E), T.lineTo(R * .24, E), T.lineTo(R * .08, E * .42), T.closePath()
+    })
   }
 
   function Ms(T, R, E) {
-    const b = T.createRadialGradient(R / 2, E * .5, 2, R / 2, E * .5, R * .6);
-    b.addColorStop(0, "rgba(255,255,255,0.9)"), b.addColorStop(.6, "rgba(200,235,255,0.5)"), b.addColorStop(1, "rgba(150,210,255,0)"), T.fillStyle = b, T.fillRect(0, 0, R, E), T.fillStyle = "rgba(255,255,255,0.98)", T.beginPath(), T.moveTo(R / 2, E * .06), T.quadraticCurveTo(R * .94, E * .18, R * .9, E * .55), T.quadraticCurveTo(R * .86, E * .9, R / 2, E * .94), T.quadraticCurveTo(R * .14, E * .9, R * .1, E * .55), T.quadraticCurveTo(R * .06, E * .18, R / 2, E * .06), T.closePath(), T.fill(), T.fillStyle = "rgba(255,255,255,0.7)", T.beginPath(), T.ellipse(R / 2, E * .32, R * .22, E * .16, 0, 0, 7), T.fill()
+    pt(T, R, E, () => {
+      T.beginPath(), T.moveTo(R / 2, 0), T.quadraticCurveTo(R * .98, E * .16, R * .94, E * .56), T.quadraticCurveTo(R * .9, E * .96, R / 2, E), T.quadraticCurveTo(R * .1, E * .96, R * .06, E * .56), T.quadraticCurveTo(R * .02, E * .16, R / 2, E * 0), T.closePath()
+    })
   }
 
-  function Fs(T, R, E) {
+  function Fs(T, R, E, I) {
+    const P = I || {
+      dunkel: "#7a1a10",
+      hell: "#ff5a2a",
+      flosse: "#b0331a",
+      flamme: "#fff2b0",
+      rauch: "rgba(255,150,40,0)"
+    };
     T.save(), T.translate(R / 2, 0);
     const b = T.createLinearGradient(-R / 2, 0, R / 2, 0);
-    b.addColorStop(0, "#7a1a10"), b.addColorStop(.5, "#ff5a2a"), b.addColorStop(1, "#7a1a10"), T.fillStyle = b, T.beginPath(), T.moveTo(0, 1), T.lineTo(R / 2 - 2, E * .42), T.lineTo(R / 2 - 2, E - 8), T.lineTo(-(R / 2 - 2), E - 8), T.lineTo(-(R / 2 - 2), E * .42), T.closePath(), T.fill(), T.lineWidth = 1.6, T.lineJoin = "round", T.strokeStyle = "#08060e", T.stroke(), T.fillStyle = "#b0331a", T.beginPath(), T.moveTo(-(R / 2 - 2), E - 12), T.lineTo(-R / 2, E), T.lineTo(-1, E - 6), T.closePath(), T.fill(), T.beginPath(), T.moveTo(R / 2 - 2, E - 12), T.lineTo(R / 2, E), T.lineTo(1, E - 6), T.closePath(), T.fill();
-    const I = T.createRadialGradient(0, E - 4, 1, 0, E - 4, 7);
-    I.addColorStop(0, "#fff2b0"), I.addColorStop(1, "rgba(255,150,40,0)"), T.fillStyle = I, T.beginPath(), T.arc(0, E - 4, 7, 0, 7), T.fill(), T.restore()
+    b.addColorStop(0, P.dunkel), b.addColorStop(.5, P.hell), b.addColorStop(1, P.dunkel), T.fillStyle = b, T.beginPath(), T.moveTo(0, 1), T.lineTo(R / 2 - 2, E * .42), T.lineTo(R / 2 - 2, E - 8), T.lineTo(-(R / 2 - 2), E - 8), T.lineTo(-(R / 2 - 2), E * .42), T.closePath(), T.fill(), T.lineWidth = 1.6, T.lineJoin = "round", T.strokeStyle = "#08060e", T.stroke(), T.fillStyle = P.flosse, T.beginPath(), T.moveTo(-(R / 2 - 2), E - 12), T.lineTo(-R / 2, E), T.lineTo(-1, E - 6), T.closePath(), T.fill(), T.beginPath(), T.moveTo(R / 2 - 2, E - 12), T.lineTo(R / 2, E), T.lineTo(1, E - 6), T.closePath(), T.fill();
+    const v = T.createRadialGradient(0, E - 4, 1, 0, E - 4, 7);
+    v.addColorStop(0, P.flamme), v.addColorStop(1, P.rauch), T.fillStyle = v, T.beginPath(), T.arc(0, E - 4, 7, 0, 7), T.fill(), T.restore()
   }
 
   function bs(T, R, E, b, I) {
@@ -55786,7 +55827,7 @@ return new ` + this.key + `();
       t = T.createRadialGradient(G, v, x * .7, G, v, R * .5);
     t.addColorStop(0, "rgba(4,5,10,0.60)"), t.addColorStop(.7, "rgba(4,5,10,0.32)"), t.addColorStop(1, "rgba(4,5,10,0)"), T.fillStyle = t, T.fillRect(0, 0, R, E), T.fillStyle = I, T.beginPath(), T.arc(G, v, x + 2.6, 0, 7), T.fill();
     const l = T.createRadialGradient(G - x * .28, v - x * .32, 1, G, v, x);
-    l.addColorStop(0, "#ffffff"), l.addColorStop(.34, "#ffd0ee"), l.addColorStop(.6, b), l.addColorStop(1, b), T.fillStyle = l, T.beginPath(), T.arc(G, v, x, 0, 7), T.fill(), T.fillStyle = "rgba(255,255,255,0.96)", T.beginPath(), T.arc(G - x * .16, v - x * .2, x * .44, 0, 7), T.fill()
+    l.addColorStop(0, "#ffffff"), l.addColorStop(.34, "#ffcaa8"), l.addColorStop(.6, b), l.addColorStop(1, b), T.fillStyle = l, T.beginPath(), T.arc(G, v, x, 0, 7), T.fill(), T.fillStyle = "rgba(255,232,220,0.9)", T.beginPath(), T.arc(G - x * .18, v - x * .22, x * .34, 0, 7), T.fill()
   }
 
   function Zt(T, R, E, b) {
@@ -55814,7 +55855,7 @@ return new ` + this.key + `();
       x = E * .82;
     Zt(T, I, E / 2, R * .7), T.fillStyle = "#08060e", Je(T, I, v, x, G + 2.2), T.fill();
     const t = T.createLinearGradient(I - G, 0, I + G, 0);
-    t.addColorStop(0, b), t.addColorStop(.5, "#ffffff"), t.addColorStop(1, b), T.fillStyle = t, Je(T, I, v, x, G), T.fill(), T.fillStyle = "rgba(255,255,255,0.9)", Je(T, I, v + 3, x - 3, G * .34), T.fill()
+    t.addColorStop(0, b), t.addColorStop(.42, b), t.addColorStop(.55, "#ffd2c4"), t.addColorStop(.7, b), t.addColorStop(1, b), T.fillStyle = t, Je(T, I, v, x, G), T.fill(), T.fillStyle = "rgba(255,222,208,0.72)", Je(T, I, v + 4, x - 4, G * .26), T.fill()
   }
 
   function Is(T, R, E, b) {
@@ -55832,7 +55873,7 @@ return new ` + this.key + `();
     };
     T.fillStyle = "#08060e", G(2.2), T.fill();
     const v = T.createLinearGradient(0, E * .1, 0, E * .9);
-    v.addColorStop(0, "#ffffff"), v.addColorStop(.4, b), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill()
+    v.addColorStop(0, "#ffe0d4"), v.addColorStop(.22, b), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill()
   }
 
   function Bs(T, R, E, b) {
@@ -55844,7 +55885,7 @@ return new ` + this.key + `();
     };
     T.fillStyle = "#08060e", v(2.4), T.fill();
     const x = T.createLinearGradient(I - R * .36, 0, I + R * .36, 0);
-    x.addColorStop(0, b), x.addColorStop(.5, "#ffffff"), x.addColorStop(1, b), T.fillStyle = x, v(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.55)", T.beginPath(), T.moveTo(I, E * .14), T.lineTo(I + R * .16, G), T.lineTo(I, E * .86), T.lineTo(I - R * .16, G), T.closePath(), T.fill()
+    x.addColorStop(0, b), x.addColorStop(.44, b), x.addColorStop(.56, "#ffd2c4"), x.addColorStop(.68, b), x.addColorStop(1, b), T.fillStyle = x, v(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.34)", T.beginPath(), T.moveTo(I, E * .14), T.lineTo(I + R * .16, G), T.lineTo(I, E * .86), T.lineTo(I - R * .16, G), T.closePath(), T.fill()
   }
 
   function Gs(T, R, E, b) {
@@ -55863,7 +55904,7 @@ return new ` + this.key + `();
     const v = (x, t, l) => {
       T.save(), T.translate(I, G), T.rotate(l), T.beginPath(), T.moveTo(0, -x), T.lineTo(t, 0), T.lineTo(0, x), T.lineTo(-t, 0), T.closePath(), T.restore()
     };
-    T.fillStyle = "#08060e", v(R * .46, R * .12, 0), T.fill(), v(R * .46, R * .12, Math.PI / 2), T.fill(), T.fillStyle = b, v(R * .42, R * .09, 0), T.fill(), v(R * .42, R * .09, Math.PI / 2), T.fill(), T.fillStyle = "rgba(255,255,255,0.95)", T.beginPath(), T.arc(I, G, R * .12, 0, 7), T.fill()
+    T.fillStyle = "#08060e", v(R * .46, R * .12, 0), T.fill(), v(R * .46, R * .12, Math.PI / 2), T.fill(), T.fillStyle = b, v(R * .42, R * .09, 0), T.fill(), v(R * .42, R * .09, Math.PI / 2), T.fill(), T.fillStyle = "rgba(255,206,186,0.95)", T.beginPath(), T.arc(I, G, R * .1, 0, 7), T.fill()
   }
 
   function Ns(T, R, E, b) {
@@ -55874,7 +55915,7 @@ return new ` + this.key + `();
     };
     T.fillStyle = "#08060e", G(1.8), T.fill();
     const v = T.createLinearGradient(I - R * .5, 0, I + R * .5, 0);
-    v.addColorStop(0, b), v.addColorStop(.5, "#ffffff"), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill()
+    v.addColorStop(0, b), v.addColorStop(.44, b), v.addColorStop(.55, "#ffd2c4"), v.addColorStop(.68, b), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.85)", T.beginPath(), T.ellipse(I - R * .06, E * .3, R * .07, E * .16, 0, 0, 7), T.fill()
   }
 
   function Vs(T, R, E, b) {
@@ -55885,7 +55926,7 @@ return new ` + this.key + `();
     };
     T.fillStyle = "#08060e", G(2.2), T.fill();
     const v = T.createLinearGradient(0, E * .06, 0, E * .94);
-    v.addColorStop(0, "#fff2c0"), v.addColorStop(.45, b), v.addColorStop(1, "#7a1e06"), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.8)", T.beginPath(), T.ellipse(I, E * .34, R * .1, E * .14, 0, 0, 7), T.fill()
+    v.addColorStop(0, "#ffe6a0"), v.addColorStop(.2, b), v.addColorStop(1, "#7a1e06"), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.8)", T.beginPath(), T.ellipse(I, E * .34, R * .1, E * .14, 0, 0, 7), T.fill()
   }
 
   function js(T, R, E, b) {
@@ -61364,7 +61405,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     },
     yt = class yt extends tt.Scene {
       constructor() {
-        super("Game"), this.sunGlintTarget = 0, this.rainTarget = 0, this.fogTarget = 0, this.lightningOn = !1, this.nextLightning = 0, this.corridorOn = !1, this.score = 0, this.best = 0, this.over = !1, this.endless = !1, this.endlessRound = 0, this.endlessNextAt = 0, this.dragging = !1, this.dragPX = 0, this.dragPY = 0, this.dragTX = 0, this.dragTY = 0, this.levelEndAt = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 5200, this.kap2Boss = !1, this.finalBoss = !1, this.stageStart = 0, this.stage = 1, this.stageCleared = !1, this.boss = null, this.lastCritText = 0, this.bossPhase = 1, this.nextBeam = 0, this.stageHit = !1, this.stageKills = 0, this.killGoal = 0, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.xpBaseStored = 0, this.combo = 0, this.comboExpire = 0, this.bossWarned = !1, this.waveHigh = 0, this.lastBreather = 0, this.wingmen = [], this.fireDelay = Ft.fireEveryMs, this.playerBulletDamage = 1, this.gearCrit = 0, this.gearCritMult = 1.5, this.gearPierceMul = 1, this.explosionMul = 1, this.weapon = "spread", this.bulletTint = 10479871, this.bulletTex = "bullet_spread", this.secondary = "none", this.secLevel = 0, this.secNext = 0, this.laserNextDmg = 0, this.enemyDmgMul = 1, this.enemyHpMul = 1, this.armFront = 0, this.armRear = 0, this.armCore = 0, this.fireRateMul = 1, this.bomb = {
+        super("Game"), this.sunGlintTarget = 0, this.rainTarget = 0, this.fogTarget = 0, this.lightningOn = !1, this.nextLightning = 0, this.corridorOn = !1, this.score = 0, this.best = 0, this.over = !1, this.endless = !1, this.endlessRound = 0, this.endlessNextAt = 0, this.dragging = !1, this.dragPX = 0, this.dragPY = 0, this.dragTX = 0, this.dragTY = 0, this.levelEndAt = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 5200, this.kap2Boss = !1, this.finalBoss = !1, this.stageStart = 0, this.stage = 1, this.stageCleared = !1, this.boss = null, this.lastCritText = 0, this.bossPhase = 1, this.nextBeam = 0, this.stageHit = !1, this.stageKills = 0, this.killGoal = 0, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.xpBaseStored = 0, this.combo = 0, this.comboExpire = 0, this.bossWarned = !1, this.waveHigh = 0, this.lastBreather = 0, this.wingmen = [], this.fireDelay = Ft.fireEveryMs, this.playerBulletDamage = 1, this.gearCrit = 0, this.gearCritMult = 1.5, this.gearPierceMul = 1, this.explosionMul = 1, this.weapon = "spread", this.bulletTint = 8378623, this.bulletTex = "bullet_spread", this.secondary = "none", this.secLevel = 0, this.secNext = 0, this.laserNextDmg = 0, this.enemyDmgMul = 1, this.enemyHpMul = 1, this.armFront = 0, this.armRear = 0, this.armCore = 0, this.fireRateMul = 1, this.bomb = {
           x: J - 58,
           y: rt - 72,
           r: 44
@@ -61730,7 +61771,7 @@ dann ausweichen!`, {
       }
       shootBullet(R, E, b, I, G) {
         const v = this.bullets.get(R, E);
-        v && (v.enableBody(!0, R, E, !0, !0), v.setTexture(this.bulletTex).setAngle(0), v.setDepth(9).setBlendMode(tt.BlendModes.ADD).setScale(I * this.bulletScaleMul).setTint(this.bulletTint), v.pierce = G + this.bulletPierceBonus, v.seek = !1, v.col = this.bulletTint, v.lastTrail = 0, v.body.setVelocity(Math.sin(b) * Ft.bulletSpeed, -Math.cos(b) * Ft.bulletSpeed))
+        v && (v.enableBody(!0, R, E, !0, !0), v.setTexture(this.bulletTex).setAngle(0), v.setDepth(9).setBlendMode(tt.BlendModes.NORMAL).setScale(I * this.bulletScaleMul).setTint(EIGEN_N), v.pierce = G + this.bulletPierceBonus, v.seek = !1, v.col = this.bulletTint, v.lastTrail = 0, v.body.setVelocity(Math.sin(b) * Ft.bulletSpeed, -Math.cos(b) * Ft.bulletSpeed))
       }
       fire() {
         if (this.over) return;
@@ -61793,7 +61834,7 @@ dann ausweichen!`, {
       }
       firePlayerSeeker() {
         const R = this.bullets.get(this.player.x, this.player.y - 20);
-        R && (R.enableBody(!0, this.player.x, this.player.y - 20, !0, !0), R.setTexture("missile").setDepth(9).setScale(1).clearTint(), R.pierce = 0, R.seek = !0, R.body.setVelocity(0, -780 * .5))
+        R && (R.enableBody(!0, this.player.x, this.player.y - 20, !0, !0), R.setTexture("missile_p").setDepth(9).setScale(1).setBlendMode(tt.BlendModes.NORMAL).clearTint(), R.pierce = 0, R.seek = !0, R.body.setVelocity(0, -780 * .5))
       }
       applyBiome(R) {
         var t, l, p, a, r, n, e;
@@ -64615,7 +64656,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             a = 0,
             r = 12 + this.player.powerLevel * 2 + this.laserWidthBonus,
             n = .75 + Math.sin(b * .05) * .2;
-          if (this.laserGfx.fillStyle(16734842, .28 * n).fillRect(p - r, a, r * 2, this.player.y - 34), this.laserGfx.fillStyle(16765152, .9 * n).fillRect(p - 3, a, 6, this.player.y - 34), b > this.laserNextDmg) {
+          if (this.laserGfx.fillStyle(13215999, .28 * n).fillRect(p - r, a, r * 2, this.player.y - 34), this.laserGfx.fillStyle(EIGEN_N, .9 * n).fillRect(p - 3, a, 6, this.player.y - 34), b > this.laserNextDmg) {
             this.laserNextDmg = b + 70, this.audio.laser();
             const e = Math.max(1, Math.round(this.playerBulletDamage * this.laserDmgMul));
             if (this.enemies.getChildren().forEach(s => {
@@ -64756,7 +64797,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
               s.setVelocity(Math.cos(h) * f, Math.sin(h) * f), p.setAngle(tt.Math.RadToDeg(h) + 90)
             }
             b - (p.lastTrail || 0) > this.trailGate(34) && (p.lastTrail = b, this.fxFly(p.texture.key, p.x, p.y, {
-              tint: (a = p.col) != null ? a : 10479871,
+              tint: (a = p.col) != null ? a : 8378623,
               depth: 8,
               scale: p.scaleX * .8,
               alpha: .3,
@@ -64810,14 +64851,14 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       aim: !1,
       spin: 0,
       hit: 7,
-      col: 16723610
+      col: GEFAHR_N
     },
     bolt: {
       tex: "eb_bolt",
       aim: !0,
       spin: 0,
       hit: 6,
-      col: 3662079,
+      col: GEFAHR_N,
       trail: !0
     },
     ring: {
@@ -64825,14 +64866,14 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       aim: !1,
       spin: 160,
       hit: 9,
-      col: 7077775
+      col: GEFAHR_N
     },
     dart: {
       tex: "eb_dart",
       aim: !0,
       spin: 0,
       hit: 7,
-      col: 16755514,
+      col: GEFAHR_N,
       trail: !0
     },
     diamond: {
@@ -64840,28 +64881,28 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       aim: !0,
       spin: 90,
       hit: 8,
-      col: 12946431
+      col: GEFAHR_N
     },
     wave: {
       tex: "eb_wave",
       aim: !0,
       spin: 0,
       hit: 8,
-      col: 5236424
+      col: GEFAHR_N
     },
     star: {
       tex: "eb_star",
       aim: !1,
       spin: 240,
       hit: 8,
-      col: 16769594
+      col: GEFAHR_N
     },
     needle: {
       tex: "eb_needle",
       aim: !0,
       spin: 0,
       hit: 6,
-      col: 16747216,
+      col: GEFAHR_N,
       trail: !0
     },
     flame: {
@@ -64869,14 +64910,14 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       aim: !0,
       spin: 0,
       hit: 7,
-      col: 16742954
+      col: GEFAHR_N
     },
     saw: {
       tex: "eb_saw",
       aim: !1,
       spin: 560,
       hit: 9,
-      col: 16731469
+      col: GEFAHR_N
     }
   }, yt.COMBO_COLS = ["#bff0ff", "#9effc0", "#ffe27a", "#ff9a3a", "#ff6ad0"], yt.FX_CAP_AUTO = 170, yt.FX_CAP_MIN = 45, yt.HIT_CELL = 64, yt.FX_ATLAS_KEYS = ["spark", "shard", "shieldRing", "smoke"], yt.FX_ATLAS_SET = new Set(yt.FX_ATLAS_KEYS);
   let li = yt;

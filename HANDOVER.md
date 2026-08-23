@@ -38,8 +38,10 @@ npm run build       # -> dist/Skyfront.html (Master, autark)
 npm run pages       # -> dist/pages/ (Web-App: Manifest, Symbol, Dienst-Arbeiter)
 npm run variants    # -> dist/Skyfront-<Name>.html je Profil + dist/index.html
 npm run all         # beides
-npm run check       # die Torkette: bauen, alle zwölf starten, Bildtor  (~2 min)
+npm run check       # die Torkette: bauen, alle zwölf starten, Bildtor, Farbtor  (~3 min)
 npm run bildtor     # nur das Bildtor
+npm run farbtor     # nur das Farbtor  (-- --nurstatisch: ohne Browser, ~2 s)
+npm run farbproben  # sieben Gegenproben zum Farbtor  (-- --alle: mit Neubau)
 npm run schirme     # jeden Bildschirm aufnehmen und nachmessen
 npm run symbol      # App-Symbol und die elf iOS-Startbilder neu backen
 npm run bilder      # Hintergrundbahnen neu codieren (verkleinert assets.js)
@@ -86,6 +88,10 @@ Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
 - `npm run schirme` — startet jede der neun Menü-Szenen einzeln, misst was aus
   dem Bild ragt, was übereinanderliegt, was auf dem Telefon zu klein ist.
 - `npm run bildtor -- --bilder` — legt die schlimmste Aufnahme je Modus ab.
+- `npm run farbtor` — die drei reservierten Farbbänder. Gefahr `#ff3a2a`,
+  Eigenfeuer `#bfefff`, Aufsammler alles außerhalb beider. Die Konstanten
+  `GEFAHR` / `EIGEN` in `src/app.js` sind die einzige Quelle; das Tor liest
+  sie von dort und meldet rot, wenn es sie nicht findet.
 
 ### Das Bildtor
 
@@ -151,6 +157,8 @@ zip.mjs               reiner-Node ZIP-Writer
 
 tools/boot.mjs        gemeinsamer Boot-Test (von check.mjs benutzt)
 tools/bildtor.mjs     sieht das Spiel so aus, wie es soll?
+tools/farbtor.mjs     drei Farbbänder: Gefahr, Eigenfeuer, Aufsammler
+tools/farbproben.mjs  sieben Gegenproben zum Farbtor
 tools/schirme.mjs     jeden Bildschirm aufnehmen und nachmessen
 tools/symbol.mjs      icon.svg -> App-Symbole + 11 iOS-Startbilder
 tools/bilder.mjs      WebP-Bahnen neu codieren (q78)
