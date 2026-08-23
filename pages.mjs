@@ -48,6 +48,7 @@ const vorrat = JSON.parse(html.slice(klammerAuf, klammerZu + 1));
 const ENDUNG = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/gif': 'gif' };
 mkdirSync(`${AUS}/bilder`, { recursive: true });
 
+const bilderAbdruck = createHash('sha1');
 let raus = 0, rausBytes = 0, drin = 0;
 const neuerVorrat = vorrat.map((eintrag, n) => {
   if (n < PHASER_EIGEN) { drin++; return eintrag; }
@@ -67,6 +68,7 @@ const neuerVorrat = vorrat.map((eintrag, n) => {
   if (!ganz) { drin++; return eintrag; }
 
   writeFileSync(`${AUS}/bilder/${n}.${endung}`, roh);
+  bilderAbdruck.update(`${n}.${endung}`).update(roh);
   raus++; rausBytes += eintrag.length;
   return `./bilder/${n}.${endung}`;
 });
@@ -117,7 +119,15 @@ writeFileSync(`${AUS}/manifest.webmanifest`, JSON.stringify(manifest, null, 2));
 // --- Huelle in die Seite einhaengen ----------------------------------------
 // Das data:-Symbol bleibt drin: es schadet nicht und haelt die Einzeldatei
 // weiterhin autark, wenn jemand sie ohne Server oeffnet.
-const marke = createHash('sha1').update(html).digest('hex').slice(0, 8);
+// Die Marke muss die Bilder mitzaehlen. Sonst passiert Folgendes: die Bilder
+// aendern sich, die HTML nicht (dort stehen ja nur noch Dateinamen), die Marke
+// bleibt gleich, der alte Speicher wird nicht weggeworfen — und das Telefon
+// zeigt fuer immer die alten Bilder. Genau nachgemessen: nach dem Verkleinern
+// von 15,75 auf 9,13 MB blieb die Marke unveraendert bei 511da9fe.
+const marke = createHash('sha1')
+  .update(html)
+  .update(bilderAbdruck.digest())
+  .digest('hex').slice(0, 8);
 
 // Die data:-Verweise ERSETZEN, nicht ergaenzen. Stuenden beide da, haette iOS
 // die Wahl zwischen einer Adresse, die es ignoriert, und einer Datei — und
