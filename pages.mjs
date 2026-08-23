@@ -23,6 +23,56 @@ mkdirSync(AUS, { recursive: true });
 
 let html = readFileSync('dist/Skyfront.html', 'utf8');
 
+// --- Bildvorrat auslagern ----------------------------------------------------
+// In der Einzeldatei stehen 71 Bilder als Base64 im Dokument: 21 MB, die der
+// Browser erst parsen muss, bevor irgendetwas passiert. Fuer die Web-App
+// werden sie zu echten Dateien. Das bringt dreierlei: die HTML wird klein, die
+// Bilder laden nebenlaeufig und einzeln zwischenspeicherbar, und eine
+// Code-Aenderung uebertraegt nicht mehr 21 MB Bilder mit.
+//
+// Der Einzeldatei-Bau bleibt unberuehrt — autark heisst autark.
+//
+// NICHT ausgelagert wird, was Phaser intern zusammensetzt: __SKFA[0] und [2]
+// sind BRUCHSTUECKE, die im Code per + mit weiterem Base64 verkettet werden.
+// Als Datei waeren sie Unsinn. [1] ist Phasers weisses Ersatzbild und wird
+// beim Hochfahren gebraucht, bevor ein Lader laeuft — das bleibt auch drin.
+const PHASER_EIGEN = 3;
+
+const anfang = html.indexOf('var __SKFA=[');
+if (anfang < 0) { console.error('✗ __SKFA nicht gefunden.'); process.exit(1); }
+const klammerAuf = html.indexOf('[', anfang);
+const klammerZu = html.indexOf('];', klammerAuf);
+if (klammerZu < 0) { console.error('✗ Ende von __SKFA nicht gefunden.'); process.exit(1); }
+const vorrat = JSON.parse(html.slice(klammerAuf, klammerZu + 1));
+
+const ENDUNG = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/gif': 'gif' };
+mkdirSync(`${AUS}/bilder`, { recursive: true });
+
+let raus = 0, rausBytes = 0, drin = 0;
+const neuerVorrat = vorrat.map((eintrag, n) => {
+  if (n < PHASER_EIGEN) { drin++; return eintrag; }
+  const komma = eintrag.indexOf(',');
+  const kopf = komma > 0 ? eintrag.slice(5, eintrag.indexOf(';')) : '';
+  const endung = ENDUNG[kopf];
+  if (!endung || !eintrag.startsWith('data:image/')) { drin++; return eintrag; }
+
+  const roh = Buffer.from(eintrag.slice(komma + 1), 'base64');
+  // Vollstaendigkeit am Bild selbst pruefen, nicht am Praefix glauben: ein
+  // abgeschnittenes Bild als Datei faellt sonst erst auf dem Telefon auf.
+  const ganz =
+    (endung === 'png'  && roh.slice(1, 4).toString() === 'PNG' && roh.slice(-8, -4).toString() === 'IEND') ||
+    (endung === 'jpg'  && roh[0] === 0xFF && roh[1] === 0xD8 && roh[roh.length - 2] === 0xFF && roh[roh.length - 1] === 0xD9) ||
+    (endung === 'webp' && roh.slice(0, 4).toString() === 'RIFF' && roh.slice(8, 12).toString() === 'WEBP') ||
+    (endung === 'gif'  && roh.slice(0, 3).toString() === 'GIF' && roh[roh.length - 1] === 0x3B);
+  if (!ganz) { drin++; return eintrag; }
+
+  writeFileSync(`${AUS}/bilder/${n}.${endung}`, roh);
+  raus++; rausBytes += eintrag.length;
+  return `./bilder/${n}.${endung}`;
+});
+
+html = html.slice(0, klammerAuf) + JSON.stringify(neuerVorrat) + html.slice(klammerZu + 1);
+
 // --- Symbole ----------------------------------------------------------------
 // Als echte Dateien, nicht als data:-Adresse. Genau die ignoriert iOS beim
 // Ablegen auf dem Startbildschirm — es nimmt dann einen Bildschirmausschnitt
@@ -127,6 +177,13 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       var still = function () {};
       reg.update().catch(still);
       setInterval(function () { reg.update().catch(still); }, 3600000);
+      // Die Bilder liegen als eigene Dateien daneben. Erst spielen lassen,
+      // dann den Rest im Hintergrund nachholen — sonst konkurriert das
+      // Nachladen mit dem, was gerade auf den Schirm soll.
+      setTimeout(function () {
+        var a = navigator.serviceWorker.controller || reg.active;
+        if (a) a.postMessage({ typ: 'vorladen' });
+      }, 12000);
     }).catch(function () {});
   });
   // Absichtlich KEIN location.reload() bei Wechsel: das Spiel wuerde mitten
@@ -142,8 +199,11 @@ if (endeLeib < 0 || endeLeib < endeKopf) {
 html = ersetzeLetztes(html, '</body>', anmeldung);
 
 writeFileSync(`${AUS}/index.html`, html);
-writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8').replaceAll('__MARKE__', marke));
+const bilderListe = readdirSync(`${AUS}/bilder`).sort().map(f => `./bilder/${f}`);
+writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8')
+  .replaceAll('__MARKE__', marke)
+  .replace('__BILDER__', JSON.stringify(bilderListe)));
 writeFileSync(`${AUS}/.nojekyll`, '');
 
 const mb = (Buffer.byteLength(html) / 1048576).toFixed(2);
-console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB · Symbole ${SYMBOLE.join('/')} · ${startZahl} Startbilder (${(startBytes/1048576).toFixed(2)} MB) · Marke ${marke}`);
+console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB (${raus} Bilder ausgelagert, ${(rausBytes/1048576).toFixed(2)} MB · ${drin} blieben drin) · ${startZahl} Startbilder · Marke ${marke}`);
