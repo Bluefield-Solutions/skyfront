@@ -187,10 +187,20 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       var still = function () {};
       reg.update().catch(still);
       setInterval(function () { reg.update().catch(still); }, 3600000);
-      // Die Bilder liegen als eigene Dateien daneben. Erst spielen lassen,
-      // dann den Rest im Hintergrund nachholen — sonst konkurriert das
-      // Nachladen mit dem, was gerade auf den Schirm soll.
-      setTimeout(function () {
+      // Die uebrigen Bilder im Hintergrund nachholen — aber NUR, wenn die
+      // Seite vom Startbildschirm aus gestartet wurde.
+      //
+      // Der Grund: das sind 9,3 MB. Wer die App abgelegt hat, will sie
+      // offline spielen koennen, und zahlt den Preis einmal je Fassung.
+      // Wer nur im Browser vorbeischaut, hat darum nicht gebeten — und
+      // ueber Mobilfunk waere es unverschaemt.
+      //
+      // Gemessen, was ohne das Nachladen wirklich noetig ist: 620 KB bis
+      // zum Menue, 702 KB beim Start einer Partie. Das Spiel holt seine
+      // Hintergrundbahnen laengst einzeln und wirft ungenutzte wieder weg.
+      var alsApp = (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
+                || navigator.standalone === true;
+      if (alsApp) setTimeout(function () {
         var a = navigator.serviceWorker.controller || reg.active;
         if (a) a.postMessage({ typ: 'vorladen' });
       }, 12000);
