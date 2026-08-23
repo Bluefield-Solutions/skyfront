@@ -62,35 +62,45 @@ Jede hat mindestens eine Runde gekostet.
 2. **Grenzen anteilig, nie absolut.** Eine feste Bildtor-Schwelle von 45 hat
    die Hauptlinie **drei Mal rot gemacht**: auf GitHub misst dieselbe heile
    Szene deutlich hoeher als hier (anderer Chromium, andere Rasterung). Bezug
-   ist jetzt der Modus „Aus", zweimal gemessen.
-3. **Eine Pruefung, die nie etwas meldet, ist kein Beweis.** Jedes Tor hier ist
+   ist jetzt der Modus „Aus", zweimal gemessen. Die Schirmpruefung fiel
+   **danach noch einmal** derselben Falle zum Opfer (Streuung 3 gesetzt,
+   GitHub misst am heilen Menue 4,8); dort ist der Median der acht Schirme
+   der Bezug. Wer hier eine Zahl hinschreibt, hat schon verloren.
+   Ausnahme: eine Notgrenze fuer den Fall, dass ALLES kaputt ist und kein
+   gesunder Bezug mehr existiert — weit weg von allem je Gemessenen.
+3. **Phasers Schleife kann schlafen.** `renderer.snapshot*` loest den Rueckruf
+   am Ende des naechsten Bildes ein. Steht die Schleife (verlorener Fokus auf
+   einem CI-Laeufer), kommt nie eins, und der Aufruf haengt fuer immer. Vor
+   jeder Aufnahme `loop.wake()`. Nachgestellt mit `loop.sleep()`: ohne Wecken
+   haengt es, mit Wecken 922 ms.
+4. **Eine Pruefung, die nie etwas meldet, ist kein Beweis.** Jedes Tor hier ist
    mit einem absichtlich eingebauten Fehler gegengeprobt. Steht das nicht in
    der Commit-Nachricht, ist es nicht passiert.
-4. **Wer eine Wirkung misst, schaltet sie zuerst ab.** Das Bildtor misst „Aus"
+5. **Wer eine Wirkung misst, schaltet sie zuerst ab.** Das Bildtor misst „Aus"
    zweimal; der Abstand beider ist das Rauschen. Liegt kein Modus darueber,
    hat das Tor fuenf Mal dasselbe gemessen und nichts bezeugt — dann schlaegt
    es an.
-5. **Jede Zahl traegt ihre Messstelle mit.** Gemessen woran, in welcher
+6. **Jede Zahl traegt ihre Messstelle mit.** Gemessen woran, in welcher
    Aufloesung, in welcher Umgebung. Vier Fehlmessungen kosteten genau das:
    das Nebelloch am ganzen Bild statt im mittleren Band, der Nachlade-Verkehr
    inklusive meines eigenen Vorladens (9,2 MB behauptet, 702 KB gemessen), die
    Schriftgroesse am Puffer statt am Layoutraum (Faktor zwei), und ein
    Befund aus dem falschen Projekt.
-6. **Der Layoutraum ist 540 x 960, der Puffer 1080 x 1920.** Die Kameras haben
+7. **Der Layoutraum ist 540 x 960, der Puffer 1080 x 1920.** Die Kameras haben
    Zoom 2. `getBounds()` liefert Layoutpunkte. Wer sie mit `renderer.width`
    vergleicht, misst doppelt so gross — das erzeugte einmal 300
    Phantom-Befunde und machte die Randpruefung wirkungslos.
-7. **Kein Tor ersetzt den Blick.** Die Torkette prueft, dass etwas
+8. **Kein Tor ersetzt den Blick.** Die Torkette prueft, dass etwas
    funktioniert, nicht ob es gut aussieht. Der zu schwache HUD-Untergrund
    (Deckkraft 0,46 ueber heller Stadtkulisse) fiel bei keinem Tor auf,
    sondern beim Ansehen einer Aufnahme.
-8. **`src/assets.js` ist auto-generiert.** Ein Eintrag darf **geleert**, aber
+9. **`src/assets.js` ist auto-generiert.** Ein Eintrag darf **geleert**, aber
    nie **entfernt** werden — die Nummern sind Positionen, die `app.js` direkt
    anspringt.
-9. **Schriftboden 13 Layoutpunkte** (9,4 Anzeigepunkte bei 390 px Breite).
+10. **Schriftboden 13 Layoutpunkte** (9,4 Anzeigepunkte bei 390 px Breite).
    Darunter ist auf dem Telefon nichts mehr zu lesen. `npm run schirme`
    meldet jede Unterschreitung.
-10. **`intensity` im Stage-Array ist wirkungslos.** Die echte Schwierigkeit
+11. **`intensity` im Stage-Array ist wirkungslos.** Die echte Schwierigkeit
    steckt in der Wellen-Formel `tn` bzw. der `curve` in `balance.js`.
 
 ---
