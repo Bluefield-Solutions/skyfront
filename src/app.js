@@ -61482,36 +61482,36 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101), h.on("pointerdown", () => this.pauseGame()), this.groundMarks = this.add.graphics().setDepth(13), this.laserGfx = this.add.graphics().setDepth(11).setBlendMode(tt.BlendModes.ADD), this.hud = this.add.graphics().setScrollFactor(0).setDepth(100);
         const f = this.rankInfo();
-        if (this.add.image(34, 38, "pilot").setScrollFactor(0).setDepth(101), this.add.circle(50, 54, 11, 1385526, .96).setStrokeStyle(2, this.planeLvl >= 6 ? 16765498 : 8376575).setScrollFactor(0).setDepth(102), this.add.text(50, 54, String(this.planeLvl), {
+        if (this.add.image(38, 38, "pilot").setScrollFactor(0).setDepth(101), this.add.circle(55, 55, 11, 1385526, .96).setStrokeStyle(2, this.planeLvl >= 6 ? 16765498 : 8376575).setScrollFactor(0).setDepth(102), this.add.text(55, 55, String(this.planeLvl), {
             fontFamily: "sans-serif",
             fontSize: "12px",
             color: "#eaf6ff",
             fontStyle: "bold"
-          }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(68, 12, f.name.toUpperCase(), {
+          }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(77, 16, f.name.toUpperCase(), {
             fontFamily: "sans-serif",
             fontSize: "11px",
             color: "#ffd85a",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(68, 28, "", {
+          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(77, 30, "", {
             fontFamily: "sans-serif",
             fontSize: "17px",
             color: "#dff0ff",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(68, 50, "", {
+          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(77, 54, "", {
             fontFamily: "sans-serif",
             fontSize: "12px",
             color: "#9fe0c2"
-          }).setScrollFactor(0).setDepth(101), this.xpBaseStored = q.planeXp(q.plane()), this.xpLabelText = this.add.text(16, 86, "", {
+          }).setScrollFactor(0).setDepth(101), this.xpBaseStored = q.planeXp(q.plane()), this.xpLabelText = this.add.text(16, 93, "", {
             fontFamily: "sans-serif",
             fontSize: "12px",
             color: "#9fe0c2",
             fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.xpNeedText = this.add.text(214, 86, "", {
+          }).setScrollFactor(0).setDepth(101), this.xpNeedText = this.add.text(214, 93, "", {
             fontFamily: "sans-serif",
             fontSize: "11px",
             color: "#8fb8dc",
             fontStyle: "bold"
-          }).setOrigin(1, 0).setScrollFactor(0).setDepth(101), this.add.rectangle(16, 102, 198, 8, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101), this.xpBarFill = this.add.rectangle(17, 102, 196, 6, 3791242, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102), this.comboText = this.add.text(16, 122, "", {
+          }).setOrigin(1, 0).setScrollFactor(0).setDepth(101), this.add.rectangle(16, 117, 198, 8, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101), this.xpBarFill = this.add.rectangle(17, 117, 196, 6, 3791242, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102), this.comboText = this.add.text(16, 134, "", {
             fontFamily: "sans-serif",
             fontSize: "15px",
             color: "#ffcf5a",
@@ -64396,9 +64396,9 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             l = t[Math.min(x, t.length - 1)];
           this.comboBar.fillStyle(1318956, .85).fillRoundedRect(G - 1, v - 1, I + 2, 7, 3), this.comboBar.fillStyle(l, 1).fillRoundedRect(G, v, Math.max(2, I * b), 5, 2.5)
         }
-        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .46).fillRoundedRect(8, 8, 224, 106, 9);
+        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .46).fillRoundedRect(8, 8, 224, 118, 9);
         const E = this.player ? this.player.hp / this.player.maxHp : 1;
-        if (this.drawAmmoBelt(16, 64, 198, 13, E), this.updateXpHud(), this.objText) {
+        if (this.drawAmmoBelt(16, 74, 198, 13, E), this.updateXpHud(), this.objText) {
           const I = J / 2 - 78,
             G = 38,
             v = 17;
