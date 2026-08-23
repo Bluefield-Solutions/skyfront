@@ -47,8 +47,6 @@
   function ensureUI() {
     if (btn || !document.body) return;
     btn = document.createElement('button'); btn.type = 'button';
-    // bottom:10px lag auf dem iPhone im Home-Indikator. env() ist ohne
-    // Safe-Area 0px, auf dem Schreibtisch aendert sich also nichts.
     btn.style.cssText = 'position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(10px + env(safe-area-inset-bottom));z-index:99999;'
       + 'font:600 13px/1.2 sans-serif;color:#dfe;background:rgba(10,16,26,.72);'
       + 'border:1px solid #2a4c6a;border-radius:10px;padding:8px 10px;'
@@ -68,7 +66,37 @@
       + 'background:rgba(6,10,20,.55);padding:8px 16px;border-radius:12px;'
       + 'opacity:0;transition:opacity .25s;pointer-events:none';
     document.body.appendChild(toast);
+    setzeLage();
+    addEventListener('resize', setzeLage);
+    addEventListener('orientationchange', function () { setTimeout(setzeLage, 300); });
     updateBtn();
+  }
+
+  // Die beiden Knoepfe lagen unten links — und verdeckten dort die
+  // Beschriftung der Faehigkeitsknoepfe. Nachgemessen bei 390x844:
+  // "Dunkelheit: Normal" belegte y 768..796, "EMP" und "STURM" standen bei
+  // y 767..779. Genau uebereinander.
+  //
+  // Das Spiel ist 16:9 hoch, das Telefon ist schmaler. Die Leinwand wird
+  // deshalb auf die Breite eingepasst, und oben bleibt ein schwarzer Balken
+  // ungenutzt: bei 390x844 sind das 113 Bildpunkte. Dort ist Platz fuer
+  // beide Knoepfe, ohne irgendetwas zu verdecken.
+  //
+  // Bleibt der Balken zu schmal — bei einem 16:9-Geraet gibt es keinen —,
+  // gehen sie zurueck nach unten. Dort verdecken sie zwar wieder etwas,
+  // aber ein Knopf ausserhalb des Bildschirms waere schlimmer.
+  function setzeLage() {
+    if (!btn || !btn2) return;
+    var lw = document.querySelector('canvas');
+    var platz = lw ? lw.getBoundingClientRect().top : 0;
+    var obenGenug = platz >= 72;
+    if (obenGenug) {
+      btn.style.bottom = 'auto';  btn.style.top = (platz - 36) + 'px';
+      btn2.style.bottom = 'auto'; btn2.style.top = (platz - 68) + 'px';
+    } else {
+      btn.style.top = 'auto';  btn.style.bottom = 'calc(10px + env(safe-area-inset-bottom))';
+      btn2.style.top = 'auto'; btn2.style.bottom = 'calc(48px + env(safe-area-inset-bottom))';
+    }
   }
   function updateBtn() { if (btn) btn.textContent = 'Modus: ' + MODES[mode]; }
   function updateBtn2(eff) { if (btn2 && SEC[eff]) btn2.textContent = SEC[eff].lab + ': ' + SEC[eff].nm[lvl[eff]]; }
