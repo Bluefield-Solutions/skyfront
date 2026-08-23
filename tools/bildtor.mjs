@@ -8,9 +8,10 @@
 //   1. Harte Querkanten im mittleren Band, je Modifikator-Modus, waehrend die
 //      Maschine hoch und runter gezogen wird. Das ist der Nebelfehler: ein
 //      Bild, das den Schirm nicht deckt, hinterlaesst eine wandernde Kante.
-//   2. Menue und Spiel duerfen keine einfarbige Flaeche sein und muessen in
-//      einem vernuenftigen Helligkeitsband liegen — faengt schwarze Schirme
-//      und nicht dekodierte Bilder.
+//   2. JEDER Schirm darf keine einfarbige Flaeche sein und muss in einem
+//      vernuenftigen Helligkeitsband liegen — faengt schwarze Schirme und
+//      nicht dekodierte Bilder. Bis dahin sah das Tor nur ins Gefecht: ein
+//      Hangar, dessen Kulisse nicht laedt, waere durch alle Tore gefallen.
 //
 // ZWEI MAL BILLIGER GEMACHT, beide Male an einer Messung, nicht an einem
 // Bauchgefuehl. Der Lauf kostete acht Minuten je Push:
@@ -83,6 +84,11 @@ const MODI = [
 ];
 const NMODI = 7;
 
+// Die Menue-Schirme. Sie werden nur angesehen, nicht gespielt: ein Bild je
+// Schirm, gefragt wird nach Helligkeit und Streuung. Gemessen kostet das
+// zusammen 12 Sekunden.
+const SCHIRME = ['Menu', 'Hangar', 'Workshop', 'Arsenal', 'Levels', 'Briefing', 'Loadout', 'Gear'];
+
 if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
 let chromium;
 try { ({ chromium } = await import('playwright')); }
@@ -153,11 +159,35 @@ await seite.waitForTimeout(2500);
 
 const r = await seite.evaluate(() => { const b = window.__game.canvas.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; });
 
-// Menue: darf nicht einfarbig und nicht schwarz sein.
-const menue = await messen(seite, false, false);
-if (menue.streuung < STREUUNG_MIN) befunde.push(`Menü: praktisch einfarbig (Streuung ${menue.streuung}, Grenze ${STREUUNG_MIN})`);
-if (menue.hell < HELL_MIN || menue.hell > HELL_MAX) befunde.push(`Menü: Helligkeit ${menue.hell} ausserhalb ${HELL_MIN}..${HELL_MAX}`);
-console.log(`    Menü       Helligkeit ${menue.hell}  Streuung ${menue.streuung}`);
+// Jeder Schirm: darf nicht einfarbig und nicht schwarz sein. Der Reihe nach
+// aufgerufen, ein Bild je Schirm.
+for (const key of SCHIRME) {
+  if (key !== 'Menu') {
+    const da = await seite.evaluate((key) => {
+      const g = window.__game;
+      if (!g.scene.getScene(key)) return false;
+      g.scene.scenes.forEach(s => { if (s.scene.isActive() && s.scene.key !== key) g.scene.stop(s.scene.key); });
+      g.scene.start(key);
+      return true;
+    }, key);
+    if (!da) { befunde.push(`${key}: Szene fehlt`); continue; }
+    await seite.waitForTimeout(1600);
+  }
+  const m = await messen(seite, false, false);
+  const schlecht = [];
+  if (m.streuung < STREUUNG_MIN) schlecht.push(`praktisch einfarbig (Streuung ${m.streuung}, Grenze ${STREUUNG_MIN})`);
+  if (m.hell < HELL_MIN || m.hell > HELL_MAX) schlecht.push(`Helligkeit ${m.hell} ausserhalb ${HELL_MIN}..${HELL_MAX}`);
+  if (schlecht.length) befunde.push(`${key}: ` + schlecht.join(' · '));
+  console.log(`    ${key.padEnd(10)} Helligkeit ${String(m.hell).padStart(5)}  Streuung ${m.streuung}${schlecht.length ? '  ✗' : ''}`);
+}
+
+// Zurueck ins Menue, von dort geht es ins Gefecht.
+await seite.evaluate(() => {
+  const g = window.__game;
+  g.scene.scenes.forEach(s => { if (s.scene.isActive()) g.scene.stop(s.scene.key); });
+  g.scene.start('Menu');
+});
+await seite.waitForTimeout(2000);
 
 // Ins Spiel. Nicht neun Sekunden blind warten, sondern warten bis die
 // Spielszene laeuft — auf einem langsamen Laeufer war die feste Frist knapp,
