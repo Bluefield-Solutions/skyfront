@@ -214,6 +214,15 @@ Werkzeuge stehen deshalb daneben und verlangen einen Blick:
   nennt. Genau das hat zwei Prüfungen als wirkungslos entlarvt
   (SKY-032) — darunter den alten Violettwert `#8a6cff`, der nur 38 von
   `pu_core` entfernt lag.
+  Das Bildtor hat seit v10 **zwei Wege zum Bild**: Phasers `snapshotArea`
+  (der Bildspeicher, volle Auflösung) und den Bildschirmabzug von Playwright.
+  Der zweite ist nur da, weil der erste am 23.08. auf den GitHub-Läufern ohne
+  Vorwarnung ausfiel — nachgewiesen an einem Commit, der eine Stunde zuvor
+  grün war. Beide benutzen dieselbe Auswertefunktion, liefern aber **nicht
+  dasselbe Bild** (Helligkeit 20,4 gegen 48,4). Der Ersatzweg darf deshalb
+  nur die Menü-Schirme beurteilen, deren Maßstab der Median der acht ist;
+  bei den Querkanten verweigert das Tor das Urteil, statt einen Befund zu
+  erfinden. `node tools/bildtor.mjs --abzug` schaltet den ersten Weg ab.
 - **`npm run schirme`** startet jede der neun Menü-Szenen einzeln und misst
   nach: was ragt aus dem Bild, was liegt übereinander, was ist auf dem Telefon
   zu klein. Überlappungen sind Befund, kleine Schrift nur ein Hinweis.

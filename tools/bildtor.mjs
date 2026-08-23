@@ -108,42 +108,37 @@ if (BILDER) mkdirSync('dist/bildtor', { recursive: true });
 
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 
-// Fragt das Spiel selbst nach seinem Bild und wertet es an Ort und Stelle aus.
+// Fragt das Spiel nach seinem Bild und wertet es an Ort und Stelle aus.
 // Zurueck kommen nur Zahlen — und, wenn verlangt, das heruntergerechnete Bild.
 // nurBand=false nimmt den ganzen Schirm (fuer Helligkeit und Streuung),
 // nurBand=true nur das beurteilte Band (fuer die Querkante).
-// Fasst einmal nach, bevor sie aufgibt. Ein verpasstes Bild ist ein
-// verpasstes Bild, kein Befund am Spiel — zwei verpasste sind einer.
-async function messen(seite, nurBand, mitBild) {
-  for (let versuch = 0; versuch < 2; versuch++) {
-    const m = await rohMessen(seite, nurBand, mitBild);
-    if (!m.fehlt) return m;
-    if (versuch === 0) { console.log(`      (…) Schnappschuss verpasst (${m.zustand}) — noch einmal`); await seite.waitForTimeout(2500); }
-    else return m;
-  }
-}
-
-function rohMessen(seite, nurBand, mitBild) {
-  return seite.evaluate(([nurBand, mitBild, VON, BIS, BREIT]) => new Promise((fertig, scheitern) => {
-    const g = window.__game, W = g.renderer.width, H = g.renderer.height;
-    if (typeof g.renderer.snapshotArea !== 'function') return scheitern(new Error('snapshotArea fehlt'));
-    const von = nurBand ? Math.round(H * VON) : 0;
-    const hoch = nurBand ? Math.round(H * (BIS - VON)) : H;
-    // Phasers Schnappschuss wird am Ende des NAECHSTEN Bildes eingeloest.
-    // Steht die Schleife still, kommt dieses Bild nie — und der Rueckruf
-    // auch nicht. Auf GitHub ist genau das passiert.
-    if (g.loop && g.loop.running === false && g.loop.wake) g.loop.wake();
-    const wecker = setTimeout(() => fertig({
-      fehlt: true,
-      zustand: `Schleife ${g.loop ? (g.loop.running ? 'laeuft' : 'steht') + ', ' + Math.round(g.loop.actualFps) + ' B/s' : '?'}` +
-               `, aktiv: ${g.scene.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key).join('+') || 'keine'}`,
-    }), 25000);
-    g.renderer.snapshotArea(0, von, W, hoch, (bild) => {
-      clearTimeout(wecker);
+//
+// ZWEI WEGE ZUM BILD, und das ist keine Bequemlichkeit.
+//
+// Der erste Weg ist Phasers `snapshotArea`. Er misst, was der Renderer
+// wirklich gezeichnet hat, in voller Aufloesung — die bessere Messstelle.
+// Er hat aber eine Bedingung: der Rueckruf kommt erst am Ende des NAECHSTEN
+// Bildes. Am 23.08. hoerte er auf den GitHub-Laeufern auf zu kommen — nach
+// dem ersten Schirm loeste kein einziger Schnappschuss mehr aus, bei
+// laufender Schleife mit 21 B/s, also nicht aus Zeitmangel. Nachgewiesen,
+// dass es NICHT am Spiel lag: derselbe Commit, der um 21:45 gruen war, fiel
+// um 22:55 identisch durch, mit demselben Chromium und demselben Build.
+//
+// Der zweite Weg ist der Bildschirmabzug von Playwright. Er geht am
+// Renderer vorbei und nimmt, was auf der Seite steht. Er misst in
+// Anzeigeaufloesung, also groeber — aber er kommt.
+//
+// Die AUSWERTUNG ist fuer beide dieselbe Funktion. Zwei Wege zum Bild,
+// eine Rechnung: sonst haette das Tor zwei Massstaebe.
+const MASSFN = `window.__SKF_BILDMASS = (quelle, nurBand, mitBild, VON, BIS, BREIT) =>
+  new Promise((fertig) => {
+    const fertigMachen = (bild, W, H) => {
+      const von = nurBand ? Math.round(H * VON) : 0;
+      const hoch = nurBand ? Math.round(H * (BIS - VON)) : H;
       const hochAus = Math.round(hoch * BREIT / W);
       const c = document.createElement('canvas'); c.width = BREIT; c.height = hochAus;
       const x = c.getContext('2d');
-      x.drawImage(bild, 0, 0, BREIT, hochAus);
+      x.drawImage(bild, 0, von, W, hoch, 0, 0, BREIT, hochAus);
       const px = x.getImageData(0, 0, BREIT, hochAus).data;
       const zeilen = []; let summe = 0, n = 0;
       for (let y = 0; y < hochAus; y++) {
@@ -167,6 +162,98 @@ function rohMessen(seite, nurBand, mitBild) {
         sprung: +sprung.toFixed(1), bei, hell: +mittel.toFixed(1), streuung: +streuung.toFixed(1),
         bild: mitBild ? c.toDataURL('image/png') : null,
       });
+    };
+    if (typeof quelle === 'string') {
+      const im = new Image();
+      im.onload = () => fertigMachen(im, im.width, im.height);
+      im.onerror = () => fertig({ fehlt: true, zustand: 'Bildschirmabzug nicht dekodierbar' });
+      im.src = quelle;
+    } else fertigMachen(quelle, quelle.width, quelle.height);
+  });`;
+
+// Wieviel wurde ueber welchen Weg gemessen? Steht am Ende im Protokoll —
+// eine Zahl ohne ihre Messstelle ist in diesem Verzeichnis kein Beleg.
+const wege = { phaser: 0, abzug: 0, verweigert: 0 };
+
+// WO DER ERSATZWEG URTEILEN DARF — UND WO NICHT.
+//
+// Beide Wege nebeneinander gemessen, dieselbe Datei, derselbe Rechner:
+//
+//                       Phaser (1080)   Abzug (390)
+//     Menue-Helligkeit        20,4          48,4
+//     Median Streuung          6,0          19,1
+//     Nebel-Sprung            27,7          96,3
+//
+// Das ist kein groeberes Bild, das ist ein ANDERES. Phaser liest den
+// Bildspeicher, der Abzug nimmt die fertig zusammengesetzte Seite — andere
+// Farbpipeline. Wer damit dieselbe Grenze anlegt, misst zwei Dinge und
+// nennt sie eins.
+//
+// Entscheidend ist deshalb, WORAUF sich das jeweilige Urteil bezieht:
+//
+//   Die Menue-Schirme werden am MEDIAN DER ACHT gemessen (Streuung >=
+//   Median x 0,35). Das ist massstabsfrei — solange alle acht ueber
+//   denselben Weg kommen, faellt der Faktor heraus. Der Ersatzweg darf hier.
+//
+//   Die Querkanten werden an der Grundlinie "Aus" gemessen, aber das
+//   VERHAELTNIS haelt nicht: Nebel steht bei 0,74 der Grundlinie ueber
+//   Phaser und bei 3,4 ueber den Abzug. Der Ersatzweg darf hier NICHT — er
+//   erzeugt sonst einen Befund, den es nicht gibt. Genau das tat er im
+//   Versuch: „Nebel: harte Querkante 96,3".
+//
+// Fuer die Gegenprobe: `--abzug` schaltet den Phaser-Weg ab.
+const NUR_ABZUG = process.argv.includes('--abzug');
+
+async function messen(seite, nurBand, mitBild, ersatzErlaubt = false) {
+  for (let versuch = 0; versuch < (NUR_ABZUG ? 0 : 2); versuch++) {
+    const m = await rohMessen(seite, nurBand, mitBild);
+    if (!m.fehlt) { wege.phaser++; return { ...m, weg: 'phaser' }; }
+    if (versuch === 0) { console.log(`      (…) Schnappschuss verpasst (${m.zustand}) — noch einmal`); await seite.waitForTimeout(2500); }
+  }
+  if (!ersatzErlaubt) {
+    wege.verweigert++;
+    return { fehlt: true, zustand: 'Phaser gibt kein Bild her, und der Bildschirmabzug darf hier nicht urteilen' };
+  }
+  const ab = await ueberAbzug(seite, nurBand, mitBild);
+  if (!ab.fehlt) { wege.abzug++; console.log('      (…) über den Bildschirmabzug gemessen'); return { ...ab, weg: 'abzug' }; }
+  return ab;
+}
+
+// Der Abzug: Playwright fotografiert die Leinwand, die Seite rechnet mit
+// derselben Funktion wie beim Phaser-Weg.
+async function ueberAbzug(seite, nurBand, mitBild) {
+  try {
+    const el = await seite.$('canvas');
+    if (!el) return { fehlt: true, zustand: 'keine Leinwand gefunden' };
+    const png = await el.screenshot({ type: 'png', timeout: 15000 });
+    const uri = 'data:image/png;base64,' + png.toString('base64');
+    return await seite.evaluate(([uri, nurBand, mitBild, VON, BIS, BREIT]) =>
+      window.__SKF_BILDMASS(uri, nurBand, mitBild, VON, BIS, BREIT),
+      [uri, nurBand, mitBild, BAND_VON, BAND_BIS, MESSBREITE]);
+  } catch (e) {
+    return { fehlt: true, zustand: 'Bildschirmabzug fehlgeschlagen: ' + String(e).slice(0, 80) };
+  }
+}
+
+function rohMessen(seite, nurBand, mitBild) {
+  return seite.evaluate(([nurBand, mitBild, VON, BIS, BREIT]) => new Promise((fertig, scheitern) => {
+    const g = window.__game, W = g.renderer.width, H = g.renderer.height;
+    if (typeof g.renderer.snapshotArea !== 'function') return scheitern(new Error('snapshotArea fehlt'));
+    const von = nurBand ? Math.round(H * VON) : 0;
+    const hoch = nurBand ? Math.round(H * (BIS - VON)) : H;
+    // Phasers Schnappschuss wird am Ende des NAECHSTEN Bildes eingeloest.
+    // Steht die Schleife still, kommt dieses Bild nie — und der Rueckruf
+    // auch nicht. Auf GitHub ist genau das passiert.
+    if (g.loop && g.loop.running === false && g.loop.wake) g.loop.wake();
+    const wecker = setTimeout(() => fertig({
+      fehlt: true,
+      zustand: `Schleife ${g.loop ? (g.loop.running ? 'laeuft' : 'steht') + ', ' + Math.round(g.loop.actualFps) + ' B/s' : '?'}` +
+               `, aktiv: ${g.scene.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key).join('+') || 'keine'}`,
+    }), 12000);
+    g.renderer.snapshotArea(0, von, W, hoch, (bild) => {
+      clearTimeout(wecker);
+      // Der Schnitt ist schon gemacht — die Auswertung bekommt das ganze Bild.
+      window.__SKF_BILDMASS(bild, false, mitBild, VON, BIS, BREIT).then(fertig);
     });
   }), [nurBand, mitBild, BAND_VON, BAND_BIS, MESSBREITE]);
 }
@@ -176,6 +263,7 @@ const gemessen = [];
 
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
 await ctx.addInitScript(`try{localStorage.setItem('skf_mod','0')}catch(e){}`);
+await ctx.addInitScript(MASSFN);
 const seite = await ctx.newPage();
 const fehler = [];
 seite.on('pageerror', e => fehler.push(String(e)));
@@ -211,7 +299,7 @@ for (const key of SCHIRME) {
     if (!steht) { befunde.push(`${key}: Szene startet nicht`); continue; }
     await seite.waitForTimeout(1200);   // Einblendung laeuft aus
   }
-  const m = await messen(seite, false, false);
+  const m = await messen(seite, false, false, true);   // Ersatzweg erlaubt: Urteil am Median der acht
   if (m.fehlt) { befunde.push(`${key}: kein Bild zu bekommen — ${m.zustand}`); continue; }
   schirme.push({ key, ...m });
   console.log(`    ${key.padEnd(10)} Helligkeit ${String(m.hell).padStart(5)}  Streuung ${m.streuung}`);
@@ -276,17 +364,28 @@ for (const [nr, name] of MODI) {
   if (!await imSpiel()) { befunde.push(`${name}: Gefecht vorzeitig beendet — nicht gemessen`); continue; }
 
   let schlimmster = { sprung: 0, bei: -1 }, schlimmstesBild = null, hellSumme = 0, streuSumme = 0;
+  let genommen = 0, fehlend = 0;
   await seite.mouse.move(cx, unten); await seite.mouse.down();
   for (let i = 0; i <= BILDERJEMODUS - 1; i++) {
     const t = i / (BILDERJEMODUS - 1), y = t < 0.5 ? unten + (oben - unten) * (t * 2) : oben + (unten - oben) * ((t - 0.5) * 2);
     await seite.mouse.move(cx, y); await seite.waitForTimeout(90);
-    const m = await messen(seite, true, BILDER);
+    const m = await messen(seite, true, BILDER);   // KEIN Ersatzweg — siehe oben
+    if (m.fehlt) { fehlend++; continue; }
+    genommen++;
     hellSumme += m.hell; streuSumme += m.streuung;
     if (m.sprung > schlimmster.sprung) { schlimmster = { sprung: m.sprung, bei: m.bei }; schlimmstesBild = m.bild; }
   }
   await seite.mouse.up();
 
-  const eintrag = { name, ...schlimmster, hell: +(hellSumme / BILDERJEMODUS).toFixed(1), streuung: +(streuSumme / BILDERJEMODUS).toFixed(1) };
+  // Ein Modus, von dem nicht alle Bilder da sind, ist NICHT gemessen — und
+  // ein Mittelwert aus der Haelfte der Bilder sieht aus wie eine Messung.
+  if (!genommen) {
+    befunde.push(`${name}: kein einziges Bild zu bekommen (${fehlend} verpasst) — Querkante nicht gemessen`);
+    await seite.mouse.up().catch(() => {});
+    continue;
+  }
+  if (fehlend) console.log(`      (…) ${name}: ${fehlend} von ${BILDERJEMODUS} Bildern verpasst, gemittelt über ${genommen}`);
+  const eintrag = { name, ...schlimmster, hell: +(hellSumme / genommen).toFixed(1), streuung: +(streuSumme / genommen).toFixed(1), bilder: genommen };
   gemessen.push(eintrag);
   console.log(`    ${name.padEnd(10)} groesster Sprung ${String(eintrag.sprung).padStart(5)} (y=${eintrag.bei})  Band-Helligkeit ${eintrag.hell}`);
   if (BILDER && schlimmstesBild) writeFileSync(`dist/bildtor/${name.replace(/[^\wÄÖÜäöü]/g, '_')}.png`, Buffer.from(schlimmstesBild.split(',')[1], 'base64'));
@@ -335,4 +434,5 @@ if (befunde.length) {
   befunde.forEach(b => console.error('   · ' + b));
   process.exit(1);
 }
+console.log(`\n  Gemessen: ${wege.phaser}x über Phaser, ${wege.abzug}x über den Bildschirmabzug` + (wege.verweigert ? `, ${wege.verweigert}x gar nicht (Ersatzweg dort nicht zulässig)` : '') + '.');
 console.log('✓ Bildtor bestanden — keine harten Querkanten, Menü nicht einfarbig.');

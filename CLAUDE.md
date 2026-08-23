@@ -251,6 +251,21 @@ Jede hat mindestens eine Runde gekostet.
    gleiche Nachbarn. Sie KONNTE nicht anschlagen. Wer eine Folge
    verdichtet, verdichtet nach der Instanz (`bnr`), nicht nach dem Namen.
 
+32. **Wird die Kette rot, ohne dass sich etwas geaendert hat: den ALTEN
+   Commit noch einmal laufen lassen.** Am 23.08. fiel das Bildtor aus, und
+   der eigene Commit war der einzige Unterschied — dreizehn Zeilen, die den
+   Renderer nicht beruehren. Der Beweis dauerte sieben Minuten: derselbe
+   Commit, der um 21:45 gruen war, fiel um 22:55 identisch durch. Ohne
+   dieses Experiment haette ich stundenlang im eigenen Diff gesucht.
+
+33. **Ein zweiter Messweg ist keine zweite Messstelle.** Phasers
+   `snapshotArea` liest den Bildspeicher, Playwrights Bildschirmabzug nimmt
+   die zusammengesetzte Seite: Helligkeit 20,4 gegen 48,4, Streuung 6,0
+   gegen 19,1. Ein Ersatzweg darf nur dort urteilen, wo das Urteil
+   MASSSTABSFREI ist — die Menue-Schirme messen am Median der acht, das
+   traegt; die Querkanten messen an einer Grundlinie, das traegt nicht. Der
+   erste Anlauf liess ihn ueberall urteilen und erfand eine harte Querkante.
+
 ---
 
 ## Aufbau
