@@ -165,17 +165,41 @@
   }
 
   var GW = 540, GH = 960;
-  function ensureFogHole(gs) {
+
+  // Das Nebelloch muss den Schirm IMMER decken, egal wo die Maschine steht.
+  // Im schlimmsten Fall sitzt sie in einer Ecke, also braucht es den
+  // doppelten Bildschirmdiagonal — plus etwas Luft fuers Pulsieren.
+  var DECKUNG = Math.round(2 * Math.sqrt(GW * GW + GH * GH) * 1.06);
+
+  // Frueher wurde das Bild in Sichtweite-Groesse gezeigt (540 * 1,85 bis 3,05)
+  // und deckte den Schirm damit nicht. Wo es endete, sprang die Deckkraft von
+  // 0,96 auf den Grundnebel darunter — eine harte Kante, die beim Steigen und
+  // Sinken durchs Bild wanderte. Genau das war der "weisse Balken".
+  // Nachgemessen bei Sicht "Normal": Bild 1296 breit, Maschine bei y=749, also
+  // von 101 bis 1397 — die obersten 101 Punkte blieben unbedeckt. In 17 von 17
+  // Bildern eines Zuges hoch und runter fand sich ein Helligkeitssprung von
+  // 140 bis 180 Stufen.
+  //
+  // Jetzt deckt das Bild immer, und die Sichtweite steckt stattdessen in den
+  // Radien des Verlaufs. Sie werden auf die neue Bildgroesse umgerechnet,
+  // damit der freie Kreis genau so gross bleibt wie vorher.
+  function ensureFogHole(gs, stufe) {
     try {
-      if (gs.textures.exists('skf_fog_hole')) return true;
+      var name = 'skf_fog_hole_' + stufe;
+      if (gs.textures.exists(name)) return name;
+      var frueher = GW * SEC[4].fog[stufe];      // die frühere Bildgroesse
+      var umrechnung = frueher / DECKUNG;
       var S = 512, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
       var c = cv.getContext('2d');
-      var g = c.createRadialGradient(S / 2, S / 2, S * 0.12, S / 2, S / 2, S * 0.5);
+      var g = c.createRadialGradient(S / 2, S / 2, S * 0.12 * umrechnung,
+                                     S / 2, S / 2, S * 0.5 * umrechnung);
       g.addColorStop(0.0, 'rgba(200,208,220,0)'); g.addColorStop(0.55, 'rgba(200,208,220,0.20)');
       g.addColorStop(0.85, 'rgba(198,206,220,0.75)'); g.addColorStop(1.0, 'rgba(196,204,218,0.96)');
+      // Ausserhalb des aeusseren Radius fuellt der Verlauf mit der letzten
+      // Farbe weiter — die ganze Flaeche wird also deckend.
       c.fillStyle = g; c.fillRect(0, 0, S, S);
-      gs.textures.addCanvas('skf_fog_hole', cv); return true;
-    } catch (e) { return false; }
+      gs.textures.addCanvas(name, cv); return name;
+    } catch (e) { return null; }
   }
 
   function applySec(gs, eff) {
@@ -240,10 +264,11 @@
     } else if (eff === 4) {
       tile('fog', 0.5, 120, null);
       var haze = tile('fog', 0.28, 121, null); if (haze) haze.__skfScroll = 0.5;
-      if (ensureFogHole(gs)) {
-        var hole = gs.add.image(GW / 2, GH * 0.78, 'skf_fog_hole').setDepth(123).setScrollFactor(0);
-        hole.setDisplaySize(GW * SEC[4].fog[lvl[4]], GW * SEC[4].fog[lvl[4]]);
-        hole.__skfHole = true; made.push(hole);
+      var lochName = ensureFogHole(gs, lvl[4]);
+      if (lochName) {
+        var hole = gs.add.image(GW / 2, GH * 0.78, lochName).setDepth(123).setScrollFactor(0);
+        hole.setDisplaySize(DECKUNG, DECKUNG);
+        hole.__skfHole = true; hole.__skfStufe = lvl[4]; made.push(hole);
       }
     }
     gs.__skf = made; gs.__skfEff = eff;
@@ -286,7 +311,16 @@
             else if (o.__skfRain) { o.tilePositionY -= 22; o.tilePositionX -= 6; }
             else if (o.__skfGust) { o.tilePositionX -= 3.2; o.tilePositionY -= 0.6; }
             else if (o.__skfSun) { o.setAlpha(0.26 + Math.sin(now * 0.0016) * 0.06); }
-            else if (o.__skfHole) { o.setPosition(px, py); var f = GW * SEC[4].fog[lvl[4]] * (1 + Math.sin(now * 0.0016) * 0.025); o.setDisplaySize(f, f); }
+            else if (o.__skfHole) {
+              // Sicht umgestellt? Dann die passende Textur nachziehen.
+              if (o.__skfStufe !== lvl[4]) {
+                var neuName = ensureFogHole(gs, lvl[4]);
+                if (neuName) { o.setTexture(neuName); o.__skfStufe = lvl[4]; }
+              }
+              o.setPosition(px, py);
+              var f = DECKUNG * (1 + Math.sin(now * 0.0016) * 0.025);
+              o.setDisplaySize(f, f);
+            }
             else if (o.__skfScroll) { o.tilePositionY -= o.__skfScroll * 4; }
           }
           if (now >= (gs.__skfNextBolt || 0)) {
