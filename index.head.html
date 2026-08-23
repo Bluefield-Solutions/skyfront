@@ -44,6 +44,28 @@
       background:rgba(120,180,220,.16);overflow:hidden}
     #splash .balken i{display:block;height:100%;width:0;border-radius:2px;
       background:linear-gradient(90deg,#4fb6e8,#ffcf6a);transition:width .28s ease}
+    /* ---- Messtafel (SKY-008) --------------------------------------------
+       Alle Leistungszahlen dieses Projekts stammten bisher aus SwiftShader,
+       also aus einer Software-Rasterung ohne Grafikkarte. Was das Telefon
+       wirklich leistet, wusste niemand. Diese Tafel misst auf dem Geraet.
+       Sie haengt bewusst in der HUELLE, nicht im Spiel: sie ueberlebt auch
+       einen Absturz des Spiels und misst die echte Bildfolge, nicht Phasers
+       geglaetteten Wert.
+       Aufrufen: Adresse mit #messung, oder drei Mal in die obere rechte Ecke
+       tippen (fuer die App auf dem Startbildschirm, wo es keine Adresszeile
+       gibt). Nochmal drei Mal tippen schliesst sie. */
+    #messung{position:fixed;left:0;right:0;bottom:0;z-index:9500;display:none;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(6,12,20,.93);border-top:1px solid #2a4c6a;
+      color:#cfe6f5;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+      white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    #messung.an{display:block}
+    #messung b{color:#ffd23a;font-weight:600}
+    #messung .warn{color:#ff8a6a}
+    #messung .gut{color:#8fe0b0}
+    #messung .knopf{display:inline-block;margin-top:8px;padding:5px 12px;
+      border:1px solid #2a4c6a;border-radius:7px;color:#9fe3ff;
+      background:rgba(20,40,60,.7);pointer-events:auto;cursor:pointer}
     @keyframes sffloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
     @keyframes sfpulse{0%,100%{opacity:.35}50%{opacity:1}}
   </style>
@@ -95,5 +117,112 @@
           }).observe(zeile, { childList: true, characterData: true, subtree: true });
         }
       } catch (e) {}
+    })();
+  </script>
+
+  <div id="messung"></div>
+  <script>
+    // Messtafel — misst die ECHTE Bildfolge auf dem Geraet, unabhaengig vom
+    // Spiel und unabhaengig von Phasers Glaettung.
+    (function () {
+      var tafel = document.getElementById('messung');
+      if (!tafel) return;
+      var an = false, tipps = 0, letzterTipp = 0;
+      var proben = [], vorher = 0, start = 0;
+      var laengste = 0, laengsteBei = 0, letzte5 = [];
+      var bilder = 0;
+
+      function anzeigen(zustand) {
+        an = zustand;
+        tafel.className = an ? 'an' : '';
+        if (an) { zuruecksetzen(); zeichnen(); }
+      }
+      function zuruecksetzen() {
+        proben.length = 0; letzte5.length = 0;
+        laengste = 0; laengsteBei = 0; bilder = 0;
+        start = performance.now(); vorher = 0;
+      }
+      // Kein eigenes Element als Fangflaeche: auf einem 16:9-Geraet laege sie
+      // genau ueber Pause- und Tonknopf und wuerde deren Tipps schlucken.
+      // Stattdessen nur MITHOEREN, nie abfangen — vier schnelle Tipps in die
+      // obere rechte Ecke. Vier statt drei, damit ein hektisches Pausieren die
+      // Tafel nicht versehentlich aufzieht.
+      window.addEventListener('pointerdown', function (e) {
+        if (e.clientX < innerWidth - 56 || e.clientY > 56) { tipps = 0; return; }
+        var jetzt = Date.now();
+        // Zwei Sekunden je Tipp, nicht 1,2: auf einem stotternden Geraet
+        // kommen vier Tipps nicht schneller an. Gemessen in der langsamen
+        // Pruefumgebung: 1,4 s Abstand, obwohl 0,15 s angefordert waren.
+        tipps = (jetzt - letzterTipp < 2000) ? tipps + 1 : 1;
+        letzterTipp = jetzt;
+        if (tipps >= 4) { tipps = 0; anzeigen(!an); }
+      }, true);
+      tafel.addEventListener('pointerdown', function (e) {
+        if (e.target && e.target.className === 'knopf') { zuruecksetzen(); e.preventDefault(); }
+      }, { passive: false });
+      if ((location.hash || '').indexOf('messung') >= 0) anzeigen(true);
+
+      function p(feld, anteil) {
+        if (!feld.length) return 0;
+        var k = feld.slice().sort(function (a, b) { return a - b; });
+        return k[Math.min(k.length - 1, Math.floor(k.length * anteil))];
+      }
+      function zahl(x, n) { return (Math.round(x * Math.pow(10, n || 1)) / Math.pow(10, n || 1)).toFixed(n || 1); }
+
+      function schleife(t) {
+        requestAnimationFrame(schleife);
+        if (!an) { vorher = t; return; }
+        if (vorher) {
+          var d = t - vorher;
+          bilder++;
+          if (proben.push(d) > 400) proben.shift();
+          letzte5.push([t, d]);
+          while (letzte5.length && t - letzte5[0][0] > 5000) letzte5.shift();
+          if (d > laengste) { laengste = d; laengsteBei = Math.round((t - start) / 100) / 10; }
+        }
+        vorher = t;
+        if (bilder % 12 === 0) zeichnen();
+      }
+      requestAnimationFrame(schleife);
+
+      function zeichnen() {
+        var med = p(proben, 0.5), p95 = p(proben, 0.95);
+        var l5 = 0; for (var i = 0; i < letzte5.length; i++) if (letzte5[i][1] > l5) l5 = letzte5[i][1];
+        var hz = med > 0 ? 1000 / med : 0;
+        var takt = hz > 100 ? 120 : hz > 75 ? 90 : hz > 45 ? 60 : Math.round(hz);
+        var lauf = (performance.now() - start) / 1000;
+        var g = window.__game, s = null;
+        try { s = g && g.scene && g.scene.getScene && g.scene.getScene('Game'); } catch (e) {}
+        var imSpiel = s && s.scene && s.scene.isActive && s.scene.isActive();
+
+        function kl(wert, warn) { return wert > warn ? 'warn' : 'gut'; }
+        var z = [];
+        z.push('<b>MESSTAFEL</b>   ' + zahl(lauf, 0) + ' s   ' + bilder + ' Bilder');
+        z.push('Bildrate      <b>' + zahl(1000 / (med || 1), 0) + '</b>/s   Anzeige ~' + takt + ' Hz');
+        z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, 1000 / takt * 1.6) + '">' + zahl(p95) + '</span> ms');
+        z.push('Laengste      <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms bei ' + laengsteBei + ' s   ·   5 s: <span class="' + kl(l5, 50) + '">' + zahl(l5) + '</span> ms');
+        if (g && g.loop) {
+          z.push('Phaser        geglaettet ' + zahl(g.loop.delta) + ' ms   roh ' + zahl(g.loop.rawDelta || 0) + ' ms');
+        }
+        if (imSpiel) {
+          try {
+            var ak = function (gr) { return gr.countActive(true) + '/' + gr.getLength(); };
+            z.push('Objekte       Bild ' + s.children.list.length + '   Gegner ' + ak(s.enemies) + '   Kugeln ' + ak(s.bullets) + ' / ' + ak(s.enemyBullets));
+            z.push('Budget        Q ' + s.qBudget.toFixed(2) + '   fx ' + s.fxActive + '/' + s.fxPool.length + '   Tests ' + s.hitTests);
+          } catch (e) {}
+        }
+        if (g && g.textures) {
+          var mb = 0, n = 0;
+          try {
+            for (var k in g.textures.list) { var q = g.textures.list[k].source[0]; if (q) { mb += q.width * q.height * 4; n++; } }
+          } catch (e) {}
+          z.push('Texturen      ' + n + ' Stueck   ' + zahl(mb / 1048576, 0) + ' MB');
+        }
+        var c = g && g.canvas;
+        z.push('Geraet        ' + Math.round(innerWidth) + '×' + Math.round(innerHeight) + ' @ ' + (window.devicePixelRatio || 1) + 'x' +
+               (c ? '   Puffer ' + c.width + '×' + c.height : ''));
+        z.push('<span class="knopf">Zuruecksetzen</span>');
+        tafel.innerHTML = z.join('\n');
+      }
     })();
   </script>

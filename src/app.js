@@ -64048,6 +64048,19 @@ ${n}` : "", {
       trailGate(R) {
         return R / Math.max(.34, this.qBudget)
       }
+      echteBildzeit() {
+        // Phaser GLAETTET loop.delta. Gemessen im selben Moment: delta 16,7 ms
+        // bei rawDelta 350 ms. Wer mit delta misst, sieht nie einen Ruckler —
+        // der Bericht meldete p50 = p95 = schlimmste = 16,7 bei einem Bild von
+        // 350 ms. Fuer MESSUNGEN also immer rawDelta.
+        //
+        // Fuer BEWEGUNG bleibt es bei delta: die Gegner laufen ueber die
+        // Arcade-Physik, und die rechnet mit dem geglaetteten Wert. Wer die
+        // Welt mit rawDelta bewegte, holte sich genau die Entkopplung zurueck,
+        // die er gerade beseitigt hat.
+        const R = this.game.loop;
+        return R.rawDelta != null && R.rawDelta > 0 ? R.rawDelta : R.delta;
+      }
       trimPools(R) {
         R - this.lastPoolTrim < 4e3 || this.boss && this.boss.active || this.enemies.countActive(!0) > 2 || (this.lastPoolTrim = R, this.trimGroup(this.bullets, 48, 16), this.trimGroup(this.enemyBullets, 48, 16), this.trimGroup(this.enemies, 20, 6), this.trimGroup(this.powerups, 10, 4), this.trimArrayPool(this.fxPool, 120, 24), this.trimArrayPool(this.txtPool, 60, 12))
       }
@@ -64136,7 +64149,7 @@ ${n}` : "", {
           b = this.frameMs.slice().sort((v, x) => v - x),
           I = v => b.length ? b[Math.min(b.length - 1, Math.floor(b.length * v))].toFixed(1) : "—",
           G = [];
-        G.push("Skyfront – Performance-Report"), G.push("Level/Modus: " + (this.endless ? "Endlos" : "Level " + this.levelNum()) + "  ·  Grad: " + (this.runDiff || q.difficulty())), G.push("Spielzeit im Sektor: " + Math.round((this.time.now - this.stageStart) / 100) / 10 + " s"), G.push(""), G.push("FPS (geglättet): " + Math.round(this.fpsEma)), G.push("Effekt-Budget: " + R.toFixed(2) + " (" + (this.fxAuto ? "auto" : "fix") + ":" + E + ")  ·  fxCap " + this.fxCap + "  txtCap " + this.txtCap), G.push("Frame-Zeit jetzt: " + this.game.loop.delta.toFixed(1) + " ms"), G.push("Frame-Zeit p50/p95 (letzte " + b.length + "): " + I(.5) + " / " + I(.95) + " ms"), G.push("Schlechteste Frame-Zeit: " + this.worstMs.toFixed(1) + " ms  (bei " + this.worstMsAt + " s)"), G.push("Frames über 33 ms (<30 FPS): " + this.slowFrames), G.push(""), G.push("Spitzenlast: Geschosse " + this.peakPB + "  ·  Gegner-Geschosse " + this.peakEB + "  ·  Gegner " + this.peakEN), G.push("Treffertests/Frame – Spitze: " + this.peakTests + "  ·  letzter Frame: " + this.hitTests), G.push("Aktive Pools: PB " + this.bullets.getLength() + "  EB " + this.enemyBullets.getLength() + "  EN " + this.enemies.getLength() + "  fx " + this.fxPool.length + "  tx " + this.txtPool.length), G.push("Effekt-Atlas aktiv: " + (this.fxAtlasReady ? "ja" : "nein"));
+        G.push("Skyfront – Performance-Report"), G.push("Level/Modus: " + (this.endless ? "Endlos" : "Level " + this.levelNum()) + "  ·  Grad: " + (this.runDiff || q.difficulty())), G.push("Spielzeit im Sektor: " + Math.round((this.time.now - this.stageStart) / 100) / 10 + " s"), G.push(""), G.push("FPS (geglättet): " + Math.round(this.fpsEma)), G.push("Effekt-Budget: " + R.toFixed(2) + " (" + (this.fxAuto ? "auto" : "fix") + ":" + E + ")  ·  fxCap " + this.fxCap + "  txtCap " + this.txtCap), G.push("Frame-Zeit jetzt (roh): " + this.echteBildzeit().toFixed(1) + " ms  ·  geglaettet " + this.game.loop.delta.toFixed(1) + " ms"), G.push("Frame-Zeit p50/p95 (letzte " + b.length + "): " + I(.5) + " / " + I(.95) + " ms"), G.push("Schlechteste Frame-Zeit: " + this.worstMs.toFixed(1) + " ms  (bei " + this.worstMsAt + " s)"), G.push("Frames über 33 ms (<30 FPS): " + this.slowFrames), G.push(""), G.push("Spitzenlast: Geschosse " + this.peakPB + "  ·  Gegner-Geschosse " + this.peakEB + "  ·  Gegner " + this.peakEN), G.push("Treffertests/Frame – Spitze: " + this.peakTests + "  ·  letzter Frame: " + this.hitTests), G.push("Aktive Pools: PB " + this.bullets.getLength() + "  EB " + this.enemyBullets.getLength() + "  EN " + this.enemies.getLength() + "  fx " + this.fxPool.length + "  tx " + this.txtPool.length), G.push("Effekt-Atlas aktiv: " + (this.fxAtlasReady ? "ja" : "nein"));
         try {
           const v = window.__bootStats;
           v && G.push("Boot: Menü nach " + v.toMenuMs + " ms" + (v.totalMs ? ", Assets komplett nach " + v.totalMs + " ms" : ""))
@@ -64170,7 +64183,7 @@ ${n}` : "", {
         const R = this.qBudget,
           E = R >= .8 ? "hoch" : R >= .5 ? "mittel" : "niedrig",
           b = v => `${v.countActive(!0)}/${v.getLength()}`,
-          I = this.game.loop.delta,
+          I = this.echteBildzeit(),
           G = this.frameMs.length ? Math.max(...this.frameMs) : I;
         this.dbgText.setText(`FPS ${Math.round(this.fpsEma)}  dt ${I.toFixed(1)}ms (max ${G.toFixed(1)})
 Q ${R.toFixed(2)} ${this.fxAuto?"(auto:"+E+")":"(fix:"+E+")"}  fxCap ${this.fxCap}  txtCap ${this.txtCap}
@@ -64541,7 +64554,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
           }
         }
         this.trimPools(b), this.player.update(b), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
-        const I = this.game.loop.delta;
+        const I = this.echteBildzeit();
         I > this.worstMs && (this.worstMs = I, this.worstMsAt = Math.round((b - this.stageStart) / 100) / 10), I > 33 && this.slowFrames++;
         const G = this.bullets.countActive(!0),
           v = this.enemyBullets.countActive(!0),
