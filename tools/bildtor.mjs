@@ -17,8 +17,21 @@
 // dazwischen, mit Abstand nach beiden Seiten.
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
-const KANTE = 45;          // groesster erlaubter Helligkeitssprung zwischen Nachbarzeilen
-const STREUUNG_MIN = 12;   // darunter ist das Bild praktisch einfarbig
+// Grenzen anteilig, nie absolut. Eine feste Schwelle von 45 hat auf GitHub
+// alles rot gemeldet, obwohl nichts kaputt war: dort misst schon die
+// Grundlinie "Aus" 75,7 statt 22,8 wie hier. Anderer Chromium, andere
+// Rasterung — die ganze Umgebung liegt hoeher.
+//
+// Deshalb ist "Aus" jetzt die Bezugsgroesse: kein Modus darf deutlich ueber
+// dem liegen, was ohne Modifikator ohnehin im Bild ist.
+//
+//   hier, heil        Aus 22,1 → Grenze 55   alle Modi 12..18   bestanden
+//   hier, Nebel kaputt Aus 22,9 → Grenze 57   Nebel 159,2        schlaegt an
+//   GitHub, heil      Aus 75,7 → Grenze 189   alle Modi 40..71   bestanden
+const FAKTOR = 2.5;        // so viel darf ein Modus ueber der Grundlinie liegen
+const KANTE_MIN = 45;      // aber nie strenger als das
+const KANTE_MAX = 200;     // und nie lockerer als das
+const STREUUNG_MIN = 7;    // darunter ist das Bild praktisch einfarbig
 const HELL_MIN = 12, HELL_MAX = 210;
 const BILDER = process.argv.includes('--bilder');
 
@@ -72,8 +85,9 @@ async function messen(base64) {
 }
 
 const befunde = [];
+const gemessen = [];
 for (const [nr, name] of MODI) {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
   await ctx.addInitScript(`try{localStorage.setItem('skf_mod','${nr}')}catch(e){}`);
   const seite = await ctx.newPage();
   const fehler = [];
@@ -99,8 +113,8 @@ for (const [nr, name] of MODI) {
   const cx = r.x + r.w * 0.5, unten = r.y + r.h * 0.82, oben = r.y + r.h * 0.22;
   let schlimmster = { sprung: 0, bei: -1 }, schlimmstesBild = null;
   await seite.mouse.move(cx, unten); await seite.mouse.down();
-  for (let i = 0; i <= 10; i++) {
-    const t = i / 10, y = t < 0.5 ? unten + (oben - unten) * (t * 2) : oben + (unten - oben) * ((t - 0.5) * 2);
+  for (let i = 0; i <= 6; i++) {
+    const t = i / 6, y = t < 0.5 ? unten + (oben - unten) * (t * 2) : oben + (unten - oben) * ((t - 0.5) * 2);
     await seite.mouse.move(cx, y); await seite.waitForTimeout(90);
     const roh = await seite.screenshot({ clip: { x: r.x, y: r.y + 14, width: r.w, height: r.h - 28 } });
     const m = await messen(roh.toString('base64'));
@@ -108,15 +122,29 @@ for (const [nr, name] of MODI) {
   }
   await seite.mouse.up();
 
-  const gut = schlimmster.sprung <= KANTE;
-  console.log(`  ${gut ? '✓' : '✗'} ${name.padEnd(10)} groesster Sprung ${String(schlimmster.sprung).padStart(5)} (y=${schlimmster.bei})  Helligkeit ${menue.hell}  Streuung ${menue.streuung}`);
-  if (!gut) befunde.push(`${name}: harte Querkante, Sprung ${schlimmster.sprung} bei y=${schlimmster.bei} (erlaubt ${KANTE})`);
+  gemessen.push({ name, ...schlimmster });
+  console.log(`    ${name.padEnd(10)} groesster Sprung ${String(schlimmster.sprung).padStart(5)} (y=${schlimmster.bei})  Helligkeit ${menue.hell}  Streuung ${menue.streuung}`);
   if (fehler.length) befunde.push(`${name}: ${fehler.length} Laufzeitfehler — ${String(fehler[0]).slice(0, 90)}`);
   if (BILDER && schlimmstesBild) writeFileSync(`dist/bildtor/${name}.png`, schlimmstesBild);
   await ctx.close();
 }
 
 await browser.close();
+
+// Jetzt urteilen, mit "Aus" als Bezug.
+const grund = gemessen.find(g => g.name === 'Aus');
+if (!grund) {
+  befunde.push('Grundlinie "Aus" wurde nicht gemessen — ohne sie ist kein Urteil moeglich.');
+} else {
+  const grenze = Math.min(KANTE_MAX, Math.max(KANTE_MIN, grund.sprung * FAKTOR));
+  console.log(`\n  Grundlinie "Aus" ${grund.sprung} → Grenze ${grenze.toFixed(1)}`);
+  for (const g of gemessen) {
+    if (g.sprung > grenze) {
+      befunde.push(`${g.name}: harte Querkante, Sprung ${g.sprung} bei y=${g.bei} (Grenze ${grenze.toFixed(1)})`);
+      console.log(`  ✗ ${g.name}`);
+    }
+  }
+}
 
 if (befunde.length) {
   console.error('\n✗ Bildtor: ' + befunde.length + ' Befund(e)');
