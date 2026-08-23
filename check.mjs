@@ -6,6 +6,7 @@
 //  Struktur-Prüfung — dann kann der Check keine Laufzeitfehler finden.)
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, rmSync } from 'fs';
+import { ladeChromium, startbar } from './tools/boot.mjs';
 
 function step(label, cmd) { console.log(`\n▶ ${label}`); execSync(cmd, { stdio: 'inherit' }); }
 
@@ -16,12 +17,32 @@ try {
   step('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch { ok = false; }
 
+// Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
+// die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
+let masterZeile = '';
+if (ok) {
+  const chromium = await ladeChromium();
+  if (!chromium) {
+    masterZeile = '| `Skyfront.html` (Master) | ⚪ nicht getestet | – |\n';
+    console.log('\n  (—) Master-Boot: Playwright nicht gefunden.');
+  } else {
+    console.log('\n▶ Boot-Test Master');
+    const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
+    const r = await startbar(browser, process.cwd() + '/dist/Skyfront.html');
+    await browser.close();
+    console.log(`  ${r.gestartet ? '✓' : '✗'} Skyfront.html — ${r.gestartet ? 'gestartet, 0 Fehler' : 'Boot fehlgeschlagen (' + r.fehler.length + ' Fehler)'}`);
+    r.fehler.slice(0, 3).forEach(f => console.log('     ! ' + String(f).slice(0, 160)));
+    ok = ok && r.gestartet;
+    masterZeile = `| \`Skyfront.html\` (Master) | ${r.gestartet ? '✅ gestartet' : '❌ Boot-Fehler'} | ${r.fehler.length} |\n`;
+  }
+}
+
 const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Variante | Status | Fehler |\n|---|:--:|:--:|\n';
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');
