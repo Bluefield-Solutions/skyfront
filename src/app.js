@@ -54762,6 +54762,7 @@ return new ` + this.key + `();
   }
   const Ke = {
     scout: {
+      rolle: "schwarm",
       hp: 2,
       speed: 200,
       scale: .46,
@@ -54775,6 +54776,7 @@ return new ` + this.key + `();
       role: "Späher"
     },
     grunt: {
+      rolle: "schwarm",
       hp: 3,
       speed: 130,
       scale: .34,
@@ -54788,6 +54790,7 @@ return new ` + this.key + `();
       bullet: "orb"
     },
     weaver: {
+      rolle: "schwarm",
       hp: 6,
       speed: 176,
       scale: .5,
@@ -54801,6 +54804,7 @@ return new ` + this.key + `();
       bullet: "bolt"
     },
     kamikaze: {
+      rolle: "stuerzer",
       hp: 3,
       speed: 260,
       scale: .66,
@@ -54813,6 +54817,7 @@ return new ` + this.key + `();
       role: "Sturzflieger"
     },
     bomber: {
+      rolle: "panzer",
       hp: 21,
       speed: 60,
       scale: .62,
@@ -54826,6 +54831,7 @@ return new ` + this.key + `();
       bullet: "ring"
     },
     gunship: {
+      rolle: "panzer",
       hp: 29,
       speed: 46,
       scale: .66,
@@ -54839,6 +54845,7 @@ return new ` + this.key + `();
       bullet: "dart"
     },
     rocketeer: {
+      rolle: "schuetze",
       hp: 8,
       speed: 92,
       scale: .56,
@@ -54851,6 +54858,7 @@ return new ` + this.key + `();
       role: "Raketenschütze"
     },
     elite: {
+      rolle: "panzer",
       hp: 50,
       speed: 54,
       scale: 1.35,
@@ -54864,6 +54872,7 @@ return new ` + this.key + `();
       bullet: "diamond"
     },
     strafer: {
+      rolle: "stuerzer",
       hp: 4,
       speed: 228,
       scale: .44,
@@ -54877,6 +54886,7 @@ return new ` + this.key + `();
       bullet: "wave"
     },
     arcer: {
+      rolle: "schuetze",
       hp: 14,
       speed: 70,
       scale: .6,
@@ -54890,6 +54900,7 @@ return new ` + this.key + `();
       bullet: "star"
     },
     sniper: {
+      rolle: "schuetze",
       hp: 9,
       speed: 84,
       scale: .5,
@@ -54903,6 +54914,7 @@ return new ` + this.key + `();
       bullet: "needle"
     },
     carrier: {
+      rolle: "panzer",
       hp: 62,
       speed: 40,
       scale: 1.18,
@@ -54917,6 +54929,7 @@ return new ` + this.key + `();
       bullet: "flame"
     },
     rotor: {
+      rolle: "panzer",
       hp: 90,
       speed: 60,
       scale: .95,
@@ -56382,55 +56395,166 @@ return new ` + this.key + `();
   const Ti = ["row", "vWedge", "arc", "sideSweep", "stream"],
     _s = ["bomber", "elite", "gunship", "rocketeer", "carrier"];
 
+  /* SKY-030 — Begegnungen statt Generator.
+
+     Vorher erzeugte diese Funktion 34 bis 89 Wellen aus einer Formel:
+     Gegnerart reihum aus dem Pool (`R[x % R.length]`), Formation reihum aus
+     der Liste (`Ti[(x + T) % Ti.length]`), Anzahl waechst mit dem Sektor.
+     Alle 120 Sektoren teilten sich diese eine Formel. Was dabei nicht
+     entstehen kann: Rhythmus, Wiedererkennung, ein Moment zum Luftholen.
+
+     Jetzt gibt es zwoelf BAUSTEINE — jeder eine Idee, die man wiedererkennt,
+     mit einem Druckwert. Ein Sektor wird gefuellt, indem eine Druckkurve
+     abgelaufen wird: Anstieg, zwei Atemzuege, Spitze am Ende.
+
+     Die Bausteine nennen ROLLEN, keine Gegnerarten. Sonst wuerde jeder
+     Baustein nur in den Sektoren funktionieren, deren Pool zufaellig die
+     richtigen Arten enthaelt — und ein spaeterer Pool haette gar keinen.
+     Welche Art eine Rolle ausfuellt, entscheidet der Pool des Sektors.  */
+  const Bausteine = [{
+    name: "Aufmarsch",
+    druck: 1,
+    teile: [{ rolle: "schwarm", n: 8, form: "row", nach: 0 }]
+  }, {
+    name: "Keil",
+    druck: 2,
+    teile: [{ rolle: "schwarm", n: 9, form: "vWedge", nach: 0 }]
+  }, {
+    name: "Zange",
+    druck: 3,
+    teile: [{ rolle: "schwarm", n: 5, form: "sideSweep", nach: 0 }, { rolle: "schwarm", n: 5, form: "sideSweep", nach: 700 }]
+  }, {
+    name: "Sperrfeuer",
+    druck: 3,
+    teile: [{ rolle: "schuetze", n: 3, form: "arc", nach: 0 }]
+  }, {
+    name: "Sturzwelle",
+    druck: 4,
+    teile: [{ rolle: "stuerzer", n: 4, form: "stream", nach: 0 }]
+  }, {
+    name: "Deckung",
+    druck: 5,
+    teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schwarm", n: 5, form: "row", nach: 900 }]
+  }, {
+    name: "Kreuzfeuer",
+    druck: 5,
+    teile: [{ rolle: "schuetze", n: 2, form: "sideSweep", nach: 0 }, { rolle: "schuetze", n: 2, form: "sideSweep", nach: 600 }]
+  }, {
+    name: "Kette",
+    druck: 6,
+    teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "panzer", n: 1, form: "single", nach: 1100 }]
+  }, {
+    name: "Hetze",
+    druck: 6,
+    teile: [{ rolle: "stuerzer", n: 3, form: "stream", nach: 0 }, { rolle: "schwarm", n: 6, form: "row", nach: 500 }]
+  }, {
+    name: "Wand",
+    druck: 7,
+    teile: [{ rolle: "schuetze", n: 4, form: "row", nach: 0 }, { rolle: "schwarm", n: 8, form: "arc", nach: 800 }]
+  }, {
+    name: "Eskorte",
+    druck: 8,
+    teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schuetze", n: 2, form: "vWedge", nach: 400 }, { rolle: "schwarm", n: 4, form: "row", nach: 900 }]
+  }, {
+    name: "Ansturm",
+    druck: 9,
+    teile: [{ rolle: "stuerzer", n: 5, form: "stream", nach: 0 }, { rolle: "panzer", n: 1, form: "single", nach: 600 }, { rolle: "schwarm", n: 6, form: "vWedge", nach: 1200 }]
+  }];
+
+  // WIE VIELE auf einmal kommen, entscheidet die GROESSENKLASSE des Gegners,
+  // nicht die Rolle, die er gerade vertritt. Das `n` im Baustein sagt nur, wie
+  // schwer der Teil im Verhaeltnis zu seiner Rolle wiegt.
+  //
+  // Zwei Anlaeufe haben das gekostet. Sektor 11 hat weder Panzer noch
+  // Schuetzen im Pool; ein Baustein mit "Panzer 1" bekam dort einen einzelnen
+  // Schwarmgegner, und der Sektor fiel auf 57 % der alten Gegnerzahl. Der
+  // erste Versuch — Verhaeltnis der Gruppengroessen — machte es schlimmer:
+  // Sektoren ohne Schwarmgegner bekamen Panzer in Schwarm-Slots und fielen
+  // auf 47 %. Beides waere niemandem aufgefallen, ohne den Vergleich gegen
+  // den alten Generator ueber alle 120 Sektoren.
+  const Gruppe = { schwarm: 7, stuerzer: 4, schuetze: 3, panzer: 1 },
+    KlasseZahl = { S: 8, M: 5, L: 2, XL: 1 };
+
+  // Welche Arten des Pools fuellen welche Rolle? Was der Pool nicht hergibt,
+  // faellt auf den Schwarm zurueck und zuletzt auf irgendetwas — ein Sektor
+  // ohne passende Art soll keine leere Welle erzeugen.
+  function rollenAusPool(T) {
+    const R = { schwarm: [], stuerzer: [], schuetze: [], panzer: [] };
+    for (const E of T) {
+      const b = Ke[E] && Ke[E].rolle;
+      b && R[b] && R[b].push(E)
+    }
+    for (const E of Object.keys(R))
+      R[E].length || (R[E] = R.schwarm.length ? R.schwarm.slice() : T.slice());
+    return R
+  }
+
+  // Die Druckkurve eines Sektors. Anstieg von gut einem Drittel auf die
+  // Spitze, dazu zwei Atemzuege bei 34 % und 67 % der Laenge — Stellen, an
+  // denen der Druck deutlich faellt. Ohne die gibt es keinen Rhythmus,
+  // sondern nur eine Rampe.
+  function druckKurve(T, R) {
+    const E = Math.min(9, 2.6 + R * .095),
+      b = I => Math.exp(-Math.pow((T - I) / .055, 2));
+    return E * (.35 + .65 * T) * (1 - .45 * (b(.34) + b(.67)))
+  }
+
   function tn(T, R) {
     const E = [],
       b = T <= 50 ? T : 50 + (T - 50) * .5,
-      I = 34 + Math.floor(b * 1.1);
-    let G = 600;
-    for (let x = 0; x < I; x++) {
-      const t = I <= 1 ? 1 : x / (I - 1),
-        l = R[x % R.length],
-        p = _s.includes(l),
-        a = p ? "single" : Ti[(x + T) % Ti.length];
-      let r;
-      l === "elite" ? r = T >= 8 ? 2 : 1 : l === "gunship" || l === "rocketeer" || l === "arcer" || l === "sniper" ? r = Math.min(2 + Math.floor(T / 3) + Math.round(t * 1.5), 5) : l === "bomber" ? r = Math.min(1 + Math.floor(T / 3) + Math.round(t), 4) : r = Math.min(6 + Math.floor(T / 2) + Math.round(t * 3) + x % 2, 12), T <= 2 && (r = Math.max(1, Math.round(r * (T === 1 ? .7 : .82))));
-      const n = Math.max(1050, 2150 - T * 45 - Math.round(t * 340));
-      E.push({
-        at: G,
-        kind: l,
-        count: r,
-        formation: a
-      }), G += n + (p ? 420 : 0)
+      // ANKER fuer die Balance-Auflage. Elf Profile stellen hier in WELLEN
+      // ein (waveBase 16 bis 34) — die Bedeutung darf sich nicht aendern,
+      // sonst waeren alle elf still umgestellt.
+      //
+      // Gebaut wird deshalb BIS ZUM WELLENZIEL, nicht auf eine feste Zahl
+      // Bausteine: wie viele Wellen ein Baustein beitraegt, haengt von seinem
+      // Druck ab (ein Aufmarsch ist eine Welle, ein Ansturm sind drei). Eine
+      // feste Bausteinzahl liess Sektor 1 auf 20 statt 27 Wellen und 102
+      // statt 163 Gegner schrumpfen — eine Balance-Aenderung durch die
+      // Hintertuer, und zwar eine, die hier niemand nachmessen kann.
+      I = 34 + Math.floor(b * 1.1),
+      G = rollenAusPool(R),
+      v = {};
+    let x = 600, t = -1, l = -1;
+    for (const a of Object.keys(G)) v[a] = 0;
+    for (let a = 0; E.length < I && a < 400; a++) {
+      const r = Math.min(1, E.length / Math.max(1, I - 1)),
+        n = druckKurve(r, T);
+      // Der Baustein, dessen Druck am naechsten liegt — aber nie derselbe
+      // zwei Mal hintereinander und nicht der vorletzte. Ohne diese zwei
+      // Zeilen waehlt die Kurve auf ihrem flachen Stueck immer denselben.
+      let e = -1, s = 1 / 0;
+      for (let o = 0; o < Bausteine.length; o++) {
+        if (o === t || o === l) continue;
+        const i = Math.abs(Bausteine[o].druck - n);
+        i < s && (s = i, e = o)
+      }
+      e < 0 && (e = 0), l = t, t = e;
+      const p = Bausteine[e],
+        h = 1 + Math.min(1.6, T * .014);
+      for (const o of p.teile) {
+        const i = G[o.rolle],
+          w = i[v[o.rolle]++ % i.length],
+          y = (Ke[w] && Ke[w].cls) || "M",
+          d = o.n / (Gruppe[o.rolle] || 1) * (KlasseZahl[y] || 5),
+          S = Math.max(1, Math.round(d * (y === "XL" ? Math.min(h, 1.6) : h)));
+        E.push({ at: x + o.nach, kind: w, count: Math.min(S, 12), formation: o.form, baustein: p.name })
+      }
+      x += Math.max(1150, 2150 - T * 45 - Math.round(r * 360)) + (p.teile.length - 1) * 320
     }
-    const v = [];
-    for (let x = 0; x < E.length; x++)(E[x].kind === "grunt" || E[x].kind === "weaver") && v.push(x);
-    if (v.forEach((x, t) => {
-        t % 2 === 0 && (E[x] = {
-          at: E[x].at,
-          kind: "scout",
-          count: Math.min(E[x].count + (T <= 2 ? 1 : 3), 12),
-          formation: "row"
-        })
-      }), T >= 5) {
-      const x = E[E.length - 1];
-      E.push({
-        at: x.at + 1600,
-        kind: "carrier",
-        count: T >= 16 ? 2 : 1,
-        formation: "single"
-      })
-    }
+    // Zwei gesetzte Momente bleiben, wie sie waren — sie sind schon
+    // Begegnungen und keine Formel.
     if (T >= 4 && E.length > 4) {
-      const x = E[Math.floor(E.length * .5)].at;
-      E.push({
-        at: x + 200,
-        kind: "rotor",
-        count: 1,
-        formation: "single"
-      })
+      const a = E[Math.floor(E.length * .5)].at;
+      E.push({ at: a + 200, kind: "rotor", count: 1, formation: "single", baustein: "Rotor" })
     }
-    return E
+    if (T >= 5) {
+      const a = E.reduce((r, n) => Math.max(r, n.at), 0);
+      E.push({ at: a + 1600, kind: "carrier", count: T >= 16 ? 2 : 1, formation: "single", baustein: "Traeger" })
+    }
+    return E.sort((a, r) => a.at - r.at)
   }
+
   const en = [{
       label: "Stadt 1",
       bg: "bg_city_01",

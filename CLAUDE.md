@@ -45,6 +45,7 @@ npm run formen     Silhouettenabstand der Gegnerprojektile
 npm run untergrund Kantenenergie der dreizehn Biome und die Beruhigung
 npm run feuerkraft die Leiter gegen den Wellenplan aller 120 Sektoren
 npm run speicher   was im Gefecht an Texturen im Speicher liegt
+npm run rhythmus   hat ein Sektor eine Form, oder ist er eine Rampe?
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -53,8 +54,8 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-`farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` →
-Boot-Test des Masters → `dist/check-report.md`.
+`farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` → `rhythmus`
+→ Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -184,7 +185,27 @@ Jede hat mindestens eine Runde gekostet.
    hitScale/scale zurueckgerechnet. So aendert sich am Spiel nichts, was hier
    ohnehin nicht messbar waere. Nachgerechnet, nicht angenommen: 21 x 32 x
    0,22 = 4,62 Weltpunkte, danach 10,04 x 15,3 x 0,46 = 4,62.
-23. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
+23. **Wer eine Formel ersetzt, rechnet die ALTE nach — und prueft den
+   Nachbau.** Der erste Nachbau des alten Wellengenerators stimmte nicht: er
+   nahm die Quellformel, die aufgezeichneten Zahlen kamen aber aus dem
+   GEBAUTEN Spiel mit Balance-Auflage. Erst mit derselben Auflage passte es.
+   Ohne diese Gegenprobe haette der Vergleich zwei verschiedene Spiele
+   verglichen — und die beiden Rueckfall-Fehler (Sektoren auf 57 % bzw. 47 %
+   der Gegnerzahl) waeren nie aufgefallen.
+24. **Elf Profile haengen an den Balance-Ankern.** `waveBase` und
+   `spacingBase` werden beim Bauen in den Quelltext gepatcht; der Build bricht
+   ab, wenn der Anker fehlt (und hat das beim ersten Versuch getan). Die
+   BEDEUTUNG darf sich ebenso wenig aendern wie der Ausdruck: `waveBase` sind
+   WELLEN, in elf Profilen zwischen 16 und 34. Wer daraus Bausteine macht,
+   stellt still elf Spielarten um.
+25. **Ein Einbruch ist relativ, nicht absolut.** Der Atemzug-Test der
+   Rhythmus-Tafel brauchte drei Anlaeufe. „Unteres Drittel des Gesamtbandes"
+   bestand genau bei dem Fehler, den er finden soll: bei einer reinen Rampe
+   liegt der ganze Anfang darunter, die Gegenprobe blieb gruen. „Erst nachdem
+   der Druck oben war" meldete 93 Sektoren rot — die zweite Delle liegt
+   absolut hoeher als die erste, weil der Anstieg sie mithebt. Richtig ist der
+   Vergleich gegen die OERTLICHE Umgebung.
+26. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
    zeichnet weiter, bewegt aber nichts. Ohne das misst der Vergleich die
    Bewegung des Untergrunds: die erste Messung der Beruhigungsschicht meldete
    -24 % Kantenenergie, obwohl die Schicht mit Deckkraft 0 unsichtbar war.
@@ -204,7 +225,7 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
 tools/             boot · bildtor · farbtor · formen · untergrund · feuerkraft
-                   speicher · farbproben · schirme · symbol · bilder
+                   speicher · rhythmus · farbproben · schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```

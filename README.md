@@ -38,7 +38,8 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Untergrund-Tafel** | `npm run untergrund` — Kantenenergie der 13 Biome und die Beruhigung |
 | **Feuerkraft-Leiter** | `npm run feuerkraft` — Erreichbarkeit über alle 120 Sektoren + Mechanik im Gefecht |
 | **Speicher-Tafel** | `npm run speicher` — Texturen im Gefecht, mit Grenze |
-| **Gegenproben** | `npm run farbproben` — dreizehn eingebaute Fehler, jeder muss anschlagen |
+| **Rhythmus-Tafel** | `npm run rhythmus` — Druckkurve, Atemzüge und Vielfalt über 120 Sektoren |
+| **Gegenproben** | `npm run farbproben` — fünfzehn eingebaute Fehler, jeder muss anschlagen |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
 | **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
@@ -84,7 +85,8 @@ project/
 │  ├─ untergrund.mjs ← wie unruhig ist jedes Biom?
 │  ├─ feuerkraft.mjs ← ist die Feuerkraft-Leiter erreichbar, und gibt es sie?
 │  ├─ speicher.mjs  ← was im Gefecht an Texturen im Speicher liegt
-│  ├─ farbproben.mjs ← dreizehn Gegenproben zu allen fünfen
+│  ├─ rhythmus.mjs  ← hat ein Sektor eine Form, oder ist er eine Rampe?
+│  ├─ farbproben.mjs ← fünfzehn Gegenproben zu allen sechsen
 │  ├─ schirme.mjs   ← jeden Bildschirm aufnehmen und nachmessen
 │  ├─ symbol.mjs    ← icon.svg → App-Symbole + 11 iOS-Startbilder
 │  └─ bilder.mjs    ← WebP-Bahnen neu codieren (q78)

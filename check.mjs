@@ -100,6 +100,19 @@ if (ok) {
   }
 }
 
+// Rhythmus: hat ein Sektor eine Form, oder ist er eine Rampe? Seit v7 wird
+// jeder Sektor aus zwoelf Bausteinen entlang einer Druckkurve gefuellt.
+let rhythZeile = '';
+if (ok) {
+  try {
+    step('Rhythmus (120 Sektoren)', 'node tools/rhythmus.mjs');
+    rhythZeile = '| Rhythmus (120 Sektoren) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    rhythZeile = '| Rhythmus (120 Sektoren) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -125,7 +138,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile + rhythZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');
