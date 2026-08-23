@@ -59138,7 +59138,45 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontSize: "13px",
           color: G > 0 ? "#9fe0c2" : "#5a708a"
         }).setOrigin(.5)
-      }), Ei.forEach((E, b) => this.armorRow(E, 336 + b * 80)), ti(this), Re(this, "workshop")
+      }), Ei.forEach((E, b) => this.armorRow(E, 336 + b * 80)), this.schutzTafel(), ti(this), Re(this, "workshop")
+    }
+    schutzTafel() {
+      // Unter den vier Reihen lagen 239 Punkte brach. Wer Panzerung kauft,
+      // sieht bisher nur "Stufe 1/4" — nicht, was er dafuer bekommt.
+      Rt(this, J / 2, 722, J - 36, 144, {
+        fill: 991542,
+        alpha: .55,
+        radius: 12
+      }), this.add.text(J / 2, 672, "WAS DU GERADE AUSHÄLTST", {
+        fontFamily: "sans-serif",
+        fontSize: "13px",
+        color: "#9fd0ee",
+        fontStyle: "bold"
+      }).setOrigin(.5);
+      const R = wt[q.plane()] || wt.falcon,
+        E = Ft.maxHp + q.upg("hp") * 25 + q.upg("arm_wing") * bt.wing.per + R.hpMod,
+        b = Ft.maxHp + pe.hp.max * 25 + bt.wing.max * bt.wing.per + R.hpMod,
+        I = (G, v) => Math.round(we(bt[G].per, q.upg("arm_" + G)) * 100),
+        G = [
+          ["Kugeln", `−${I("front")} %`, I("front") / Math.round(bt.front.per * bt.front.max * 100)],
+          ["Rammen", `−${I("rear")} %`, I("rear") / Math.round(bt.rear.per * bt.rear.max * 100)],
+          ["Boss-Laser", `−${I("core")} %`, I("core") / Math.round(bt.core.per * bt.core.max * 100)],
+          ["Leben", String(E), E / b]
+        ];
+      G.forEach(([v, x, t], l) => {
+        const p = 81 + l * 126;
+        this.add.text(p, 704, v, {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#8fb0cc"
+        }).setOrigin(.5), this.add.text(p, 733, x, {
+          fontFamily: "sans-serif",
+          fontSize: "20px",
+          color: t > 0 ? "#9fe0c2" : "#7f93a8",
+          fontStyle: "bold"
+        }).setOrigin(.5), this.add.rectangle(p, 760, 96, 6, 2500134, .9).setOrigin(.5),
+          this.add.rectangle(p - 48, 760, Math.max(2, Math.round(96 * Math.min(1, t))), 6, t >= 1 ? 3817285 : 3791242, .95).setOrigin(0, .5)
+      })
     }
     armorRow(R, E) {
       const b = bt[R],
@@ -60531,6 +60569,57 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       statLine(R) {
         return ni.filter(E => R.stats[E]).map(E => `${si[E]} +${$t(R,E)}%`).join("  ·  ")
       }
+      leerTafel() {
+        // Bei frischem Spielstand stand hier eine Zeile in 590 Punkten Leere.
+        // Das ist der erste Eindruck des Schirms — er soll sagen, was es zu
+        // holen gibt, nicht dass nichts da ist.
+        Rt(this, J / 2, 565, J - 36, 340, {
+          fill: 991542,
+          alpha: .5,
+          radius: 14
+        });
+        this.add.text(J / 2, 435, "Noch keine Module", {
+          fontFamily: "sans-serif",
+          fontSize: "20px",
+          color: "#eaf6ff",
+          fontStyle: "bold"
+        }).setOrigin(.5);
+        this.add.text(J / 2, 467, "Jedes abgeschlossene Level lässt eines fallen — Bosse die besseren.", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#bcd6ec",
+          align: "center",
+          wordWrap: {
+            width: J - 110
+          }
+        }).setOrigin(.5);
+        this.add.text(J / 2, 519, "ZWEI GLEICHE ERGEBEN EIN SET", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#9fd0ee",
+          fontStyle: "bold"
+        }).setOrigin(.5);
+        Object.keys(je).forEach((T, R) => {
+          const E = je[T],
+            b = 563 + R * 56;
+          this.add.text(46, b, E.short, {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#" + E.color.toString(16).padStart(6, "0"),
+            fontStyle: "bold"
+          }).setOrigin(0, .5);
+          this.add.text(196, b - 10, "2 ×   " + E.desc2, {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#cfe3ff"
+          }).setOrigin(0, .5);
+          this.add.text(196, b + 10, "3 ×   " + E.desc3, {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#9fe0c2"
+          }).setOrigin(0, .5)
+        })
+      }
       lvlTxt(R) {
         return `Lv ${R.lvl||0}/${Ue[R.rarity]}`
       }
@@ -60558,21 +60647,15 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
               width: J - 30
             }
           }).setOrigin(.5)
-        } else this.add.text(J / 2, 115, "Themen-Sets: 2+ Module desselben Sets → Bonus", {
-          fontFamily: "sans-serif",
-          fontSize: "13px",
-          color: "#7f93a8",
-          align: "center",
-          wordWrap: {
-            width: J - 30
-          }
-        }).setOrigin(.5);
-        const E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set: alle 3 Slots"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>qt[l].name).join(", "):"Tier-Bonus per angelegter Seltenheit"}`;
-        this.add.text(J / 2, 131, E, {
-          fontFamily: "sans-serif",
-          fontSize: "13px",
-          color: R.fullSet || R.tiers.length ? "#9fe0c2" : "#66788c"
-        }).setOrigin(.5);
+        }
+        if (R.fullSet || R.tiers.length) {
+          const E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set offen"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>qt[l].name).join(", "):"noch kein Tier-Bonus"}`;
+          this.add.text(J / 2, 131, E, {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#9fe0c2"
+          }).setOrigin(.5)
+        }
         for (let l = 0; l < Pn; l++) {
           const p = 100 + l * 170,
             a = 188,
@@ -60625,11 +60708,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           fontSize: "13px",
           color: "#9fd0ee",
           fontStyle: "bold"
-        }), b.length === 0 && this.add.text(J / 2, 310, "Leer — schließe Level ab, um Module zu erbeuten.", {
-          fontFamily: "sans-serif",
-          fontSize: "13px",
-          color: "#8fb0cc"
-        }).setOrigin(.5), b.slice(v, v + I).forEach((l, p) => {
+        }), b.length === 0 && this.leerTafel(), b.slice(v, v + I).forEach((l, p) => {
           const a = 296 + p * 64,
             r = qt[l.rarity],
             n = Rt(this, J / 2, a, J - 36, 56, {
