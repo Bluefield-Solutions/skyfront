@@ -54,11 +54,21 @@ const FAKTOR = 2.5;        // so viel darf ein Modus ueber der Grundlinie liegen
 // 132 bis 145. Der Boden liegt dazwischen und naeher am Heilen.
 const KANTE_MIN = 55;      // aber nie strenger als das
 const KANTE_MAX = 200;     // und nie lockerer als das
-// Gegengeprobt: heiles Menue 6,8 bis 7,9 — einfarbige Flaeche darueber 0,0,
-// gleich ob schwarz, grau oder weiss. Die alte Schwelle 7 lag MITTEN im
-// heilen Band und haette einen gesunden Lauf rot gemeldet.
-const STREUUNG_MIN = 3;    // darunter ist das Bild praktisch einfarbig
-const HELL_MIN = 12, HELL_MAX = 210;   // schwarz gedeckt misst 5,7
+// Auch hier: anteilig, nie absolut. Die feste Schwelle 3 fuer "praktisch
+// einfarbig" war oertlich gemessen (heiles Menue 6,8 bis 9,1) — auf GitHub
+// misst dasselbe heile Menue 4,8. Anderthalb mal Abstand ist kein Abstand,
+// und die naechste Auflage von Chromium haette den Lauf rot gemacht.
+//
+// Bezug sind jetzt die acht Schirme untereinander: einer, der praktisch
+// einfarbig ist, faellt gegen die anderen sieben auf, ganz gleich wie hoch
+// die Umgebung insgesamt misst.
+const STREUUNG_ANTEIL = 0.35;   // so weit darf ein Schirm unter den Median
+const HELL_ANTEIL_UNTEN = 0.4, HELL_ANTEIL_OBEN = 2.6;
+// Und ein letzter Halt fuer den Fall, dass ALLE Schirme kaputt sind — dann
+// gibt es keinen gesunden Median mehr, gegen den sich messen liesse. Diese
+// beiden sind absichtlich weit weg von allem je Gemessenen (oertlich 6,8..9,1,
+// auf GitHub 4,8; schwarz gedeckt 0,0 bei Helligkeit 5,7).
+const STREUUNG_NOT = 1.5, HELL_NOT = 8;
 const BILDER = process.argv.includes('--bilder');
 
 // Das beurteilte Band. Oben sitzt das HUD, unten die Faehigkeitsknoepfe; deren
@@ -102,13 +112,32 @@ const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', 
 // Zurueck kommen nur Zahlen — und, wenn verlangt, das heruntergerechnete Bild.
 // nurBand=false nimmt den ganzen Schirm (fuer Helligkeit und Streuung),
 // nurBand=true nur das beurteilte Band (fuer die Querkante).
-function messen(seite, nurBand, mitBild) {
+// Fasst einmal nach, bevor sie aufgibt. Ein verpasstes Bild ist ein
+// verpasstes Bild, kein Befund am Spiel — zwei verpasste sind einer.
+async function messen(seite, nurBand, mitBild) {
+  for (let versuch = 0; versuch < 2; versuch++) {
+    const m = await rohMessen(seite, nurBand, mitBild);
+    if (!m.fehlt) return m;
+    if (versuch === 0) { console.log(`      (…) Schnappschuss verpasst (${m.zustand}) — noch einmal`); await seite.waitForTimeout(2500); }
+    else return m;
+  }
+}
+
+function rohMessen(seite, nurBand, mitBild) {
   return seite.evaluate(([nurBand, mitBild, VON, BIS, BREIT]) => new Promise((fertig, scheitern) => {
     const g = window.__game, W = g.renderer.width, H = g.renderer.height;
     if (typeof g.renderer.snapshotArea !== 'function') return scheitern(new Error('snapshotArea fehlt'));
     const von = nurBand ? Math.round(H * VON) : 0;
     const hoch = nurBand ? Math.round(H * (BIS - VON)) : H;
-    const wecker = setTimeout(() => scheitern(new Error('snapshotArea antwortet nicht')), 15000);
+    // Phasers Schnappschuss wird am Ende des NAECHSTEN Bildes eingeloest.
+    // Steht die Schleife still, kommt dieses Bild nie — und der Rueckruf
+    // auch nicht. Auf GitHub ist genau das passiert.
+    if (g.loop && g.loop.running === false && g.loop.wake) g.loop.wake();
+    const wecker = setTimeout(() => fertig({
+      fehlt: true,
+      zustand: `Schleife ${g.loop ? (g.loop.running ? 'laeuft' : 'steht') + ', ' + Math.round(g.loop.actualFps) + ' B/s' : '?'}` +
+               `, aktiv: ${g.scene.scenes.filter(s => s.scene.isActive()).map(s => s.scene.key).join('+') || 'keine'}`,
+    }), 25000);
     g.renderer.snapshotArea(0, von, W, hoch, (bild) => {
       clearTimeout(wecker);
       const hochAus = Math.round(hoch * BREIT / W);
@@ -159,8 +188,9 @@ await seite.waitForTimeout(2500);
 
 const r = await seite.evaluate(() => { const b = window.__game.canvas.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; });
 
-// Jeder Schirm: darf nicht einfarbig und nicht schwarz sein. Der Reihe nach
-// aufgerufen, ein Bild je Schirm.
+// Jeder Schirm: darf nicht einfarbig und nicht schwarz sein. Erst alle
+// messen, dann urteilen — die Schirme sind einander der Massstab.
+const schirme = [];
 for (const key of SCHIRME) {
   if (key !== 'Menu') {
     const da = await seite.evaluate((key) => {
@@ -171,14 +201,40 @@ for (const key of SCHIRME) {
       return true;
     }, key);
     if (!da) { befunde.push(`${key}: Szene fehlt`); continue; }
-    await seite.waitForTimeout(1600);
+    // Nicht blind warten, sondern bis die Szene wirklich laeuft. Auf einem
+    // langsamen Laeufer reichten 1600 ms nicht.
+    let steht = false;
+    for (let i = 0; i < 40; i++) {
+      if (await seite.evaluate((key) => window.__game.scene.isActive(key), key)) { steht = true; break; }
+      await seite.waitForTimeout(250);
+    }
+    if (!steht) { befunde.push(`${key}: Szene startet nicht`); continue; }
+    await seite.waitForTimeout(1200);   // Einblendung laeuft aus
   }
   const m = await messen(seite, false, false);
-  const schlecht = [];
-  if (m.streuung < STREUUNG_MIN) schlecht.push(`praktisch einfarbig (Streuung ${m.streuung}, Grenze ${STREUUNG_MIN})`);
-  if (m.hell < HELL_MIN || m.hell > HELL_MAX) schlecht.push(`Helligkeit ${m.hell} ausserhalb ${HELL_MIN}..${HELL_MAX}`);
-  if (schlecht.length) befunde.push(`${key}: ` + schlecht.join(' · '));
-  console.log(`    ${key.padEnd(10)} Helligkeit ${String(m.hell).padStart(5)}  Streuung ${m.streuung}${schlecht.length ? '  ✗' : ''}`);
+  if (m.fehlt) { befunde.push(`${key}: kein Bild zu bekommen — ${m.zustand}`); continue; }
+  schirme.push({ key, ...m });
+  console.log(`    ${key.padEnd(10)} Helligkeit ${String(m.hell).padStart(5)}  Streuung ${m.streuung}`);
+}
+
+// Urteil: gegen den Median der Schirme, nicht gegen eine feste Zahl.
+if (schirme.length >= 4) {
+  const med = (f) => { const w = schirme.map(f).sort((a, b) => a - b); return w[Math.floor(w.length / 2)]; };
+  const mStreu = med(s => s.streuung), mHell = med(s => s.hell);
+  const gStreu = mStreu * STREUUNG_ANTEIL;
+  console.log(`\n  Median Streuung ${mStreu} → Grenze ${gStreu.toFixed(1)} · Median Helligkeit ${mHell}`);
+  if (mStreu < STREUUNG_NOT || mHell < HELL_NOT) {
+    befunde.push(`ALLE Schirme praktisch leer (Median Streuung ${mStreu}, Helligkeit ${mHell}) — da stimmt nichts mehr`);
+  } else {
+    for (const g of schirme) {
+      const schlecht = [];
+      if (g.streuung < gStreu) schlecht.push(`praktisch einfarbig (Streuung ${g.streuung}, Median ${mStreu})`);
+      if (g.hell < mHell * HELL_ANTEIL_UNTEN || g.hell > mHell * HELL_ANTEIL_OBEN) schlecht.push(`Helligkeit ${g.hell} weit weg vom Median ${mHell}`);
+      if (schlecht.length) { befunde.push(`${g.key}: ` + schlecht.join(' · ')); console.log(`  ✗ ${g.key}`); }
+    }
+  }
+} else {
+  befunde.push(`nur ${schirme.length} von ${SCHIRME.length} Schirmen gemessen — kein Massstab`);
 }
 
 // Zurueck ins Menue, von dort geht es ins Gefecht.
