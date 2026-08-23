@@ -56585,6 +56585,17 @@ return new ` + this.key + `();
   const Gruppe = { schwarm: 7, stuerzer: 4, schuetze: 3, panzer: 1 },
     KlasseZahl = { S: 8, M: 5, L: 2, XL: 1 };
 
+  // Naht fuer tools/formationen.mjs. Sie steht HIER und nicht bei den anderen
+  // Naehten weiter unten: Bausteine, Gruppe, KlasseZahl und Ti sind lokal in
+  // $s, nicht auf Modulebene. Ein erster Anlauf setzte sie unten neben
+  // __SKF_PWR — ReferenceError, und weil das mitten in einer Kette stand,
+  // blieb __SKF_PWR gesetzt und die Naht still weg. Ein Fehler, der wie eine
+  // fehlende Naht aussieht.
+  //
+  // Das Werkzeug rechnet die Bausteine NICHT nach. Es laesst spawnWave() sie
+  // selbst stellen und misst, wo die Gegner danach stehen.
+  typeof window < "u" && (window.__SKF_BAUSTEINE = { bausteine: Bausteine, gruppe: Gruppe, klasse: KlasseZahl, formen: Ti, kurve: (T, R) => druckKurve(T, R) });
+
   // Welche Arten des Pools fuellen welche Rolle? Was der Pool nicht hergibt,
   // faellt auf den Schwarm zurueck und zuletzt auf irgendetwas — ein Sektor
   // ohne passende Art soll keine leere Welle erzeugen.
@@ -56648,7 +56659,7 @@ return new ` + this.key + `();
           y = (Ke[w] && Ke[w].cls) || "M",
           d = o.n / (Gruppe[o.rolle] || 1) * (KlasseZahl[y] || 5),
           S = Math.max(1, Math.round(d * (y === "XL" ? Math.min(h, 1.6) : h)));
-        E.push({ at: x + o.nach, kind: w, count: Math.min(S, 12), formation: o.form, baustein: p.name })
+        E.push({ at: x + o.nach, kind: w, count: Math.min(S, 12), formation: o.form, baustein: p.name, bnr: a })
       }
       x += Math.max(1150, 2150 - T * 45 - Math.round(r * 360)) + (p.teile.length - 1) * 320
     }

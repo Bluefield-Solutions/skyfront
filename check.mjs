@@ -113,6 +113,21 @@ if (ok) {
   }
 }
 
+// Formationen: sind die zwoelf Bausteine im BILD zwoelf Dinge? Die
+// Rhythmus-Tafel prueft, dass ein Sektor Vielfalt HAT — nicht, dass die
+// Bausteine unterschiedlich aussehen. Zwoelf Namen fuer dasselbe Bild waeren
+// nach jeder anderen Zahl gruen.
+let formationZeile = '';
+if (ok) {
+  try {
+    step('Formationen (12 Bausteine)', 'node tools/formationen.mjs');
+    formationZeile = '| Formationen (12 Bausteine) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    formationZeile = '| Formationen (12 Bausteine) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -138,7 +153,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile + rhythZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile + rhythZeile + formationZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');

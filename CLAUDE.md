@@ -228,6 +228,29 @@ Jede hat mindestens eine Runde gekostet.
    Texturbreite steht in keiner Tabelle, sie kommt aus dem WebP-Vorrat.
    Also am gebauten Spiel messen, nicht in der Quelle raten.
 
+29. **Eine Gegenprobe muss sagen, WORAN das Tor rot wird.** Bis v9b prueften
+   die Proben an den Tafeln nur, DASS es rot wird. Das reicht nicht: die
+   Probe „Keil ohne Staffelung" war rot und meldete ein Paar, das der
+   Eingriff nicht betraf; die Probe „Bausteine duerfen sich wiederholen"
+   war rot ueber die Atemzuege, gedacht war die Vielfalt. Beide zaehlten
+   als bestanden und bewiesen nichts. Das sechste Feld in `PROBEN` haelt
+   jetzt einen Text, der im Befund vorkommen MUSS — und hat sofort **zwei
+   wirkungslose Pruefungen** aufgedeckt.
+
+30. **Eine Pruefung, deren Massstab aus dem Beurteilten stammt, prueft
+   nichts** — und das faellt nicht auf, weil sie gruen meldet. Zweimal in
+   einer Runde: die Vielfalt-Pruefung nahm ihr Druckband aus der Folge, die
+   sie beurteilte (vier von zwoelf Bausteinen: null Befunde). Die
+   Formationentafel normierte auf die Streuung des gemessenen Feldes (eine
+   Aenderung an A meldete einen Befund ueber B und C). Der Massstab kommt
+   aus dem Spiel — die Druckkurve, die Schrittweite 62/46, der Versatz 400 —
+   oder aus dem Geraet. Nie aus der Messung selbst.
+
+31. **Zusammenfassen und dann Nachbarn vergleichen ist immer tot.** Die
+   Wiederholungspruefung entfernte gleiche Nachbarn und suchte danach
+   gleiche Nachbarn. Sie KONNTE nicht anschlagen. Wer eine Folge
+   verdichtet, verdichtet nach der Instanz (`bnr`), nicht nach dem Namen.
+
 ---
 
 ## Aufbau

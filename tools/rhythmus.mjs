@@ -44,9 +44,33 @@ await seite.goto('file://' + process.cwd() + '/dist/Skyfront.html');
 await seite.waitForFunction(() => window.__SKF_STUFEN, null, { timeout: 90000 });
 const stufen = await seite.evaluate(() => window.__SKF_STUFEN.map((s, i) => ({
   nr: i + 1, label: s.label,
-  wellen: (s.waves || []).map((w) => ({ b: w.baustein || '?', n: w.count || 0 })),
+  wellen: (s.waves || []).map((w) => ({ b: w.baustein || '?', n: w.count || 0, nr: w.bnr })),
 })));
+// Das Druckband eines Sektors kommt aus seiner KURVE, nicht aus der Folge,
+// die beurteilt werden soll.
+//
+// Vorher wurden dMin und dMax aus den tatsaechlich gestellten Bausteinen
+// gerechnet — das Modell hing am Gemessenen (eiserne Regel 4). Die Folge:
+// die Vielfalt-Pruefung war WIRKUNGSLOS. Gegengeprobt, indem die Auswahl auf
+// vier der zwoelf Bausteine beschraenkt wurde: null Befunde. Ein Generator,
+// der nur vier benutzt, erklaert sein Band selbst zu „vier Bausteinen" und
+// besteht.
+//
+// Gefragt wird jetzt die Kurve des SPIELS, ueber die Naht — nicht die Formel
+// hier nachgerechnet.
+const baender = await seite.evaluate((n) => {
+  const K = window.__SKF_BAUSTEINE && window.__SKF_BAUSTEINE.kurve;
+  if (!K) return null;
+  const aus = [];
+  for (let t = 1; t <= n; t++) {
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i <= 40; i++) { const v = K(i / 40, t); if (v < lo) lo = v; if (v > hi) hi = v; }
+    aus.push([lo, hi]);
+  }
+  return aus;
+}, 200);
 await browser.close();
+if (!baender) { console.error('✗ Naht __SKF_BAUSTEINE.kurve fehlt — das Druckband ist nicht zu erreichen. Eine Vielfalt-Pruefung ohne eigenes Band prueft nichts.'); process.exit(1); }
 
 const kor = (a) => {
   const n = a.length; if (n < 3) return 0;
@@ -80,7 +104,15 @@ for (const st of stufen) {
   const w = st.wellen.filter((x) => DRUCK[x.b] != null);
   const folge = [];
   let letzter = '';
-  for (const x of st.wellen) { if (x.b !== letzter) { folge.push(x.b); letzter = x.b; } }
+  // Zusammengefasst wird nach der BAUSTEININSTANZ (`bnr`), nicht nach dem
+  // Namen. Vorher stand hier `if (x.b !== letzter)` — das fasste zwei
+  // gleichnamige Bausteine hintereinander zu einem zusammen, und damit war
+  // die Wiederholungspruefung drei Zeilen weiter unten TOT: sie verglich
+  // Nachbarn in einer Folge, aus der gleiche Nachbarn gerade entfernt worden
+  // waren. Gegengeprobt, indem die Wiederholungssperre im Generator
+  // ausgebaut wurde: null Befunde. Eine Pruefung, die nie etwas meldet, ist
+  // kein Beweis (eiserne Regel 5).
+  for (const x of st.wellen) { const k = x.nr === undefined ? x.b : x.nr; if (k !== letzter) { folge.push(x.b); letzter = k; } }
   const druck = w.map((x) => DRUCK[x.b]);
   const anstieg = kor(druck);
   // Atemzug: ein Einbruch gegen die OERTLICHE Umgebung, nicht gegen das
@@ -105,7 +137,8 @@ for (const st of stufen) {
   }
   const verschieden = new Set(folge.filter((x) => DRUCK[x] != null)).size;
   // Wie viele Bausteine liegen ueberhaupt im Druckband dieses Sektors?
-  const erreichbar = Object.values(DRUCK).filter((d) => d >= dMin - 0.5 && d <= dMax + 0.5).length;
+  const [kMin, kMax] = baender[st.nr - 1] || [dMin, dMax];
+  const erreichbar = Object.values(DRUCK).filter((d) => d >= kMin - 0.5 && d <= kMax + 0.5).length;
   let doppelt = 0;
   for (let i = 1; i < folge.length; i++) if (folge[i] === folge[i - 1]) doppelt++;
   const gegner = st.wellen.reduce((a, x) => a + x.n, 0);

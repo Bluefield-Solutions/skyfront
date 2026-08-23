@@ -90,6 +90,12 @@ Ausgeliefert wird über `.github/workflows/pages.yml` bei jedem Push auf `main`.
 
 Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
 
+- `npm run formationen` — misst, ob die zwölf Begegnungsbausteine im Bild
+  zwölf Dinge sind. Lässt `spawnWave()` im laufenden Gefecht jeden Teil
+  wirklich stellen und schreibt mit, wo abgesetzt wird; verglichen wird in
+  den Schrittweiten des Spiels (62 quer, 46 tief, 400 ms). Treibt die Uhr
+  des Spiels selbst an — `delayedCall` zählt in Delta-Zeit, und die geht
+  ohne Fensterfokus anders als `time.now`.
 - `npm run schirme` — startet jede der neun Menü-Szenen einzeln, misst was aus
   dem Bild ragt, was übereinanderliegt, was auf dem Telefon zu klein ist.
 - `npm run bildtor -- --bilder` — legt die schlimmste Aufnahme je Modus ab.
