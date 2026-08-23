@@ -64,8 +64,10 @@ Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 Jede hat mindestens eine Runde gekostet.
 
 1. **Erst einchecken, dann gegenproben.** Die Gegenproben bauen absichtlich
-   Fehler ein und stellen mit `git checkout` wieder her — sie loeschen sonst
-   die frische Arbeit.
+   Fehler ein. `tools/farbproben.mjs` arbeitet deshalb NIE mit `git checkout`:
+   es legt vorher eine Kopie an und schreibt daraus zurueck, auch bei einem
+   Abbruch. Frische, noch nicht eingecheckte Arbeit ueberlebt das. Wer eine
+   neue Probe baut, haelt sich daran.
 2. **Grenzen anteilig, nie absolut.** Eine feste Bildtor-Schwelle von 45 hat
    die Hauptlinie **drei Mal rot gemacht**: auf GitHub misst dieselbe heile
    Szene deutlich hoeher als hier (anderer Chromium, andere Rasterung). Bezug
