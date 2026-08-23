@@ -13,7 +13,8 @@
     "package:master": "node build-all.mjs --zip=master",
     "release": "node build-all.mjs --zip --boot",
     "check": "node check.mjs",
-    "bildtor": "node tools/bildtor.mjs"
+    "bildtor": "node tools/bildtor.mjs",
+    "schirme": "node tools/schirme.mjs"
   },
   "engines": {
     "node": ">=18"

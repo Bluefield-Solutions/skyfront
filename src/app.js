@@ -60048,12 +60048,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const f = 90 + h * 120;
         this.slot(f, e, i.icon, bt[i.key].short, `Stufe ${q.upg("arm_"+i.key)}`, q.upg("arm_" + i.key), bt[i.key].max, 1929144, () => this.scene.start("Workshop"), 112, 108)
       }), this.recommendation();
-      const o = this.add.circle(J - 30, 38, 15, 2373708, .94).setStrokeStyle(2, 3824250).setDepth(80).setInteractive({
+      const o = this.add.circle(J - 30, 76, 14, 2373708, .94).setStrokeStyle(2, 3824250).setDepth(80).setInteractive({
         useHandCursor: !0
       });
-      this.add.text(J - 30, 38, "?", {
+      this.add.text(J - 30, 76, "?", {
         fontFamily: "sans-serif",
-        fontSize: "17px",
+        fontSize: "16px",
         color: "#cfe3ff",
         fontStyle: "bold"
       }).setOrigin(.5).setDepth(81), o.on("pointerover", () => o.setFillStyle(3032668, .98)), o.on("pointerout", () => o.setFillStyle(2373708, .94)), o.on("pointerdown", () => this.showTutorial()), Re(this, "loadout"), q.tutSeen("equip") || this.showTutorial()
@@ -60542,15 +60542,15 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }
         this.add.rectangle(0, 0, J, rt, 331804, .86).setOrigin(0, 0), this.textures.exists("vignette") && this.add.image(J / 2, rt / 2, "vignette"), Pe(this, "MODULE");
         const R = Mi(Wt.all());
-        if (this.add.text(J / 2, 78, `Schaden ×${R.dmgMul.toFixed(2)}  ·  Krit ${(R.critChance*100).toFixed(0)}% ×${R.critMult.toFixed(2)}  ·  Panzerbr. ×${R.pierceMul.toFixed(2)}`, {
+        if (this.add.text(J / 2, 96, `Schaden ×${R.dmgMul.toFixed(2)}  ·  Krit ${(R.critChance*100).toFixed(0)}% ×${R.critMult.toFixed(2)}  ·  Panzerbr. ×${R.pierceMul.toFixed(2)}`, {
             fontFamily: "sans-serif",
-            fontSize: "11px",
+            fontSize: "12.5px",
             color: "#9fe0c2"
           }).setOrigin(.5), R.sets.length) {
           const l = R.sets.map(p => `★ ${je[p.key].short} ${p.pieces}/3 (${p.pieces>=3?je[p.key].desc3:je[p.key].desc2})`).join("   ");
-          this.add.text(J / 2, 96, l, {
+          this.add.text(J / 2, 115, l, {
             fontFamily: "sans-serif",
-            fontSize: "10px",
+            fontSize: "11px",
             color: "#ffd23a",
             fontStyle: "bold",
             align: "center",
@@ -60558,9 +60558,9 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
               width: J - 30
             }
           }).setOrigin(.5)
-        } else this.add.text(J / 2, 96, "Themen-Sets: 2+ Module desselben Sets anlegen → Bonus (Brandsatz / Bollwerk / Präzision)", {
+        } else this.add.text(J / 2, 115, "Themen-Sets: 2+ Module desselben Sets → Bonus", {
           fontFamily: "sans-serif",
-          fontSize: "9.5px",
+          fontSize: "11px",
           color: "#7f93a8",
           align: "center",
           wordWrap: {
@@ -60568,15 +60568,10 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           }
         }).setOrigin(.5);
         const E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set: alle 3 Slots"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>qt[l].name).join(", "):"Tier-Bonus per angelegter Seltenheit"}`;
-        this.add.text(J / 2, 114, E, {
-          fontFamily: "sans-serif",
-          fontSize: "9.5px",
-          color: R.fullSet || R.tiers.length ? "#9fe0c2" : "#66788c"
-        }).setOrigin(.5), this.add.text(J / 2, 132, "ANGELEGTE MODULE — typisierte Slots", {
+        this.add.text(J / 2, 131, E, {
           fontFamily: "sans-serif",
           fontSize: "11px",
-          color: "#9fd0ee",
-          fontStyle: "bold"
+          color: R.fullSet || R.tiers.length ? "#9fe0c2" : "#66788c"
         }).setOrigin(.5);
         for (let l = 0; l < Pn; l++) {
           const p = 100 + l * 170,
