@@ -47,6 +47,20 @@ if (ok) {
   }
 }
 
+// Formentor: seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die
+// FORM der einzige Traeger der Information „wer hat geschossen". Dieses Tor
+// misst, ob zwei Formen zugleich flaechengleich und profilgleich sind.
+let formZeile = '';
+if (ok) {
+  try {
+    step('Formentor (Silhouetten bei Anzeigegroesse)', 'node tools/formen.mjs');
+    formZeile = '| Formentor (11 Silhouetten) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    formZeile = '| Formentor (11 Silhouetten) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -72,7 +86,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');

@@ -13,6 +13,7 @@
     "bildtor": "node tools/bildtor.mjs",
     "farbtor": "node tools/farbtor.mjs",
     "farbproben": "node tools/farbproben.mjs",
+    "formen": "node tools/formen.mjs",
     "schirme": "node tools/schirme.mjs",
     "symbol": "node tools/symbol.mjs",
     "bilder": "node tools/bilder.mjs",

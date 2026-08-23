@@ -21,7 +21,9 @@ const ALLE = process.argv.includes('--alle');
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
 
-// [Name, zustaendige Pruefung, Ersetzung alt -> neu, braucht Neubau]
+// [Name, zustaendige Pruefung, Ersetzung alt -> neu, braucht Neubau, Tor]
+// Tor: 'farb' (Vorgabe) oder 'form'. Die Formproben brauchen immer einen
+// Neubau, weil das Formentor die Textur des gebauten Spiels ausmisst.
 const PROBEN = [
   ['alte Gegnerfarbe zurueck (eb_bolt cyan)', 'B',
     ['zs(R, E, b, GEFAHR)', 'zs(R, E, b, "#37e0ff")'], false],
@@ -40,6 +42,11 @@ const PROBEN = [
   ['weisses Mittelband auf eb_needle', 'F',
     ['v.addColorStop(0, b), v.addColorStop(.44, b), v.addColorStop(.55, "#ffd2c4"), v.addColorStop(.68, b), v.addColorStop(1, b)',
       'v.addColorStop(0, b), v.addColorStop(.5, "#ffffff"), v.addColorStop(1, b)'], true],
+  // Die Raute wieder zur eingeschriebenen Scheibe: dann ist sie flaechen-
+  // UND profilgleich mit eb_orb, und genau das soll das Formentor melden.
+  ['eb_diamond zurueck zur Scheibenform', '✗', [
+    'T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()',
+    'T.beginPath(), T.arc(I, G, R * .3 + t, 0, 7), T.closePath()'], true, 'form'],
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
@@ -47,10 +54,10 @@ copyFileSync(APP, SICHER);
 const zurueck = () => copyFileSync(SICHER, APP);
 process.on('exit', () => { if (existsSync(SICHER)) { zurueck(); unlinkSync(SICHER); } });
 
-const torLauf = (statisch) => {
+const torLauf = (statisch, tor = 'farb') => {
+  const cmd = tor === 'form' ? ['tools/formen.mjs'] : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
-    execFileSync('node', ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])],
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     return { rot: false, text: '' };
   } catch (e) {
     return { rot: true, text: (e.stdout || '') + (e.stderr || '') };
@@ -59,16 +66,19 @@ const torLauf = (statisch) => {
 
 // Grundlinie: ohne Eingriff muss das Tor gruen sein, sonst misst hier nichts.
 console.log('Grundlinie …');
-const grund = torLauf(!ALLE);
-if (grund.rot) {
-  console.error('✗ Das Farbtor ist schon ohne Eingriff rot. Erst das in Ordnung bringen.');
-  console.error(grund.text.split('\n').filter((z) => z.includes('·')).join('\n'));
-  process.exit(1);
+for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor']] : [['farb', 'Farbtor']]) {
+  const grund = torLauf(!ALLE, tor);
+  if (grund.rot) {
+    console.error(`✗ Das ${name} ist schon ohne Eingriff rot. Erst das in Ordnung bringen.`);
+    console.error(grund.text.split('\n').filter((z) => z.includes('·') || z.includes('✗')).join('\n'));
+    process.exit(1);
+  }
+  console.log(`  ${name} grün, wie erwartet.`);
 }
-console.log('  grün, wie erwartet.\n');
+console.log('');
 
 let fehler = 0, gelaufen = 0;
-for (const [name, pruefung, [alt, neu], neubau] of PROBEN) {
+for (const [name, pruefung, [alt, neu], neubau, tor = 'farb'] of PROBEN) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const roh = readFileSync(SICHER, 'utf8');
   const n = roh.split(alt).length - 1;
@@ -78,17 +88,17 @@ for (const [name, pruefung, [alt, neu], neubau] of PROBEN) {
   }
   writeFileSync(APP, roh.replace(alt, neu));
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
-  const r = torLauf(!neubau);
+  const r = torLauf(!neubau, tor);
   gelaufen++;
   if (!r.rot) { console.log(`✗ ${name}: Tor blieb GRÜN — Prüfung ${pruefung} greift nicht`); fehler++; }
-  else if (!new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
+  else if (pruefung !== '✗' && !new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
     const zeilen = r.text.split('\n').filter((z) => z.trim().startsWith('·')).join(' | ');
     console.log(`✗ ${name}: rot, aber nicht durch ${pruefung} — ${zeilen}`);
     fehler++;
   } else {
-    const zeile = r.text.split('\n').find((z) => z.trim().startsWith('· ' + pruefung + ':')).trim();
-    console.log(`✓ ${name} → ${pruefung} schlägt an`);
-    console.log(`    ${zeile.slice(2)}`);
+    const zeile = (r.text.split('\n').find((z) => z.trim().startsWith(pruefung === '✗' ? '✗ ' : '· ' + pruefung + ':')) || '').trim();
+    console.log(`✓ ${name} → ${pruefung === '✗' ? 'Formentor' : pruefung} schlägt an`);
+    console.log(`    ${zeile.replace(/^[✗·]\s*/, '')}`);
   }
   zurueck();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });

@@ -144,7 +144,7 @@ const farbenDerTextur = (name) => {
 
 /* ---------- die drei Mengen ------------------------------------------- */
 
-const GEGNER_TEX = ['bullet_e', 'eb_orb', 'eb_bolt', 'eb_ring', 'eb_dart', 'eb_diamond',
+const GEGNER_TEX = ['eb_orb', 'eb_bolt', 'eb_ring', 'eb_dart', 'eb_diamond',
   'eb_wave', 'eb_star', 'eb_needle', 'eb_flame', 'eb_saw', 'missile'];
 const SPIELER_TEX = ['bullet_p', 'bullet_spread', 'bullet_focus', 'bullet_heavy', 'missile_p'];
 

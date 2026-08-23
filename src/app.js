@@ -54875,7 +54875,7 @@ return new ` + this.key + `();
 
   function Gi(T) {
     for (const [R, E] of Object.entries(pi)) ht(T, R, 540, 540, (b, I) => gi(b, I, E));
-    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "bullet_e", 28, 28, (R, E, b) => bs(R, E, b, GEFAHR, "#08060e")), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
+    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
       dunkel: "#7fb8dc",
       hell: EIGEN,
       flosse: "#9fd0ee",
@@ -55815,20 +55815,11 @@ return new ` + this.key + `();
     };
     T.save(), T.translate(R / 2, 0);
     const b = T.createLinearGradient(-R / 2, 0, R / 2, 0);
-    b.addColorStop(0, P.dunkel), b.addColorStop(.5, P.hell), b.addColorStop(1, P.dunkel), T.fillStyle = b, T.beginPath(), T.moveTo(0, 1), T.lineTo(R / 2 - 2, E * .42), T.lineTo(R / 2 - 2, E - 8), T.lineTo(-(R / 2 - 2), E - 8), T.lineTo(-(R / 2 - 2), E * .42), T.closePath(), T.fill(), T.lineWidth = 1.6, T.lineJoin = "round", T.strokeStyle = "#08060e", T.stroke(), T.fillStyle = P.flosse, T.beginPath(), T.moveTo(-(R / 2 - 2), E - 12), T.lineTo(-R / 2, E), T.lineTo(-1, E - 6), T.closePath(), T.fill(), T.beginPath(), T.moveTo(R / 2 - 2, E - 12), T.lineTo(R / 2, E), T.lineTo(1, E - 6), T.closePath(), T.fill();
+    b.addColorStop(0, P.dunkel), b.addColorStop(.5, P.hell), b.addColorStop(1, P.dunkel), T.fillStyle = b, T.beginPath(), T.moveTo(0, 1), T.lineTo(R * .28, E * .34), T.lineTo(R * .28, E - 6), T.lineTo(-R * .28, E - 6), T.lineTo(-R * .28, E * .34), T.closePath(), T.fill(), T.lineWidth = 1.6, T.lineJoin = "round", T.strokeStyle = "#08060e", T.stroke(), T.fillStyle = P.flosse, T.beginPath(), T.moveTo(-R * .26, E * .52), T.lineTo(-R * .5, E * .94), T.lineTo(-R * .5, E - 1), T.lineTo(-R * .24, E - 4), T.closePath(), T.fill(), T.beginPath(), T.moveTo(R * .26, E * .52), T.lineTo(R * .5, E * .94), T.lineTo(R * .5, E - 1), T.lineTo(R * .24, E - 4), T.closePath(), T.fill();
     const v = T.createRadialGradient(0, E - 4, 1, 0, E - 4, 7);
     v.addColorStop(0, P.flamme), v.addColorStop(1, P.rauch), T.fillStyle = v, T.beginPath(), T.arc(0, E - 4, 7, 0, 7), T.fill(), T.restore()
   }
 
-  function bs(T, R, E, b, I) {
-    const G = R / 2,
-      v = E / 2,
-      x = R * .3,
-      t = T.createRadialGradient(G, v, x * .7, G, v, R * .5);
-    t.addColorStop(0, "rgba(4,5,10,0.60)"), t.addColorStop(.7, "rgba(4,5,10,0.32)"), t.addColorStop(1, "rgba(4,5,10,0)"), T.fillStyle = t, T.fillRect(0, 0, R, E), T.fillStyle = I, T.beginPath(), T.arc(G, v, x + 2.6, 0, 7), T.fill();
-    const l = T.createRadialGradient(G - x * .28, v - x * .32, 1, G, v, x);
-    l.addColorStop(0, "#ffffff"), l.addColorStop(.34, "#ffcaa8"), l.addColorStop(.6, b), l.addColorStop(1, b), T.fillStyle = l, T.beginPath(), T.arc(G, v, x, 0, 7), T.fill(), T.fillStyle = "rgba(255,232,220,0.9)", T.beginPath(), T.arc(G - x * .18, v - x * .22, x * .34, 0, 7), T.fill()
-  }
 
   function Zt(T, R, E, b) {
     const I = T.createRadialGradient(R, E, b * .35, R, E, b);
@@ -55848,14 +55839,20 @@ return new ` + this.key + `();
     x.addColorStop(0, "#ffffff"), x.addColorStop(.4, b), x.addColorStop(1, b), T.fillStyle = x, T.beginPath(), T.arc(I, G, v, 0, 7), T.fill(), T.fillStyle = "rgba(255,255,255,0.95)", T.beginPath(), T.arc(I - v * .18, G - v * .22, v * .4, 0, 7), T.fill()
   }
 
+  // eb_bolt war eine Kapsel mit runden Kappen und damit derselbe Umriss wie
+  // der Flammentropfen (Deckung 0,75). Ein Bolzen ist kein Tropfen: harte
+  // Kanten, gleichbleibende Breite, angeschraegte Spitze, flaches Ende.
   function zs(T, R, E, b) {
     const I = R / 2,
-      G = R * .28,
-      v = E * .18,
-      x = E * .82;
-    Zt(T, I, E / 2, R * .7), T.fillStyle = "#08060e", Je(T, I, v, x, G + 2.2), T.fill();
-    const t = T.createLinearGradient(I - G, 0, I + G, 0);
-    t.addColorStop(0, b), t.addColorStop(.42, b), t.addColorStop(.55, "#ffd2c4"), t.addColorStop(.7, b), t.addColorStop(1, b), T.fillStyle = t, Je(T, I, v, x, G), T.fill(), T.fillStyle = "rgba(255,222,208,0.72)", Je(T, I, v + 4, x - 4, G * .26), T.fill()
+      G = R * .26,
+      v = E * .12,
+      x = E * .88,
+      t = (l) => {
+        T.beginPath(), T.moveTo(I, v - l), T.lineTo(I + G + l, v + E * .18), T.lineTo(I + G + l, x + l), T.lineTo(I - G - l, x + l), T.lineTo(I - G - l, v + E * .18), T.closePath()
+      };
+    Zt(T, I, E / 2, R * .7), T.fillStyle = "#08060e", t(2.2), T.fill();
+    const l = T.createLinearGradient(I - G, 0, I + G, 0);
+    l.addColorStop(0, b), l.addColorStop(.42, b), l.addColorStop(.55, "#ffd2c4"), l.addColorStop(.7, b), l.addColorStop(1, b), T.fillStyle = l, t(0), T.fill(), T.fillStyle = "rgba(255,206,186,0.6)", T.fillRect(I - G * .16, v + E * .24, G * .32, E * .58), T.fill()
   }
 
   function Is(T, R, E, b) {
@@ -55869,7 +55866,7 @@ return new ` + this.key + `();
     const I = R / 2;
     Zt(T, I, E / 2, R * .6);
     const G = x => {
-      T.beginPath(), T.moveTo(I, E * .08 - x), T.lineTo(I + R * .42 + x, E * .6 + x), T.lineTo(I + R * .16 + x, E * .6 + x), T.lineTo(I + R * .16 + x, E * .92 + x), T.lineTo(I - R * .16 - x, E * .92 + x), T.lineTo(I - R * .16 - x, E * .6 + x), T.lineTo(I - R * .42 - x, E * .6 + x), T.closePath()
+      T.beginPath(), T.moveTo(I, E * .02 - x), T.lineTo(I + R * .42 + x, E * .66 + x), T.lineTo(I + R * .11 + x, E * .56 + x), T.lineTo(I + R * .11 + x, E * .98 + x), T.lineTo(I, E * .78), T.lineTo(I - R * .11 - x, E * .98 + x), T.lineTo(I - R * .11 - x, E * .56 + x), T.lineTo(I - R * .42 - x, E * .66 + x), T.closePath()
     };
     T.fillStyle = "#08060e", G(2.2), T.fill();
     const v = T.createLinearGradient(0, E * .1, 0, E * .9);
@@ -55881,11 +55878,11 @@ return new ` + this.key + `();
       G = E / 2;
     Zt(T, I, G, R * .55);
     const v = t => {
-      T.beginPath(), T.moveTo(I, E * .08 - t), T.lineTo(I + R * .36 + t, G), T.lineTo(I, E * .92 + t), T.lineTo(I - R * .36 - t, G), T.closePath()
+      T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()
     };
     T.fillStyle = "#08060e", v(2.4), T.fill();
     const x = T.createLinearGradient(I - R * .36, 0, I + R * .36, 0);
-    x.addColorStop(0, b), x.addColorStop(.44, b), x.addColorStop(.56, "#ffd2c4"), x.addColorStop(.68, b), x.addColorStop(1, b), T.fillStyle = x, v(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.34)", T.beginPath(), T.moveTo(I, E * .14), T.lineTo(I + R * .16, G), T.lineTo(I, E * .86), T.lineTo(I - R * .16, G), T.closePath(), T.fill()
+    x.addColorStop(0, b), x.addColorStop(.44, b), x.addColorStop(.56, "#ffd2c4"), x.addColorStop(.68, b), x.addColorStop(1, b), T.fillStyle = x, v(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.34)", T.beginPath(), T.moveTo(I, E * .1), T.lineTo(I + R * .1, G), T.lineTo(I, E * .9), T.lineTo(I - R * .1, G), T.closePath(), T.fill()
   }
 
   function Gs(T, R, E, b) {
@@ -55911,30 +55908,30 @@ return new ` + this.key + `();
     const I = R / 2;
     Zt(T, I, E / 2, R * .9);
     const G = x => {
-      T.beginPath(), T.moveTo(I, E * .03 - x), T.quadraticCurveTo(I + R * .5 + x, E * .5, I, E * .97 + x), T.quadraticCurveTo(I - R * .5 - x, E * .5, I, E * .03 - x), T.closePath()
+      T.beginPath(), T.moveTo(I, E * .02 - x), T.quadraticCurveTo(I + R * .38 + x, E * .5, I, E * .98 + x), T.quadraticCurveTo(I - R * .38 - x, E * .5, I, E * .02 - x), T.closePath()
     };
     T.fillStyle = "#08060e", G(1.8), T.fill();
     const v = T.createLinearGradient(I - R * .5, 0, I + R * .5, 0);
-    v.addColorStop(0, b), v.addColorStop(.44, b), v.addColorStop(.55, "#ffd2c4"), v.addColorStop(.68, b), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.85)", T.beginPath(), T.ellipse(I - R * .06, E * .3, R * .07, E * .16, 0, 0, 7), T.fill()
+    v.addColorStop(0, b), v.addColorStop(.44, b), v.addColorStop(.55, "#ffd2c4"), v.addColorStop(.68, b), v.addColorStop(1, b), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.85)", T.beginPath(), T.ellipse(I - R * .03, E * .32, R * .05, E * .18, 0, 0, 7), T.fill()
   }
 
   function Vs(T, R, E, b) {
     const I = R / 2;
     Zt(T, I, E / 2, R * .6);
     const G = x => {
-      T.beginPath(), T.moveTo(I, E * .06 - x), T.quadraticCurveTo(I + R * .46 + x, E * .55, I, E * .94 + x), T.quadraticCurveTo(I - R * .46 - x, E * .55, I, E * .06 - x), T.closePath()
+      T.beginPath(), T.moveTo(I, E * .02 - x), T.quadraticCurveTo(I + R * .44 + x, E * .18, I + R * .4 + x, E * .44), T.quadraticCurveTo(I + R * .36 + x, E * .6, I + R * .12 + x, E * .68), T.quadraticCurveTo(I + R * .3 + x, E * .82, I + R * .05 + x, E * .99 + x), T.lineTo(I - R * .05 - x, E * .99 + x), T.quadraticCurveTo(I - R * .3 - x, E * .82, I - R * .12 - x, E * .68), T.quadraticCurveTo(I - R * .36 - x, E * .6, I - R * .4 - x, E * .44), T.quadraticCurveTo(I - R * .44 - x, E * .18, I, E * .02 - x), T.closePath()
     };
     T.fillStyle = "#08060e", G(2.2), T.fill();
     const v = T.createLinearGradient(0, E * .06, 0, E * .94);
-    v.addColorStop(0, "#ffe6a0"), v.addColorStop(.2, b), v.addColorStop(1, "#7a1e06"), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.8)", T.beginPath(), T.ellipse(I, E * .34, R * .1, E * .14, 0, 0, 7), T.fill()
+    v.addColorStop(0, "#ffe6a0"), v.addColorStop(.26, b), v.addColorStop(1, "#7a1e06"), T.fillStyle = v, G(0), T.fill(), T.fillStyle = "rgba(255,255,255,0.8)", T.beginPath(), T.ellipse(I, E * .26, R * .13, E * .13, 0, 0, 7), T.fill()
   }
 
   function js(T, R, E, b) {
     const I = R / 2,
       G = E / 2,
-      v = R * .36,
-      x = R * .24,
-      t = 8;
+      v = R * .44,
+      x = R * .19,
+      t = 6;
     Zt(T, I, G, R * .55);
     const l = (a, r) => {
       T.beginPath();
@@ -61444,7 +61441,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           defaultKey: "bullet_p",
           maxSize: 220
         }), this.enemyBullets = this.physics.add.group({
-          defaultKey: "bullet_e",
+          defaultKey: "eb_orb",
           maxSize: 220
         }), this.enemies = this.physics.add.group({
           classType: oi,

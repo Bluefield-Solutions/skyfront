@@ -40,7 +40,8 @@ npm run pages      Web-App (Manifest, Symbol, Startbilder, Dienst-Arbeiter)
 npm run bildtor    sieht das Spiel so aus, wie es soll?  (-- --bilder legt sie ab)
 npm run farbtor    drei Farbbaender: Gefahr, Eigenfeuer, Aufsammler
                    (-- --nurstatisch laesst den Browserteil weg, ~2 s)
-npm run farbproben sieben Gegenproben zum Farbtor (-- --alle, ~4 min)
+npm run farbproben acht Gegenproben zu Farb- und Formentor (-- --alle, ~6 min)
+npm run formen     Silhouettenabstand der Gegnerprojektile
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -49,7 +50,7 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-`farbtor` → Boot-Test des Masters → `dist/check-report.md`.
+`farbtor` → `formen` → Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -127,6 +128,18 @@ Jede hat mindestens eine Runde gekostet.
    Kulisse bei 2,7 bis 2,9:1 — sie hatten keinen Rand, weil ein Rand dort
    gar nicht ankommen konnte. Das Leuchten gehoert in Spur und
    Muendungsfeuer, nicht in den Koerper.
+14. **Eine Kennzahl allein misst nie eine Gestalt.** Der Formentor rechnete
+   erst nur die gemeinsame Flaeche (IoU). Als eb_bolt von der runden Kapsel
+   zum kantigen Leuchtspurkoerper wurde — fuer das Auge sofort ein anderes
+   Ding —, STIEG die Zahl von 0,75 auf 0,80, weil der Bolzen laenger geworden
+   war. Erst die zweite Zahl (Breitenprofil ueber sechzehn Hoehen) sagt, WIE
+   die Flaeche verteilt ist. Verwechselbar ist ein Paar nur, wenn beide Zahlen
+   eng sind.
+15. **Was sich dreht, sieht man sich drehen.** Der Formentor urteilte erst
+   ueber die schlimmste Lage. Eine Raute mit 90 Grad in der Sekunde deckt den
+   Pfeil in einem Augenblick von vieren und steht in den anderen dreien quer —
+   das ist kein Lesbarkeitsfehler, sondern ein Einzelbild. Gemittelt wird ueber
+   alle Lagen, die schlimmste steht daneben.
 
 ---
 
@@ -140,7 +153,7 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
-tools/             boot · bildtor · farbtor · farbproben · schirme · symbol · bilder
+tools/             boot · bildtor · farbtor · formen · farbproben · schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```
