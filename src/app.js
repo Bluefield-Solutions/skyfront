@@ -56070,22 +56070,15 @@ return new ` + this.key + `();
   }
   const Js = {
       p_fighter1: __SKFA[3],
-      enemyPlane: __SKFA[4],
-      boss1: __SKFA[5]
+      enemyPlane: __SKFA[4]
     },
-    ks = {
-      bg_ocean: __SKFA[6]
-    },
+    ks = {},
     Zs = {
       warship: __SKFA[7],
       island: __SKFA[8],
       island2: __SKFA[9],
       island3: __SKFA[10],
-      carrier: __SKFA[11],
-      e_grunt: __SKFA[12],
-      e_weaver: __SKFA[13],
-      e_bomber: __SKFA[14],
-      e_gunship: __SKFA[15]
+      carrier: __SKFA[11]
     },
     qs = {
       boss1: __SKFA[16],
