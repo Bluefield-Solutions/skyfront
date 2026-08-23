@@ -40,6 +40,10 @@
     #splash .sub{margin-top:8px;font:700 13px/1 -apple-system,Roboto,sans-serif;
       letter-spacing:6px;color:#ffcf6a}
     #splash .load{margin-top:26px;font:12px/1 monospace;letter-spacing:2px;color:#7fb3d8;animation:sfpulse 1.3s ease-in-out infinite}
+    #splash .balken{margin-top:14px;width:190px;height:4px;border-radius:2px;
+      background:rgba(120,180,220,.16);overflow:hidden}
+    #splash .balken i{display:block;height:100%;width:0;border-radius:2px;
+      background:linear-gradient(90deg,#4fb6e8,#ffcf6a);transition:width .28s ease}
     @keyframes sffloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
     @keyframes sfpulse{0%,100%{opacity:.35}50%{opacity:1}}
   </style>
@@ -56,6 +60,7 @@
     <div class="wm">SKYFRONT</div>
     <div class="sub">1945 · AIRTRACE</div>
     <div class="load">lädt …</div>
+    <div class="balken"><i></i></div>
   </div>
   <div id="diag"></div>
   <script>
@@ -74,5 +79,21 @@
       // ueber dem Ladeschirm, und der steht auf dem Telefon sekundenlang im
       // Bild. Fehler bleiben sichtbar — die will man sehen.
       try { console.log('Script läuft (UA: ' + navigator.userAgent.slice(0, 60) + ')'); } catch (e) {}
+
+      // Der Balken liest den Prozentsatz aus dem Text, den das Spiel ohnehin
+      // schreibt ("lädt … 52%"). So bleibt app.js unangetastet: die Huelle
+      // stellt dar, das Spiel meldet. Wer den Text im Spiel aendert, muss
+      // hier nichts nachziehen — der Balken bleibt dann eben stehen, statt
+      // etwas Falsches zu zeigen.
+      try {
+        var zeile = document.querySelector('#splash .load');
+        var fuell = document.querySelector('#splash .balken i');
+        if (zeile && fuell && window.MutationObserver) {
+          new MutationObserver(function () {
+            var m = /(\d+)\s*%/.exec(zeile.textContent || '');
+            if (m) fuell.style.width = Math.min(100, +m[1]) + '%';
+          }).observe(zeile, { childList: true, characterData: true, subtree: true });
+        }
+      } catch (e) {}
     })();
   </script>

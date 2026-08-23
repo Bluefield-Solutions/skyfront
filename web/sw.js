@@ -68,17 +68,25 @@ async function vorladen() {
   const c = await caches.open(MARKE);
   const offen = [];
   for (const pfad of BILDER) if (!(await c.match(pfad))) offen.push(pfad);
-  let i = 0;
+  let i = 0, fertig = 0;
+  await melde(0, offen.length);
   async function arbeiter() {
     while (i < offen.length) {
       const pfad = offen[i++];
       try {
         const a = await fetch(pfad);
-        if (a && a.ok) await c.put(pfad, a.clone());
+        if (a && a.ok) { await c.put(pfad, a.clone()); fertig++; await melde(fertig, offen.length); }
       } catch (e) { /* naechster Start versucht es wieder */ }
     }
   }
   await Promise.all([arbeiter(), arbeiter(), arbeiter(), arbeiter()]);
+}
+
+// Der Seite sagen, wie weit es ist. Sonst laedt das Telefon still 9 MB und
+// niemand weiss, warum das Netz arbeitet.
+async function melde(fertig, gesamt) {
+  const klienten = await self.clients.matchAll();
+  for (const k of klienten) k.postMessage({ typ: 'vorladen-stand', fertig, gesamt });
 }
 
 self.addEventListener('message', e => {

@@ -204,6 +204,32 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         var a = navigator.serviceWorker.controller || reg.active;
         if (a) a.postMessage({ typ: 'vorladen' });
       }, 12000);
+
+      // Anzeige fuer das Nachladen. Sie sitzt im schwarzen Balken ueber der
+      // Leinwand, damit sie nichts vom Spiel verdeckt, und verschwindet,
+      // sobald alles da ist.
+      var schild = null;
+      navigator.serviceWorker.addEventListener('message', function (e) {
+        if (!e.data || e.data.typ !== 'vorladen-stand') return;
+        if (!schild) {
+          schild = document.createElement('div');
+          schild.style.cssText = 'position:fixed;right:calc(10px + env(safe-area-inset-right));'
+            + 'z-index:99998;font:600 11px/1.2 sans-serif;color:#9fc4e4;'
+            + 'background:rgba(10,16,26,.72);border:1px solid #24405c;border-radius:9px;'
+            + 'padding:6px 9px;pointer-events:none;transition:opacity .5s';
+          document.body.appendChild(schild);
+          var lw = document.querySelector('canvas');
+          var platz = lw ? lw.getBoundingClientRect().top : 0;
+          schild.style.top = (platz >= 40 ? platz - 34 : 8) + 'px';
+        }
+        schild.textContent = e.data.fertig >= e.data.gesamt
+          ? 'offline bereit'
+          : 'für offline: ' + e.data.fertig + '/' + e.data.gesamt;
+        if (e.data.fertig >= e.data.gesamt) {
+          setTimeout(function () { schild.style.opacity = '0'; }, 2200);
+          setTimeout(function () { if (schild) schild.remove(); }, 3000);
+        }
+      });
     }).catch(function () {});
   });
   // Absichtlich KEIN location.reload() bei Wechsel: das Spiel wuerde mitten
