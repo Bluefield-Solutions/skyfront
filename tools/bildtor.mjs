@@ -27,6 +27,12 @@
 // Weil jetzt alle Modi in EINEM Gefecht liegen, wird "Aus" zwei Mal gemessen,
 // am Anfang und nach der vollen Runde. Der Abstand zwischen beiden ist das
 // Rauschen — und nur was deutlich darueber liegt, ist ueberhaupt eine Wirkung.
+//
+// Geurteilt wird ueber den SCHLIMMSTEN der fuenf Zuege, nicht ueber den
+// mittleren. Das ist gemessen: der kaputte Nebel zeigte sich mit
+// 21 · 24,6 · 132 · 25,7 · 22,8 — in genau EINEM von fuenf Bildern, naemlich
+// am oberen Anschlag, wo die Unterkante des Nebellochs ins Band faellt. Ein
+// Median haette das Tor still getoetet.
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 // Grenzen anteilig, nie absolut. Eine feste Schwelle von 45 hat auf GitHub
@@ -36,8 +42,16 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 //
 // Deshalb ist "Aus" die Bezugsgroesse: kein Modus darf deutlich ueber dem
 // liegen, was ohne Modifikator ohnehin im Bild ist.
+//
+// Bezug ist der MITTELWERT beider "Aus"-Messungen, nicht die erste. Gemessen
+// ueber sechs Laeufe: "Aus" am Anfang 29..32, "Aus (2)" am Ende 25..52 — das
+// spaete Gefecht ist schlicht voller, Explosionen sind echte Helligkeits-
+// spruenge. Wer nur die erste nimmt, meldet irgendwann die zweite selbst rot.
+// Deshalb sind beide zusammen der Bezug und keine von beiden ein Prueflinge.
 const FAKTOR = 2.5;        // so viel darf ein Modus ueber der Grundlinie liegen
-const KANTE_MIN = 45;      // aber nie strenger als das
+// Gemessen ueber sechs Laeufe: heile Modi 9,5 bis 42,6 — der kaputte Nebel
+// 132 bis 145. Der Boden liegt dazwischen und naeher am Heilen.
+const KANTE_MIN = 55;      // aber nie strenger als das
 const KANTE_MAX = 200;     // und nie lockerer als das
 // Gegengeprobt: heiles Menue 6,8 bis 7,9 — einfarbige Flaeche darueber 0,0,
 // gleich ob schwarz, grau oder weiss. Die alte Schwelle 7 lag MITTEN im
@@ -54,6 +68,11 @@ const BAND_VON = 0.22, BAND_BIS = 0.80;
 // internen Puffer von 1080. Sonst misst dasselbe Bild je nach Aufloesung
 // anders. (Eiserne Regel: jede Zahl traegt ihre Messstelle mit.)
 const MESSBREITE = 390;
+// So viele Bilder je Modus, waehrend die Maschine von unten nach oben und
+// zurueck gezogen wird. Jedes kostet 0,7 bis 1,5 s — das ist inzwischen der
+// ganze Lauf. Gegengeprobt mit dem kaputten Nebel: bei fuenf Bildern schlaegt
+// das Tor weiterhin an (siehe unten), bei sieben ist es nicht empfindlicher.
+const BILDERJEMODUS = 5;
 
 // Reihenfolge der Modifikator-Auswahl im Spiel:
 //   0 Aus · 1 Auto · 2 Zufall · 3 Nacht · 4 Sturm · 5 Daemmerung · 6 Nebel
@@ -172,8 +191,8 @@ for (const [nr, name] of MODI) {
 
   let schlimmster = { sprung: 0, bei: -1 }, schlimmstesBild = null, hellSumme = 0, streuSumme = 0;
   await seite.mouse.move(cx, unten); await seite.mouse.down();
-  for (let i = 0; i <= 6; i++) {
-    const t = i / 6, y = t < 0.5 ? unten + (oben - unten) * (t * 2) : oben + (unten - oben) * ((t - 0.5) * 2);
+  for (let i = 0; i <= BILDERJEMODUS - 1; i++) {
+    const t = i / (BILDERJEMODUS - 1), y = t < 0.5 ? unten + (oben - unten) * (t * 2) : oben + (unten - oben) * ((t - 0.5) * 2);
     await seite.mouse.move(cx, y); await seite.waitForTimeout(90);
     const m = await messen(seite, true, BILDER);
     hellSumme += m.hell; streuSumme += m.streuung;
@@ -181,7 +200,7 @@ for (const [nr, name] of MODI) {
   }
   await seite.mouse.up();
 
-  const eintrag = { name, ...schlimmster, hell: +(hellSumme / 7).toFixed(1), streuung: +(streuSumme / 7).toFixed(1) };
+  const eintrag = { name, ...schlimmster, hell: +(hellSumme / BILDERJEMODUS).toFixed(1), streuung: +(streuSumme / BILDERJEMODUS).toFixed(1) };
   gemessen.push(eintrag);
   console.log(`    ${name.padEnd(10)} groesster Sprung ${String(eintrag.sprung).padStart(5)} (y=${eintrag.bei})  Band-Helligkeit ${eintrag.hell}`);
   if (BILDER && schlimmstesBild) writeFileSync(`dist/bildtor/${name.replace(/[^\wÄÖÜäöü]/g, '_')}.png`, Buffer.from(schlimmstesBild.split(',')[1], 'base64'));
@@ -196,9 +215,12 @@ const grund2 = gemessen.find(g => g.name === 'Aus (2)');
 if (!grund) {
   befunde.push('Grundlinie "Aus" wurde nicht gemessen — ohne sie ist kein Urteil moeglich.');
 } else {
-  const grenze = Math.min(KANTE_MAX, Math.max(KANTE_MIN, grund.sprung * FAKTOR));
-  console.log(`\n  Grundlinie "Aus" ${grund.sprung} → Grenze ${grenze.toFixed(1)}`);
-  for (const g of gemessen) {
+  const basis = grund2 ? (grund.sprung + grund2.sprung) / 2 : grund.sprung;
+  const grenze = Math.min(KANTE_MAX, Math.max(KANTE_MIN, basis * FAKTOR));
+  console.log(`\n  Grundlinie "Aus" ${grund.sprung}${grund2 ? ' und ' + grund2.sprung : ''} → Bezug ${basis.toFixed(1)} → Grenze ${grenze.toFixed(1)}`);
+  // Geurteilt wird nur ueber die Modi. Die beiden "Aus" sind der Massstab —
+  // ein Massstab misst sich nicht selbst.
+  for (const g of gemessen.filter(g => g !== grund && g !== grund2)) {
     if (g.sprung > grenze) {
       befunde.push(`${g.name}: harte Querkante, Sprung ${g.sprung} bei y=${g.bei} (Grenze ${grenze.toFixed(1)})`);
       console.log(`  ✗ ${g.name}`);
@@ -217,7 +239,7 @@ if (!grund) {
     if (stumm.length === wirkung.length) {
       befunde.push('Kein Modus veraendert das Bild mehr als das blosse Rauschen — das Tor misst hier nichts.');
     } else if (stumm.length) {
-      console.log(`  (i) ohne messbare Wirkung auf die Helligkeit: ${stumm.map(s => s.name).join(', ')}`);
+      console.log(`  (i) unter der Rauschgrenze, sagt also nichts: ${stumm.map(s => s.name).join(', ')}`);
     }
   }
 }
