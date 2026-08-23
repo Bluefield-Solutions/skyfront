@@ -209,7 +209,7 @@ Werkzeuge stehen deshalb daneben und verlangen einen Blick:
   gebauten Spiel gemessen, weil die Gegnerbilder aus dem WebP-Vorrat kommen
   und in keiner Tabelle stehen).
 
-  `npm run farbproben` baut fünfzehn Fehler ein und verlangt, dass jeder
+  `npm run farbproben` baut zwanzig Fehler ein und verlangt, dass jeder
   gefunden wird — darunter den alten Violettwert `#8a6cff`, der nur 38 von
   `pu_core` entfernt lag.
 - **`npm run schirme`** startet jede der neun Menü-Szenen einzeln und misst
