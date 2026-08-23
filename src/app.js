@@ -54327,6 +54327,35 @@ return new ` + this.key + `();
     // teleportiert und schnelle Geschosse nicht durch Gegner hindurchspringen.
     ZF = T => tt.Math.Clamp(T || 16.667, 8, 50) / 16.667,
     GEFAHR = "#ff3a2a",
+    // Die Tiefenordnung des Spielfelds. 0 bis 19 ist Kulisse, Gegner,
+    // Spieler, Aufsammler und Wirkung; auf 20 fliegen die Gegnerkugeln,
+    // und darueber liegt nichts mehr, was bei jedem Treffer feuert.
+    // Ab 60 faengt die Bedienoberflaeche an.
+    TIEFE_WIRKUNG = 19,
+    TIEFE_KUGEL = 20,
+    // Ausnahme mit Namen: was den Schirm ohnehin leerraeumt, darf darueber.
+    // Der Sturm loescht alle Gegnerkugeln — er kann keine verdecken.
+    TIEFE_UEBER_GEFAHR = 21,
+    // Wie unruhig der Untergrund sein darf. Gemessen wird die KANTENENERGIE:
+    // die mittlere Helligkeitsaenderung von Punkt zu Punkt, auf einer
+    // Kantenlaenge von KANTEN_PROBE abgetastet. Nicht die Helligkeit — die
+    // waere die falsche Messstelle. Ein dunkles Bild kann unruhiger sein als
+    // ein helles, und Abdunkeln nimmt der Kugel ihren Rand: der dunkle Rand
+    // traegt gerade ueber HELLEM Grund (Frost 6,65:1 → 4,68:1 bei 22 %
+    // Abdunkelung). Was stoert, sind die Kanten, nicht die Helligkeit.
+    //
+    // Zurueckgenommen wird deshalb der Kontrast gegen die MITTELFARBE des
+    // Bildes: die mittlere Helligkeit bleibt, der Umfang schrumpft. Das
+    // kostet der Kugel nichts und nimmt dem Bild die Unruhe.
+    // ZIEL aus der Verteilung der dreizehn Biome: neun liegen zwischen
+    // 0,033 und 0,075, vier zwischen 0,142 und 0,207. Die Grenze liegt in
+    // der Luecke. MAX ist ein Deckel mit einem Grund, den man SEHEN muss:
+    // bei 30 % flachen Alpen und Frost sichtbar ab, bei 24 % behalten sie
+    // ihre Tiefe. Vier Stufen nebeneinandergelegt und angesehen.
+    KANTEN_ZIEL = .115,
+    KANTEN_MAX = .24,
+    KANTEN_PROBE = 192,
+    Lin = T => { const R = T / 255; return R <= .03928 ? R / 12.92 : ((R + .055) / 1.055) ** 2.4 },
     GEFAHR_N = 16726570,
     EIGEN = "#bfefff",
     EIGEN_N = 12578815,
@@ -55824,6 +55853,55 @@ return new ` + this.key + `();
   function Zt(T, R, E, b) {
     const I = T.createRadialGradient(R, E, b * .35, R, E, b);
     I.addColorStop(0, "rgba(4,6,12,0.55)"), I.addColorStop(.7, "rgba(4,6,12,0.26)"), I.addColorStop(1, "rgba(4,6,12,0)"), T.fillStyle = I, T.beginPath(), T.arc(R, E, b, 0, 7), T.fill()
+  }
+
+  // Wie unruhig ist dieses Bild, und welche Farbe nimmt ihm die Unruhe, ohne
+  // seine Helligkeit zu verschieben? Gemessen wird die KANTENENERGIE: die
+  // mittlere Helligkeitsaenderung von Punkt zu Punkt, auf KANTEN_PROBE
+  // abgetastet. Zurueck kommt die Deckkraft der Beruhigungsschicht und die
+  // Mittelfarbe, die sie tragen soll.
+  //
+  // Steht als MODULFUNKTION und nicht in der Szene, damit das Tor sie
+  // aufrufen kann statt ihre Formel nachzurechnen: die Gegenprobe "Schicht
+  // auf Schwarz" blieb gruen, solange die Tafel die Mittelfarbe selbst
+  // ausrechnete und die des Spiels nie zu sehen bekam.
+  function bodenMessung(T) {
+    const R = {
+      alpha: 0,
+      farbe: 0,
+      energie: 0,
+      median: 0
+    };
+    try {
+      if (!T || !T.width) return R;
+      const E = KANTEN_PROBE,
+        b = document.createElement("canvas");
+      b.width = E, b.height = E;
+      const I = b.getContext("2d", {
+        willReadFrequently: !0
+      });
+      I.drawImage(T, 0, 0, T.width, T.height, 0, 0, E, E);
+      const G = I.getImageData(0, 0, E, E).data,
+        v = new Float64Array(E * E);
+      let x = 0, t = 0, l = 0;
+      for (let e = 0, s = 0; e < G.length; e += 4, s++) v[s] = .2126 * Lin(G[e]) + .7152 * Lin(G[e + 1]) + .0722 * Lin(G[e + 2]), x += G[e], t += G[e + 1], l += G[e + 2];
+      let p = 0;
+      for (let e = 0; e < E - 1; e++)
+        for (let s = 0; s < E - 1; s++) {
+          const o = e * E + s;
+          p += Math.abs(v[o + 1] - v[o]) + Math.abs(v[o + E] - v[o])
+        }
+      const a = p / ((E - 1) * (E - 1)),
+        r = E * E,
+        n = Array.from(v).sort((e, s) => e - s);
+      return {
+        alpha: tt.Math.Clamp(1 - KANTEN_ZIEL / Math.max(1e-6, a), 0, KANTEN_MAX),
+        farbe: Math.round(x / r) << 16 | Math.round(t / r) << 8 | Math.round(l / r),
+        energie: a,
+        median: n[n.length >> 1]
+      }
+    } catch (E) {}
+    return R
   }
 
   function Je(T, R, E, b, I) {
@@ -61437,7 +61515,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         var d, u, c, g;
         this.over = !1, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
         const R = 96;
-        this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.bullets = this.physics.add.group({
+        this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.spielfeld = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(1.6).setVisible(!1), this.bullets = this.physics.add.group({
           defaultKey: "bullet_p",
           maxSize: 220
         }), this.enemyBullets = this.physics.add.group({
@@ -61860,7 +61938,7 @@ dann ausweichen!`, {
           I !== "bg_ocean" && this.textures.exists(I) ? (this.sea.setTexture(I), this.sea.clearTint(), s = I) : E[b] !== void 0 && this.textures.exists("bg_ocean") ? (this.sea.setTexture("bg_ocean"), this.sea.setTint(E[b]), s = "bg_ocean") : this.textures.exists(I) && (this.sea.setTexture(I), this.sea.clearTint(), s = I);
           const o = this.textures.exists(s) ? this.textures.get(s).getSourceImage() : null,
             i = o && o.width ? o.width : J;
-          this.sea.setTileScale(J / Math.max(1, i - 2), J / i), this.sea.tilePositionX = 1
+          this.sea.setTileScale(J / Math.max(1, i - 2), J / i), this.sea.tilePositionX = 1, this.bodenKey = s
         };
         if (G(), I !== "bg_ocean" && !this.textures.exists(I)) {
           const s = o => {
@@ -61870,6 +61948,10 @@ dann ausweichen!`, {
         }(t = this.stageOverlay) == null || t.setFillStyle(R.sky, R.skyAlpha * .45);
         const v = (p = (l = hi[R.bg]) != null ? l : hi[b]) != null ? p : hi.bg_ocean;
         this.gradeTop.setTint(v.top).setAlpha(v.topA), this.gradeBot.setTint(v.bot).setAlpha(v.botA), this.swell.setTint(v.swellTint).setAlpha(v.swellA), this.clouds.setAlpha(R.cloud);
+        if (this.spielfeld) {
+          const w = this.untergrundRuhe(this.bodenKey || "sea");
+          this.spielfeld.setFillStyle(w.farbe, w.alpha).setVisible(w.alpha > .01)
+        }
         const x = {
           bg_ocean: .5,
           bg_coast: .45,
@@ -62786,6 +62868,16 @@ ${R.label}`, {
         const t = v.hit;
         x.setCircle(t, G.width / 2 - t, G.height / 2 - t), x.setVelocity(b, I)
       }
+      // Wie unruhig ist dieser Untergrund, und mit welcher Farbe nimmt man
+      // ihm die Unruhe? Einmal je Biom gerechnet und gemerkt: das Abtasten
+      // kostet ein paar Millisekunden, aber nur beim ersten Betreten.
+      untergrundRuhe(R) {
+        var E;
+        if ((E = this.ruheCache) != null && E[R]) return this.ruheCache[R];
+        this.ruheCache = this.ruheCache || {};
+        const b = this.textures.exists(R) ? this.textures.get(R).getSourceImage() : null;
+        return this.ruheCache[R] = bodenMessung(b)
+      }
       telegraph(R) {
         const E = R.cfg.scale;
         R.setTintFill(16777215), this.time.delayedCall(130, () => {
@@ -63391,7 +63483,7 @@ ${G}`, {
         }));
         for (const G of [0, 90, 190]) this.fxFly("shieldRing", E, b, {
           tint: 5943551,
-          depth: 20,
+          depth: TIEFE_UEBER_GEFAHR,
           scale: .3,
           alpha: .85,
           to: {
@@ -63403,7 +63495,7 @@ ${G}`, {
         });
         this.fxFly("spark", E, b, {
           tint: 14676223,
-          depth: 21,
+          depth: TIEFE_UEBER_GEFAHR,
           scale: 3,
           to: {
             scale: 22,
@@ -63417,7 +63509,7 @@ ${G}`, {
             x = 120 + G % 3 * 30;
           this.fxFly("spark", E, b, {
             tint: 10475775,
-            depth: 21,
+            depth: TIEFE_UEBER_GEFAHR,
             scale: .5,
             alpha: .95,
             to: {
@@ -63779,7 +63871,7 @@ ${G}`, {
             duration: 300,
             onComplete: () => G.destroy()
           });
-          const v = this.add.image(I.x, I.y, "spark").setTint(16777215).setBlendMode(tt.BlendModes.ADD).setDepth(20).setScale(.9);
+          const v = this.add.image(I.x, I.y, "spark").setTint(16777215).setBlendMode(tt.BlendModes.ADD).setDepth(TIEFE_WIRKUNG).setScale(.9);
           this.tweens.add({
             targets: v,
             scale: 3.2,
@@ -64394,7 +64486,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       impact(R, E, b) {
         this.fxFly("spark", R, E, {
           tint: b,
-          depth: 21,
+          depth: TIEFE_WIRKUNG,
           scale: .45,
           alpha: .95,
           to: {
@@ -64404,7 +64496,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
           dur: 170
         }), this.fxFly("shieldRing", R, E, {
           tint: b,
-          depth: 21,
+          depth: TIEFE_WIRKUNG,
           scale: .18,
           alpha: .8,
           to: {
@@ -64418,7 +64510,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             v = 14 + I % 2 * 9;
           this.fxFly("spark", R, E, {
             tint: b,
-            depth: 21,
+            depth: TIEFE_WIRKUNG,
             scale: .32,
             alpha: .9,
             to: {
@@ -65030,6 +65122,9 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
   }, Oe("main.ts geladen ✓ – starte Phaser…");
   try {
     const T = window.__game=new tt.Game(Nn);
+    // Pruefnaht: tools/untergrund.mjs misst damit DIESE Funktion, nicht
+    // eine nachgebaute Formel.
+    window.__SKF_UNTERGRUND = bodenMessung;
     Oe("Phaser.Game erstellt ✓");
     try {
       const R = T.canvas;

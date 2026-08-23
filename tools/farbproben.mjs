@@ -44,6 +44,11 @@ const PROBEN = [
       'v.addColorStop(0, b), v.addColorStop(.5, "#ffffff"), v.addColorStop(1, b)'], true],
   // Die Raute wieder zur eingeschriebenen Scheibe: dann ist sie flaechen-
   // UND profilgleich mit eb_orb, und genau das soll das Formentor melden.
+  // Die Beruhigungsschicht auf Schwarz statt Mittelfarbe: dann DUNKELT sie ab
+  // statt Kontrast zu nehmen, und genau das soll die Untergrund-Tafel melden.
+  ['Beruhigungsschicht auf Schwarz', '✗', [
+    'farbe: Math.round(x / r) << 16 | Math.round(t / r) << 8 | Math.round(l / r),',
+    'farbe: 0,'], true, 'boden'],
   ['eb_diamond zurueck zur Scheibenform', '✗', [
     'T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()',
     'T.beginPath(), T.arc(I, G, R * .3 + t, 0, 7), T.closePath()'], true, 'form'],
@@ -55,7 +60,9 @@ const zurueck = () => copyFileSync(SICHER, APP);
 process.on('exit', () => { if (existsSync(SICHER)) { zurueck(); unlinkSync(SICHER); } });
 
 const torLauf = (statisch, tor = 'farb') => {
-  const cmd = tor === 'form' ? ['tools/formen.mjs'] : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
+  const cmd = tor === 'form' ? ['tools/formen.mjs']
+    : tor === 'boden' ? ['tools/untergrund.mjs']
+    : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     return { rot: false, text: '' };
@@ -66,7 +73,7 @@ const torLauf = (statisch, tor = 'farb') => {
 
 // Grundlinie: ohne Eingriff muss das Tor gruen sein, sonst misst hier nichts.
 console.log('Grundlinie …');
-for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor']] : [['farb', 'Farbtor']]) {
+for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['boden', 'Untergrund-Tafel']] : [['farb', 'Farbtor']]) {
   const grund = torLauf(!ALLE, tor);
   if (grund.rot) {
     console.error(`✗ Das ${name} ist schon ohne Eingriff rot. Erst das in Ordnung bringen.`);
@@ -96,9 +103,14 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb'] of PROBEN) {
     console.log(`✗ ${name}: rot, aber nicht durch ${pruefung} — ${zeilen}`);
     fehler++;
   } else {
-    const zeile = (r.text.split('\n').find((z) => z.trim().startsWith(pruefung === '✗' ? '✗ ' : '· ' + pruefung + ':')) || '').trim();
-    console.log(`✓ ${name} → ${pruefung === '✗' ? 'Formentor' : pruefung} schlägt an`);
-    console.log(`    ${zeile.replace(/^[✗·]\s*/, '')}`);
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel' }[tor];
+    // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
+    const zeile = (r.text.split('\n').find((z) => {
+      const x = z.trim();
+      return pruefung === '✗' ? (x.startsWith('✗ ') || x.startsWith('· ')) : x.startsWith('· ' + pruefung + ':');
+    }) || '').trim();
+    console.log(`✓ ${name} → ${pruefung === '✗' ? torName : pruefung} schlägt an`);
+    console.log(`    ${zeile.replace(/^[✗·]\s*/, '') || '(Tor rot, keine Einzelzeile)'}`);
   }
   zurueck();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });

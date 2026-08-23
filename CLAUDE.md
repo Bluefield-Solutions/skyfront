@@ -42,6 +42,7 @@ npm run farbtor    drei Farbbaender: Gefahr, Eigenfeuer, Aufsammler
                    (-- --nurstatisch laesst den Browserteil weg, ~2 s)
 npm run farbproben acht Gegenproben zu Farb- und Formentor (-- --alle, ~6 min)
 npm run formen     Silhouettenabstand der Gegnerprojektile
+npm run untergrund Kantenenergie der dreizehn Biome und die Beruhigung
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -50,7 +51,8 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-`farbtor` → `formen` → Boot-Test des Masters → `dist/check-report.md`.
+`farbtor` → `formen` → `untergrund` → Boot-Test des Masters →
+`dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -140,6 +142,30 @@ Jede hat mindestens eine Runde gekostet.
    Pfeil in einem Augenblick von vieren und steht in den anderen dreien quer —
    das ist kein Lesbarkeitsfehler, sondern ein Einzelbild. Gemittelt wird ueber
    alle Lagen, die schlimmste steht daneben.
+16. **Der Schluessel einer TileSprite ist eine interne GUID.** Phaser baut
+   sich fuer die Kachelung eine eigene Textur; `this.sea.texture.key` gibt
+   `a3363582-eb6d-...` zurueck, nicht `bg_city`. Wer damit etwas nachschlaegt,
+   findet nichts und merkt es nicht — die Beruhigungsschicht kam so mit
+   Deckkraft 0 heraus und sah aus wie eine Schicht, die nichts tut.
+   `this.bodenKey` haelt den wirklich gesetzten Namen fest.
+17. **Ein Tor, das die Formel NACHRECHNET, prueft nichts.** Die
+   Untergrund-Tafel rechnete die Deckkraft und die Mittelfarbe zuerst selbst
+   aus. Die Gegenprobe „Schicht auf Schwarz" blieb deshalb gruen: das
+   Werkzeug bekam die Farbe des Spiels nie zu sehen. Die Messung sitzt jetzt
+   als Modulfunktion `bodenMessung` im Spiel, `window.__SKF_UNTERGRUND` ist
+   die Pruefnaht, und die Tafel ruft sie auf. Wer eine Berechnung im Tor
+   wiederholt, bezeugt sie, statt sie zu pruefen.
+18. **Kurze Namen im gebauten Buendel sind vergeben.** `function Vt` gab es
+   schon (`var Vt = {...}` in Zeile 27). Die Funktionsdeklaration wurde still
+   ueberschrieben, `window.__SKF_UNTERGRUND` zeigte auf ein Objekt, und
+   `untergrundRuhe` haette zur Laufzeit geworfen. Neuer Code bekommt
+   ausgeschriebene Namen — `bodenMessung`, nicht `Vt`.
+19. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
+   zeichnet weiter, bewegt aber nichts. Ohne das misst der Vergleich die
+   Bewegung des Untergrunds: die erste Messung der Beruhigungsschicht meldete
+   -24 % Kantenenergie, obwohl die Schicht mit Deckkraft 0 unsichtbar war.
+   Dasselbe schon beim Schatten der Maschine — dritter Anlauf, bis die Zahl
+   stimmte.
 
 ---
 
@@ -153,7 +179,8 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
-tools/             boot · bildtor · farbtor · formen · farbproben · schirme · symbol · bilder
+tools/             boot · bildtor · farbtor · formen · untergrund · farbproben
+                   schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```

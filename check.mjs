@@ -61,6 +61,19 @@ if (ok) {
   }
 }
 
+// Untergrund-Tafel: prueft, dass die Beruhigungsschicht Kontrast nimmt und
+// nicht Helligkeit — Abdunkeln wuerde der Gegnerkugel den Rand nehmen.
+let bodenZeile = '';
+if (ok) {
+  try {
+    step('Untergrund (13 Biome)', 'node tools/untergrund.mjs');
+    bodenZeile = '| Untergrund (13 Biome) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    bodenZeile = '| Untergrund (13 Biome) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -86,7 +99,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');

@@ -450,6 +450,63 @@ if (GERENDERT) {
   }
 }
 
+/* ---------- Pruefung G: was ueber den Gegnerkugeln liegt --------------- */
+
+// Die Gegnerkugeln fliegen auf Tiefe 20. Alles, was additiv darueber liegt,
+// kann sie ueberstrahlen — additiv heisst aufhellen, und eine ueberstrahlte
+// Kugel ist eine Kugel, die man nicht kommen sieht.
+//
+// Gefunden hatte das Audit den Fall bei `impact`: drei additive Effekte auf
+// Tiefe 21, ausgeloest bei JEDEM Treffer, also dutzendfach in der Sekunde.
+//
+// Es gibt genau eine erlaubte Ausnahme, und sie hat einen Namen:
+// TIEFE_UEBER_GEFAHR. Wer sie benutzt, muss begruenden koennen, dass sein
+// Effekt den Schirm ohnehin leerraeumt — der Sturm loescht alle
+// Gegnerkugeln, er kann keine verdecken. Eine Zahl im Quelltext waere
+// dieselbe Entscheidung, nur ohne Begruendung und ohne Spur.
+const BAND_VON = 20, BAND_BIS = 60;   // darueber faengt die Bedienoberflaeche an
+{
+  const treffer = [];
+  // fxFly zeichnet ohne ausdrueckliche Angabe additiv.
+  for (const m of quelle.matchAll(/this\.fxFly\(/g)) {
+    let i = m.index + m[0].length, tiefe = 0, str = null;
+    const a = i;
+    for (; i < quelle.length; i++) {
+      const c = quelle[i];
+      if (str) { if (c === '\\') i++; else if (c === str) str = null; continue; }
+      if (c === '"' || c === "'" || c === '`') { str = c; continue; }
+      if (c === '(' || c === '{' || c === '[') tiefe++;
+      else if (c === ')' || c === '}' || c === ']') { if (tiefe === 0) break; tiefe--; }
+    }
+    const arg = quelle.slice(a, i);
+    if (/blend:\s*tt\.BlendModes\.NORMAL/.test(arg)) continue;
+    const d = /depth:\s*([A-Za-z_0-9.]+)/.exec(arg);
+    if (!d) continue;
+    const zeile = quelle.slice(0, m.index).split('\n').length;
+    if (/^\d+$/.test(d[1])) {
+      const n = Number(d[1]);
+      if (n >= BAND_VON && n < BAND_BIS) treffer.push({ zeile, wert: d[1], art: 'fxFly' });
+    } else if (d[1] !== 'TIEFE_UEBER_GEFAHR' && d[1] !== 'TIEFE_WIRKUNG' && !/^I\.|^G\./.test(d[1])) {
+      treffer.push({ zeile, wert: d[1], art: 'fxFly (unbekannte Konstante)' });
+    }
+  }
+  // und einzeln gesetzte additive Bilder
+  for (const re of [/setBlendMode\(tt\.BlendModes\.ADD\)[^;\n]{0,90}?setDepth\((\d+)\)/g,
+                    /setDepth\((\d+)\)[^;\n]{0,90}?setBlendMode\(tt\.BlendModes\.ADD\)/g])
+    for (const m of quelle.matchAll(re)) {
+      const n = Number(m[1]);
+      if (n >= BAND_VON && n < BAND_BIS)
+        treffer.push({ zeile: quelle.slice(0, m.index).split('\n').length, wert: m[1], art: 'setDepth' });
+    }
+
+  const ausnahmen = (quelle.match(/depth: TIEFE_UEBER_GEFAHR/g) || []).length;
+  console.log(`G  Additive Wirkung im Gefahrenband ${BAND_VON}..${BAND_BIS - 1}: ${treffer.length} · benannte Ausnahmen (TIEFE_UEBER_GEFAHR): ${ausnahmen}`);
+  for (const t of treffer)
+    melde(`G: additive Wirkung auf Tiefe ${t.wert} (${t.art}, Zeile ${t.zeile}) liegt ueber den Gegnerkugeln`);
+  if (!/TIEFE_KUGEL = 20/.test(quelle))
+    melde('G: TIEFE_KUGEL nicht gefunden — die Tiefenordnung ist nicht mehr die geprüfte');
+}
+
 /* ---------- Bericht ---------------------------------------------------- */
 
 console.log(`\nA  Gegnerprojektile ${mG.size} Farbwerte · Spielerprojektile ${mS.size} · Aufsammler ${mA.size}`);

@@ -41,7 +41,9 @@ npm run all         # beides
 npm run check       # die Torkette: bauen, alle zwölf starten, Bildtor, Farbtor  (~3 min)
 npm run bildtor     # nur das Bildtor
 npm run farbtor     # nur das Farbtor  (-- --nurstatisch: ohne Browser, ~2 s)
-npm run farbproben  # sieben Gegenproben zum Farbtor  (-- --alle: mit Neubau)
+npm run farbproben  # neun Gegenproben zu allen drei Toren  (-- --alle: mit Neubau)
+npm run formen      # Silhouettenabstand der Gegnerprojektile
+npm run untergrund  # Kantenenergie der 13 Biome und die Beruhigungsschicht
 npm run schirme     # jeden Bildschirm aufnehmen und nachmessen
 npm run symbol      # App-Symbol und die elf iOS-Startbilder neu backen
 npm run bilder      # Hintergrundbahnen neu codieren (verkleinert assets.js)
@@ -91,7 +93,14 @@ Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
 - `npm run farbtor` — die drei reservierten Farbbänder. Gefahr `#ff3a2a`,
   Eigenfeuer `#bfefff`, Aufsammler alles außerhalb beider. Die Konstanten
   `GEFAHR` / `EIGEN` in `src/app.js` sind die einzige Quelle; das Tor liest
-  sie von dort und meldet rot, wenn es sie nicht findet.
+  sie von dort und meldet rot, wenn es sie nicht findet. Prüfung G zählt
+  außerdem, was additiv über den Gegnerkugeln liegt (Tiefe 20…59) — erlaubt
+  ist nur, was `TIEFE_UEBER_GEFAHR` beim Namen nennt.
+- `npm run untergrund` — die Beruhigungsschicht. Sie nimmt dem Untergrund
+  Kontrast gegen seine **Mittelfarbe**, nicht Helligkeit: Abdunkeln würde der
+  Gegnerkugel den dunklen Rand nehmen, der gerade über hellem Grund trägt.
+  Die Tafel ruft `window.__SKF_UNTERGRUND` auf — die Funktion des Spiels,
+  nicht eine nachgebaute Formel.
 
 ### Das Bildtor
 
@@ -158,7 +167,9 @@ zip.mjs               reiner-Node ZIP-Writer
 tools/boot.mjs        gemeinsamer Boot-Test (von check.mjs benutzt)
 tools/bildtor.mjs     sieht das Spiel so aus, wie es soll?
 tools/farbtor.mjs     drei Farbbänder: Gefahr, Eigenfeuer, Aufsammler
-tools/farbproben.mjs  sieben Gegenproben zum Farbtor
+tools/formen.mjs      Silhouettenabstand der Gegnerprojektile
+tools/untergrund.mjs  Kantenenergie der 13 Biome, misst die Funktion des Spiels
+tools/farbproben.mjs  neun Gegenproben zu Farbtor, Formentor, Untergrund-Tafel
 tools/schirme.mjs     jeden Bildschirm aufnehmen und nachmessen
 tools/symbol.mjs      icon.svg -> App-Symbole + 11 iOS-Startbilder
 tools/bilder.mjs      WebP-Bahnen neu codieren (q78)
