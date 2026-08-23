@@ -31,12 +31,13 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~15 MB, eine Datei) |
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
 | **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
-| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, Farbtor, Formentor, Untergrund, `dist/check-report.md` (~4 min) |
+| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, Farbtor, Formentor, Untergrund, Feuerkraft, `dist/check-report.md` (~5 min) |
 | **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab |
 | **Nur das Farbtor** | `npm run farbtor` — mit `-- --nurstatisch` ohne Browser (~2 s) |
 | **Silhouettenabstand** | `npm run formen` — Deckung und Breitenprofil der Gegnerprojektile |
 | **Untergrund-Tafel** | `npm run untergrund` — Kantenenergie der 13 Biome und die Beruhigung |
-| **Gegenproben** | `npm run farbproben` — neun eingebaute Fehler, jeder muss anschlagen |
+| **Feuerkraft-Leiter** | `npm run feuerkraft` — Erreichbarkeit über alle 120 Sektoren + Mechanik im Gefecht |
+| **Gegenproben** | `npm run farbproben` — elf eingebaute Fehler, jeder muss anschlagen |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
 | **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
@@ -80,7 +81,8 @@ project/
 │  ├─ farbtor.mjs   ← Gefahr, Eigenfeuer, Aufsammler: drei getrennte Bänder
 │  ├─ formen.mjs    ← Silhouettenabstand der Gegnerprojektile
 │  ├─ untergrund.mjs ← wie unruhig ist jedes Biom?
-│  ├─ farbproben.mjs ← neun Gegenproben zu allen dreien
+│  ├─ feuerkraft.mjs ← ist die Feuerkraft-Leiter erreichbar, und gibt es sie?
+│  ├─ farbproben.mjs ← elf Gegenproben zu allen vieren
 │  ├─ schirme.mjs   ← jeden Bildschirm aufnehmen und nachmessen
 │  ├─ symbol.mjs    ← icon.svg → App-Symbole + 11 iOS-Startbilder
 │  └─ bilder.mjs    ← WebP-Bahnen neu codieren (q78)

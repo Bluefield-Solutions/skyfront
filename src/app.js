@@ -54336,6 +54336,35 @@ return new ` + this.key + `();
     // Ausnahme mit Namen: was den Schirm ohnehin leerraeumt, darf darueber.
     // Der Sturm loescht alle Gegnerkugeln — er kann keine verdecken.
     TIEFE_UEBER_GEFAHR = 21,
+    // SKY-010: die Feuerkraft-Leiter im Gefecht.
+    //
+    // powerLevel stand bisher beim Betreten der Karte fest (1 + Meta-Ausbau)
+    // und aenderte sich bis zum Ende nicht. Damit hatte der Kernloop —
+    // schiessen, treffen, ausweichen — keine Belohnung: eine Welle zu
+    // ueberstehen aenderte nichts an dem, was man in die naechste mitnimmt.
+    // Dabei HAENGT die halbe Waffenwirkung daran: Fokus schiesst 1+P Bahnen,
+    // Wucht 1+P/2, Streuung faechert nach P auf.
+    //
+    // Jetzt: Aufsammler +1, Treffer -1, und die Meta-Stufe ist der BODEN.
+    // Wer sich schont, wird staerker; wer getroffen wird, zahlt sofort —
+    // aber nie unter das, was er sich erspielt hat.
+    PWR_JE_TREFFER = 1,
+    // Eine feste Fallwahrscheinlichkeit kann Sektor 1 und Sektor 120 nicht
+    // zugleich bedienen: der erste faehrt 163 Gegner auf, der letzte weit
+    // ueber 900. Nachgerechnet lag die volle Stufe im ersten Sektor bei 81 %
+    // seiner Laenge und ab Sektor 97 bei 5 % — dieselbe Zahl, zwei ganz
+    // verschiedene Spiele.
+    //
+    // Deshalb kein Wurf, sondern ein GUTHABEN. Jeder Abschuss zahlt nach
+    // Groessenklasse ein; bei einem vollen Punkt faellt ein Aufsammler. Wie
+    // viel ein Abschuss einzahlt, wird beim Betreten des Sektors aus dessen
+    // Wellenplan gerechnet — so kostet die Leiter ueberall denselben ANTEIL
+    // des Sektors, egal wie gross er ist.
+    //
+    // Nebenwirkung, und eine gute: es ist vorhersagbar. Man lernt, dass etwa
+    // jeder N-te Abschuss zahlt, statt auf einen Wurf zu hoffen.
+    PWR_GEWICHT = { XL: 6, L: 3, M: 1.6, S: 1 },
+    PWR_ANTEIL = .55,   // nach diesem Anteil des Sektors waere man oben
     // Wie unruhig der Untergrund sein darf. Gemessen wird die KANTENENERGIE:
     // die mittlere Helligkeitsaenderung von Punkt zu Punkt, auf einer
     // Kantenlaenge von KANTEN_PROBE abgetastet. Nicht die Helligkeit — die
@@ -60969,7 +60998,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   let ai = jt;
   class Fn extends tt.Physics.Arcade.Image {
     constructor(R, E, b, I = "p_fighter1") {
-      super(R, E, b, R.textures.exists(I) ? I : "p_fighter1"), this.maxHp = Ft.maxHp, this.hp = Ft.maxHp, this.invulnUntil = 0, this.powerLevel = 1, this.shieldUntil = 0, this.bombs = Ft.bombStart, this.minX = 30, this.maxX = Number.POSITIVE_INFINITY, R.add.existing(this), R.physics.add.existing(this), this.targetX = E, this.targetY = b;
+      super(R, E, b, R.textures.exists(I) ? I : "p_fighter1"), this.maxHp = Ft.maxHp, this.hp = Ft.maxHp, this.invulnUntil = 0, this.powerLevel = 1, this.powerFloor = 1, this.shieldUntil = 0, this.bombs = Ft.bombStart, this.minX = 30, this.maxX = Number.POSITIVE_INFINITY, R.add.existing(this), R.physics.add.existing(this), this.targetX = E, this.targetY = b;
       // SKY-070: Jeder Gegner wirft einen Schatten, der Spieler bisher nicht.
       // Dadurch lag ausgerechnet die Maschine, die man ansieht, flach auf dem
       // Bild, waehrend alles andere darueber schwebte. Gleicher Versatz wie bei
@@ -60994,7 +61023,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       return R < this.shieldUntil
     }
     hit(R, E) {
-      return this.isShielded(R) || this.isInvulnerable(R) ? !1 : (this.hp = Math.max(0, this.hp - E), this.invulnUntil = R + Ft.hitInvulnMs, !0)
+      if (this.isShielded(R) || this.isInvulnerable(R)) return !1;
+      this.hp = Math.max(0, this.hp - E), this.invulnUntil = R + Ft.hitInvulnMs;
+      // Ein Treffer kostet eine Stufe — aber nie unter den Meta-Boden.
+      const b = this.powerLevel;
+      return this.powerLevel = Math.max(this.powerFloor, this.powerLevel - PWR_JE_TREFFER), this.powerVerloren = this.powerLevel < b, !0
     }
     update(R, E) {
       const b = Math.max(30, this.minX),
@@ -61606,7 +61639,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           tint: 8378623
         })).setDepth(8), this.trail.startFollow(this.player, 0, 22), this.armFront = we(bt.front.per, q.upg("arm_front")), this.armRear = we(bt.rear.per, q.upg("arm_rear")), this.armCore = we(bt.core.per, q.upg("arm_core"));
         const b = bt.wing.per * q.upg("arm_wing");
-        this.player.maxHp = Ft.maxHp + 25 * q.upg("hp") + E.hpMod + b, this.player.hp = this.player.maxHp, this.player.powerLevel = Math.min(Ft.maxPower, 1 + q.upg("power")), this.player.bombs = Ft.bombStart + q.upg("bomb"), this.fireDelay = E.fireEvery, this.playerBulletDamage = E.bulletDamage;
+        this.player.maxHp = Ft.maxHp + 25 * q.upg("hp") + E.hpMod + b, this.player.hp = this.player.maxHp, this.player.powerLevel = this.player.powerFloor = Math.min(Ft.maxPower, 1 + q.upg("power")), this.player.bombs = Ft.bombStart + q.upg("bomb"), this.fireDelay = E.fireEvery, this.playerBulletDamage = E.bulletDamage;
         const I = Mi(Wt.all());
         this.playerBulletDamage = Math.max(1, Math.round(this.playerBulletDamage * I.dmgMul)), this.gearCrit = I.critChance, this.gearCritMult = I.critMult, this.gearPierceMul = I.pierceMul, this.explosionMul = I.explosionMul;
         const G = q.weapon();
@@ -61993,7 +62026,7 @@ dann ausweichen!`, {
         } else this.wallL.setVisible(!1), this.wallR.setVisible(!1), this.player.minX = 30, this.player.maxX = Number.POSITIVE_INFINITY
       }
       startEndless() {
-        this.stage = 1, this.stageDef = Ut[0], this.stageStart = this.time.now, this.stageCleared = !1, this.applyBiome(this.stageDef), this.stageText.setText("ENDLOS"), this.stageText.setVisible(!0), this.stageBacking.setVisible(!0), this.killGoal = 0, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 4600, this.endlessRound = 0, this.endlessNextAt = this.time.now + 1700, this.updateHud();
+        this.stage = 1, this.stageDef = Ut[0], this.stageStart = this.time.now, this.stageCleared = !1, this.applyBiome(this.stageDef), this.pwrEichen(this.stageDef.waves), this.stageText.setText("ENDLOS"), this.stageText.setVisible(!0), this.stageBacking.setVisible(!0), this.killGoal = 0, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 4600, this.endlessRound = 0, this.endlessNextAt = this.time.now + 1700, this.updateHud();
         const R = this.add.text(J / 2, rt * .4, `ENDLOS-MODUS
 Überlebe so lange du kannst!`, {
             fontFamily: "sans-serif",
@@ -62094,7 +62127,7 @@ dann ausweichen!`, {
         const E = this.runDiff || q.difficulty(),
           b = Xe[E] || Xe.normal,
           I = Si(R.waves, b, R.intensity);
-        this.levelEndAt = $s(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
+        this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
         const G = this.add.text(J / 2, rt * .4, `LEVEL ${this.levelNum()}
 ${R.label}`, {
           fontFamily: "sans-serif",
@@ -63381,6 +63414,11 @@ ${G}`, {
         let G = "",
           v = "#bff0ff";
         switch (b.kind) {
+          case "power": {
+            const t = this.player.powerLevel;
+            this.player.powerLevel = Math.min(Ft.maxPower, t + 1), G = this.player.powerLevel > t ? `FEUERKRAFT ${this.player.powerLevel}` : "VOLLE KRAFT", v = "#bfefff", this.pwrPuls(this.player.powerLevel > t);
+            break
+          }
           case "shield":
             this.player.shieldUntil = I + Ft.shieldMs, G = "SCHILD";
             break;
@@ -63413,8 +63451,47 @@ ${G}`, {
           onComplete: () => x.destroy()
         }), this.floatText(this.player.x, this.player.y - 40, G, v), this.updateHud()
       }
+      // Die Zahl in der Kopfzeile aendert sich; ohne einen Schlag darauf
+      // sieht das niemand. Hoch: kurz gross und hell. Runter: rot und kurz.
+      pwrPuls(R) {
+        const E = this.pwrText;
+        if (!E) return;
+        this.updateHud(), E.setScale(1), E.setColor(R ? "#bfefff" : "#ff8a7a"), this.tweens.killTweensOf(E), this.tweens.add({
+          targets: E,
+          scale: R ? 1.42 : .84,
+          duration: 110,
+          yoyo: !0,
+          ease: "Quad.Out",
+          onComplete: () => E.setColor("#9fd0ff").setScale(1)
+        }), R || this.floatText(this.player.x, this.player.y - 58, "FEUERKRAFT -1", "#ff8a7a")
+      }
       maybeDrop(R, E, b, I, G) {
-        G === "XL" ? (this.dropPU("part", R - 12, E), Math.random() < .55 && this.dropPU("part", R + 12, E + 6), Math.random() < .32 && this.dropPU("core", R, E - 8)) : G === "L" ? Math.random() < .5 && this.dropPU("part", R + 10, E) : this.isArmored(I) && Math.random() < .28 && this.dropPU("part", R + 10, E), Math.random() < b * .1 && this.dropPU(Math.random() < .6 ? "bomb" : "shield", R, E - 6), this.maybeDropCoin(R, E, G)
+        G === "XL" ? (this.dropPU("part", R - 12, E), Math.random() < .55 && this.dropPU("part", R + 12, E + 6), Math.random() < .32 && this.dropPU("core", R, E - 8)) : G === "L" ? Math.random() < .5 && this.dropPU("part", R + 10, E) : this.isArmored(I) && Math.random() < .28 && this.dropPU("part", R + 10, E), Math.random() < b * .1 && this.dropPU(Math.random() < .6 ? "bomb" : "shield", R, E - 6), this.maybeDropPower(R, E, G), this.maybeDropCoin(R, E, G)
+      }
+      // Was zahlt ein Abschuss in diesem Sektor ein? Aus dem Wellenplan
+      // gerechnet, damit die Leiter ueberall denselben Anteil kostet.
+      pwrEichen(R) {
+        var E;
+        let b = 0;
+        for (const I of R || []) {
+          const G = (E = window.__SKF_GEGNER || Ke) != null ? E[I.kind] : null,
+            v = G && PWR_GEWICHT[G.cls] != null ? PWR_GEWICHT[G.cls] : PWR_GEWICHT.S;
+          b += (I.count || 0) * v
+        }
+        this.pwrGewichtGesamt = b, this.pwrGuthaben = 0, this.pwrProPunkt = (Ft.maxPower - 1) / Math.max(1, b * PWR_ANTEIL)
+      }
+      // Wer nur Spaeher abraeumt, klettert langsam; wer sich an die Grossen
+      // traut, schnell. Auf voller Stufe wird nichts eingezahlt — das
+      // Guthaben bleibt stehen, damit nach einem Treffer der naechste
+      // Aufsammler schnell kommt.
+      maybeDropPower(R, E, b) {
+        var I;
+        const G = this.player;
+        if (!G || G.powerLevel >= Ft.maxPower) return;
+        this.pwrProPunkt || this.pwrEichen(this.stageDef && this.stageDef.waves);
+        const v = (I = PWR_GEWICHT[b]) != null ? I : PWR_GEWICHT.S;
+        for (this.pwrGuthaben = (this.pwrGuthaben || 0) + v * this.pwrProPunkt; this.pwrGuthaben >= 1;)
+          this.pwrGuthaben -= 1, this.dropPU("power", R, E - 4)
       }
       maybeDropCoin(R, E, b) {
         const I = b === "XL" ? .3 : b === "L" ? .14 : b === "M" ? .08 : .05;
@@ -64734,7 +64811,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             this.fpsEma < 46 ? this.qBudget = Math.max(.15, this.qBudget - .12) : this.fpsEma > 56 && b - this.qUpAt > 900 && (this.qBudget = Math.min(1, this.qBudget + .05), this.qUpAt = b), this.qBudget !== a && this.applyBudget()
           }
         }
-        this.trimPools(b), this.player.update(b, this.game.loop.delta), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
+        this.trimPools(b), this.player.update(b, this.game.loop.delta), this.player.powerVerloren && (this.player.powerVerloren = !1, this.pwrPuls(!1)), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
         const I = this.echteBildzeit();
         I > this.worstMs && (this.worstMs = I, this.worstMsAt = Math.round((b - this.stageStart) / 100) / 10), I > 33 && this.slowFrames++;
         const G = this.bullets.countActive(!0),
@@ -65125,6 +65202,14 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     // Pruefnaht: tools/untergrund.mjs misst damit DIESE Funktion, nicht
     // eine nachgebaute Formel.
     window.__SKF_UNTERGRUND = bodenMessung;
+    // Weitere Pruefnaehte: tools/feuerkraft.mjs rechnet die Leiter gegen
+    // den WELLENPLAN DES SPIELS, nicht gegen einen nachgebauten.
+    window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
+      gewicht: PWR_GEWICHT,
+      anteil: PWR_ANTEIL,
+      max: Ft.maxPower,
+      jeTreffer: PWR_JE_TREFFER
+    };
     Oe("Phaser.Game erstellt ✓");
     try {
       const R = T.canvas;

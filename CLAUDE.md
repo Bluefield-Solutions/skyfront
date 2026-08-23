@@ -43,6 +43,7 @@ npm run farbtor    drei Farbbaender: Gefahr, Eigenfeuer, Aufsammler
 npm run farbproben acht Gegenproben zu Farb- und Formentor (-- --alle, ~6 min)
 npm run formen     Silhouettenabstand der Gegnerprojektile
 npm run untergrund Kantenenergie der dreizehn Biome und die Beruhigung
+npm run feuerkraft die Leiter gegen den Wellenplan aller 120 Sektoren
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
@@ -51,7 +52,7 @@ npm run package    verteilbares Skyfront-dist.zip
 ```
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
-`farbtor` → `formen` → `untergrund` → Boot-Test des Masters →
+`farbtor` → `formen` → `untergrund` → `feuerkraft` → Boot-Test des Masters →
 `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
@@ -160,7 +161,12 @@ Jede hat mindestens eine Runde gekostet.
    ueberschrieben, `window.__SKF_UNTERGRUND` zeigte auf ein Objekt, und
    `untergrundRuhe` haette zur Laufzeit geworfen. Neuer Code bekommt
    ausgeschriebene Namen — `bodenMessung`, nicht `Vt`.
-19. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
+19. **Eine Anzeige, die sich selbst neu zeichnet, reisst ihre Knoepfe mit.**
+   Die Messtafel schrieb alle zwoelf Bilder ihr ganzes innerHTML neu — auf
+   einem 60-Hz-Geraet alle 200 ms. Das Ersatzfeld, aus dem man die Messzeile
+   markiert, waere dem Nutzer unter den Fingern verschwunden. Werte und
+   Bedienung gehoeren in getrennte Elemente.
+20. **Vor einem Vorher-Nachher-Vergleich die Szene anhalten.** `scene.pause()`
    zeichnet weiter, bewegt aber nichts. Ohne das misst der Vergleich die
    Bewegung des Untergrunds: die erste Messung der Beruhigungsschicht meldete
    -24 % Kantenenergie, obwohl die Schicht mit Deckkraft 0 unsichtbar war.
@@ -179,8 +185,8 @@ src/assets.js      AUTO-GENERIERT, 71 Base64-Blobs
 
 index.head.html    <head> UND Rumpfanfang (#game, #splash, #diag)
 pages.mjs          baut die Web-App aus der fertigen Einzeldatei
-tools/             boot · bildtor · farbtor · formen · untergrund · farbproben
-                   schirme · symbol · bilder
+tools/             boot · bildtor · farbtor · formen · untergrund · feuerkraft
+                   farbproben · schirme · symbol · bilder
 web/icon.svg       ★ QUELLE des App-Symbols (#grund / #maschine / #schleier)
 profiles/          je eine Spielvariante
 ```

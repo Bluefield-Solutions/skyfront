@@ -41,9 +41,10 @@ npm run all         # beides
 npm run check       # die Torkette: bauen, alle zwölf starten, Bildtor, Farbtor  (~3 min)
 npm run bildtor     # nur das Bildtor
 npm run farbtor     # nur das Farbtor  (-- --nurstatisch: ohne Browser, ~2 s)
-npm run farbproben  # neun Gegenproben zu allen drei Toren  (-- --alle: mit Neubau)
+npm run farbproben  # elf Gegenproben zu allen vier Toren  (-- --alle: mit Neubau)
 npm run formen      # Silhouettenabstand der Gegnerprojektile
 npm run untergrund  # Kantenenergie der 13 Biome und die Beruhigungsschicht
+npm run feuerkraft  # Feuerkraft-Leiter: 120 Sektoren + Mechanik im Gefecht
 npm run schirme     # jeden Bildschirm aufnehmen und nachmessen
 npm run symbol      # App-Symbol und die elf iOS-Startbilder neu backen
 npm run bilder      # Hintergrundbahnen neu codieren (verkleinert assets.js)
@@ -96,6 +97,11 @@ Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
   sie von dort und meldet rot, wenn es sie nicht findet. Prüfung G zählt
   außerdem, was additiv über den Gegnerkugeln liegt (Tiefe 20…59) — erlaubt
   ist nur, was `TIEFE_UEBER_GEFAHR` beim Namen nennt.
+- **Messtafel auf dem Gerät** — Adresse mit `#messung`, oder **vier Mal** in
+  die obere rechte Ecke tippen (für die App auf dem Startbildschirm). Der
+  Knopf **Kopieren** legt alles als eine Zeile in die Zwischenablage. Im
+  GEFECHT messen, nicht im Menü — die Zeile sagt es selbst, wenn man es
+  falsch macht.
 - `npm run untergrund` — die Beruhigungsschicht. Sie nimmt dem Untergrund
   Kontrast gegen seine **Mittelfarbe**, nicht Helligkeit: Abdunkeln würde der
   Gegnerkugel den dunklen Rand nehmen, der gerade über hellem Grund trägt.
@@ -169,7 +175,8 @@ tools/bildtor.mjs     sieht das Spiel so aus, wie es soll?
 tools/farbtor.mjs     drei Farbbänder: Gefahr, Eigenfeuer, Aufsammler
 tools/formen.mjs      Silhouettenabstand der Gegnerprojektile
 tools/untergrund.mjs  Kantenenergie der 13 Biome, misst die Funktion des Spiels
-tools/farbproben.mjs  neun Gegenproben zu Farbtor, Formentor, Untergrund-Tafel
+tools/feuerkraft.mjs  Feuerkraft-Leiter: Erreichbarkeit und Mechanik
+tools/farbproben.mjs  elf Gegenproben zu allen vier Toren
 tools/schirme.mjs     jeden Bildschirm aufnehmen und nachmessen
 tools/symbol.mjs      icon.svg -> App-Symbole + 11 iOS-Startbilder
 tools/bilder.mjs      WebP-Bahnen neu codieren (q78)

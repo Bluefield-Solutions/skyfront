@@ -74,6 +74,19 @@ if (ok) {
   }
 }
 
+// Feuerkraft: rechnet die Leiter gegen den Wellenplan JEDES Sektors und
+// sieht danach im laufenden Gefecht nach, dass es die Mechanik gibt.
+let kraftZeile = '';
+if (ok) {
+  try {
+    step('Feuerkraft (120 Sektoren + Gefecht)', 'node tools/feuerkraft.mjs');
+    kraftZeile = '| Feuerkraft (120 Sektoren) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    kraftZeile = '| Feuerkraft (120 Sektoren) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -99,7 +112,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');

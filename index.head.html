@@ -51,21 +51,30 @@
        Sie haengt bewusst in der HUELLE, nicht im Spiel: sie ueberlebt auch
        einen Absturz des Spiels und misst die echte Bildfolge, nicht Phasers
        geglaetteten Wert.
-       Aufrufen: Adresse mit #messung, oder drei Mal in die obere rechte Ecke
+       Aufrufen: Adresse mit #messung, oder VIER Mal in die obere rechte Ecke
        tippen (fuer die App auf dem Startbildschirm, wo es keine Adresszeile
-       gibt). Nochmal drei Mal tippen schliesst sie. */
+       gibt). Nochmal vier Mal tippen schliesst sie.
+       Der Knopf "Kopieren" legt alle Werte als EINE Zeile in die
+       Zwischenablage — eine Messung, die auf dem Telefon bleibt, ist keine
+       Messung. */
     #messung{position:fixed;left:0;right:0;bottom:0;z-index:9500;display:none;
       padding:10px 12px calc(10px + env(safe-area-inset-bottom));
       background:rgba(6,12,20,.93);border-top:1px solid #2a4c6a;
       color:#cfe6f5;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
-      white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch}
+      -webkit-overflow-scrolling:touch}
+    #messwerte{margin:0;white-space:pre;overflow-x:auto;font:inherit;color:inherit}
+    #messknoepfe{display:flex;flex-wrap:wrap;align-items:center}
     #messung.an{display:block}
     #messung b{color:#ffd23a;font-weight:600}
     #messung .warn{color:#ff8a6a}
     #messung .gut{color:#8fe0b0}
-    #messung .knopf{display:inline-block;margin-top:8px;padding:5px 12px;
-      border:1px solid #2a4c6a;border-radius:7px;color:#9fe3ff;
+    #messung .knopf{display:inline-block;margin-top:8px;margin-right:8px;
+      padding:6px 14px;border:1px solid #2a4c6a;border-radius:7px;color:#9fe3ff;
       background:rgba(20,40,60,.7);pointer-events:auto;cursor:pointer}
+    #messung .knopf.haupt{color:#0a1a24;background:#9fe3ff;border-color:#9fe3ff;font-weight:600}
+    #messung .zeile{display:block;margin-top:8px;width:100%;box-sizing:border-box;
+      padding:6px 8px;border:1px solid #2a4c6a;border-radius:7px;
+      background:rgba(10,20,30,.9);color:#cfe6f5;font:11px/1.4 ui-monospace,monospace}
     @keyframes sffloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
     @keyframes sfpulse{0%,100%{opacity:.35}50%{opacity:1}}
   </style>
@@ -120,13 +129,17 @@
     })();
   </script>
 
-  <div id="messung"></div>
+  <div id="messung"><pre id="messwerte"></pre><div id="messknoepfe"></div></div>
   <script>
     // Messtafel — misst die ECHTE Bildfolge auf dem Geraet, unabhaengig vom
     // Spiel und unabhaengig von Phasers Glaettung.
     (function () {
       var tafel = document.getElementById('messung');
-      if (!tafel) return;
+      var werte = document.getElementById('messwerte');
+      var knoepfe = document.getElementById('messknoepfe');
+      if (!tafel || !werte || !knoepfe) return;
+      knoepfe.innerHTML = '<span class="knopf haupt" data-tat="kopieren">Kopieren</span>' +
+                          '<span class="knopf" data-tat="reset">Zuruecksetzen</span>';
       var an = false, tipps = 0, letzterTipp = 0;
       var proben = [], vorher = 0, start = 0;
       var laengste = 0, laengsteBei = 0, letzte5 = [];
@@ -157,9 +170,40 @@
         letzterTipp = jetzt;
         if (tipps >= 4) { tipps = 0; anzeigen(!an); }
       }, true);
+      // Die letzte gezeichnete Zeile, damit "Kopieren" genau das mitnimmt,
+      // was auf dem Schirm steht.
+      var letzteZeile = '';
       tafel.addEventListener('pointerdown', function (e) {
-        if (e.target && e.target.className === 'knopf') { zuruecksetzen(); e.preventDefault(); }
+        var k = e.target && e.target.getAttribute && e.target.getAttribute('data-tat');
+        if (!k) return;
+        e.preventDefault();
+        if (k === 'reset') { zuruecksetzen(); return; }
+        if (k === 'kopieren') kopieren();
       }, { passive: false });
+
+      // Eine Messung, die auf dem Telefon bleibt, ist keine Messung. Der
+      // Knopf legt alles als EINE Zeile in die Zwischenablage; wenn die
+      // Zwischenablage nicht mitspielt (aeltere Browser, kein sicherer
+      // Kontext), erscheint stattdessen ein Feld, das man markieren kann.
+      function kopieren() {
+        var txt = letzteZeile;
+        function ersatz() {
+          var alt = knoepfe.querySelector('.zeile');
+          if (alt) alt.parentNode.removeChild(alt);
+          var f = document.createElement('input');
+          f.className = 'zeile'; f.value = txt; f.readOnly = true;
+          knoepfe.appendChild(f);
+          f.focus(); f.setSelectionRange(0, txt.length);
+        }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt).then(function () {
+              var k = knoepfe.querySelector('[data-tat="kopieren"]');
+              if (k) { k.textContent = 'Kopiert ✓'; setTimeout(function () { k.textContent = 'Kopieren'; }, 1600); }
+            }, ersatz);
+          } else ersatz();
+        } catch (e) { ersatz(); }
+      }
       if ((location.hash || '').indexOf('messung') >= 0) anzeigen(true);
 
       function p(feld, anteil) {
@@ -221,8 +265,28 @@
         var c = g && g.canvas;
         z.push('Geraet        ' + Math.round(innerWidth) + '×' + Math.round(innerHeight) + ' @ ' + (window.devicePixelRatio || 1) + 'x' +
                (c ? '   Puffer ' + c.width + '×' + c.height : ''));
-        z.push('<span class="knopf">Zuruecksetzen</span>');
-        tafel.innerHTML = z.join('\n');
+        // Dieselben Werte noch einmal als eine Zeile, zum Mitnehmen.
+        var eine = ['SKYFRONT-MESSUNG'];
+        eine.push(Math.round(innerWidth) + 'x' + Math.round(innerHeight) + '@' + (window.devicePixelRatio || 1) + 'x');
+        if (c) eine.push('Puffer ' + c.width + 'x' + c.height);
+        eine.push(zahl(1000 / (med || 1), 0) + '/s (~' + takt + 'Hz)');
+        eine.push('p50 ' + zahl(med) + ' p95 ' + zahl(p95) + ' ms');
+        eine.push('laengste ' + zahl(laengste) + ' ms bei ' + laengsteBei + ' s');
+        eine.push('5s ' + zahl(l5) + ' ms');
+        if (g && g.loop) eine.push('Phaser ' + zahl(g.loop.delta) + '/' + zahl(g.loop.rawDelta || 0));
+        if (imSpiel) {
+          try {
+            eine.push('Objekte ' + s.children.list.length);
+            eine.push('Gegner ' + s.enemies.countActive(true) + ' Kugeln ' + s.bullets.countActive(true) + '/' + s.enemyBullets.countActive(true));
+            eine.push('Q ' + s.qBudget.toFixed(2));
+            eine.push('PWR ' + (s.player ? s.player.powerLevel : '?') + ' Sektor ' + s.stage);
+          } catch (e) {}
+        } else eine.push('(im Menue gemessen — bitte IM GEFECHT messen)');
+        eine.push(zahl(lauf, 0) + ' s / ' + bilder + ' Bilder');
+        eine.push(navigator.userAgent.replace(/[|]/g, '/'));
+        letzteZeile = eine.join(' | ');
+
+        werte.innerHTML = z.join('\n');
       }
     })();
   </script>
