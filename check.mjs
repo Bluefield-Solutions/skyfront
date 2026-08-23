@@ -17,6 +17,20 @@ try {
   step('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch { ok = false; }
 
+// Bildtor: prueft nicht, ob etwas laeuft, sondern ob es aussieht wie
+// vorgesehen. Dafuer gab es bisher kein Tor — der Nebel war seit jeher kaputt
+// und alle Tore meldeten gruen.
+let bildZeile = '';
+if (ok) {
+  try {
+    step('Bildtor (Modifikator-Modi)', 'node tools/bildtor.mjs');
+    bildZeile = '| Bildtor (5 Modi) | ✅ ohne Befund | 0 |\n';
+  } catch {
+    ok = false;
+    bildZeile = '| Bildtor (5 Modi) | ❌ Befund | – |\n';
+  }
+}
+
 // Der Master. Er wurde oben gebaut, aber bis v3 nie gestartet — ausgerechnet
 // die Datei, die ausgeliefert wird, war die einzige ohne Boot-Test.
 let masterZeile = '';
@@ -42,7 +56,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile;
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');
