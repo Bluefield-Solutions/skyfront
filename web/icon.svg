@@ -19,16 +19,27 @@
     <!-- Metall, Licht von oben links -->
     <linearGradient id="mL" x1="1" y1="0.1" x2="0.05" y2="0.9">
       <stop offset="0"    stop-color="#ffffff"/>
-      <stop offset="0.22" stop-color="#e2ecf7"/>
-      <stop offset="0.55" stop-color="#a4b6c9"/>
-      <stop offset="0.82" stop-color="#65788c"/>
-      <stop offset="1"    stop-color="#445566"/>
+      <stop offset="0.22" stop-color="#eef5fd"/>
+      <stop offset="0.55" stop-color="#c2d2e2"/>
+      <stop offset="0.82" stop-color="#8497aa"/>
+      <stop offset="1"    stop-color="#617385"/>
     </linearGradient>
     <linearGradient id="mR" x1="0" y1="0.1" x2="0.95" y2="0.9">
-      <stop offset="0"    stop-color="#dde7f3"/>
-      <stop offset="0.30" stop-color="#adbecf"/>
-      <stop offset="0.62" stop-color="#77899d"/>
-      <stop offset="1"    stop-color="#36444f"/>
+      <stop offset="0"    stop-color="#b6c5d5"/>
+      <stop offset="0.30" stop-color="#8b99ab"/>
+      <stop offset="0.62" stop-color="#5b6c7e"/>
+      <stop offset="1"    stop-color="#2a3640"/>
+    </linearGradient>
+    <!-- Streiflicht: hell an der Wurzel, verlaeuft zur Spitze aus -->
+    <linearGradient id="streifL" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0"    stop-color="#ffffff" stop-opacity="0.90"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.52"/>
+      <stop offset="1"    stop-color="#ffffff" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="schattenR" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"    stop-color="#050d18" stop-opacity="0.42"/>
+      <stop offset="0.5"  stop-color="#050d18" stop-opacity="0.24"/>
+      <stop offset="1"    stop-color="#050d18" stop-opacity="0.05"/>
     </linearGradient>
     <linearGradient id="korpus" x1="0.12" y1="0" x2="0.9" y2="0.85">
       <stop offset="0"    stop-color="#ffffff"/>
@@ -83,10 +94,22 @@
 
   <!-- Tragflaechen -->
   <path d="M512 452 L892 700 L892 762 L512 700 Z" fill="url(#mR)"/>
+  <!-- ... und im Schatten, weil das Licht von oben links kommt -->
+  <path d="M512 452 L892 700 L892 762 L512 700 Z" fill="url(#schattenR)"/>
   <path d="M512 452 L132 700 L132 762 L512 700 Z" fill="url(#mL)"/>
+  <!-- Streiflicht auf der Vorderkante der linken Flaeche. Das ist die Kante,
+       die dem Licht zugewandt ist — sie macht aus zwei grauen Dreiecken
+       zwei Blechflaechen. -->
+  <path d="M512 452 L132 700 L132 719 L512 470 Z" fill="url(#streifL)"/>
+  <!-- Und eine duenne kalte Kante auf der Schattenseite. Ohne sie faellt die
+       rechte Spitze fast in den Himmel: gemessen 35 Helligkeitsstufen
+       Abstand gegen 60 vorher. -->
+  <path d="M512 452 L892 700 L892 711 L512 463 Z" fill="#cfe4ff" opacity="0.34"/>
   <!-- Canards -->
   <path d="M512 300 L706 424 L706 456 L512 396 Z" fill="url(#mR)"/>
+  <path d="M512 300 L706 424 L706 456 L512 396 Z" fill="url(#schattenR)"/>
   <path d="M512 300 L318 424 L318 456 L512 396 Z" fill="url(#mL)"/>
+  <path d="M512 300 L318 424 L318 435 L512 312 Z" fill="url(#streifL)"/>
   <!-- Leitwerke -->
   <path d="M468 626 L404 818 L448 818 L494 654 Z" fill="#8598ac"/>
   <path d="M556 626 L620 818 L576 818 L530 654 Z" fill="#56687a"/>
@@ -112,6 +135,14 @@
         stroke="#ffffff" stroke-opacity="0.62" stroke-width="9" fill="none" stroke-linecap="round"/>
   <path d="M512 132 C 488 216 474 330 472 470 C 471 590 474 690 480 758"
         stroke="#0a141d" stroke-opacity="0.34" stroke-width="7" fill="none" stroke-linecap="round"/>
+
+  <!-- Lichtkante auf der linken Rumpfsilhouette -->
+  <path d="M446 764 C 436 654 434 520 444 400 C 452 292 476 190 512 108"
+        stroke="#ffffff" stroke-opacity="0.5" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Rueckwurf der Nachbrenner auf den hinteren Rumpf. Ohne ihn haengt das
+       Gluehen unten am Bild statt an der Maschine. -->
+  <ellipse cx="512" cy="768" rx="120" ry="64" fill="url(#kern)" opacity="0.22"/>
 
   <!-- Kanzel -->
   <path d="M512 214 C 542 254 556 316 556 366 C 556 416 538 442 512 442
