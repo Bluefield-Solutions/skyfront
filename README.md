@@ -193,13 +193,25 @@ Werkzeuge stehen deshalb daneben und verlangen einen Blick:
 - **`npm run farbtor`** nimmt sich die siebzehn Projektiltexturen einzeln vor.
   Drei Kategorien haben je ein reserviertes Farbband — Gefahr (Gegnerfeuer),
   Eigenfeuer (Spielerfeuer), Aufsammler —, und keines darf ins andere ragen.
-  Sechs Prüfungen: gemeinsame Farbwerte, Farbtonabstand, Graustufenabstand,
+  Neun Prüfungen: gemeinsame Farbwerte, Farbtonabstand, Graustufenabstand,
   Kontrast gegen die dreizehn Biome, Schichtaufbau (heller Kern, dunkler Rand),
-  und zum Schluss eine, die **die Pixel des gebauten Spiels zählt**. Die letzte
-  ist die wichtigste: die fünf davor waren alle grün, während drei Gegnerkugeln
-  ein so breites weißes Mittelband trugen, dass sie sich als eigenes Feuer
-  lasen. `npm run farbproben` baut sieben Fehler ein und verlangt, dass jeder
-  gefunden wird.
+  eine, die **die Pixel des gebauten Spiels zählt**, additive Wirkung über den
+  Gegnerkugeln, und zuletzt die beiden **Kennleuchten** der Gegner. Die
+  Pixelzählung ist die wichtigste: die fünf davor waren alle grün, während drei
+  Gegnerkugeln ein so breites weißes Mittelband trugen, dass sie sich als
+  eigenes Feuer lasen.
+
+  Bei den Kennleuchten sagt das Tor ausdrücklich, was es **nicht** beweist:
+  der Farbkreis trägt schon neun reservierte Farben, der beste erreichbare
+  reine Farbtonabstand zu einem Aufsammler liegt bei 33 Grad. Getrennt sind
+  sie über Farbton **und** Helligkeit (H) — und vor allem über die Größe: 4,8
+  Anzeigepunkte gegen 31,8 beim kleinsten Aufsammler, Faktor 6,6 (H2, am
+  gebauten Spiel gemessen, weil die Gegnerbilder aus dem WebP-Vorrat kommen
+  und in keiner Tabelle stehen).
+
+  `npm run farbproben` baut fünfzehn Fehler ein und verlangt, dass jeder
+  gefunden wird — darunter den alten Violettwert `#8a6cff`, der nur 38 von
+  `pu_core` entfernt lag.
 - **`npm run schirme`** startet jede der neun Menü-Szenen einzeln und misst
   nach: was ragt aus dem Bild, was liegt übereinander, was ist auf dem Telefon
   zu klein. Überlappungen sind Befund, kleine Schrift nur ein Hinweis.

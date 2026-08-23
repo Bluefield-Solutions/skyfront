@@ -98,7 +98,13 @@ Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
   `GEFAHR` / `EIGEN` in `src/app.js` sind die einzige Quelle; das Tor liest
   sie von dort und meldet rot, wenn es sie nicht findet. Prüfung G zählt
   außerdem, was additiv über den Gegnerkugeln liegt (Tiefe 20…59) — erlaubt
-  ist nur, was `TIEFE_UEBER_GEFAHR` beim Namen nennt.
+  ist nur, was `TIEFE_UEBER_GEFAHR` beim Namen nennt. H und H2 nehmen sich die
+  beiden **Kennleuchten** vor (`LEUCHTE_FARBE`): Abstand zu allen neun
+  belegten Farben aus Farbton plus halbem Graustufenabstand (Grenze 45), kein
+  Gefahrenband, Sättigung deutlich über EIGEN, Graustufe über 110 — und in H2,
+  am gebauten Spiel, die Größe gegen den kleinsten Aufsammler (Faktor 2,5).
+  H2 wartet auf **Stillstand** der Texturliste, nicht auf die Uhr: nach 3 s
+  fehlten fünf von dreizehn Gegnerbildern.
 - **Messtafel auf dem Gerät** — Adresse mit `#messung`, oder **vier Mal** in
   die obere rechte Ecke tippen (für die App auf dem Startbildschirm). Der
   Knopf **Kopieren** legt alles als eine Zeile in die Zwischenablage. Im

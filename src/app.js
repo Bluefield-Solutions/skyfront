@@ -54384,6 +54384,52 @@ return new ` + this.key + `();
     KANTEN_ZIEL = .115,
     KANTEN_MAX = .24,
     KANTEN_PROBE = 192,
+    // SKY-029 — die Farbsprache der Gegner.
+    //
+    // Vorher trugen sechs der dreizehn Gegner kraeftige Toenungen und sieben
+    // gar keine, und die Farbe sagte nichts ueber die Rolle: die vier Panzer
+    // waren weiss, weiss, violett, graublau und gold. Fuenf der sechs lagen
+    // ausserdem im selben Farbton wie ein Aufsammler (Rotor 41 Grad gegen
+    // Bombe 44, Schlachttraeger 215 gegen Kraft 214).
+    //
+    // Schlimmer: die Toenung IST ein Helligkeitsregler, sie multipliziert.
+    // Der Elite verlor 85 % seiner Helligkeit und kam auf dem Stadtbiom auf
+    // 1,21:1 — der staerkste Gegner war der unsichtbarste, das Kanonenfutter
+    // hatte 4,20:1.
+    //
+    // Nachgerechnet ueber alle dreizehn Biome: KEINE Koerperhelligkeit im
+    // Bereich der Bilder (0,145 bis 0,204) erreicht auf ihrem schlechtesten
+    // Biom auch nur 1,2:1. Erst ab 0,57 waere es genug, und das waere
+    // ausgebranntes Weiss. Der Koerper allein kann es nicht tragen.
+    //
+    // Also dasselbe wie bei den Geschossen: ein dunkler SAUM traegt auf
+    // hellem Grund, der Koerper auf dunklem. Dazu eine KENNLEUCHTE an den
+    // Fluegelspitzen, deren Farbe die ROLLE sagt — wie das Positionslicht
+    // eines echten Flugzeugs, also technisch glaubwuerdig und frei in der
+    // Farbe. Zwei begruendete Farben statt sechs willkuerlicher.
+    UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
+    UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
+    LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
+    LEUCHTE_ANTEIL = .06,    // oder so viel der Spritebreite, was groesser ist
+    // Mischt eine Farbe gegen Weiss. Gebraucht fuer den Kern der Leuchte:
+    // ein REIN weisser Kern frisst die Kennfarbe auf, das war schon bei
+    // eb_needle der Fehler. Der Kern ist jetzt die aufgehellte Farbe.
+    heller = (T, R) => {
+      const E = parseInt(T.slice(1), 16),
+        b = I => Math.round(I + (255 - I) * R);
+      return "rgb(" + b(E >> 16 & 255) + "," + b(E >> 8 & 255) + "," + b(E & 255) + ")"
+    },
+    // Der Farbkreis ist VOLL: Gefahr, Eigenfeuer und sieben Aufsammler
+    // belegen ihn fast lueckenlos. Ein Abstand allein ueber den Farbton ist
+    // deshalb nicht zu haben — die Leuchten trennen sich zusaetzlich ueber
+    // die HELLIGKEIT. Nachgerechnet in tools/farbtor.mjs, Pruefung H:
+    //   stuerzer #93f562  H100 grau 214 — naechste pu_bomb, Abstand 66
+    //   schuetze #a88cff  H255 grau 154 — naechste pu_core, Abstand 50
+    // Ein erster Anlauf hatte #8a6cff: 36 Grad von pu_core bei
+    // Graustufenabstand 5 — im Bild dasselbe. Saettigung bleibt bei beiden
+    // ueber 0,35, sonst wandern sie zu EIGEN (0,25) und lesen sich als
+    // eigenes Feuer.
+    LEUCHTE_FARBE = { stuerzer: "#93f562", schuetze: "#a88cff" },
     Lin = T => { const R = T / 255; return R <= .03928 ? R / 12.92 : ((R + .055) / 1.055) ** 2.4 },
     GEFAHR_N = 16726570,
     EIGEN = "#bfefff",
@@ -54862,7 +54908,7 @@ return new ` + this.key + `();
       hp: 50,
       speed: 54,
       scale: 1.35,
-      tint: 9059024,
+      tint: 16777215,
       score: 950,
       fireEvery: 1e3,
       pattern: "ring",
@@ -54876,7 +54922,7 @@ return new ` + this.key + `();
       hp: 4,
       speed: 228,
       scale: .44,
-      tint: 9428223,
+      tint: 16777215,
       score: 260,
       fireEvery: 1400,
       pattern: "twin",
@@ -54890,7 +54936,7 @@ return new ` + this.key + `();
       hp: 14,
       speed: 70,
       scale: .6,
-      tint: 8048816,
+      tint: 16777215,
       score: 420,
       fireEvery: 1700,
       pattern: "fan5",
@@ -54904,7 +54950,7 @@ return new ` + this.key + `();
       hp: 9,
       speed: 84,
       scale: .5,
-      tint: 16751312,
+      tint: 16777215,
       score: 360,
       fireEvery: 1950,
       pattern: "snipe",
@@ -54918,7 +54964,7 @@ return new ` + this.key + `();
       hp: 62,
       speed: 40,
       scale: 1.18,
-      tint: 11450566,
+      tint: 16777215,
       score: 1500,
       fireEvery: 1150,
       pattern: "burst3",
@@ -54933,7 +54979,7 @@ return new ` + this.key + `();
       hp: 90,
       speed: 60,
       scale: .95,
-      tint: 16764778,
+      tint: 16777215,
       score: 2200,
       fireEvery: 900,
       pattern: "rotorspin",
@@ -55953,6 +55999,70 @@ return new ` + this.key + `();
       }
     } catch (E) {}
     return R
+  }
+
+  // Backt Saum und Kennleuchte EINMAL in die Gegnertextur, statt sie je
+  // Flugzeug als eigene Sprites zu zeichnen. Bei 64 Gegnern gleichzeitig
+  // waeren das 192 zusaetzliche Objekte je Bild; so sind es dreizehn
+  // Leinwaende beim ersten Auftreten.
+  //
+  // Kein `filter: blur` — auf iOS ist das die schwarze Wand nach einer
+  // Sekunde. Der Saum entsteht aus acht versetzten Kopien der Silhouette.
+  function gegnerBacken(T, R, E) {
+    var v;
+    const b = T.textures;
+    if (!b.exists(R)) return !1;
+    const I = b.get(R);
+    if (I.__gebacken) return !0;
+    try {
+      const G = I.getSourceImage();
+      if (!G || !G.width) return !1;
+      // Der Saum soll in ANZEIGEPUNKTEN gleich breit sein, nicht in
+      // Quellpunkten — sonst hat der Spaeher einen Balken und der
+      // Schlachttraeger einen Haarstrich.
+      const x = Math.max(1, Math.round(UMRISS_PUNKTE / Math.max(.05, E.scale * .722))),
+        t = G.width + 2 * x,
+        l = G.height + 2 * x,
+        p = document.createElement("canvas");
+      p.width = t, p.height = l;
+      const a = p.getContext("2d", { willReadFrequently: !0 });
+      // 1. Saum: acht versetzte schwarze Kopien im Kreis.
+      a.save(), a.globalAlpha = UMRISS_DECK;
+      for (let e = 0; e < 8; e++) {
+        const s = e / 8 * Math.PI * 2;
+        a.drawImage(G, x + Math.round(Math.cos(s) * x), x + Math.round(Math.sin(s) * x))
+      }
+      a.globalCompositeOperation = "source-in", a.fillStyle = "#0a0f16", a.fillRect(0, 0, t, l), a.restore();
+      // 2. Der Flieger selbst, mittig.
+      a.drawImage(G, x, x);
+      // 3. Kennleuchte an den Fluegelspitzen — die breiteste Zeile der
+      // Silhouette, links und rechts aussen. Gemessen, nicht je Gegner
+      // gepflegt: so gilt es auch fuer eine vierzehnte Art.
+      const r = (v = LEUCHTE_FARBE[E.rolle]) != null ? v : null;
+      if (r) {
+        const n = a.getImageData(0, 0, t, l).data;
+        let e = -1, s = 0, o = 0, i = 0;
+        for (let h = 0; h < l; h++) {
+          let f = -1, d = -1;
+          for (let m = 0; m < t; m++)
+            if (n[(h * t + m) * 4 + 3] >= 160) { f < 0 && (f = m), d = m }
+          d - f > s && (s = d - f, e = h, o = f, i = d)
+        }
+        if (e >= 0 && s > 4) {
+          const h = Math.max(LEUCHTE_PUNKTE / Math.max(.05, E.scale * .722), t * LEUCHTE_ANTEIL);
+          for (const d of [o + h * .5, i - h * .5]) {
+            const m = a.createRadialGradient(d, e, 0, d, e, h);
+            m.addColorStop(0, heller(r, .75)), m.addColorStop(.3, heller(r, .25)), m.addColorStop(.62, r), m.addColorStop(1, r + "00"),
+              a.fillStyle = m, a.beginPath(), a.arc(d, e, h, 0, 7), a.fill()
+          }
+        }
+      }
+      b.remove(R);
+      const w = b.addCanvas(R, p);
+      return w && (w.__gebacken = !0), !0
+    } catch (G) {
+      return !1
+    }
   }
 
   function Je(T, R, E, b, I) {
@@ -61283,7 +61393,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         var x;
         this.kind = R, this.cfg = Ke[R], this.hp = this.cfg.hp, this.phase = Math.random() * Math.PI * 2, this.enableBody(!0, E, -50, !0, !0);
         const I = this.cfg.tex || "e_" + R;
-        this.setTexture(I), this.clearTint(), this.setTint(this.cfg.tint), this.setScale(this.cfg.scale), this.setAngle(180), this.shadow.setTexture(I).setAngle(180).setScale(this.cfg.scale).setTintFill(0).setAlpha(.3).setVisible(!0);
+        gegnerBacken(this.scene, I, this.cfg), this.setTexture(I), this.clearTint(), this.setTint(this.cfg.tint), this.setScale(this.cfg.scale), this.setAngle(180), this.shadow.setTexture(I).setAngle(180).setScale(this.cfg.scale).setTintFill(0).setAlpha(.3).setVisible(!0);
         const G = this.body;
         G.setSize(this.width * .5 * this.trefferAnteil(), this.height * .5 * this.trefferAnteil(), !0), this.nextFire = b + this.cfg.fireEvery * (.5 + Math.random() * .6), this.telegraphed = !1, this.strafeDir = E < J / 2 ? 1 : -1, this.positioned = !1, this.holdUntil = 0;
         const v = (x = bn[R]) != null ? x : Ln;
@@ -65345,6 +65455,9 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_UNTERGRUND = bodenMessung;
     // Weitere Pruefnaehte: tools/feuerkraft.mjs rechnet die Leiter gegen
     // den WELLENPLAN DES SPIELS, nicht gegen einen nachgebauten.
+    // Pruefnaht: die Tore backen damit dieselbe Funktion, die das Spiel
+    // beim Auftauchen benutzt — nicht eine nachgebaute.
+    window.__SKF_GEGNERBACKEN = gegnerBacken;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,

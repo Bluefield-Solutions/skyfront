@@ -212,6 +212,22 @@ Jede hat mindestens eine Runde gekostet.
    Dasselbe schon beim Schatten der Maschine — dritter Anlauf, bis die Zahl
    stimmte.
 
+27. **Der Farbkreis ist VOLL — sag, was Du nicht beweist.** Gefahr,
+   Eigenfeuer und sieben Aufsammler belegen ihn fast lueckenlos. Als die
+   Gegner eine Kennleuchte bekamen, war der beste erreichbare reine
+   Farbtonabstand zu einem Aufsammler **33 Grad**. Ein Tor, das daraus
+   „getrennt" macht, luegt. Die Kennleuchte ist getrennt ueber Farbton PLUS
+   Helligkeit — und vor allem ueber die GROESSE: 4,8 Anzeigepunkte gegen
+   31,8. Das Tor schreibt beides hin, auch den Satz „das beweist es nicht".
+
+28. **Eine Groesse im Bild hat drei Faktoren, nicht einen.** Die erste
+   Fassung der Groessenregel nahm die breiteste `ht()`-Anmeldung (der
+   Traeger, 297 px — der traegt gar keine Leuchte) und liess `cfg.scale`
+   weg. Ergebnis: Faktor 1,67 statt 6,6, das Tor rot, und beides aus
+   demselben Grund. Texturbreite × `cfg.scale` × 0,722 — und die
+   Texturbreite steht in keiner Tabelle, sie kommt aus dem WebP-Vorrat.
+   Also am gebauten Spiel messen, nicht in der Quelle raten.
+
 ---
 
 ## Aufbau

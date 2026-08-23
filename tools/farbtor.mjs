@@ -507,6 +507,203 @@ const BAND_VON = 20, BAND_BIS = 60;   // darueber faengt die Bedienoberflaeche a
     melde('G: TIEFE_KUGEL nicht gefunden — die Tiefenordnung ist nicht mehr die geprüfte');
 }
 
+/* ---------- Pruefung H: die Kennleuchten der Gegner --------------------- */
+
+// Seit v-Kennleuchte tragen zwei Gegnerrollen ein Positionslicht an den
+// Fluegelspitzen: gruen fuer den Stuerzer, violett fuer den Schuetzen. Das
+// ist eine VIERTE Farbsprache in einem Kreis, der schon neun reservierte
+// Farben traegt (Gefahr, Eigenfeuer, sieben Aufsammler).
+//
+// Was dieses Tor beweist und was nicht:
+//
+//   Es beweist NICHT, dass die Leuchte von einem Aufsammler ueber den
+//   Farbton allein zu unterscheiden ist. Der Kreis ist dafuer zu voll —
+//   der beste erreichbare reine Winkel liegt bei 33 Grad. Wer das behauptet,
+//   behauptet mehr als die Zahlen hergeben.
+//
+//   Es beweist, dass die Trennung ueber die Summe aus Farbton UND
+//   Helligkeit traegt, dass keine Leuchte in einem der beiden
+//   Projektilbaender liegt, dass die beiden untereinander auch fuer einen
+//   Farbenblinden auseinanderfallen — und dass die Leuchte im Bild eine
+//   ganz andere GROESSE hat als ein Aufsammler. Das Letzte ist der
+//   eigentliche Trennungsgrund, und es ist der einzige, der auch dann noch
+//   traegt, wenn der Farbkreis irgendwann ueberlaeuft.
+
+const leuchtBlock = /LEUCHTE_FARBE = \{([^}]*)\}/.exec(quelle);
+if (!leuchtBlock) melde('H: LEUCHTE_FARBE nicht in src/app.js gefunden');
+else {
+  const leuchten = [...leuchtBlock[1].matchAll(/(\w+): "(#[0-9a-fA-F]{6})"/g)]
+    .map((m) => ({ rolle: m[1], c: hex(m[2]) }));
+  if (leuchten.length < 2) melde(`H: nur ${leuchten.length} Kennleuchte(n) gefunden, mindestens 2 erwartet`);
+
+  // Alles, was der Kreis schon traegt.
+  const belegt = [];
+  if (GEFAHR) belegt.push({ n: 'Gefahr', c: GEFAHR });
+  if (EIGEN) belegt.push({ n: 'Eigenfeuer', c: EIGEN });
+  for (const a of aufsammler) belegt.push({ n: a.quelle, c: a.c });
+
+  // Das Abstandsmass. Farbton in Grad, dazu der halbe Graustufenabstand,
+  // gedeckelt bei 60 — eine Farbe wird nicht beliebig unterscheidbar, nur
+  // weil sie sehr viel heller ist. Gegengeprobt: mit dem alten #8a6cff
+  // kommt schuetze auf 38 und faellt.
+  const LEUCHT_ABSTAND_MIN = 45;
+  const abstand = (a, b) => winkel(hsv(a).h, hsv(b).h) + Math.min(60, Math.abs(grau(a) - grau(b)) * 0.5);
+
+  console.log(`H  Kennleuchten gegen ${belegt.length} belegte Farben (Grenze ${LEUCHT_ABSTAND_MIN})`);
+  for (const l of leuchten) {
+    const { h, s, v } = hsv(l.c);
+    let min = Infinity, wer = '', minWinkel = Infinity;
+    for (const b of belegt) {
+      const d = abstand(l.c, b.c);
+      if (d < min) { min = d; wer = b.n; }
+      minWinkel = Math.min(minWinkel, winkel(h, hsv(b.c).h));
+    }
+    console.log(`   ${l.rolle.padEnd(10)} ${alsHex(l.c)} H${h.toFixed(0).padStart(3)} S${s.toFixed(2)} grau ${grau(l.c).toFixed(0).padStart(3)} · naechste ${wer} bei ${min.toFixed(0)} (reiner Winkel ${minWinkel.toFixed(0)})`);
+    if (min < LEUCHT_ABSTAND_MIN)
+      melde(`H: Kennleuchte ${l.rolle} ${alsHex(l.c)} liegt nur ${min.toFixed(0)} von ${wer} entfernt (Grenze ${LEUCHT_ABSTAND_MIN})`);
+
+    // In keinem der beiden Projektilbaender — eine Leuchte, die sich als
+    // Geschoss liest, ist schlimmer als gar keine.
+    if (s >= SATT && v >= 0.3 && winkel(h, gH) <= BAND)
+      melde(`H: Kennleuchte ${l.rolle} ${alsHex(l.c)} liegt bei ${h.toFixed(0)}° im Gefahrenband`);
+    // und nicht so entsaettigt, dass sie zu Eigenfeuer wird
+    if (EIGEN && s <= hsv(EIGEN).s + 0.06)
+      melde(`H: Kennleuchte ${l.rolle} ${alsHex(l.c)} hat Saettigung ${s.toFixed(2)} — zu nah an Eigenfeuer (${hsv(EIGEN).s.toFixed(2)})`);
+    // Sie muss leuchten. Auf dunklem Rumpf und dunklem Saum traegt nur,
+    // was hell ist.
+    if (grau(l.c) < 110)
+      melde(`H: Kennleuchte ${l.rolle} ${alsHex(l.c)} hat Graustufe ${grau(l.c).toFixed(0)} — auf dunklem Rumpf traegt sie nicht`);
+  }
+
+  // Die Leuchten untereinander: hier zaehlt der Graustufenabstand voll,
+  // denn sie stehen in derselben Welle nebeneinander im Bild.
+  const LEUCHT_UNTER_MIN = 100;
+  for (let i = 0; i < leuchten.length; i++)
+    for (let j = i + 1; j < leuchten.length; j++) {
+      const a = leuchten[i], b = leuchten[j];
+      const d = winkel(hsv(a.c).h, hsv(b.c).h) + Math.min(80, Math.abs(grau(a.c) - grau(b.c)));
+      console.log(`   ${a.rolle} gegen ${b.rolle}: ${d.toFixed(0)} (Grenze ${LEUCHT_UNTER_MIN})`);
+      if (d < LEUCHT_UNTER_MIN)
+        melde(`H: Kennleuchten ${a.rolle} und ${b.rolle} liegen nur ${d.toFixed(0)} auseinander`);
+    }
+
+  // Die Groessenregel steht nicht hier, sondern in H2 weiter unten: sie
+  // braucht die ECHTEN Texturbreiten, und die kommen erst aus dem WebP-Vorrat
+  // des gebauten Spiels. Ein erster Anlauf rechnete sie hier statisch aus der
+  // breitesten ht()-Anmeldung und kam auf Faktor 1,67 statt 6,6 — er nahm den
+  // Traeger (297 px), der die Rolle panzer hat und gar keine Leuchte traegt,
+  // und liess cfg.scale ganz weg. Die Zahl war falsch, das Tor rot, und beides
+  // aus demselben Grund: falsche Messstelle.
+}
+
+/* ---------- Pruefung H2: wie gross die Kennleuchte im Bild wirklich ist -- */
+
+// H hat gezeigt, dass Farbton und Helligkeit die Leuchte nicht vollstaendig
+// von den Aufsammlern trennen — der reine Winkel kommt beim Schuetzen auf 33
+// Grad und mehr ist im vollen Kreis nicht zu haben. Was sie trennt, ist die
+// GROESSE, und die ist nur am gebauten Spiel zu messen: die Gegnerbilder
+// kommen aus dem WebP-Vorrat, ihre Breiten stehen in keiner Tabelle.
+//
+// Gerechnet wird genau die Zeile aus gegnerBacken:
+//     h = max(LEUCHTE_PUNKTE / (scale * ANZEIGE), texturBreite * LEUCHTE_ANTEIL)
+// in Texturpunkten, mal scale * ANZEIGE ergibt den Anzeigeradius.
+//
+// Uebersprungen wird nur, wenn dist/ oder Playwright fehlt — nie still bei
+// einem Fehler, und nie mit einer unvollstaendigen Texturliste: ht() nimmt
+// eine Textur WEG und legt sie neu an, der WebP-Vorrat ersetzt dieselben
+// Schluessel noch einmal. Nach 3 s fehlten fuenf von dreizehn. Deshalb wird
+// auf Stillstand gewartet, nicht auf die Uhr.
+if (GERENDERT) {
+  const { existsSync } = await import('node:fs');
+  const datei = join(wurzel, 'dist', 'Skyfront.html');
+  const leuchtBlock2 = /LEUCHTE_FARBE = \{([^}]*)\}/.exec(quelle);
+  const rollen = leuchtBlock2
+    ? [...leuchtBlock2[1].matchAll(/(\w+): "#[0-9a-fA-F]{6}"/g)].map((m) => m[1]) : [];
+
+  // Welche Gegner tragen eine dieser Rollen, und mit welchem scale?
+  const traeger = [];
+  {
+    const a = quelle.indexOf('const Ke = {');
+    const e = quelle.indexOf('\n  };', a);
+    if (a < 0 || e < 0) melde('H2: Gegnertabelle Ke nicht gefunden');
+    else for (const m of quelle.slice(a, e).matchAll(/\n    (\w+): \{([\s\S]*?)\n    \}/g)) {
+      const r = /rolle: "(\w+)"/.exec(m[2]);
+      const sc = /scale: ([0-9.]+)/.exec(m[2]);
+      if (r && sc && rollen.includes(r[1])) traeger.push({ k: m[1], rolle: r[1], scale: Number(sc[1]) });
+    }
+    if (!traeger.length) melde('H2: kein Gegner mit Kennleuchte in Ke gefunden — traegt sie ueberhaupt jemand?');
+  }
+
+  const lp2 = (() => { const m = /\bLEUCHTE_PUNKTE = ([0-9.]+)/.exec(quelle); return m ? Number(m[1]) : null; })();
+  const la2 = (() => { const m = /\bLEUCHTE_ANTEIL = ([0-9.]+)/.exec(quelle); return m ? Number(m[1]) : null; })();
+  if (lp2 === null) melde('H2: LEUCHTE_PUNKTE nicht gefunden');
+  if (la2 === null) melde('H2: LEUCHTE_ANTEIL nicht gefunden');
+
+  if (!existsSync(datei)) {
+    melde('H2: dist/Skyfront.html fehlt — erst bauen (oder --nurstatisch)');
+  } else if (traeger.length && lp2 !== null && la2 !== null) {
+    let chromium2;
+    try { ({ chromium: chromium2 } = await import('playwright')); }
+    catch { chromium2 = null; console.log('H2 (—) Playwright nicht gefunden — uebersprungen.'); }
+    if (chromium2) {
+      const browser = await chromium2.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
+      try {
+        const seite = await browser.newPage({ viewport: { width: 390, height: 844 } });
+        await seite.goto('file://' + datei);
+        await seite.waitForFunction(() => window.__game && window.__game.scene.scenes.some((x) => x.scene.isActive()), null, { timeout: 90000 });
+
+        const schluessel = [...traeger.map((t) => 'e_' + t.k), 'pu_power', 'pu_shield', 'pu_bomb', 'pu_coin', 'pu_part', 'pu_core', 'pu_slow'];
+        const lies = () => seite.evaluate((ks) => {
+          const g = window.__game, aus = {};
+          for (const k of ks) aus[k] = g.textures.exists(k)
+            ? [g.textures.get(k).getSourceImage().width, g.textures.get(k).getSourceImage().height] : null;
+          return aus;
+        }, schluessel);
+
+        let masse = null, letzte = '', gleich = 0;
+        for (let i = 0; i < 120; i++) {
+          await seite.waitForTimeout(400);
+          const jetzt = await lies();
+          const abdruck = JSON.stringify(jetzt);
+          if (abdruck === letzte) { if (++gleich >= 4 && !Object.values(jetzt).includes(null)) { masse = jetzt; break; } }
+          else { gleich = 0; letzte = abdruck; }
+        }
+        await browser.close();
+
+        if (!masse) {
+          const fehlend = schluessel.filter((k) => { try { return !JSON.parse(letzte || '{}')[k]; } catch { return true; } });
+          melde(`H2: Texturliste kam nicht zum Stillstand — es fehlen ${fehlend.join(', ') || '(unbekannt)'}. Eine Messung an einer unvollstaendigen Liste ist kein Beweis.`);
+        } else {
+          const ANZEIGE = 390 / 540;
+          // Der kleinste Aufsammler im Bild — er ist der, mit dem eine Leuchte
+          // am ehesten zu verwechseln waere.
+          let puMin = Infinity, puWer = '';
+          for (const k of schluessel) if (k.startsWith('pu_')) {
+            const d = masse[k][0] * ANZEIGE;
+            if (d < puMin) { puMin = d; puWer = k; }
+          }
+          const FAKTOR_MIN = 2.5;
+          console.log(`H2 Groesse im Bild auf 390 px · kleinster Aufsammler ${puWer} ${puMin.toFixed(1)} Anzeigepunkte (Grenze Faktor ${FAKTOR_MIN})`);
+          for (const t of traeger) {
+            const tw = masse['e_' + t.k][0];
+            const sk = t.scale * ANZEIGE;
+            const radiusTex = Math.max(lp2 / Math.max(0.05, sk), tw * la2);
+            const durchmesser = 2 * radiusTex * sk;
+            const spriteBreite = tw * sk;
+            const faktor = puMin / durchmesser;
+            console.log(`   ${t.k.padEnd(11)} ${t.rolle.padEnd(9)} Bild ${spriteBreite.toFixed(1).padStart(5)} · Leuchte ${durchmesser.toFixed(2).padStart(5)} (${(100 * durchmesser / spriteBreite).toFixed(0).padStart(2)} % davon) · Faktor ${faktor.toFixed(1)}`);
+            if (faktor < FAKTOR_MIN)
+              melde(`H2: Kennleuchte von ${t.k} ist ${durchmesser.toFixed(1)} Anzeigepunkte gross, der kleinste Aufsammler ${puMin.toFixed(1)} — Faktor ${faktor.toFixed(1)} unter ${FAKTOR_MIN}. Der Farbton allein traegt die Trennung nicht (H: reiner Winkel bis herunter zu 33 Grad).`);
+          }
+        }
+      } catch (e) {
+        await browser.close().catch(() => {});
+        melde('H2: Groessenmessung fehlgeschlagen — ' + e.message);
+      }
+    }
+  }
+}
+
 /* ---------- Bericht ---------------------------------------------------- */
 
 console.log(`\nA  Gegnerprojektile ${mG.size} Farbwerte · Spielerprojektile ${mS.size} · Aufsammler ${mA.size}`);

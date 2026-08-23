@@ -74,6 +74,26 @@ const PROBEN = [
     'for (const [R, E] of Object.entries(pi)) ht(T, R, 540, 540, (b, I) => gi(b, I, E));'], true, 'speicher'],
   ['Spaeher zurueck auf 17 Punkte Flaeche', '✗', [
     'scale: .46,\n      hitScale: .22,', 'scale: .22,'], true, 'form'],
+  // ---- die Kennleuchten der Gegner --------------------------------------
+  // Der alte Violettwert zurueck: 36 Grad und 5 Graustufen von pu_core, also
+  // im Bild derselbe Punkt. Genau dafuer ist H da.
+  ['alter Violettwert der Kennleuchte zurueck', 'H',
+    ['schuetze: "#a88cff"', 'schuetze: "#8a6cff"'], false],
+  // Eine Kennleuchte im Gefahrenband: dann liest sich der Fluegel als
+  // Geschoss, und das ist schlimmer als gar keine Leuchte.
+  ['Kennleuchte ins Gefahrenband', 'H',
+    ['stuerzer: "#93f562"', 'stuerzer: "#ff5a3a"'], false],
+  // Eine Kennleuchte, die nicht leuchtet: auf dunklem Rumpf und dunklem
+  // Saum ist sie dann gar nicht da.
+  ['Kennleuchte zu dunkel', 'H',
+    ['stuerzer: "#93f562"', 'stuerzer: "#1f3d12"'], false],
+  // Beide Rollen auf dieselbe Farbe: dann sagt die Leuchte nichts mehr.
+  ['beide Kennleuchten gleich', 'H',
+    ['schuetze: "#a88cff"', 'schuetze: "#93f562"'], false],
+  // Und die Leuchte auf Aufsammlergroesse aufblasen: dann traegt der
+  // Farbton die Trennung allein, und dafuer ist der Kreis zu voll.
+  ['Kennleuchte auf Aufsammlergroesse', 'H2',
+    ['LEUCHTE_PUNKTE = 2.4,', 'LEUCHTE_PUNKTE = 24,'], true],
   ['eb_diamond zurueck zur Scheibenform', '✗', [
     'T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()',
     'T.beginPath(), T.arc(I, G, R * .3 + t, 0, 7), T.closePath()'], true, 'form'],
