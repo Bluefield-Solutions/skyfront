@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v24",
+    SKF_VERSION = "v25",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -56067,12 +56067,24 @@ return new ` + this.key + `();
       // KEIN filter:blur und KEIN 'lighter' auf sich selbst — auf iOS gibt
       // das nach etwa einer Sekunde ein schwarzes Bild und faellt auf dem
       // Schreibtisch nicht auf (eiserne Regel 11).
+      // Das Licht liegt in der Textur UNTEN RECHTS — damit es auf dem Schirm
+      // oben links landet.
+      //
+      // Gegner werden mit setAngle(180) gezeichnet: was in der Textur oben
+      // liegt, erscheint unten. In v21 hatte ich es oben links gebacken und
+      // nicht nachgesehen; nachgemessen lag es auf dem Schirm unten rechts —
+      // auf derselben Seite wie der Schatten, der um (+7,+12) faellt. Ein
+      // Koerper, der von unten rechts beleuchtet wird und zugleich nach unten
+      // rechts Schatten wirft, widerspricht sich selbst.
+      //
+      // Der Schatten ist der staerkere Hinweis und die uebliche Richtung.
+      // Also richtet sich das Licht nach ihm, nicht umgekehrt.
       const lichtD = Math.max(1, Math.round(t * LICHT_ANTEIL));
       if (lichtD >= 1) {
         const lp = document.createElement("canvas");
         lp.width = t, lp.height = l;
         const lt = lp.getContext("2d", { willReadFrequently: !0 });
-        lt.drawImage(p, -lichtD, -lichtD);
+        lt.drawImage(p, lichtD, lichtD);
         lt.globalCompositeOperation = "destination-out";
         lt.drawImage(p, 0, 0);
         lt.globalCompositeOperation = "source-in";
@@ -56080,7 +56092,7 @@ return new ` + this.key + `();
         a.save();
         a.globalAlpha = LICHT_DECK;
         a.globalCompositeOperation = "source-atop";
-        a.drawImage(lp, lichtD, lichtD);
+        a.drawImage(lp, -lichtD, -lichtD);
         a.restore();
       }
       // 3. Kennleuchte an den Fluegelspitzen — die breiteste Zeile der
@@ -61298,8 +61310,59 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     };
   jt.scroll = 0;
   let ai = jt;
+  // Das Kantenlicht fuer den Spieler.
+  //
+  // Er laeuft NICHT durch gegnerBacken und stand seit v21 als einziger ohne
+  // da — waehrend jeder Gegner Licht bekam. Und er braucht es am ehesten:
+  // nachgemessen ist seine Grafik praktisch ungerichtet beleuchtet (Falcon
+  // 145/147/164/165 je Viertel; das Hellere unten ist der Triebwerksschein,
+  // keine Lichtrichtung).
+  //
+  // Hier liegt das Licht OBEN LINKS in der Textur — anders als bei den
+  // Gegnern. Der Spieler wird nicht um 180 Grad gedreht, also ist Textur
+  // gleich Schirm. Dieselbe Lichtrichtung, zwei verschiedene Vorzeichen:
+  // genau deshalb steht es an beiden Stellen ausgeschrieben.
+  //
+  // Kein Saum: der Spieler traegt keinen, und einer waere hier eine neue
+  // Entscheidung statt einer Angleichung.
+  function spielerBacken(T, R) {
+    const b = T.textures;
+    if (!b.exists(R)) return !1;
+    const I = b.get(R);
+    if (I.__gebacken) return !0;
+    try {
+      const G = I.getSourceImage();
+      if (!G || !G.width) return !1;
+      const t = G.width, l = G.height,
+        p = document.createElement("canvas");
+      p.width = t, p.height = l;
+      const a = p.getContext("2d", { willReadFrequently: !0 });
+      a.drawImage(G, 0, 0);
+      const d = Math.max(1, Math.round(t * LICHT_ANTEIL));
+      const lp = document.createElement("canvas");
+      lp.width = t, lp.height = l;
+      const lt = lp.getContext("2d", { willReadFrequently: !0 });
+      lt.drawImage(p, -d, -d);
+      lt.globalCompositeOperation = "destination-out";
+      lt.drawImage(p, 0, 0);
+      lt.globalCompositeOperation = "source-in";
+      lt.fillStyle = LICHT_FARBE, lt.fillRect(0, 0, t, l);
+      a.save();
+      a.globalAlpha = LICHT_DECK;
+      a.globalCompositeOperation = "source-atop";
+      a.drawImage(lp, d, d);
+      a.restore();
+      b.remove(R);
+      const w = b.addCanvas(R, p);
+      return w && (w.__gebacken = !0), !0
+    } catch (G) {
+      return !1
+    }
+  }
+
   class Fn extends tt.Physics.Arcade.Image {
     constructor(R, E, b, I = "p_fighter1") {
+      spielerBacken(R, R.textures.exists(I) ? I : "p_fighter1"),
       super(R, E, b, R.textures.exists(I) ? I : "p_fighter1"), this.maxHp = Ft.maxHp, this.hp = Ft.maxHp, this.invulnUntil = 0, this.powerLevel = 1, this.powerFloor = 1, this.shieldUntil = 0, this.bombs = Ft.bombStart, this.minX = 30, this.maxX = Number.POSITIVE_INFINITY, R.add.existing(this), R.physics.add.existing(this), this.targetX = E, this.targetY = b;
       // SKY-070: Jeder Gegner wirft einen Schatten, der Spieler bisher nicht.
       // Dadurch lag ausgerechnet die Maschine, die man ansieht, flach auf dem
@@ -61352,7 +61415,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       // Das ruhige Wiegen bleibt, aber leiser — sonst kaempft es mit der Rolle.
       this.setAngle(this.rolle + Math.sin(R * .006) * 1.6);
       const t = this.schatten;
+      // Dieselbe Biomlogik wie bei den Gegnern (v23). Ohne sie waere
+      // ausgerechnet die Maschine, die man ansieht, die einzige mit festem
+      // Schatten — auf Frost haette sie weniger Halt als alles um sie herum.
       t && t.setPosition(this.x + oi.SHADOW_DX, this.y + oi.SHADOW_DY).setScale(this.scaleX, this.scaleY).setAngle(this.angle)
+        .setAlpha(this.scene.schattenStaerke ? this.scene.schattenStaerke() : .3)
     }
   }
   Fn.ROLL_MAX = 18;

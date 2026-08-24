@@ -9,7 +9,7 @@ liest hier.
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle. Wo unten „✅"
 steht, ist im Quelltext nachgesehen worden und die Stelle ist genannt.
 
-Stand: v24.
+Stand: v25.
 
 ---
 
@@ -88,7 +88,7 @@ Grafikkarte**. Der JavaScript-Anteil überträgt auf ein Telefon, Rastern und
 Zusammensetzen nicht.
 
 Auf dem iPhone: Seite laden → **Spielen** → 📊 rechts oben → die Zeile
-`SKYFRONT-MESSUNG v24 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
+`SKYFRONT-MESSUNG v25 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
 („noch zu wenig gemessen — N von 60").
 
 ### 5. Lesbarkeit auf hellen Biomen — **neu, v21**
@@ -110,6 +110,23 @@ als das Licht.
 
 Richtung, noch nicht gemessen: auf hellen Biomen müsste der **dunkle Saum**
 mehr tragen, nicht ein helles Streiflicht.
+
+### 5b. Die Bilder sind gegen ihren eigenen Schatten beleuchtet — **neu, v25**
+
+Gegner und Boss werden mit `setAngle(180)` gezeichnet. Die in die Bilder
+eingebackene Schattierung dreht sich mit: Elite, Carrier und Gunship sind
+in der Textur messbar von oben links beleuchtet (Gunship 131,5 gegen 81,8 —
+Faktor 1,6), auf dem Schirm kommt dieses Licht also von **unten rechts**.
+Der Schatten fällt um (+7, +12), ebenfalls nach unten rechts. Ein Körper,
+der von unten rechts beleuchtet wird und dorthin Schatten wirft,
+widerspricht sich selbst.
+
+Am **Bild** zu beheben, nicht am Code: entweder mit der Nase nach unten
+zeichnen, oder das Spiel dreht sie nicht. Das gebackene Kantenlicht (v25)
+wirkt inzwischen dagegen statt dafür, ersetzt es aber nicht.
+
+Der Spieler ist nicht betroffen — er wird nicht gedreht, und seine Grafik
+ist ohnehin praktisch ungerichtet beleuchtet.
 
 ### 6. B4 · Telemetrie
 Solange nichts vom Gerät zurückkommt, bleibt jede Zahl in `balance.js`

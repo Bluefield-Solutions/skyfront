@@ -74,6 +74,15 @@ const PROBEN = [
   ['elite bekommt das Bild des Spaehers (kleineres Quellbild)', '✗',
     ['e_elite: __SKFA[22]', 'e_elite: __SKFA[28]'], true, 'form',
     'Quellbild auf 42 px geschrumpft, Boden ist 80 px'],
+  // Der Cache-Vertrag. Bis v23 merkte sich untergrundRuhe auch eine Messung
+  // an einer Textur, die es noch gar nicht gab — bodenMessung(null) liefert
+  // Nullen, und die blieben fuer den ganzen Lauf stehen. Betroffen waren
+  // Beruhigungsschicht UND Schattenstaerke. Aufgefallen ist es an einer
+  // anderen Baustelle; gemeldet hat es kein Tor.
+  ['untergrundRuhe merkt sich wieder den Zwischenstand', '✗',
+    ['if (!this.textures.exists(R)) return bodenMessung(null);\n        const b = this.textures.get(R).getSourceImage();\n        if (!b || !b.width) return bodenMessung(null);\n        return this.ruheCache[R] = bodenMessung(b)',
+     'const b = this.textures.exists(R) ? this.textures.get(R).getSourceImage() : null;\n        return this.ruheCache[R] = bodenMessung(b)'],
+    true, 'boden', 'merkt sich eine Messung an fehlender Textur'],
   ['Beruhigungsschicht auf Schwarz', '✗', [
     'farbe: Math.round(x / r) << 16 | Math.round(t / r) << 8 | Math.round(l / r),',
     'farbe: 0,'], true, 'boden', 'die Schicht verschiebt die Mittelhelligkeit'],

@@ -69,9 +69,47 @@ const tafel = await seite.evaluate(async () => {
       farbe: '#' + (w.farbe >>> 0).toString(16).padStart(6, '0'),
     });
   }
-  return { liste: aus };
+  // Und die Frage, die v23 teuer war: merkt sich das Spiel eine Messung,
+  // die es an einer noch fehlenden Textur gemacht hat?
+  //
+  // `untergrundRuhe` speichert je Biom. Bis v23 speicherte es auch dann,
+  // wenn die Textur noch gar nicht da war — bodenMessung(null) liefert
+  // Nullen, und die blieben fuer den ganzen Lauf stehen. Aufgefallen ist es
+  // an einer anderen Baustelle; gemeldet hat es kein Tor.
+  //
+  // Geprueft wird der Ablauf, nicht der Zustand: erst fragen, WAEHREND die
+  // Textur fehlt, dann die Textur anlegen und noch einmal fragen. Wer den
+  // Zwischenstand merkt, gibt beim zweiten Mal dieselben Nullen zurueck.
+  // Die Gefechtsszene, auch wenn sie gerade nicht laeuft: untergrundRuhe
+  // haengt nur an this.textures, nicht daran, dass gespielt wird. Ins
+  // Gefecht zu tippen kostete zehn Sekunden und braechte dieselbe Antwort.
+  const g = window.__game;
+  const sz = g && g.scene && g.scene.getScene ? g.scene.getScene('Game') : null;
+  let cache = null;
+  if (sz) {
+    const schluessel = '__probe_boden__';
+    const vorher = sz.untergrundRuhe(schluessel);          // Textur fehlt
+    const bild = new Image();
+    bild.src = feld[namen.length ? namen[0][1] : 0];
+    await bild.decode().catch(() => {});
+    if (bild.width) {
+      g.textures.addImage(schluessel, bild);
+      const nachher = sz.untergrundRuhe(schluessel);        // jetzt da
+      cache = { vorher: vorher ? vorher.median : null, nachher: nachher ? nachher.median : null };
+      g.textures.remove(schluessel);
+      if (sz.ruheCache) delete sz.ruheCache[schluessel];
+    }
+  }
+  return { liste: aus, cache };
 });
 await browser.close();
+
+// Der Cache-Vertrag. Steht VOR der Tafel, weil ein gemerkter Zwischenstand
+// alle Zahlen darunter entwertet.
+if (!tafel.cache) M.ungemessen('Cache-Verhalten nicht geprueft — keine lebende Szene mit untergrundRuhe gefunden');
+else if (!(tafel.cache.nachher > 0))
+  M.befund(`untergrundRuhe merkt sich eine Messung an fehlender Textur: erst ${tafel.cache.vorher}, nach dem Anlegen immer noch ${tafel.cache.nachher}. Damit haengen Beruhigungsschicht und Schattenstaerke des ganzen Laufs an Nullen.`);
+else console.log(`  Cache: ohne Textur ${tafel.cache.vorher}, mit Textur ${tafel.cache.nachher} — der Zwischenstand wird nicht gemerkt.`);
 
 if (tafel.fehler) M.abbruch(tafel.fehler);
 const gut = tafel.liste.filter((x) => !x.fehlt).sort((a, b) => b.energie - a.energie);
