@@ -9,7 +9,7 @@ liest hier.
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle. Wo unten „✅"
 steht, ist im Quelltext nachgesehen worden und die Stelle ist genannt.
 
-Stand: v26.
+Stand: v27.
 
 ---
 
@@ -34,6 +34,51 @@ die das Spielgefühl tragen.
 ---
 
 ## 2. Priorisiert — was den größten Nutzen bringt
+
+### 0. Vom Nutzer benannt (v26) — Levellänge, Bossstärke, Rückmeldung
+
+Fünf Punkte, alle noch offen. Sie hängen zusammen: ein Level, das 60 bis 90
+Sekunden trägt, braucht einen Boss, der sich lohnt, und der braucht
+Rückmeldung, damit man ihn lesen kann.
+
+**0a · Die Level sind zu kurz.** Ziel: **60 bis 90 Sekunden** je Level, wie
+im Vorbild. Heute ist ein Level fertig, wenn alle Wellen abgeräumt sind —
+wie lange das dauert, ist nirgends gesetzt und nirgends gemessen. Erster
+Schritt ist deshalb eine **Messung**, nicht eine Schraube:
+`tools/rhythmus.mjs` kennt Wellenzahl und Dichte je Sektor, aber nicht die
+Zeit. Ohne die Zeitachse ist jede Verlängerung geraten.
+
+**0b · Die Bosse sind teilweise zu leicht.** Gemessen sind die
+Lebenspunkte 173 / 432 / 670 (Stufe 1 / 2 / 3, Sektor 1, ohne
+Endlos-Aufschlag). Ob das zu leicht ist, sagt keine dieser Zahlen — es sagt
+das Spielgefühl, und dafür fehlt die Telemetrie (B4). Bis dahin ist jede
+Anhebung eine Schätzung, und das gehört dazugesagt.
+
+**0c · Die Bosse müssen anders schießen.** Heute drei Geschossarten für alle
+Stufen, alle drei von Gegnern geliehen (`star`, `ring`, `diamond`). Siehe
+`docs/BILDAUFTRAEGE-BOSSE.md`, Abschnitt 4.
+
+**0d · Bessere Rückmeldung im Bossgefecht.** Was seit v22 da ist: der Boss
+dunkelt je Phase ab und raucht. Was fehlt: Treffer-Rückmeldung an der
+getroffenen STELLE statt am ganzen Körper, hörbare Abstufung, ein sichtbarer
+Unterschied zwischen „trifft" und „trifft die Panzerung".
+
+**0e · Der weiße Blitz beim Abschuss ist weg** (v27). Er war ein reinweißes
+`spark`-Bild im ADD-Modus, das in 190 ms von 0,6 auf 2,6 aufriss — bei jedem
+einzelnen Gegner. Beim Boss bleibt einer, warm statt reinweiß.
+
+### 0f. Die Bosse werden hochgerechnet — **neu, v27**
+
+| | Quellbild | im Puffer | Faktor |
+|---|---|---|---|
+| `boss1` | 325 × 260 | 650 × 520 | **0,50×** |
+| `boss2` | 377 × 260 | 860 × 593 | **0,44×** |
+| `boss3` | 425 × 260 | 1054 × 645 | **0,40×** |
+
+Das Formentor nennt alles unter 0,6× „weich im Bild". `boss3` liegt bei
+0,40× — fast so schlecht wie der Elite (0,37×), und er ist das **größte
+Ding auf dem Schirm**. Aufträge mit genauen Maßen:
+`docs/BILDAUFTRAEGE-BOSSE.md`.
 
 ### 1. B7 · Bosse aus Teilen
 Der Boss ist der einzige *gestaltete* Moment im Spiel und wiederholt sich
@@ -88,7 +133,7 @@ Grafikkarte**. Der JavaScript-Anteil überträgt auf ein Telefon, Rastern und
 Zusammensetzen nicht.
 
 Auf dem iPhone: Seite laden → **Spielen** → 📊 rechts oben → die Zeile
-`SKYFRONT-MESSUNG v26 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
+`SKYFRONT-MESSUNG v27 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
 („noch zu wenig gemessen — N von 60").
 
 ### 5. Lesbarkeit auf hellen Biomen — **neu, v21**

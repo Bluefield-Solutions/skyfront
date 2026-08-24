@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v26",
+    SKF_VERSION = "v27",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -65121,14 +65121,31 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       }
       boom(R, E, b) {
         this.explosions.explode(this.fxCount(b ? 22 : 11), R, E), this.smoke.explode(this.fxCount(b ? 10 : 5), R, E);
-        const I = this.add.image(R, E, "spark").setBlendMode(tt.BlendModes.ADD).setDepth(16).setScale(.6).setTint(16777215);
-        this.tweens.add({
-          targets: I,
-          scale: b ? 4.4 : 2.6,
-          alpha: 0,
-          duration: 190,
-          onComplete: () => I.destroy()
-        });
+        // KEIN weisser Blitz mehr bei einem gewoehnlichen Abschuss.
+        //
+        // Hier stand ein reinweisses spark-Bild (0xFFFFFF) im ADD-Modus, das
+        // in 190 ms von 0,6 auf 2,6 aufriss. Bei jedem einzelnen Gegner. In
+        // einem Spiel, in dem man zweihundert Gegner je Runde abschiesst, ist
+        // das kein Akzent mehr, sondern ein Flackern — und Weiss ist die
+        // einzige Farbe, die IMMER heraussticht, egal auf welchem Biom.
+        //
+        // Der Abschuss bleibt lesbar: Explosionspartikel, Rauch, Funken und
+        // der warme Ring darunter tun das schon. Weggenommen wird der
+        // Ausschlag, nicht die Rueckmeldung.
+        //
+        // Beim GROSSEN Abschuss (Boss) bleibt ein Blitz — dort ist er selten
+        // und soll auffallen. Aber warm statt reinweiss, damit er zum Feuer
+        // gehoert und nicht zur Benutzeroberflaeche.
+        if (b) {
+          const I = this.add.image(R, E, "spark").setBlendMode(tt.BlendModes.ADD).setDepth(16).setScale(.6).setTint(16764262);
+          this.tweens.add({
+            targets: I,
+            scale: 4.4,
+            alpha: 0,
+            duration: 190,
+            onComplete: () => I.destroy()
+          });
+        }
         const G = this.add.image(R, E, "shieldRing").setBlendMode(tt.BlendModes.ADD).setDepth(16).setScale(b ? .4 : .2).setTint(b ? 16764794 : 16767392).setAlpha(.9);
         this.tweens.add({
           targets: G,
