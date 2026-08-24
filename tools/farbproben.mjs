@@ -66,6 +66,14 @@ const PROBEN = [
   // UND profilgleich mit eb_orb, und genau das soll das Formentor melden.
   // Die Beruhigungsschicht auf Schwarz statt Mittelfarbe: dann DUNKELT sie ab
   // statt Kontrast zu nehmen, und genau das soll die Untergrund-Tafel melden.
+  // Der Bildboden. Ohne ihn konnte die Aufloesung unbemerkt SCHLECHTER
+  // werden: die Tabelle im Formentor war bis v19 blosse Meldung, und der
+  // Hinweis darunter uebernahm das kleinere Bild klaglos als neues Soll
+  // ("elite 42 px → mindestens 113 px"). Ein kleineres Quellbild
+  // untergeschoben — das ist genau der Fall, den kein Tor sah.
+  ['elite bekommt das Bild des Spaehers (kleineres Quellbild)', '✗',
+    ['e_elite: __SKFA[22]', 'e_elite: __SKFA[28]'], true, 'form',
+    'Quellbild auf 42 px geschrumpft, Boden ist 80 px'],
   ['Beruhigungsschicht auf Schwarz', '✗', [
     'farbe: Math.round(x / r) << 16 | Math.round(t / r) << 8 | Math.round(l / r),',
     'farbe: 0,'], true, 'boden', 'die Schicht verschiebt die Mittelhelligkeit'],

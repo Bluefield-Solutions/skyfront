@@ -47,7 +47,9 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Gegenproben (kurz)** | `npm run probenkurz` — nur die sechs Modusproben ohne Bildtor: jedes Tor muss seine drei Ausgänge (0 · 1 · 2) noch nehmen können. **41 s** |
 | **Ein Tor ohne Messstelle** | `node tools/<tor>.mjs --ohne-naht` — nimmt dem Tor die Prüfnaht weg. Es muss dann **2** zurückgeben („nicht gemessen"), nicht 0 und nicht 1 |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
-| **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
+| **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder. Weist eine Vorlage ab, die ihren eigenen Rand mitbringt |
+| **Neue Symbolvorlage aufbereiten** | `node tools/symbolquelle.mjs <bild.png>` → `web/quelle/icon-quelle.png`, randlos. Bei anderem Bildaufbau `--feld=X,Y,S --radius=R` |
+| **Rahmenprüfung gegenproben** | `npm run symbolprobe` — baut aus der echten Vorlage einen Rahmen und verlangt, dass er abgewiesen wird |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |
 | **Balance im Code ändern** | Zahl in `src/balance.js` ändern, dann `node build.mjs` |
 | **Neue Variante** | Profil in `profiles/<Name>.js` ablegen (Format wie `balance.js`, optional `export const META`), dann `node build-variants.mjs` |

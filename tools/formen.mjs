@@ -280,9 +280,33 @@ auswerten('Gegner', rohGegner, 96, 12);
 
 /* ---- Aufloesung: was auf dem Zielgeraet ankommt ---------------------------
 
-   Nur gemeldet, nicht gewertet: hier fehlen BILDER, kein Code. Die Zahl sagt,
-   wie viele Quellbildpunkte je Geraetebildpunkt uebrig sind. Unter 1,0 wird
-   hochgerechnet.                                                            */
+   Die Zahl sagt, wie viele Quellbildpunkte je Geraetebildpunkt uebrig sind.
+   Unter 1,0 wird hochgerechnet, unter 0,6 sieht man es.
+
+   BESSER wird das nur mit neuen Bildern — das ist zweimal gemessen und
+   zweimal verworfen: die Schaerfemaske (Nachtrag v16b) hob in glatten
+   Flaechen genauso viel wie an Kanten, und weder eine steilere
+   Deckkraft-Rampe noch ein in Anzeigeaufloesung gezeichneter Saum bringen
+   mehr als 1,2 % (Nachtrag v19). Detail, das nicht da ist, kommt nicht
+   zurueck.
+
+   SCHLECHTER werden konnte es aber unbemerkt, und DAS ist hier zu holen.
+   Bis v19 stand die Tabelle als blosse Meldung im Protokoll: wer ein
+   Quellbild gegen ein kleineres tauscht oder einen Massstab hochsetzt,
+   machte das Bild weicher, und kein Tor sagte etwas. Der Boden unten haelt
+   den heutigen Stand fest. Wer ihn unterschreitet, bekommt einen Befund.
+
+   Der Boden ist KEIN Ziel — er ist die Linie, unter die es nicht mehr geht.
+   Das Ziel steht darunter in der Bildanforderung.                          */
+
+// Gemessen am Stand v19. Quellbreite in Bildpunkten je Gegner.
+// Wer bessere Bilder einbaut, hebt diese Zahlen mit — sonst haelt der Boden
+// bald etwas fest, das laengst ueberholt ist.
+const BILDBODEN = {
+  elite: 80, carrier: 125, rotor: 71, kamikaze: 37, gunship: 204,
+  bomber: 167, arcer: 76, rocketeer: 60, weaver: 162, sniper: 80,
+  scout: 42, strafer: 79, grunt: 180,
+};
 {
   console.log(`\nAufloesung auf dem Zielgeraet (${GERAETE_PUNKTE.toFixed(2)} Bildpunkte je Anzeigepunkt)`);
   const zeilen = [];
@@ -316,8 +340,35 @@ auswerten('Gegner', rohGegner, 96, 12);
     // Staerke 0,7: +9,6 % an Kanten, +9,4 % in Flaechen). Sie stellt keine
     // Struktur her, sie dreht den Kontrast des Sprites hoch und verstaerkt
     // das Oberflachenkorn mit. Kein Ersatz fuer Bildpunkte.
-    console.log('    (Eine Schaerfemaske ist geprueft und verworfen — sie verstaerkt Korn wie Kanten.)');
+    console.log('    (Drei Wege sind geprueft und verworfen: Schaerfemaske — verstaerkt Korn wie');
+    console.log('     Kanten. Steilere Deckkraft-Rampe — wirkt bei 1,3x, bei 2,7x gar nicht.');
+    console.log('     Saum in Anzeigeaufloesung gezeichnet — 1,2 %, also Rauschen. Der Saum');
+    console.log('     kommt aus der Silhouette, und die ist hochgerechnet weich.)');
   }
+
+  // Der Boden. Hier wird gewertet, nicht gemeldet.
+  const gehoben = [];
+  for (const z of zeilen) {
+    const boden = BILDBODEN[z.k];
+    if (boden === undefined) {
+      M.ungemessen(`${z.k}: kein Boden hinterlegt — ueber diesen Gegner sagt die Aufloesungspruefung nichts. Nachtragen in BILDBODEN.`);
+      continue;
+    }
+    if (z.quelle < boden)
+      befunde.push(`${z.k}: Quellbild auf ${z.quelle} px geschrumpft, Boden ist ${boden} px. Das Bild wird auf dem Geraet weicher als es war (${z.anteil.toFixed(2)}x).`);
+    else if (z.quelle > boden) gehoben.push(`${z.k} ${boden} → ${z.quelle} px`);
+  }
+  if (gehoben.length) {
+    console.log(`\n    Besser als der Boden: ${gehoben.join(', ')}.`);
+    console.log('    BILDBODEN in tools/formen.mjs mitheben — sonst haelt er bald etwas fest,');
+    console.log('    das laengst ueberholt ist.');
+  }
+  // Umgekehrt: ein Gegner, der aus der Tabelle faellt, faellt auch aus dem
+  // Boden. Ein Boden ohne Gegner ist kein Fehler (Bild entfernt), aber er
+  // darf nicht unbemerkt bleiben — sonst schrumpft der Schutz mit.
+  for (const k of Object.keys(BILDBODEN))
+    if (!zeilen.some((z) => z.k === k))
+      M.ungemessen(`${k}: steht im BILDBODEN, kam aber in der Messung nicht vor — der Boden schuetzt ihn gerade nicht.`);
 }
 
 for (const b of befunde) M.befund(b);

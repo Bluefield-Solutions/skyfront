@@ -30,7 +30,8 @@
     "bilder": "node tools/bilder.mjs",
     "package": "node build-all.mjs --zip",
     "package:master": "node build-all.mjs --zip=master",
-    "release": "node build-all.mjs --zip --boot"
+    "release": "node build-all.mjs --zip --boot",
+    "symbolprobe": "node tools/symbol.mjs --probe"
   },
   "engines": {
     "node": ">=18"
