@@ -278,10 +278,32 @@ auswerten('Gegner', rohGegner, 96, 12);
     zeilen.push({ k, quelle: v.quelleW, noetig, anteil: v.quelleW / noetig });
   }
   zeilen.sort((a, b) => a.anteil - b.anteil);
-  for (const z of zeilen)
-    console.log(`    ${z.k.padEnd(12)} Quelle ${String(z.quelle).padStart(4)} px · gebraucht ${z.noetig.toFixed(0).padStart(4)} px · ${z.anteil.toFixed(2)}x${z.anteil < 1 ? '  hochgerechnet' : ''}`);
+  // WEICH IM BILD ab 0,6x — und das ist nachgesehen, nicht gerechnet.
+  //
+  // "8 von 13 werden hochgerechnet" war richtig und unbrauchbar: es sagte
+  // nicht, welche davon man SIEHT. In Geraetegroesse nebeneinander gelegt
+  // (docs/AUDIT, Nachtrag v16) halten kamikaze und gunship bei 0,76x,
+  // bomber bei 0,81x, arcer bei 0,84x und rocketeer bei 0,90x tadellos.
+  // Matschig sind drei: elite 0,37x, carrier 0,42x und rotor 0,53x.
+  const WEICH = 0.6;
+  for (const z of zeilen) {
+    const marke = z.anteil < WEICH ? '  WEICH IM BILD' : z.anteil < 1 ? '  hochgerechnet' : '';
+    console.log(`    ${z.k.padEnd(12)} Quelle ${String(z.quelle).padStart(4)} px · gebraucht ${z.noetig.toFixed(0).padStart(4)} px · ${z.anteil.toFixed(2)}x${marke}`);
+  }
   const schlecht = zeilen.filter((z) => z.anteil < 1).length;
-  console.log(`    ${schlecht} von ${zeilen.length} werden auf dem Geraet hochgerechnet. Das ist an den BILDERN zu beheben, nicht am Code.`);
+  const weich = zeilen.filter((z) => z.anteil < WEICH);
+  console.log(`    ${schlecht} von ${zeilen.length} werden hochgerechnet, davon ${weich.length} sichtbar weich (unter ${WEICH}x).`);
+  if (weich.length) {
+    console.log('    Zu beheben an den BILDERN, nicht am Code. Gebraucht wird je Quellbild:');
+    for (const z of weich)
+      console.log(`      ${z.k.padEnd(10)} ${String(z.quelle).padStart(4)} px → mindestens ${z.noetig.toFixed(0)} px breit  (+${(z.noetig - z.quelle).toFixed(0)} px)`);
+    // Nachgemessen und verworfen: eine Unschaerfemaske nach dem Hochrechnen
+    // hebt in glatten Flaechen genauso viel wie an Kanten (elite bei
+    // Staerke 0,7: +9,6 % an Kanten, +9,4 % in Flaechen). Sie stellt keine
+    // Struktur her, sie dreht den Kontrast des Sprites hoch und verstaerkt
+    // das Oberflachenkorn mit. Kein Ersatz fuer Bildpunkte.
+    console.log('    (Eine Schaerfemaske ist geprueft und verworfen — sie verstaerkt Korn wie Kanten.)');
+  }
 }
 
 if (befunde.length) {
