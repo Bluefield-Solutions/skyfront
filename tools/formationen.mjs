@@ -148,7 +148,13 @@ const gemessen = await seite.evaluate(async () => {
       // laenger: unter SwiftShader ist eine Sekunde Spielzeit rund acht
       // Sekunden Wanduhrzeit, und zu grosszuegig gewartet laeuft der Lauf in
       // die Notbremse statt in die Messung.
-      const schritt = teil.form === 'sideSweep' ? 150 : teil.form === 'stream' ? 280 : 0;
+      // Wie lange braucht die Formation, bis sie alle gestellt hat? Steht
+      // hier je Formation, weil `pincer` paarweise stellt und deshalb nur
+      // halb so viele Schritte braucht wie Gegner.
+      const schritt = teil.form === 'sideSweep' ? 150
+        : teil.form === 'stream' ? 280
+        : teil.form === 'pincer' ? 220 / 2
+        : 0;
       treibe(schritt * erwartet + 400);
       for (const q of mit) wolke.push({ x: q.x, y: q.y, t: q.t + teil.nach, teil: teil.form, erwartet });
       const fehlt = erwartet - mit.length;

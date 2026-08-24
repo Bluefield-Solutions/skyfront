@@ -56532,7 +56532,7 @@ return new ` + this.key + `();
   }, {
     name: "Zange",
     druck: 3,
-    teile: [{ rolle: "schwarm", n: 5, form: "sideSweep", nach: 0 }, { rolle: "schwarm", n: 5, form: "sideSweep", nach: 700 }]
+    teile: [{ rolle: "schwarm", n: 5, form: "pincer", nach: 0 }, { rolle: "schwarm", n: 5, form: "pincer", nach: 700 }]
   }, {
     name: "Sperrfeuer",
     druck: 3,
@@ -56548,7 +56548,7 @@ return new ` + this.key + `();
   }, {
     name: "Kreuzfeuer",
     druck: 5,
-    teile: [{ rolle: "schuetze", n: 2, form: "sideSweep", nach: 0 }, { rolle: "schuetze", n: 2, form: "sideSweep", nach: 600 }]
+    teile: [{ rolle: "schuetze", n: 2, form: "post", nach: 0 }, { rolle: "schuetze", n: 2, form: "post", nach: 600 }]
   }, {
     name: "Kette",
     druck: 6,
@@ -56556,7 +56556,7 @@ return new ` + this.key + `();
   }, {
     name: "Hetze",
     druck: 6,
-    teile: [{ rolle: "stuerzer", n: 3, form: "stream", nach: 0 }, { rolle: "schwarm", n: 6, form: "row", nach: 500 }]
+    teile: [{ rolle: "stuerzer", n: 3, form: "stream", nach: 0 }, { rolle: "schwarm", n: 6, form: "trail", nach: 500 }]
   }, {
     name: "Wand",
     druck: 7,
@@ -56564,7 +56564,7 @@ return new ` + this.key + `();
   }, {
     name: "Eskorte",
     druck: 8,
-    teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schuetze", n: 2, form: "vWedge", nach: 400 }, { rolle: "schwarm", n: 4, form: "row", nach: 900 }]
+    teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schuetze", n: 2, form: "column", nach: 400 }, { rolle: "schwarm", n: 4, form: "row", nach: 900 }]
   }, {
     name: "Ansturm",
     druck: 9,
@@ -63133,7 +63133,38 @@ ${R.label}`, {
                 const v = G % 2 === 0,
                   x = 70 + Math.floor(G / 2) * 48;
                 this.time.delayedCall(G * 150, () => this.spawnSide(R.kind, v, x))
-              } else {
+              } else if (R.formation === "pincer")
+                // ZANGE. sideSweep schickt abwechselnd einen von links, einen
+                // von rechts — das liest sich als Reihe, nicht als Zange. Hier
+                // kommt ein PAAR gleichzeitig, und jedes naechste Paar tiefer:
+                // man wird von beiden Seiten zugleich eingeschnuert.
+                for (let G = 0; G < R.count; G++) {
+                  const paar = Math.floor(G / 2), links = G % 2 === 0;
+                  this.time.delayedCall(paar * 220, () => this.spawnSide(R.kind, links, 90 + paar * 70))
+                } else if (R.formation === "post")
+                  // KREUZFEUER. Nicht hereinfliegen, sondern Stellung beziehen:
+                  // die Schuetzen kommen von oben an beiden Raendern herunter,
+                  // auf verschiedenen Hoehen. Die Bahn dazwischen liegt im
+                  // Feuer von links UND rechts.
+                  for (let G = 0; G < R.count; G++) {
+                    const links = G % 2 === 0, stufe = Math.floor(G / 2);
+                    this.spawnAt(R.kind, links ? E + 26 : J - E - 26, stufe * 130)
+                  } else if (R.formation === "column")
+                    // ESKORTE. Schmal und tief hinter dem Anfuehrer, leicht
+                    // versetzt — kein Keil, der sich breit macht, sondern eine
+                    // Kolonne, die ihm folgt.
+                    for (let G = 0; G < R.count; G++)
+                      this.spawnAt(R.kind, J / 2 + (G % 2 === 0 ? -34 : 34), 110 + G * 96);
+                  else if (R.formation === "trail")
+                    // HETZE. Keine Reihe, die als Wand herunterkommt, sondern
+                    // eine schraege Schleppe, die quer durch die Bahn zieht —
+                    // hinter den Stuerzern her. Deckung und Hetze teilten sich
+                    // vorher dieselbe flache Reihe und waren damit dasselbe Bild.
+                    for (let G = 0; G < R.count; G++) {
+                      const v = R.count === 1 ? .5 : G / (R.count - 1);
+                      this.spawnAt(R.kind, E + b * v, v * 300)
+                    }
+              else {
                 const G = tt.Math.Between(E, J - E);
                 for (let v = 0; v < R.count; v++) this.time.delayedCall(v * 280, () => this.spawnAt(R.kind, G, 0))
               }

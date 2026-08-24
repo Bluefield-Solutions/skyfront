@@ -116,7 +116,7 @@ const PROBEN = [
   // Die Eskorte auf die Deckung setzen: dann sind es elf Ideen mit zwoelf
   // Namen, und die Formationentafel muss das sehen.
   ['Eskorte ist die Deckung noch einmal', '✗', [
-    'teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schuetze", n: 2, form: "vWedge", nach: 400 }, { rolle: "schwarm", n: 4, form: "row", nach: 900 }]',
+    'teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schuetze", n: 2, form: "column", nach: 400 }, { rolle: "schwarm", n: 4, form: "row", nach: 900 }]',
     'teile: [{ rolle: "panzer", n: 1, form: "single", nach: 0 }, { rolle: "schwarm", n: 5, form: "row", nach: 900 }]'], true, 'formation', 'Deckung und Eskorte'],
   // Und die Staffelung aus dem Keil nehmen: dann ist er eine Reihe, und die
   // Tafel muss ihn neben den Aufmarsch legen.
