@@ -54407,6 +54407,12 @@ return new ` + this.key + `();
     // Fluegelspitzen, deren Farbe die ROLLE sagt — wie das Positionslicht
     // eines echten Flugzeugs, also technisch glaubwuerdig und frei in der
     // Farbe. Zwei begruendete Farben statt sechs willkuerlicher.
+    // Die Spielversion. EINE Quelle: der Bau stempelt sie in die HTML-Huelle
+    // (buildcore.mjs) und verweigert den Dienst, wenn er sie hier nicht
+    // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
+    // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
+    // gegeneinander.
+    SKF_VERSION = "v14",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -65510,6 +65516,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       max: Ft.maxPower,
       jeTreffer: PWR_JE_TREFFER
     };
+    typeof window < "u" && (window.__SKF_VERSION = SKF_VERSION);
     Oe("Phaser.Game erstellt ✓");
     try {
       const R = T.canvas;

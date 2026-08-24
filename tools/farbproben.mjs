@@ -229,10 +229,11 @@ const MODUSPROBEN = [{
   name: 'Bildtor ohne Phaser-Schnappschuss (--abzug)',
   cmd: ['tools/bildtor.mjs', '--abzug'],
   rotErwartet: false,
+  exitErwartet: 2,
   mussEnthalten: ['Median Streuung', 'NICHT DURCHGEFÜHRT', 'Querkante nicht gemessen',
     'Menü geprüft, Querkanten NICHT'],
   darfNichtEnthalten: ['harte Querkante', 'Das ist kein Menue'],
-  beweist: 'Menü gemessen und beurteilt, Querkanten laut verweigert, kein erfundener Befund',
+  beweist: 'Menü gemessen und beurteilt, Querkanten laut verweigert, Rückgabe 2 („nicht gemessen")',
 }, {
   // Jeder Schirm liefert dasselbe Wertepaar. Auf GitHub kam genau das vor:
   // sieben Mal 43,6 / 1,9. Das sind nicht sieben Messungen, das ist ein
@@ -240,6 +241,7 @@ const MODUSPROBEN = [{
   name: 'Bildtor mit lauter gleichen Schirmen (--flach)',
   cmd: ['tools/bildtor.mjs', '--flach'],
   rotErwartet: true,
+  exitErwartet: 1,
   mussEnthalten: ['Das ist kein Menue, das ist ein Bild', 'Nicht gemessen'],
   darfNichtEnthalten: ['Median Streuung'],
   beweist: 'lauter gleiche Schirme werden als „ein Bild" erkannt, nicht als Messung',
@@ -249,13 +251,20 @@ let modusFehler = 0, modusGelaufen = 0;
 if (ALLE) {
   console.log('');
   for (const m of MODUSPROBEN) {
-    let text = '', rot = false;
+    let text = '', rot = false, code = 0;
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
-    catch (e) { rot = true; text = (e.stdout || '') + (e.stderr || ''); }
+    catch (e) { code = e.status; rot = true; text = (e.stdout || '') + (e.stderr || ''); }
     modusGelaufen++;
     const mangel = [];
-    if (m.rotErwartet && !rot) mangel.push('Tor blieb GRÜN, rot erwartet');
-    if (!m.rotErwartet && rot) mangel.push('Tor wurde ROT, grün erwartet');
+    // Rueckgabe 2 heisst "nicht (vollstaendig) gemessen" und ist KEIN
+    // Mangel — check.mjs schreibt dafuer "⚠ nicht gemessen" in den Bericht
+    // statt "✅ ohne Befund". Der Wert ist damit ein Vertrag zwischen Tor
+    // und Kette, und Vertraege gehoeren geprueft.
+    if (m.exitErwartet !== undefined && code !== m.exitErwartet)
+      mangel.push(`Rückgabe ${code}, ${m.exitErwartet} erwartet`);
+    const echtRot = rot && code !== 2;
+    if (m.rotErwartet && !echtRot) mangel.push('Tor blieb GRÜN, rot erwartet');
+    if (!m.rotErwartet && echtRot) mangel.push('Tor wurde ROT, grün erwartet');
     for (const t of m.mussEnthalten) if (!text.includes(t)) mangel.push(`„${t}" fehlt im Bericht`);
     for (const t of m.darfNichtEnthalten) if (text.includes(t)) mangel.push(`„${t}" steht im Bericht, darf aber nicht — der Ersatzweg urteilt, wo er nicht darf`);
     if (mangel.length) { console.log(`✗ ${m.name}: ${mangel.join(' · ')}`); modusFehler++; }

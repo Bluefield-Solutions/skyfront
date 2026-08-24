@@ -102,7 +102,7 @@ const SCHIRME = ['Menu', 'Hangar', 'Workshop', 'Arsenal', 'Levels', 'Briefing', 
 if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Bildtor: Playwright nicht gefunden — uebersprungen.'); process.exit(0); }
+catch { console.log('  (—) Bildtor: Playwright nicht gefunden — uebersprungen.'); process.exit(2); }
 
 if (BILDER) mkdirSync('dist/bildtor', { recursive: true });
 
@@ -216,7 +216,10 @@ const hinweise = [];
 //   Versuch: „Nebel: harte Querkante 96,3".
 //
 // Fuer die Gegenprobe: `--abzug` schaltet den Phaser-Weg ab.
-const NUR_ABZUG = process.argv.includes('--abzug');
+// Auch ueber die Umgebung schaltbar: so laesst sich die GANZE Torkette
+// einmal in dem Zustand durchfahren, der am 23.08. auf GitHub eintrat,
+// ohne check.mjs anzufassen.
+const NUR_ABZUG = process.argv.includes('--abzug') || process.env.SKF_ABZUG === '1';
 
 // EIN WEG JE LAUF — vorher entschieden, nicht je Schirm.
 //
@@ -532,6 +535,10 @@ if (befunde.length) {
   process.exit(1);
 }
 console.log(`\n  Gemessen: ${wege.phaser}x über Phaser, ${wege.abzug}x über den Bildschirmabzug` + (wege.verweigert ? `, ${wege.verweigert}x gar nicht (Ersatzweg dort nicht zulässig)` : '') + '.');
-console.log(hinweise.length
-  ? '✓ Bildtor bestanden, soweit es messbar war — Menü geprüft, Querkanten NICHT.'
-  : '✓ Bildtor bestanden — keine harten Querkanten, Menü nicht einfarbig.');
+if (hinweise.length) {
+  // Rueckgabe 2: gemessen, was ging — aber nicht alles. check.mjs schreibt
+  // dafuer "⚠ nicht gemessen" in den Bericht, nicht "✅ ohne Befund".
+  console.log('✓ Bildtor bestanden, soweit es messbar war — Menü geprüft, Querkanten NICHT.');
+  process.exit(2);
+}
+console.log('✓ Bildtor bestanden — keine harten Querkanten, Menü nicht einfarbig.');

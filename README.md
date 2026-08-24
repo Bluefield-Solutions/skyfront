@@ -33,6 +33,7 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
 | **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, Farbtor, Formentor, Untergrund, Feuerkraft, `dist/check-report.md` (~5 min) |
 | **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab |
+| **Version prüfen** | `npm run version` — Quelle, Auditbericht und Bau müssen dieselbe zeigen; `-- --setzen` hebt sie |
 | **Nur das Farbtor** | `npm run farbtor` — mit `-- --nurstatisch` ohne Browser (~2 s) |
 | **Silhouettenabstand** | `npm run formen` — Deckung und Breitenprofil der Gegnerprojektile |
 | **Untergrund-Tafel** | `npm run untergrund` — Kantenenergie der 13 Biome und die Beruhigung |

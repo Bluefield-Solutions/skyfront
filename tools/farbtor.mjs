@@ -27,6 +27,9 @@ const quelle = readFileSync(join(wurzel, 'src', 'app.js'), 'utf8');
 
 const befunde = [];
 const melde = (t) => befunde.push(t);
+// Pruefungen, die gar nicht erst gelaufen sind. Das ist kein Befund — aber
+// der Bericht darf es nicht als "ohne Befund" ausgeben.
+const nichtGemessen = [];
 
 /* ---------- Farbrechnung ---------------------------------------------- */
 
@@ -375,7 +378,7 @@ if (GERENDERT) {
   } else {
     let chromium;
     try { ({ chromium } = await import('playwright')); }
-    catch { chromium = null; console.log('F  (—) Playwright nicht gefunden — uebersprungen.'); }
+    catch { chromium = null; console.log('F  (—) Playwright nicht gefunden — uebersprungen.'); nichtGemessen.push('F'); }
     if (chromium) {
       const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
       try {
@@ -644,7 +647,7 @@ if (GERENDERT) {
   } else if (traeger.length && lp2 !== null && la2 !== null) {
     let chromium2;
     try { ({ chromium: chromium2 } = await import('playwright')); }
-    catch { chromium2 = null; console.log('H2 (—) Playwright nicht gefunden — uebersprungen.'); }
+    catch { chromium2 = null; console.log('H2 (—) Playwright nicht gefunden — uebersprungen.'); nichtGemessen.push('H2'); }
     if (chromium2) {
       const browser = await chromium2.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
       try {
@@ -713,5 +716,9 @@ if (befunde.length) {
   console.log('\nFARBTOR ROT — ' + befunde.length + ' Befund(e):');
   for (const b of befunde) console.log('  · ' + b);
   process.exit(1);
+}
+if (nichtGemessen.length) {
+  console.log(`\nFARBTOR GRÜN, soweit gemessen — ${nichtGemessen.join(' und ')} sind gar nicht gelaufen.`);
+  process.exit(2);
 }
 console.log('\nFARBTOR GRÜN — die drei Bänder überschneiden sich nicht.');

@@ -300,7 +300,21 @@ Jede hat mindestens eine Runde gekostet.
    in die Hinweise, wird laut ausgegeben und behauptet nichts. Was gemessen
    werden konnte, urteilt weiter.
 
-39. **Gleiche Zahlen sind keine Messung.** Der Bildschirmabzug lieferte fuer
+39. **Die Version muss mitwandern.** `SKF_VERSION` steht einmal in
+   src/app.js, der Bau stempelt sie in die Huelle, und sie steht unten im
+   Bild — Menue wie Gefecht. Sie zaehlt mit den Nachtraegen im
+   Auditbericht: wer einen Nachtrag schreibt, hebt sie
+   (`npm run version -- --setzen`). Eine Version, die sich nie aendert,
+   behauptet etwas. `npm run version` haengt in der Torkette und prueft
+   Quelle, Bericht und BAU — ein nicht ersetzter Platzhalter sieht in der
+   Quelle voellig in Ordnung aus.
+
+40. **Rueckgabe 2 heisst „nicht gemessen".** Ein Tor, das nichts geprueft
+   hat, darf im Bericht nicht aussehen wie eines, das bestanden hat. 0 =
+   gemessen und ohne Befund, 2 = nicht (vollstaendig) gemessen (Kette bleibt
+   gruen, Bericht sagt „⚠ nicht gemessen"), alles andere = Befund.
+
+41. **Gleiche Zahlen sind keine Messung.** Der Bildschirmabzug lieferte fuer
    sieben Schirme sieben Mal 43,6 / 1,9. Der Median daraus ist trotzdem eine
    Zahl. Wo mehrere Dinge gemessen werden, die verschieden sein MUESSEN,
    gehoert eine Sperre hin, die genau das prueft.

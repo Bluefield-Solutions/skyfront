@@ -21,7 +21,7 @@ import { existsSync } from 'node:fs';
 if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Feuerkraft: Playwright nicht gefunden — uebersprungen.'); process.exit(0); }
+catch { console.log('  (—) Feuerkraft: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
 
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 const seite = await browser.newPage({ viewport: { width: 390, height: 844 } });

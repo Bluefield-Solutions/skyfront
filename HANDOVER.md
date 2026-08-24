@@ -90,6 +90,16 @@ Ausgeliefert wird über `.github/workflows/pages.yml` bei jedem Push auf `main`.
 
 Dazu, nicht in der Torkette, weil es Urteil verlangt statt Schwellen:
 
+- **Die Version steht unten im Bild**, klein und mittig, im Menü wie im
+  Gefecht. Eine Quelle: `SKF_VERSION` in `src/app.js`; der Bau stempelt sie
+  in die HTML-Hülle und verweigert den Dienst, wenn Konstante oder
+  Platzhalter fehlen. `npm run version` vergleicht Quelle, Auditbericht
+  (höchster Nachtrag) und **Bau** — ein nicht ersetzter Platzhalter sieht in
+  der Quelle in Ordnung aus. Wer einen Nachtrag schreibt, hebt die Version
+  mit `npm run version -- --setzen`.
+- **Rückgabe 2 heißt „nicht gemessen“.** 0 = gemessen und ohne Befund, 2 =
+  nicht (vollständig) gemessen (Kette bleibt grün, Bericht zeigt
+  „⚠ nicht gemessen“), alles andere = Befund.
 - `npm run formationen` — misst, ob die zwölf Begegnungsbausteine im Bild
   zwölf Dinge sind. Lässt `spawnWave()` im laufenden Gefecht jeden Teil
   wirklich stellen und schreibt mit, wo abgesetzt wird; verglichen wird in

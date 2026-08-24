@@ -59,7 +59,7 @@ const GERAETE_PUNKTE = 1080 / 390;
 if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Formentor: Playwright nicht gefunden — uebersprungen.'); process.exit(0); }
+catch { console.log('  (—) Formentor: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
 
 // Was gemessen wird, kommt aus der QUELLE, nicht aus dem Kopf. Findet das Tor
 // eine Tabelle nicht, bricht es ab — eine still gekuerzte Liste saehe aus wie

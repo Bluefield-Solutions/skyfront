@@ -8,12 +8,25 @@ import { execSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, rmSync } from 'fs';
 import { ladeChromium, startbar } from './tools/boot.mjs';
 
-function step(label, cmd) { console.log(`\n▶ ${label}`); execSync(cmd, { stdio: 'inherit' }); }
+// Rueckgabe: 0 = gemessen und ohne Befund · 2 = NICHT (vollstaendig)
+// gemessen · alles andere wirft.
+//
+// Der Unterschied zwischen 0 und 2 hat gefehlt, und das war eine Luecke.
+// Sechs der acht Tafeln steigen still mit 0 aus, wenn Playwright fehlt —
+// im Pruefbericht stand danach "✅ ohne Befund", obwohl nichts gemessen
+// wurde. Ein Tor, das nichts geprueft hat, darf nicht aussehen wie eines,
+// das bestanden hat.
+function step(label, cmd) {
+  console.log(`\n▶ ${label}`);
+  try { execSync(cmd, { stdio: 'inherit' }); return 0; }
+  catch (e) { if (e.status === 2) return 2; throw e; }
+}
 
 let ok = true;
 try {
   if (existsSync('dist/boot-report.txt')) rmSync('dist/boot-report.txt');  // Stale-Schutz
   step('Build (Master)', 'node build.mjs');
+  step('Version (Quelle, Bericht, Bau)', 'node tools/version.mjs');
   step('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch { ok = false; }
 
@@ -23,8 +36,12 @@ try {
 let bildZeile = '';
 if (ok) {
   try {
-    step('Bildtor (Modifikator-Modi)', 'node tools/bildtor.mjs');
-    bildZeile = '| Bildtor (5 Modi) | ✅ ohne Befund | 0 |\n';
+    const c = step('Bildtor (Modifikator-Modi)', 'node tools/bildtor.mjs');
+    bildZeile = c === 2
+
+      ? '| Bildtor (5 Modi) | ⚠ nicht gemessen | – |\n'
+
+      : '| Bildtor (5 Modi) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     bildZeile = '| Bildtor (5 Modi) | ❌ Befund | – |\n';
@@ -39,8 +56,12 @@ if (ok) {
 let farbZeile = '';
 if (ok) {
   try {
-    step('Farbtor (Gefahr · Eigenfeuer · Aufsammler)', 'node tools/farbtor.mjs');
-    farbZeile = '| Farbtor (17 Projektile) | ✅ ohne Befund | 0 |\n';
+    const c = step('Farbtor (Gefahr · Eigenfeuer · Aufsammler)', 'node tools/farbtor.mjs');
+    farbZeile = c === 2
+
+      ? '| Farbtor (17 Projektile) | ⚠ nicht gemessen | – |\n'
+
+      : '| Farbtor (17 Projektile) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     farbZeile = '| Farbtor (17 Projektile) | ❌ Befund | – |\n';
@@ -53,8 +74,12 @@ if (ok) {
 let formZeile = '';
 if (ok) {
   try {
-    step('Formentor (Silhouetten bei Anzeigegroesse)', 'node tools/formen.mjs');
-    formZeile = '| Formentor (11 Silhouetten) | ✅ ohne Befund | 0 |\n';
+    const c = step('Formentor (Silhouetten bei Anzeigegroesse)', 'node tools/formen.mjs');
+    formZeile = c === 2
+
+      ? '| Formentor (11 Silhouetten) | ⚠ nicht gemessen | – |\n'
+
+      : '| Formentor (11 Silhouetten) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     formZeile = '| Formentor (11 Silhouetten) | ❌ Befund | – |\n';
@@ -66,8 +91,12 @@ if (ok) {
 let bodenZeile = '';
 if (ok) {
   try {
-    step('Untergrund (13 Biome)', 'node tools/untergrund.mjs');
-    bodenZeile = '| Untergrund (13 Biome) | ✅ ohne Befund | 0 |\n';
+    const c = step('Untergrund (13 Biome)', 'node tools/untergrund.mjs');
+    bodenZeile = c === 2
+
+      ? '| Untergrund (13 Biome) | ⚠ nicht gemessen | – |\n'
+
+      : '| Untergrund (13 Biome) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     bodenZeile = '| Untergrund (13 Biome) | ❌ Befund | – |\n';
@@ -79,8 +108,12 @@ if (ok) {
 let kraftZeile = '';
 if (ok) {
   try {
-    step('Feuerkraft (120 Sektoren + Gefecht)', 'node tools/feuerkraft.mjs');
-    kraftZeile = '| Feuerkraft (120 Sektoren) | ✅ ohne Befund | 0 |\n';
+    const c = step('Feuerkraft (120 Sektoren + Gefecht)', 'node tools/feuerkraft.mjs');
+    kraftZeile = c === 2
+
+      ? '| Feuerkraft (120 Sektoren) | ⚠ nicht gemessen | – |\n'
+
+      : '| Feuerkraft (120 Sektoren) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     kraftZeile = '| Feuerkraft (120 Sektoren) | ❌ Befund | – |\n';
@@ -92,8 +125,12 @@ if (ok) {
 let memZeile = '';
 if (ok) {
   try {
-    step('Speicher (Texturen im Gefecht)', 'node tools/speicher.mjs');
-    memZeile = '| Speicher (Texturen) | ✅ ohne Befund | 0 |\n';
+    const c = step('Speicher (Texturen im Gefecht)', 'node tools/speicher.mjs');
+    memZeile = c === 2
+
+      ? '| Speicher (Texturen) | ⚠ nicht gemessen | – |\n'
+
+      : '| Speicher (Texturen) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     memZeile = '| Speicher (Texturen) | ❌ Befund | – |\n';
@@ -105,8 +142,12 @@ if (ok) {
 let rhythZeile = '';
 if (ok) {
   try {
-    step('Rhythmus (120 Sektoren)', 'node tools/rhythmus.mjs');
-    rhythZeile = '| Rhythmus (120 Sektoren) | ✅ ohne Befund | 0 |\n';
+    const c = step('Rhythmus (120 Sektoren)', 'node tools/rhythmus.mjs');
+    rhythZeile = c === 2
+
+      ? '| Rhythmus (120 Sektoren) | ⚠ nicht gemessen | – |\n'
+
+      : '| Rhythmus (120 Sektoren) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     rhythZeile = '| Rhythmus (120 Sektoren) | ❌ Befund | – |\n';
@@ -120,8 +161,12 @@ if (ok) {
 let formationZeile = '';
 if (ok) {
   try {
-    step('Formationen (12 Bausteine)', 'node tools/formationen.mjs');
-    formationZeile = '| Formationen (12 Bausteine) | ✅ ohne Befund | 0 |\n';
+    const c = step('Formationen (12 Bausteine)', 'node tools/formationen.mjs');
+    formationZeile = c === 2
+
+      ? '| Formationen (12 Bausteine) | ⚠ nicht gemessen | – |\n'
+
+      : '| Formationen (12 Bausteine) | ✅ ohne Befund | 0 |\n';
   } catch {
     ok = false;
     formationZeile = '| Formationen (12 Bausteine) | ❌ Befund | – |\n';

@@ -15,6 +15,7 @@
     "farbproben": "node tools/farbproben.mjs",
     "formen": "node tools/formen.mjs",
     "formationen": "node tools/formationen.mjs",
+    "version": "node tools/version.mjs",
     "untergrund": "node tools/untergrund.mjs",
     "feuerkraft": "node tools/feuerkraft.mjs",
     "speicher": "node tools/speicher.mjs",

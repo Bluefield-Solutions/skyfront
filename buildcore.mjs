@@ -166,7 +166,18 @@ export function assemble(parts, B, log = () => {}) {
     const r5 = applyCorridor(app, B.corridorAll, log); app = r5.src; changed += r5.changed;
     const r6 = applyBossBeam(app, B.bossBeamAlways, log); app = r6.src; changed += r6.changed;
   }
-  const html = parts.head + '<script>/*SKF_ASSETS*/\n' + parts.assets + '\n</script>\n' +
+  // Die Version wird aus src/app.js gelesen und in die Huelle gestempelt.
+  // EINE Quelle, kein Abgleich noetig — und beides fehlt zu lassen ist ein
+  // Baufehler, kein stiller Ruecklauf: eine Versionszeile, die leer bleibt
+  // oder eine alte Zahl zeigt, ist schlimmer als gar keine.
+  const mv = /\bSKF_VERSION = "([^"]+)"/.exec(app);
+  if (!mv) throw new Error('SKF_VERSION nicht in src/app.js gefunden — die Versionszeile haette keine Quelle.');
+  let head = parts.head;
+  if (!head.includes('%%SKF_VERSION%%'))
+    throw new Error('Platzhalter %%SKF_VERSION%% fehlt in index.head.html — die Version kaeme nirgends an.');
+  head = head.split('%%SKF_VERSION%%').join(mv[1]);
+
+  const html = head + '<script>/*SKF_ASSETS*/\n' + parts.assets + '\n</script>\n' +
     parts.modopen + '\n' + app + '\n</script>' + parts.modifier + parts.tail;
-  return { html, changed, hasModifier: !!parts.modifier };
+  return { html, changed, hasModifier: !!parts.modifier, version: mv[1] };
 }

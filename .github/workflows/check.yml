@@ -20,11 +20,22 @@ jobs:
         with:
           node-version: '20'
 
+      # Playwright ist GEPINNT. Ungepinnt ist die Messumgebung eine Variable,
+      # die niemand beobachtet: die Bildtor-Ausfaelle am 23.08. traten zwar
+      # bei gleicher Chromium-Fassung auf, aber das war Glueck — mit
+      # "npm install playwright" haette derselbe Commit am naechsten Tag
+      # gegen einen anderen Browser gemessen, ohne dass es irgendwo steht.
+      # Eine Zahl traegt ihre Messstelle mit, und dazu gehoert der Browser.
+      #
+      # Die Fassung ist dieselbe, gegen die hier entwickelt wird (1.56.0).
+      # Wer sie hebt, hebt sie bewusst und sieht sich die Tore danach an.
       - name: Playwright installieren (für den Boot-Test)
         run: |
           npm init -y >/dev/null 2>&1 || true
-          npm install playwright
+          npm install playwright@1.56.0
           npx playwright install --with-deps chromium
+          node -e "console.log('  Playwright', require('playwright/package.json').version)"
+          npx playwright --version
 
       - name: Check ausführen (Build + Boot-Test)
         run: node check.mjs
