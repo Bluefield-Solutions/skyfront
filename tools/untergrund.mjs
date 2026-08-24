@@ -15,17 +15,20 @@
   (Eiserne Regel: jede Zahl traegt ihre Messstelle mit.)
 */
 import { existsSync, readFileSync } from 'node:fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
+const M = messstelle('Untergrund', 'die Schicht nimmt Kontrast, nicht Helligkeit.');
+
+if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Untergrund-Tafel: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
+catch { M.abbruch('Playwright nicht gefunden.'); }
 
 // Die drei Werte kommen aus der Quelle, nicht aus dem Kopf.
 const quelle = readFileSync('src/app.js', 'utf8');
 const zahl = (name) => {
   const m = new RegExp(`\\b${name} = (\\.?\\d+(?:\\.\\d+)?)`).exec(quelle);
-  if (!m) { console.error(`✗ ${name} nicht in src/app.js gefunden`); process.exit(1); }
+  if (!m) { console.error(`✗ ${name} nicht in src/app.js gefunden`); process.exit(1); }  // echter Befund: die Quelle sagt es nicht mehr
   return Number(m[1]);
 };
 const ZIEL = zahl('KANTEN_ZIEL'), MAX = zahl('KANTEN_MAX'), PROBE = zahl('KANTEN_PROBE');
@@ -38,6 +41,7 @@ await seite.goto('file://' + process.cwd() + '/dist/Skyfront.html');
 await seite.waitForFunction(() => window.__game, null, { timeout: 90000 });
 await seite.waitForTimeout(1500);
 
+if (OHNE_NAHT) await seite.evaluate(() => { delete window.__SKF_UNTERGRUND; });
 const tafel = await seite.evaluate(async () => {
   // Gemessen wird DIE FUNKTION DES SPIELS (window.__SKF_UNTERGRUND), nicht
   // eine hier nachgebaute Formel. Der Unterschied ist kein Feinschliff: die
@@ -69,9 +73,14 @@ const tafel = await seite.evaluate(async () => {
 });
 await browser.close();
 
-if (tafel.fehler) { console.error('✗ ' + tafel.fehler); process.exit(1); }
+if (tafel.fehler) M.abbruch(tafel.fehler);
 const gut = tafel.liste.filter((x) => !x.fehlt).sort((a, b) => b.energie - a.energie);
-for (const x of tafel.liste) if (x.fehlt) console.log(`  (—) ${x.name}: Bild nicht dekodierbar`);
+// Ein nicht dekodierbares Bild ist KEIN Mangel am Untergrund — es ist ein
+// Biom, ueber das diese Tafel nichts sagt. Bis hierher stand es als "(—)"
+// im Protokoll und fiel danach aus der Rechnung: neun von dreizehn
+// gemessen sahen aus wie dreizehn von dreizehn.
+for (const x of tafel.liste)
+  if (x.fehlt) M.ungemessen(`${x.name}: Bild nicht dekodierbar — dieses Biom ist nicht beurteilt`);
 
 console.log(`Untergrund-Tafel — ${gut.length} Biome, abgetastet auf ${PROBE} x ${PROBE} in der Canvas des Spiels`);
 console.log(`Ziel-Kantenenergie ${ZIEL} · hoechstens ${(MAX * 100).toFixed(0)} % Kontrastruecknahme\n`);
@@ -107,10 +116,6 @@ const nach = gut.map((x) => x.energie * (1 - x.alpha));
 console.log(`\n  ${gedaempft} von ${gut.length} Biomen werden beruhigt.`);
 console.log(`  Abstand unruhigstes zu ruhigstem: ${(Math.max(...e) / Math.min(...e)).toFixed(1)}x → ${(Math.max(...nach) / Math.min(...nach)).toFixed(1)}x`);
 
-if (!gut.length) befunde.push('kein einziges Biom messbar — die Tafel bezeugt nichts');
-if (befunde.length) {
-  console.log('\nUNTERGRUND ROT:');
-  for (const b of befunde) console.log('  · ' + b);
-  process.exit(1);
-}
-console.log('\nUNTERGRUND GRÜN — die Schicht nimmt Kontrast, nicht Helligkeit.');
+if (!gut.length) M.abbruch('kein einziges Biom messbar — die Tafel bezeugt nichts');
+for (const b of befunde) M.befund(b);
+M.urteil();

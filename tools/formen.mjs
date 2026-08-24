@@ -36,6 +36,7 @@
   Verwechselbar ist ein Paar erst, wenn ALLE DREI eng sind.
 */
 import { existsSync, readFileSync } from 'node:fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
 const ANZEIGE = 0.722;          // 390 / 540
 // Ab welcher Deckkraft ein Punkt zur SILHOUETTE gehoert. Nicht 96: jede Kugel
@@ -56,10 +57,12 @@ const ENG_DECKUNG = 0.72, ENG_PROFIL = 0.10, ENG_GROESSE = 1.35;
 // wird weich. Das ist keine Meinung, das ist Division.
 const GERAETE_PUNKTE = 1080 / 390;
 
-if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
+const M = messstelle('Formentor', 'keine zwei Silhouetten sind zugleich gleich gross und gleich gebaut.');
+
+if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Formentor: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
+catch { M.abbruch('Playwright nicht gefunden.'); }
 
 // Was gemessen wird, kommt aus der QUELLE, nicht aus dem Kopf. Findet das Tor
 // eine Tabelle nicht, bricht es ab — eine still gekuerzte Liste saehe aus wie
@@ -150,8 +153,15 @@ async function messen(liste, raster) {
 
 const alleKeys = [...KUGELN, ...GEGNER].map((x) => x.tex);
 const zustand = await stillstand(alleKeys);
+// Nicht zur Ruhe gekommen heisst: es fehlt etwas oder es aendert sich noch.
+// Bis hierher stand das als Hinweis im Protokoll und das Tor urteilte
+// trotzdem — ueber die Silhouetten, die es gerade erwischt hatte.
 if (zustand.includes(':-') || zustand.includes(':?'))
-  console.log('  (!) Texturbestand kam nicht zur Ruhe: ' + zustand.split(',').filter((x) => /:[-?]$/.test(x)).join(' '));
+  M.ungemessen('Texturbestand kam nicht zur Ruhe: ' + zustand.split(',').filter((x) => /:[-?]$/.test(x)).join(' '));
+
+// Der Hebel fuer die Gegenprobe: EINE Textur wegnehmen. Damit entsteht genau
+// der Zustand, den das Tor bis v18 als Befund gemeldet hat.
+if (OHNE_NAHT) await seite.evaluate(() => { window.__game.textures.remove('e_elite'); });
 
 const rohKugeln = await messen(KUGELN, 64);
 const rohGegner = await messen(GEGNER, 96);
@@ -182,8 +192,12 @@ const befunde = [];
 
 function auswerten(titel, roh, raster, wieviel) {
   const namen = Object.keys(roh).filter((k) => roh[k]);
-  for (const k of Object.keys(roh)) if (!roh[k]) befunde.push(`${titel}: Textur fuer ${k} nicht gefunden`);
-  if (namen.length < wieviel) { befunde.push(`${titel}: nur ${namen.length} von ${wieviel} gemessen — kein Massstab`); return; }
+  // Eine fehlende Textur ist KEIN Mangel an der Silhouette — es ist eine
+  // Silhouette, ueber die dieses Tor nichts sagt. Als Befund gemeldet hat
+  // sie einen roten Lauf erzeugt, der ueber das Spiel nichts aussagte;
+  // genau diese Sorte falscher Befund kostete auf GitHub Lauf 31.
+  for (const k of Object.keys(roh)) if (!roh[k]) M.ungemessen(`${titel}: Textur fuer ${k} nicht gefunden — diese Silhouette ist nicht beurteilt`);
+  if (namen.length < wieviel) { M.ungemessen(`${titel}: nur ${namen.length} von ${wieviel} gemessen — kein Massstab, es wird gar nicht verglichen`); return; }
 
   const paare = [];
   for (let i = 0; i < namen.length; i++)
@@ -306,9 +320,5 @@ auswerten('Gegner', rohGegner, 96, 12);
   }
 }
 
-if (befunde.length) {
-  console.log('\nFORMENTOR ROT:');
-  for (const b of befunde) console.log('  · ' + b);
-  process.exit(1);
-}
-console.log('\nFORMENTOR GRÜN — keine zwei Silhouetten sind zugleich gleich gross und gleich gebaut.');
+for (const b of befunde) M.befund(b);
+M.urteil();

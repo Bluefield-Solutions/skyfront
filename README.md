@@ -31,9 +31,11 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~15 MB, eine Datei) |
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
 | **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
-| **Torkette (alles prüfen)** | `npm run check` → baut, startet alle zwölf, Bildtor, Farbtor, Formentor, Untergrund, Feuerkraft, `dist/check-report.md` (~5 min) |
-| **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab |
-| **Schnelle Runde (bei jeder Änderung)** | `npm run schnell` — Bau, Version, Boot aller elf Varianten, dann Farbtor, Formentor, Untergrund und Rhythmus **parallel**. 49 s gemessen statt 302 s. Ohne Bildtor, Feuerkraft, Speicher, Formationen — die laufen in `npm run check` und auf GitHub. Siehe `docs/AUDIT-TORKETTE.md` |
+| **Stufe 1 — bei jeder Änderung** | `npm run schnell` — Bau, Version, Boot aller elf Varianten, dann Farbtor, Formentor, Untergrund und Rhythmus **parallel**. **48 s gemessen** |
+| **Stufe 2 — vor dem Push** | `npm run check` — alle Tore **ohne** das Bildtor, `dist/check-report.md`. **127 s gemessen** |
+| **Stufe 3 — CI / vor der Lieferung** | `npm run torkette` — alles, inklusive Bildtor, und **streng**: „nicht gemessen" zählt als Fehlschlag. **291–293 s** über drei Läufe |
+| **Welche Stufe brauche ich?** | `npm run wache` — sieht die geänderten Dateien an und sagt an, ob die Gegenproben fällig sind |
+| **Nur das Bildtor** | `npm run bildtor` — mit `-- --bilder` legt es die Aufnahmen ab. Kostet allein 174 s, also 58 % der ganzen Kette. Siehe `docs/AUDIT-TORKETTE.md` |
 | **Version prüfen** | `npm run version` — Quelle, Auditbericht und Bau müssen dieselbe zeigen; `-- --setzen` hebt sie |
 | **Nur das Farbtor** | `npm run farbtor` — mit `-- --nurstatisch` ohne Browser (~2 s) |
 | **Silhouettenabstand** | `npm run formen` — Deckung und Breitenprofil der Gegnerprojektile |
@@ -41,7 +43,9 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Feuerkraft-Leiter** | `npm run feuerkraft` — Erreichbarkeit über alle 120 Sektoren + Mechanik im Gefecht |
 | **Speicher-Tafel** | `npm run speicher` — Texturen im Gefecht, mit Grenze |
 | **Rhythmus-Tafel** | `npm run rhythmus` — Druckkurve, Atemzüge und Vielfalt über 120 Sektoren |
-| **Gegenproben** | `npm run farbproben` — fünfzehn eingebaute Fehler, jeder muss anschlagen |
+| **Gegenproben (voll)** | `npm run proben` — 25 eingebaute Fehler + 8 Modusproben, jeder muss anschlagen (15–30 min). **Pflicht, wenn `tools/` angefasst wurde** |
+| **Gegenproben (kurz)** | `npm run probenkurz` — nur die sechs Modusproben ohne Bildtor: jedes Tor muss seine drei Ausgänge (0 · 1 · 2) noch nehmen können. **41 s** |
+| **Ein Tor ohne Messstelle** | `node tools/<tor>.mjs --ohne-naht` — nimmt dem Tor die Prüfnaht weg. Es muss dann **2** zurückgeben („nicht gemessen"), nicht 0 und nicht 1 |
 | **Bildschirme nachmessen** | `npm run schirme` — Überlappungen, Ränder, Schriftgrößen |
 | **App-Symbol neu backen** | `npm run symbol` → `web/icon-*.png` + die elf iOS-Startbilder |
 | **Balance visuell einstellen** | `Skyfront-Balance-Editor.html` im Browser öffnen → Werte schieben → `balance.js` exportieren |

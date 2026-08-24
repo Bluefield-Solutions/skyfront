@@ -18,6 +18,16 @@ import { readFileSync, writeFileSync, existsSync, copyFileSync, unlinkSync } fro
 import { execFileSync } from 'node:child_process';
 
 const ALLE = process.argv.includes('--alle');
+// Nur die Modusproben. Sie brauchen keinen Eingriff in src/app.js und
+// keinen Neubau — nur den gebauten Stand. Damit lassen sie sich in einer
+// Minute pruefen statt in dreissig, und genau deshalb werden sie auch
+// gelaufen und nicht nur aufgeschrieben.
+const NUR_MODUS = process.argv.includes('--nurmodus');
+// Die beiden Bildtor-Modusproben starten je einen vollen Bildtor-Lauf und
+// machen allein 174 der 230 gemessenen Sekunden aus. `--ohnebild` laesst
+// sie weg: die sechs uebrigen kosten dann zusammen 56 s und sind damit
+// billig genug, um bei jedem Lauf mitzukommen.
+const OHNE_BILD = process.argv.includes('--ohnebild');
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
 
@@ -161,7 +171,11 @@ const torLauf = (statisch, tor = 'farb') => {
   }
 };
 
+if (!NUR_MODUS)
+  console.log('  (!) src/app.js wird waehrend dieses Laufs staendig ueberschrieben.\n      NICHT nebenher daran arbeiten — die Aenderung waere lautlos weg.\n');
+
 // Grundlinie: ohne Eingriff muss das Tor gruen sein, sonst misst hier nichts.
+if (!NUR_MODUS) {
 console.log('Grundlinie …');
 for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['boden', 'Untergrund-Tafel'], ['kraft', 'Feuerkraft'], ['speicher', 'Speicher-Tafel'], ['rhythmus', 'Rhythmus-Tafel'], ['formation', 'Formationentafel']] : [['farb', 'Farbtor']]) {
   const grund = torLauf(!ALLE, tor);
@@ -173,9 +187,10 @@ for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['
   console.log(`  ${name} grün, wie erwartet.`);
 }
 console.log('');
+}
 
 let fehler = 0, gelaufen = 0;
-for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of PROBEN) {
+for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_MODUS ? [] : PROBEN)) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const roh = readFileSync(SICHER, 'utf8');
   const n = roh.split(alt).length - 1;
@@ -257,12 +272,44 @@ const MODUSPROBEN = [{
   mussEnthalten: ['Das ist kein Menue, das ist ein Bild', 'Nicht gemessen'],
   darfNichtEnthalten: ['Median Streuung'],
   beweist: 'lauter gleiche Schirme werden als „ein Bild" erkannt, nicht als Messung',
-}];
+},
+
+// ---- Der dritte Ausgang: 2 = "nicht gemessen" -------------------------
+//
+// Sechs Tore konnten bis v18 nur 0 oder 1. Was dazwischen liegt — der
+// Apparat hat gar keine Zahl geliefert — landete je nach Tor auf der
+// falschen Seite: das Formentor meldete eine fehlende Textur als BEFUND
+// (ein roter Lauf, der ueber das Spiel nichts sagt), die Untergrund-Tafel
+// meldete neun von dreizehn Biomen als GRUEN.
+//
+// `--ohne-naht` nimmt jedem Tor genau die Messstelle weg, an der es haengt.
+// Das ist kein nachgestellter Zustand: es ist derselbe, den ein zu frueh
+// oder auf einem klemmenden Laeufer messendes Tor antrifft. Verlangt wird
+// die Rueckgabe 2 — nicht 0 und nicht 1.
+...[
+  ['Formentor',        'tools/formen.mjs',       'Textur fuer elite nicht gefunden'],
+  ['Untergrund-Tafel', 'tools/untergrund.mjs',   '__SKF_UNTERGRUND fehlt'],
+  ['Feuerkraft',       'tools/feuerkraft.mjs',   'Pruefnaehte fehlen'],
+  ['Speicher-Tafel',   'tools/speicher.mjs',     'Texturbestand aendert sich noch'],
+  ['Rhythmus-Tafel',   'tools/rhythmus.mjs',     '__SKF_BAUSTEINE.kurve fehlt'],
+  ['Formationentafel', 'tools/formationen.mjs',  '__SKF_BAUSTEINE fehlt'],
+].map(([name, datei, marke]) => ({
+  name: `${name} ohne Messstelle (--ohne-naht)`,
+  cmd: [datei, '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', marke],
+  // Ein Tor ohne Messstelle darf ueber das Spiel GAR NICHTS sagen. Sagt es
+  // trotzdem "GRÜN —" (der Schlusssatz eines vollstaendigen Laufs), hat es
+  // ueber Zahlen geurteilt, die es nicht hat.
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: `${name} sagt "nicht gemessen" statt gruen oder rot, Rückgabe 2`,
+}))];
 
 let modusFehler = 0, modusGelaufen = 0;
-if (ALLE) {
+if (ALLE || NUR_MODUS) {
   console.log('');
-  for (const m of MODUSPROBEN) {
+  for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor')))) {
     let text = '', rot = false, code = 0;
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
     catch (e) { code = e.status; rot = true; text = (e.stdout || '') + (e.stderr || ''); }
@@ -293,6 +340,19 @@ if (ALLE) {
 } else if (MODUSPROBEN.length) {
   console.log(`\n(—) ${MODUSPROBEN.length} Modusprobe(n) — brauchen den gebauten Stand, mit --alle`);
 }
+
+// Hat jemand src/app.js WAEHREND des Laufs angefasst?
+//
+// Die Datei wird hier staendig ueberschrieben und aus der Kopie
+// zurueckgeschrieben. Wer nebenher daran arbeitet, verliert seine Arbeit beim
+// naechsten `zurueck()` — lautlos. Genau das ist beim Bauen dieser Pruefung
+// passiert: eine Versionsanhebung war zwanzig Minuten spaeter wieder weg.
+//
+// Der Kopf dieser Datei sagt seit jeher, dass frische Arbeit einen ABBRUCH
+// ueberlebt. Das stimmt und war nie die Gefahr. Die Gefahr ist die
+// Bearbeitung waehrend des Laufs, und darueber stand nichts.
+if (readFileSync(APP, 'utf8') !== readFileSync(SICHER, 'utf8'))
+  console.log('\n⚠ src/app.js weicht am Ende von der Ausgangskopie ab — hat jemand waehrend des Laufs daran gearbeitet? Die Aenderung ist dann verloren.');
 
 console.log(`\n${gelaufen} Probe(n) gelaufen, ${fehler} ohne Wirkung.`);
 if (modusGelaufen) console.log(`${modusGelaufen} Modusprobe(n) gelaufen, ${modusFehler} ohne Wirkung.`);

@@ -17,11 +17,14 @@
   die Fallraten des Spiels (window.__SKF_PWR), nicht gegen nachgebaute.
 */
 import { existsSync } from 'node:fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
+const M = messstelle('Feuerkraft', 'die Leiter ist erreichbar, traegt jeden Sektor und tut es auch.');
+
+if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Feuerkraft: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
+catch { M.abbruch('Playwright nicht gefunden.'); }
 
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 const seite = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -29,6 +32,7 @@ await seite.goto('file://' + process.cwd() + '/dist/Skyfront.html');
 await seite.waitForFunction(() => window.__game, null, { timeout: 90000 });
 await seite.waitForTimeout(1200);
 
+if (OHNE_NAHT) await seite.evaluate(() => { delete window.__SKF_PWR; });
 const daten = await seite.evaluate(() => {
   const stufen = window.__SKF_STUFEN, gegner = window.__SKF_GEGNER, pwr = window.__SKF_PWR;
   if (!stufen || !gegner || !pwr || !pwr.gewicht) return { fehler: 'Pruefnaehte fehlen (__SKF_STUFEN / __SKF_GEGNER / __SKF_PWR)' };
@@ -65,7 +69,7 @@ const daten = await seite.evaluate(() => {
 });
 await browser.close();
 
-if (daten.fehler) { console.error('✗ ' + daten.fehler); process.exit(1); }
+if (daten.fehler) M.abbruch(daten.fehler);
 const { liste, pwr } = daten;
 
 console.log('Feuerkraft-Leiter — Erreichbarkeit, nicht Spielgefuehl');
@@ -97,11 +101,9 @@ for (const s of liste) {
 const anteile = liste.filter((s) => s.vollBei > 0).map((s) => s.vollBei / s.wellen);
 if (anteile.length) console.log(`\n  Volle Stufe erreicht nach ${(Math.min(...anteile) * 100).toFixed(0)} bis ${(Math.max(...anteile) * 100).toFixed(0)} % des Sektors (Band ${FRUEH * 100}..${SPAET * 100} %).`);
 
-if (befunde.length) {
-  console.log('\nFEUERKRAFT ROT:');
-  for (const b of befunde) console.log('  · ' + b);
-  process.exit(1);
-}
+// Erreichbarkeit ist rein arithmetisch entschieden. Steht hier schon ein
+// Befund, hat der zweite Teil nichts mehr zu klaeren.
+if (befunde.length) { for (const b of befunde) M.befund(b); M.urteil(); }
 // ---------------------------------------------------------------------
 // Zweiter Teil: tut die Leiter im laufenden Spiel auch, was die Rechnung
 // oben annimmt? Die Arithmetik oben rechnet mit einer Mechanik — dass es
@@ -120,6 +122,12 @@ for (let i = 0; i < 60; i++) {
   if (await s2.evaluate(() => (window.__game.scene.scenes || []).some((x) => x.scene.key === 'Game' && x.scene.isActive()))) { drin = true; break; }
   await s2.waitForTimeout(250);
 }
+// Das bleibt ein BEFUND und wird NICHT zu "nicht gemessen" herabgestuft,
+// obwohl es unter SwiftShader auch ein Zeitablauf sein kann. Grund: "alle
+// Tore gruen, aber man kommt nicht ins Spiel" ist die teuerste Sorte
+// Fehler, die es hier gibt — sie hat im Schwesterprojekt eine ganze
+// Lieferung gekostet. Lieber einmal zu Unrecht rot als einmal zu Unrecht
+// gruen. Wer das aufweicht, nimmt genau diese Wette an.
 if (!drin) { befunde.push('kommt nicht ins Gefecht — die Leiter ist nicht nachgesehen'); }
 else {
   await s2.waitForTimeout(2500);
@@ -164,9 +172,5 @@ else {
   if (!(probe.guthabenNachXL > 0)) befunde.push('ein XL-Abschuss zahlt nichts ein');
 }
 
-if (befunde.length) {
-  console.log('\nFEUERKRAFT ROT:');
-  for (const b of befunde) console.log('  · ' + b);
-  process.exit(1);
-}
-console.log('\nFEUERKRAFT GRÜN — die Leiter ist erreichbar, traegt jeden Sektor und tut es auch.');
+for (const b of befunde) M.befund(b);
+M.urteil();

@@ -31,15 +31,14 @@
 */
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
+const M = messstelle('Formationen', 'die zwölf Bausteine sind im Bild zwölf Dinge.');
 const TAFEL = process.argv.includes('--tafel');
 const DATEI = process.cwd() + '/dist/Skyfront.html';
 const befunde = [];
 
-if (!existsSync(DATEI)) {
-  console.error('✗ dist/Skyfront.html fehlt — erst bauen.');
-  process.exit(1);
-}
+if (!existsSync(DATEI)) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 const seite = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
@@ -64,6 +63,7 @@ if (!drin) {
 }
 await seite.waitForTimeout(2000);
 
+if (OHNE_NAHT) await seite.evaluate(() => { delete window.__SKF_BAUSTEINE; });
 const gemessen = await seite.evaluate(async () => {
   const g = window.__game, sp = g.scene.getScene('Game');
   const N = window.__SKF_BAUSTEINE;
@@ -171,12 +171,15 @@ const gemessen = await seite.evaluate(async () => {
 
 await browser.close();
 
-if (gemessen.fehler) { console.error('✗ ' + gemessen.fehler); process.exit(1); }
+if (gemessen.fehler) M.abbruch(gemessen.fehler);
 // Ereignisse, die am Ende noch haengen, gehoeren zu einem Baustein, der
 // nicht fertig gestellt hat — und ein halb gemessener Baustein sieht aus wie
 // ein schmalerer.
+// Das ist kein Mangel an den Bausteinen, sondern einer an dieser Messung:
+// ein halb gemessener Baustein sieht aus wie ein schmalerer, und ein Urteil
+// darueber waere ein erfundener Befund.
 if (gemessen.offen > 2)
-  befunde.push(`${gemessen.offen} Zeitereignisse haengen am Ende noch — die Uhr wurde nicht weit genug getrieben, die Messung ist unvollstaendig.`);
+  M.ungemessen(`${gemessen.offen} Zeitereignisse haengen am Ende noch — die Uhr wurde nicht weit genug getrieben; die Breiten unten gehoeren zu halb gestellten Bausteinen`);
 
 /* ---------- die drei Kennzahlen je Baustein ---------------------------- */
 
@@ -259,10 +262,5 @@ for (const p of paare)
   if (p.d < ABSTAND_MIN)
     befunde.push(`${p.a.name} und ${p.b.name} erzeugen dasselbe Bild (Abstand ${p.d.toFixed(2)} < ${ABSTAND_MIN}): Breite ${p.a.k.breite.toFixed(2)}/${p.b.k.breite.toFixed(2)}, Staffel ${p.a.k.staffel.toFixed(2)}/${p.b.k.staffel.toFixed(2)}, Zeit ${p.a.k.zeit}/${p.b.k.zeit} ms`);
 
-console.log('');
-if (befunde.length) {
-  console.log(`FORMATIONEN ROT — ${befunde.length} Befund(e):`);
-  for (const b of befunde) console.log('  · ' + b);
-  process.exit(1);
-}
-console.log('FORMATIONEN GRÜN — die zwölf Bausteine sind im Bild zwölf Dinge.');
+for (const b of befunde) M.befund(b);
+M.urteil();

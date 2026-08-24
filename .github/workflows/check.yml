@@ -37,8 +37,14 @@ jobs:
           node -e "console.log('  Playwright', require('playwright/package.json').version)"
           npx playwright --version
 
-      - name: Check ausführen (Build + Boot-Test)
-        run: node check.mjs
+      # --streng: hier zaehlt "nicht gemessen" als Fehlschlag. Beim Arbeiten
+      # tut es das nicht (ein staendig rotes Tor wird ignoriert), vor der
+      # Auslieferung schon — dort ist "nicht nachgesehen" so wenig wert wie
+      # "nicht bestanden". Das Bildtor laeuft NUR hier: es kostet 174 s von
+      # 302 s der Kette, und ein unbeaufsichtigter Lauf ist genau der Ort
+      # dafuer.
+      - name: Check ausführen (Build + Boot-Test, alle Tore, streng)
+        run: node check.mjs --streng
 
       - name: Prüfbericht in die Job-Zusammenfassung schreiben
         if: always()
@@ -48,3 +54,38 @@ jobs:
           else
             echo "Kein check-report.md gefunden." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  # Die Gegenproben laufen NEBEN dem Check, nicht dahinter: sie kosten
+  # gemessen 230 s, der Check 325 s — parallel also keine Wartezeit.
+  #
+  # Warum ueberhaupt in der CI: eine Pruefung, die nie etwas meldet, ist kein
+  # Beweis. Zwei Pruefungen dieses Projekts haben vier Versionen lang gruen
+  # gemeldet und dabei gar nichts geprueft. Gefunden hat das keine Torkette,
+  # sondern eine Gegenprobe. Die acht Modusproben stellen sicher, dass jedes
+  # Tor seine drei Ausgaenge (0 · 1 · 2) noch wirklich nehmen kann.
+  #
+  # Die 25 Fehlerinjektionen bleiben aussen vor — sie brauchen Neubauten und
+  # 15 bis 30 Minuten. Wer ein Tor anfasst, laesst sie mit `npm run proben`
+  # laufen; `npm run wache` sagt an, wann das faellig ist.
+  proben:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Playwright installieren
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install playwright@1.56.0
+          npx playwright install --with-deps chromium
+
+      - name: Bauen
+        run: node build.mjs
+
+      - name: Modusproben (jedes Tor muss seine drei Ausgänge nehmen können)
+        run: node tools/farbproben.mjs --nurmodus

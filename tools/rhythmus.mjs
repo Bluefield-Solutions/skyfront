@@ -24,11 +24,14 @@
   (SKY-001). Rhythmus ist Arithmetik, Spass nicht.
 */
 import { existsSync, readFileSync } from 'node:fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-if (!existsSync('dist/Skyfront.html')) { console.error('✗ dist/Skyfront.html fehlt — erst bauen.'); process.exit(1); }
+const M = messstelle('Rhythmus', 'jeder Sektor hat Anstieg, Atemzuege und Vielfalt.');
+
+if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Rhythmus-Tafel: Playwright nicht gefunden — uebersprungen.'); process.exit(2); /* 2 = nicht gemessen, kein Mangel */ }
+catch { M.abbruch('Playwright nicht gefunden.'); }
 
 // Die Druckwerte kommen aus der Quelle, nicht aus dem Kopf.
 const quelle = readFileSync('src/app.js', 'utf8');
@@ -58,6 +61,7 @@ const stufen = await seite.evaluate(() => window.__SKF_STUFEN.map((s, i) => ({
 //
 // Gefragt wird jetzt die Kurve des SPIELS, ueber die Naht — nicht die Formel
 // hier nachgerechnet.
+if (OHNE_NAHT) await seite.evaluate(() => { if (window.__SKF_BAUSTEINE) delete window.__SKF_BAUSTEINE.kurve; });
 const baender = await seite.evaluate((n) => {
   const K = window.__SKF_BAUSTEINE && window.__SKF_BAUSTEINE.kurve;
   if (!K) return null;
@@ -70,7 +74,7 @@ const baender = await seite.evaluate((n) => {
   return aus;
 }, 200);
 await browser.close();
-if (!baender) { console.error('✗ Naht __SKF_BAUSTEINE.kurve fehlt — das Druckband ist nicht zu erreichen. Eine Vielfalt-Pruefung ohne eigenes Band prueft nichts.'); process.exit(1); }
+if (!baender) M.abbruch('Naht __SKF_BAUSTEINE.kurve fehlt — das Druckband ist nicht zu erreichen. Eine Vielfalt-Pruefung ohne eigenes Band prueft nichts.');
 
 const kor = (a) => {
   const n = a.length; if (n < 3) return 0;
@@ -164,10 +168,5 @@ console.log(`  Dichte steigt ueber die 120 Sektoren: ${kor(zeilen.map((z) => z.d
 if (kor(zeilen.map((z) => z.dichte)) < 0.2)
   befunde.push(`Die Dichte steigt ueber die 120 Sektoren nicht (${kor(zeilen.map((z) => z.dichte)).toFixed(2)}) — spaeter wird es nicht voller`);
 
-if (befunde.length) {
-  console.log(`\nRHYTHMUS ROT — ${befunde.length} Befund(e):`);
-  for (const b of befunde.slice(0, 12)) console.log('  · ' + b);
-  if (befunde.length > 12) console.log(`  … und ${befunde.length - 12} weitere`);
-  process.exit(1);
-}
-console.log('\nRHYTHMUS GRÜN — jeder Sektor hat Anstieg, Atemzuege und Vielfalt.');
+for (const b of befunde) M.befund(b);
+M.urteil();

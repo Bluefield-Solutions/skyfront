@@ -22,6 +22,51 @@ function step(label, cmd) {
   catch (e) { if (e.status === 2) return 2; throw e; }
 }
 
+// Wer ein "nicht gemessen" hinnimmt, und wer nicht.
+//
+// Beim Arbeiten ist eine ausgefallene Messung ein Aergernis, kein Grund
+// anzuhalten — ein Tor, das staendig rot ist, weil der Laeufer klemmt, wird
+// ignoriert, und dann ist es gar kein Tor mehr.
+//
+// Vor der Auslieferung ist es das Gegenteil. Dort ist "nicht gemessen"
+// genau so wenig wert wie "nicht bestanden": beides heisst, dass niemand
+// nachgesehen hat. `--streng` (in der CI gesetzt) macht daraus einen roten
+// Lauf. Ohne den Schalter bleibt es bei der Zeile "⚠ nicht gemessen" im
+// Bericht — sichtbar, aber nicht anhaltend.
+const STRENG = process.argv.includes('--streng') || process.env.SKF_STRENG === '1';
+
+// Die Stufung.
+//
+// Gemessen: die Kette kostet seriell 302 s, davon 174 s allein das Bildtor.
+// Wer bei jeder Aenderung fuenf Minuten wartet, prueft am Ende seltener —
+// und das ist teurer als ein Tor, das erst in der CI laeuft.
+//
+//   npm run check              alles ausser dem Bildtor  (Stufe 2, vor dem Push)
+//   node check.mjs --streng    alles                     (Stufe 3, CI)
+//   node check.mjs --nur=farbtor,formen     nur diese
+//   node check.mjs --ohne=bildtor,speicher  alles ausser diesen
+//
+// Das Bildtor faellt beim Arbeiten NICHT weg — es wandert dorthin, wo
+// niemand darauf wartet. Vier von vier belegbaren roten Laeufen auf GitHub
+// waren das Bildtor, und keiner davon ein Mangel am Spiel. Genau dafuer ist
+// ein unbeaufsichtigter Lauf da.
+const wert = (name) => {
+  const a = process.argv.find((x) => x.startsWith(`--${name}=`));
+  return a ? a.slice(name.length + 3).split(',').map((x) => x.trim()).filter(Boolean) : null;
+};
+const NUR = wert('nur'), OHNE = wert('ohne');
+const uebersprungenWarum = NUR ? `nicht in --nur=${NUR.join(',')}` : `--ohne=${(OHNE || []).join(',')}`;
+const laeuft = (k) => (NUR ? NUR.includes(k) : !(OHNE || []).includes(k));
+
+// Fuer die Gegenprobe: --ohne-naht wird an die Tore durchgereicht. Damit
+// laesst sich der strenge Zweig herbeifuehren, statt ihn zu behaupten.
+const DURCHREICHEN = process.argv.includes('--ohne-naht') ? ' --ohne-naht' : '';
+const ungemessen = [];
+function buchen(name, code) {
+  if (code === 2) ungemessen.push(name);
+  return code;
+}
+
 let ok = true;
 try {
   if (existsSync('dist/boot-report.txt')) rmSync('dist/boot-report.txt');  // Stale-Schutz
@@ -30,146 +75,58 @@ try {
   step('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch { ok = false; }
 
-// Bildtor: prueft nicht, ob etwas laeuft, sondern ob es aussieht wie
-// vorgesehen. Dafuer gab es bisher kein Tor — der Nebel war seit jeher kaputt
-// und alle Tore meldeten gruen.
-let bildZeile = '';
-if (ok) {
-  try {
-    const c = step('Bildtor (Modifikator-Modi)', 'node tools/bildtor.mjs');
-    bildZeile = c === 2
+// Die acht Tore als TABELLE, nicht als acht Verzweigungen.
+//
+// Bis v18 stand hier acht Mal derselbe Block mit ausgetauschten Namen. Das
+// war nicht nur lang: jede Aenderung an der Logik musste acht Mal gemacht
+// werden, und beim ersten Versuch war sie sechs Mal gemacht. Eine Regel, die
+// acht Kopien hat, gilt bald in sieben.
+//
+// `schluessel` ist zugleich der Name fuer --ohne= und --nur=.
+const TORE = [
+  // Prueft nicht, ob etwas laeuft, sondern ob es aussieht wie vorgesehen.
+  // Dafuer gab es lange kein Tor — der Nebel war seit jeher kaputt und alle
+  // Tore meldeten gruen. Kostet 174 s, also 58 % der ganzen Kette.
+  { schluessel: 'bildtor',     lauf: 'Bildtor (Modifikator-Modi)',           zeile: 'Bildtor (5 Modi)',           datei: 'tools/bildtor.mjs' },
+  // Die drei Farbbaender duerfen sich nicht ueberschneiden — Gefahr,
+  // Eigenfeuer, Aufsammler. Gezaehlt werden die Bildpunkte des GEBAUTEN
+  // Spiels, nicht nachgebaute Werte.
+  { schluessel: 'farbtor',     lauf: 'Farbtor (Gefahr · Eigenfeuer · Aufsammler)', zeile: 'Farbtor (17 Projektile)', datei: 'tools/farbtor.mjs' },
+  // Seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die FORM der
+  // einzige Traeger der Information "wer hat geschossen".
+  { schluessel: 'formen',      lauf: 'Formentor (Silhouetten bei Anzeigegroesse)', zeile: 'Formentor (11 Silhouetten)', datei: 'tools/formen.mjs' },
+  // Die Beruhigungsschicht muss Kontrast nehmen und nicht Helligkeit —
+  // Abdunkeln wuerde der Gegnerkugel den dunklen Rand nehmen.
+  { schluessel: 'untergrund',  lauf: 'Untergrund (13 Biome)',                zeile: 'Untergrund (13 Biome)',      datei: 'tools/untergrund.mjs' },
+  // Rechnet die Leiter gegen den Wellenplan JEDES Sektors und sieht danach
+  // im laufenden Gefecht nach, dass es die Mechanik ueberhaupt gibt.
+  { schluessel: 'feuerkraft',  lauf: 'Feuerkraft (120 Sektoren + Gefecht)',  zeile: 'Feuerkraft (120 Sektoren)',  datei: 'tools/feuerkraft.mjs' },
+  // Auf iOS beendet Safari eine Seite, die zu viel Grafikspeicher haelt,
+  // ohne Vorwarnung. Die teuerste Zeile war eine, die niemand sah.
+  { schluessel: 'speicher',    lauf: 'Speicher (Texturen im Gefecht)',       zeile: 'Speicher (Texturen)',        datei: 'tools/speicher.mjs' },
+  // Hat ein Sektor eine Form, oder ist er eine Rampe?
+  { schluessel: 'rhythmus',    lauf: 'Rhythmus (120 Sektoren)',              zeile: 'Rhythmus (120 Sektoren)',    datei: 'tools/rhythmus.mjs' },
+  // Sind die zwoelf Bausteine im BILD zwoelf Dinge? Die Rhythmus-Tafel
+  // prueft, dass ein Sektor Vielfalt HAT — nicht, dass die Bausteine
+  // unterschiedlich aussehen. Zwoelf Namen fuer dasselbe Bild waeren nach
+  // jeder anderen Zahl gruen.
+  { schluessel: 'formationen', lauf: 'Formationen (12 Bausteine)',           zeile: 'Formationen (12 Bausteine)', datei: 'tools/formationen.mjs' },
+];
 
-      ? '| Bildtor (5 Modi) | ⚠ nicht gemessen | – |\n'
-
-      : '| Bildtor (5 Modi) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    bildZeile = '| Bildtor (5 Modi) | ❌ Befund | – |\n';
+const torZeilen = [];
+for (const t of TORE) {
+  if (!ok) break;
+  if (!laeuft(t.schluessel)) {
+    torZeilen.push(`| ${t.zeile} | ⏭ uebersprungen | – |\n`);
+    console.log(`\n(—) ${t.lauf} — uebersprungen (${uebersprungenWarum})`);
+    continue;
   }
-}
-
-// Farbtor: prueft, dass sich die drei Farbbaender nicht ueberschneiden —
-// Gefahr, Eigenfeuer, Aufsammler. Der Bildtor sieht den ganzen Schirm, das
-// Farbtor sieht die einzelnen Projektile, und zwar gerendert: es zaehlt die
-// Pixel des gebauten Spiels. Die Gegenproben dazu stehen in
-// tools/farbproben.mjs.
-let farbZeile = '';
-if (ok) {
   try {
-    const c = step('Farbtor (Gefahr · Eigenfeuer · Aufsammler)', 'node tools/farbtor.mjs');
-    farbZeile = c === 2
-
-      ? '| Farbtor (17 Projektile) | ⚠ nicht gemessen | – |\n'
-
-      : '| Farbtor (17 Projektile) | ✅ ohne Befund | 0 |\n';
+    const c = buchen(t.zeile, step(t.lauf, `node ${t.datei}${DURCHREICHEN}`));
+    torZeilen.push(`| ${t.zeile} | ${c === 2 ? '⚠ nicht gemessen' : '✅ ohne Befund'} | ${c === 2 ? '–' : '0'} |\n`);
   } catch {
     ok = false;
-    farbZeile = '| Farbtor (17 Projektile) | ❌ Befund | – |\n';
-  }
-}
-
-// Formentor: seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die
-// FORM der einzige Traeger der Information „wer hat geschossen". Dieses Tor
-// misst, ob zwei Formen zugleich flaechengleich und profilgleich sind.
-let formZeile = '';
-if (ok) {
-  try {
-    const c = step('Formentor (Silhouetten bei Anzeigegroesse)', 'node tools/formen.mjs');
-    formZeile = c === 2
-
-      ? '| Formentor (11 Silhouetten) | ⚠ nicht gemessen | – |\n'
-
-      : '| Formentor (11 Silhouetten) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    formZeile = '| Formentor (11 Silhouetten) | ❌ Befund | – |\n';
-  }
-}
-
-// Untergrund-Tafel: prueft, dass die Beruhigungsschicht Kontrast nimmt und
-// nicht Helligkeit — Abdunkeln wuerde der Gegnerkugel den Rand nehmen.
-let bodenZeile = '';
-if (ok) {
-  try {
-    const c = step('Untergrund (13 Biome)', 'node tools/untergrund.mjs');
-    bodenZeile = c === 2
-
-      ? '| Untergrund (13 Biome) | ⚠ nicht gemessen | – |\n'
-
-      : '| Untergrund (13 Biome) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    bodenZeile = '| Untergrund (13 Biome) | ❌ Befund | – |\n';
-  }
-}
-
-// Feuerkraft: rechnet die Leiter gegen den Wellenplan JEDES Sektors und
-// sieht danach im laufenden Gefecht nach, dass es die Mechanik gibt.
-let kraftZeile = '';
-if (ok) {
-  try {
-    const c = step('Feuerkraft (120 Sektoren + Gefecht)', 'node tools/feuerkraft.mjs');
-    kraftZeile = c === 2
-
-      ? '| Feuerkraft (120 Sektoren) | ⚠ nicht gemessen | – |\n'
-
-      : '| Feuerkraft (120 Sektoren) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    kraftZeile = '| Feuerkraft (120 Sektoren) | ❌ Befund | – |\n';
-  }
-}
-
-// Speicher: auf iOS beendet Safari eine Seite, die zu viel Grafikspeicher
-// haelt, ohne Vorwarnung. Die teuerste Zeile war eine, die niemand sah.
-let memZeile = '';
-if (ok) {
-  try {
-    const c = step('Speicher (Texturen im Gefecht)', 'node tools/speicher.mjs');
-    memZeile = c === 2
-
-      ? '| Speicher (Texturen) | ⚠ nicht gemessen | – |\n'
-
-      : '| Speicher (Texturen) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    memZeile = '| Speicher (Texturen) | ❌ Befund | – |\n';
-  }
-}
-
-// Rhythmus: hat ein Sektor eine Form, oder ist er eine Rampe? Seit v7 wird
-// jeder Sektor aus zwoelf Bausteinen entlang einer Druckkurve gefuellt.
-let rhythZeile = '';
-if (ok) {
-  try {
-    const c = step('Rhythmus (120 Sektoren)', 'node tools/rhythmus.mjs');
-    rhythZeile = c === 2
-
-      ? '| Rhythmus (120 Sektoren) | ⚠ nicht gemessen | – |\n'
-
-      : '| Rhythmus (120 Sektoren) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    rhythZeile = '| Rhythmus (120 Sektoren) | ❌ Befund | – |\n';
-  }
-}
-
-// Formationen: sind die zwoelf Bausteine im BILD zwoelf Dinge? Die
-// Rhythmus-Tafel prueft, dass ein Sektor Vielfalt HAT — nicht, dass die
-// Bausteine unterschiedlich aussehen. Zwoelf Namen fuer dasselbe Bild waeren
-// nach jeder anderen Zahl gruen.
-let formationZeile = '';
-if (ok) {
-  try {
-    const c = step('Formationen (12 Bausteine)', 'node tools/formationen.mjs');
-    formationZeile = c === 2
-
-      ? '| Formationen (12 Bausteine) | ⚠ nicht gemessen | – |\n'
-
-      : '| Formationen (12 Bausteine) | ✅ ohne Befund | 0 |\n';
-  } catch {
-    ok = false;
-    formationZeile = '| Formationen (12 Bausteine) | ❌ Befund | – |\n';
+    torZeilen.push(`| ${t.zeile} | ❌ Befund | – |\n`);
   }
 }
 
@@ -198,7 +155,7 @@ let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
-  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + bildZeile + farbZeile + formZeile + bodenZeile + kraftZeile + memZeile + rhythZeile + formationZeile;
+  md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + torZeilen.join('');
   let allBoot = true;
   for (const l of lines) {
     const good = l.startsWith('✓');
@@ -208,13 +165,33 @@ if (existsSync('dist/boot-report.txt')) {
     md += `| \`${file}\` | ${good ? '✅ gestartet' : '❌ Boot-Fehler'} | ${errs} |\n`;
   }
   ok = ok && allBoot;
+  // Das Urteil wird NACH der Buchung des Ungemessenen gefaellt, nicht davor.
+  // Erster Anlauf schrieb "✅ bestanden" in den Bericht, waehrend der Lauf
+  // mit Rueckgabe 1 endete — der Bericht sagte das Gegenteil des Ergebnisses.
+  if (STRENG && ungemessen.length) ok = false;
   md += `\n**Ergebnis:** ${ok ? '✅ bestanden' : '❌ fehlgeschlagen'}\n`;
 } else {
   md += (ok ? '✅ Alle Builds erzeugt. ' : '❌ Build fehlgeschlagen. ') +
     '_Boot-Test nicht gelaufen (Playwright nicht installiert) — nur Struktur-Prüfung._\n';
 }
 
+if (ungemessen.length) {
+  md += `\n⚠ **Nicht gemessen:** ${ungemessen.join(', ')}${STRENG ? ' — im strengen Lauf zaehlt das als Fehlschlag.' : ''}\n`;
+}
+
 writeFileSync('dist/check-report.md', md);
 console.log('\n' + md);
+
+if (ungemessen.length) {
+  console.log(`⚠ ${ungemessen.length} Tor(e) haben NICHT gemessen: ${ungemessen.join(', ')}`);
+  if (STRENG) {
+    console.log('  Im strengen Lauf ist das ein Fehlschlag — vor der Auslieferung ist');
+    console.log('  "nicht nachgesehen" so wenig wert wie "nicht bestanden".');
+    ok = false;  // schon oben gesetzt; hier fuer den Fall ohne Boot-Bericht
+  } else {
+    console.log('  (Beim Arbeiten kein Grund anzuhalten. Mit --streng schon.)');
+  }
+}
+
 console.log(ok ? '✓ CHECK bestanden.' : '✗ CHECK fehlgeschlagen.');
 process.exit(ok ? 0 : 1);

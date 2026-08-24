@@ -319,6 +319,40 @@ Jede hat mindestens eine Runde gekostet.
    Zahl. Wo mehrere Dinge gemessen werden, die verschieden sein MUESSEN,
    gehoert eine Sperre hin, die genau das prueft.
 
+42. **Der dritte Ausgang gehoert in JEDES Tor, nicht in die Kette.** Regel 40
+   sagt, was Rueckgabe 2 bedeutet — sechs von acht Toren konnten sie
+   trotzdem nur fuer den einen Fall „Playwright fehlt". Alles andere fiel auf
+   die falsche Seite, und zwar in beide Richtungen: das Formentor meldete
+   eine fehlende Textur als BEFUND (ein roter Lauf, der ueber das Spiel
+   nichts sagt), die Untergrund-Tafel meldete neun von dreizehn Biomen als
+   GRUEN. Die Trennlinie ist immer dieselbe: sagt das SPIEL etwas Falsches,
+   ist es ein Befund; hat der APPARAT keine Zahl geliefert, ist es die 2.
+   `tools/messstelle.mjs` haelt alle drei Ausgaenge — wer ein Tor baut,
+   nimmt sie von dort.
+
+43. **Der Ausgang 2 muss sich herbeifuehren lassen.** Ein Ausgang, der nie
+   genommen wird, ist kein Ausgang, sondern eine Behauptung — und das ist
+   Regel 5 in ihrer teuersten Fassung, weil es hier den AUSFALL der Messung
+   betrifft. `--ohne-naht` nimmt jedem Tor die Messstelle weg, an der es
+   haengt; die acht Modusproben verlangen dann genau die 2. Das ist kein
+   nachgestellter Zustand: es ist derselbe, den ein zu frueh oder auf einem
+   klemmenden Laeufer messendes Tor antrifft.
+
+44. **Beim Arbeiten ist „nicht gemessen" hinnehmbar, vor der Lieferung nicht.**
+   Ein Tor, das staendig rot ist, weil der Laeufer klemmt, wird ignoriert —
+   dann ist es gar kein Tor mehr. Vor der Auslieferung ist es umgekehrt:
+   dort ist „nicht nachgesehen" so wenig wert wie „nicht bestanden".
+   Deshalb `--streng`, und deshalb nur in der CI.
+
+45. **Ruhe misst man am Bestand, den der Code laedt — nicht an allem.** Die
+   erste Ruhepruefung der Speicher-Tafel zaehlte Phasers Kachelpuffer mit.
+   Die schwanken im Gefecht von Bild zu Bild (141, eine halbe Sekunde
+   spaeter 139, bei unveraenderten 63,0 MB) und kommen nie zur Ruhe: der
+   erste strenge Lauf meldete „nicht gemessen" auf einem vollkommen gesunden
+   Stand. Wer auf Stillstand wartet, muss vorher sagen, WESSEN Stillstand.
+   Und der Vorgaenger dieser Pruefung war noch schlimmer — eine Grenze
+   `< 100 Texturen`, wo der kleinste je beobachtete Wert 119 war (Regel 2).
+
 ---
 
 ## Aufbau

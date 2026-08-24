@@ -119,15 +119,17 @@ Beantwortet: *Baut es? Startet es? Sind die Farbbänder und Silhouetten
 intakt?* Das fängt alles, was ein Tippfehler oder eine verrutschte Konstante
 anrichtet.
 
-### Stufe 2 — `npm run check`, vor dem Push (≈ 90 s, gerechnet)
+### Stufe 2 — `npm run check`, vor dem Push (**127 s gemessen**)
 
-Stufe 1 **plus** Feuerkraft, Speicher, Formationen — parallel.
-Ohne Bildtor.
+Alle acht Tore **ohne** das Bildtor, dazu Bau, Version und der Boot-Test
+aller elf Varianten. Vorhergesagt hatte ich 90 s; gemessen sind es 127.
+Die Zahl steht so, wie sie gemessen ist.
 
-### Stufe 3 — CI, unbeaufsichtigt (≈ 5 min)
+### Stufe 3 — `npm run torkette` / CI, unbeaufsichtigt (**291–293 s, drei Läufe**)
 
-Alles, inklusive Bildtor. Läuft ohnehin nach jedem Push und kostet **keine
-Wartezeit**, wenn man nicht davorsitzt.
+Alles, inklusive Bildtor, und **streng**: dort zählt „nicht gemessen" als
+Fehlschlag. Läuft ohnehin nach jedem Push und kostet **keine Wartezeit**,
+wenn man nicht davorsitzt.
 
 ### Die Gegenproben: nur bei Toränderungen
 
@@ -141,13 +143,15 @@ Disziplin zu überlassen.
 
 | | heute | Vorschlag |
 |---|---:|---:|
-| bei jeder Änderung, lokal | ≈ 302 s | **49 s** (gemessen) |
-| vor dem Push, lokal | ≈ 302 s | ≈ 90 s |
-| CI (unbeaufsichtigt) | ≈ 325 s | ≈ 325 s |
+| bei jeder Änderung, lokal | ≈ 302 s | **48 s** |
+| vor dem Push, lokal | ≈ 302 s | **127 s** |
+| CI (unbeaufsichtigt) | ≈ 325 s | ≈ 325 s + Gegenproben daneben |
 | Gegenproben je Spieländerung | 15–30 min | **0** |
 
+Alle vier Zahlen der rechten Spalte sind gemessen, nicht gerechnet.
+
 **Die Rückmeldeschleife beim Arbeiten geht von fünf Minuten auf unter eine.**
-Vorhergesagt hatte ich 40 s; gemessen sind es 49 — die vier Tore laufen
+Vorhergesagt hatte ich 40 s; gemessen sind es 48 — die vier Tore laufen
 parallel langsamer als einzeln, weil sie sich vier Kerne teilen (Farbtor
 14 → 29 s). Die Zahl steht so, wie sie gemessen ist.
 Die Abdeckung vor der Auslieferung bleibt vollständig — sie verschiebt sich
@@ -189,3 +193,69 @@ gehören nur an die richtige Stelle.
   der eigentliche Kostentreiber ist.
 - Ob die Parallelität auf dem CI-Läufer ebenso stabil ist, ist hier nicht zu
   prüfen — vier grüne Läufe auf 4 Kernen sind ein Anfang, kein Beweis.
+
+---
+
+## 8. Nachtrag v19 — umgesetzt und gegengeprobt
+
+Der Vorschlag aus Abschnitt 4 ist gebaut. Was dabei zusätzlich gefunden
+wurde, steht hier, weil es die Sorte Befund ist, die dieses Verzeichnis
+teuer bezahlt hat: **Prüfungen, die nichts prüfen konnten.**
+
+### Der dritte Ausgang
+
+Sechs Tore kannten nur zwei Ausgänge, 0 und 1. Was dazwischen liegt — *der
+Apparat hat gar keine Zahl geliefert* — landete je nach Tor auf der falschen
+Seite, und zwar in **beide** Richtungen:
+
+| Tor | was es meldete | was es ist |
+|---|---|---|
+| Formentor | „Textur für elite nicht gefunden" als **Befund** | ein Tor, das zu früh gemessen hat |
+| Untergrund | neun von dreizehn Biomen, dann **GRÜN** | vier Biome unbeurteilt |
+| Speicher | „nur N Texturen" als **Befund** | eine Messung, keine Aussage über das Spiel |
+| Formationen | hängende Zeitereignisse als **Befund** | halb gestellte Bausteine |
+| Rhythmus / Feuerkraft | fehlende Naht als **Befund** | die Prüfnaht ist weg, nicht das Spiel |
+
+Beide Richtungen sind dieselbe Lücke. Ein Tor, das nichts geprüft hat, darf
+weder aussehen wie eines, das bestanden hat, noch wie eines, das etwas
+gefunden hat. `tools/messstelle.mjs` hält jetzt alle drei Ausgänge, und
+jedes der sechs Tore nimmt sie.
+
+### Zwei Befunde an den eigenen Toren
+
+**Die Speicher-Grenze konnte nie fallen.** Sie verlangte weniger als 100
+Texturen. Nachgemessen: im Menü 119, im Gefecht 125, und nur im allerersten
+Augenblick nach `window.__game` waren es 99. Eine Grenze, die einen Wert von
+99 fordert, wo der kleinste je beobachtete 119 ist, meldet nie etwas.
+Ersetzt durch die Frage, auf die es ankommt: *ändert sich der Bestand noch?*
+
+**Und deren erste Fassung war zu scharf.** Sie zählte Phasers Kachelpuffer
+mit, und die schwanken im Gefecht von Bild zu Bild: 141, eine halbe Sekunde
+später 139, bei unveränderten 63,0 MB. Der erste strenge Lauf meldete
+deshalb „nicht gemessen" auf einem vollkommen gesunden Stand. Gezählt wird
+jetzt der Bestand, den der Code lädt — 109, zweimal gleich.
+
+### Die Gegenproben
+
+`--ohne-naht` nimmt jedem Tor die Messstelle weg, an der es hängt. Das ist
+kein nachgestellter Zustand, sondern derselbe, den ein zu früh oder auf
+einem klemmenden Läufer messendes Tor antrifft.
+
+Acht Modusproben, **alle acht greifen**, 230 s (ohne die zwei
+Bildtor-Proben 41 s). Der strenge Zweig ist in beide Richtungen belegt:
+`--nur=rhythmus --ohne-naht` ist **rot mit `--streng`** und **grün ohne**.
+
+Dabei fiel ein Fehler auf, der ohne die Gegenprobe stehen geblieben wäre:
+der Bericht schrieb „✅ bestanden", während der Lauf mit Rückgabe 1 endete.
+Das Urteil wurde vor der Buchung gefällt.
+
+### Was noch offen blieb
+
+- Die 25 Fehlerinjektionen laufen weiterhin **nicht** in der CI — sie
+  brauchen Neubauten. `npm run wache` sagt an, wann sie fällig sind.
+- „Kommt nicht ins Gefecht" bleibt in allen Toren ein **Befund** und wurde
+  bewusst *nicht* herabgestuft, obwohl es unter SwiftShader auch ein
+  Zeitablauf sein kann. „Alle Tore grün, aber man kommt nicht ins Spiel" ist
+  die teuerste Sorte Fehler, die es hier gibt.
+- Ob die Parallelität auf dem CI-Läufer ebenso stabil ist, ist hier nicht zu
+  prüfen.
