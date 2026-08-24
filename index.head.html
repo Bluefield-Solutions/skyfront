@@ -252,6 +252,18 @@
         var med = p(proben, 0.5), p95 = p(proben, 0.95);
         var l5 = 0; for (var i = 0; i < letzte5.length; i++) if (letzte5[i][1] > l5) l5 = letzte5[i][1];
         var hz = med > 0 ? 1000 / med : 0;
+        // NULLEN SIND KEINE MESSUNG.
+        //
+        // Die Tafel setzt beim Aufziehen zurueck. Wer sie oeffnet und sofort
+        // auf "Kopieren" tippt, nimmt eine Zeile mit, in der "1000,0/s" und
+        // "p50 0,0 ms" steht — das sieht aus wie eine Messung und ist keine.
+        // Genau so eine Zeile waere vom Geraet zurueckgekommen und haette
+        // eine Fahrt gekostet.
+        //
+        // 60 Proben sind bei 30 Bildern zwei Sekunden. Darunter sagt die
+        // Tafel, dass sie noch nichts hat, und der Knopf gibt nichts heraus.
+        var GENUG = 60;
+        var reif = proben.length >= GENUG && med > 0;
         var takt = hz > 100 ? 120 : hz > 75 ? 90 : hz > 45 ? 60 : Math.round(hz);
         var lauf = (performance.now() - start) / 1000;
         var g = window.__game, s = null;
@@ -265,7 +277,8 @@
         var ver = (vEl && vEl.textContent || '').trim() || '?';
         var z = [];
         z.push('<b>MESSTAFEL</b>  <b>' + ver + '</b>   ' + zahl(lauf, 0) + ' s   ' + bilder + ' Bilder');
-        z.push('Bildrate      <b>' + zahl(1000 / (med || 1), 0) + '</b>/s   Anzeige ~' + takt + ' Hz');
+        if (!reif) z.push('<span class="warn">noch zu wenig gemessen — ' + proben.length + ' von ' + GENUG + ' Bildern.</span>');
+        z.push('Bildrate      <b>' + (reif ? zahl(1000 / med, 0) : '—') + '</b>/s   Anzeige ~' + (reif ? takt : '—') + ' Hz');
         z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, 1000 / takt * 1.6) + '">' + zahl(p95) + '</span> ms');
         z.push('Laengste      <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms bei ' + laengsteBei + ' s   ·   5 s: <span class="' + kl(l5, 50) + '">' + zahl(l5) + '</span> ms');
         if (g && g.loop) {
@@ -292,6 +305,17 @@
         // Die Version gehoert in die MITGENOMMENE Zeile, nicht nur auf den
         // Schirm: eine Messung, die nicht sagt, aus welchem Stand sie stammt,
         // ist spaeter nicht mehr zuzuordnen — und genau dafuer ist sie da.
+        if (!reif) {
+          // Die Restzeit aus der BISHER gemessenen Rate, nicht aus einer
+          // angenommenen: auf einem langsamen Geraet dauert es laenger, und
+          // eine zu optimistische Ansage schickt den Nutzer zu frueh zum
+          // Knopf. Ohne jede Probe bleibt die Annahme 30/s.
+          var rate = med > 0 ? 1000 / med : 30;
+          letzteZeile = 'SKYFRONT-MESSUNG ' + ver + ' | NOCH NICHTS GEMESSEN — bitte im Gefecht '
+            + Math.max(1, Math.ceil((GENUG - proben.length) / rate)) + ' s laufen lassen und dann kopieren.';
+          werte.innerHTML = z.join('\n');
+          return;
+        }
         var eine = ['SKYFRONT-MESSUNG ' + ver];
         eine.push(Math.round(innerWidth) + 'x' + Math.round(innerHeight) + '@' + (window.devicePixelRatio || 1) + 'x');
         if (c) eine.push('Puffer ' + c.width + 'x' + c.height);
