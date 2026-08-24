@@ -68,9 +68,16 @@
        Der Knopf "Kopieren" legt alle Werte als EINE Zeile in die
        Zwischenablage — eine Messung, die auf dem Telefon bleibt, ist keine
        Messung. */
-    #messung{position:fixed;left:0;right:0;bottom:0;z-index:9500;display:none;
-      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    /* Die Tafel schwebt UEBER der Knopfreihe, nicht darauf. Zuerst sass sie
+       am unteren Rand — und lag damit genau auf EMP, Sturm und Bombe. Wer
+       damit misst, kann waehrend der Messung nicht mehr voll spielen, und
+       die dichten Momente sind die interessanten. 104 px sind die Hoehe der
+       Knopfreihe auf 844 px, gemessen am gebauten Spiel. */
+    #messung{position:fixed;left:0;right:0;z-index:9500;display:none;
+      bottom:calc(104px + env(safe-area-inset-bottom));
+      padding:10px 12px;
       background:rgba(6,12,20,.93);border-top:1px solid #2a4c6a;
+      border-bottom:1px solid #2a4c6a;
       color:#cfe6f5;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
       -webkit-overflow-scrolling:touch}
     #messwerte{margin:0;white-space:pre;overflow-x:auto;font:inherit;color:inherit}
@@ -252,8 +259,12 @@
         var imSpiel = s && s.scene && s.scene.isActive && s.scene.isActive();
 
         function kl(wert, warn) { return wert > warn ? 'warn' : 'gut'; }
+        // Die Version steht in der Huelle (#version) und damit auch dann zur
+        // Verfuegung, wenn das Spiel gar nicht erst hochkommt.
+        var vEl = document.getElementById('version');
+        var ver = (vEl && vEl.textContent || '').trim() || '?';
         var z = [];
-        z.push('<b>MESSTAFEL</b>   ' + zahl(lauf, 0) + ' s   ' + bilder + ' Bilder');
+        z.push('<b>MESSTAFEL</b>  <b>' + ver + '</b>   ' + zahl(lauf, 0) + ' s   ' + bilder + ' Bilder');
         z.push('Bildrate      <b>' + zahl(1000 / (med || 1), 0) + '</b>/s   Anzeige ~' + takt + ' Hz');
         z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, 1000 / takt * 1.6) + '">' + zahl(p95) + '</span> ms');
         z.push('Laengste      <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms bei ' + laengsteBei + ' s   ·   5 s: <span class="' + kl(l5, 50) + '">' + zahl(l5) + '</span> ms');
@@ -278,7 +289,10 @@
         z.push('Geraet        ' + Math.round(innerWidth) + '×' + Math.round(innerHeight) + ' @ ' + (window.devicePixelRatio || 1) + 'x' +
                (c ? '   Puffer ' + c.width + '×' + c.height : ''));
         // Dieselben Werte noch einmal als eine Zeile, zum Mitnehmen.
-        var eine = ['SKYFRONT-MESSUNG'];
+        // Die Version gehoert in die MITGENOMMENE Zeile, nicht nur auf den
+        // Schirm: eine Messung, die nicht sagt, aus welchem Stand sie stammt,
+        // ist spaeter nicht mehr zuzuordnen — und genau dafuer ist sie da.
+        var eine = ['SKYFRONT-MESSUNG ' + ver];
         eine.push(Math.round(innerWidth) + 'x' + Math.round(innerHeight) + '@' + (window.devicePixelRatio || 1) + 'x');
         if (c) eine.push('Puffer ' + c.width + 'x' + c.height);
         eine.push(zahl(1000 / (med || 1), 0) + '/s (~' + takt + 'Hz)');
