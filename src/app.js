@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v17",
+    SKF_VERSION = "v18",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61801,6 +61801,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           x: J - 32,
           y: 32,
           r: 22
+        }, this.messBtn = {
+          // Direkt links neben dem Ton: Pause 508, Ton 460, Messtafel 412.
+          // Gleiche Groesse wie die beiden anderen — ein Knopf, der kleiner
+          // ist als seine Nachbarn, ist auf dem Daumen ein anderer Knopf.
+          x: J - 128,
+          y: 32,
+          r: 22
         }, this.mute = {
           x: J - 80,
           y: 32,
@@ -61951,7 +61958,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             fires: y
           }
         }), this.escortDrone = this.add.image(this.player.x, this.player.y + 42, this.player.texture.key).setScale(.18).setTint(12576511).setAlpha(.85).setDepth(8), this.shieldSprite = this.add.image(this.player.x, this.player.y, "shieldRing").setDepth(11).setVisible(!1).setBlendMode(tt.BlendModes.ADD);
-        const r = A => tt.Math.Distance.Between(A.worldX, A.worldY, this.bomb.x, this.bomb.y) <= this.bomb.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad.x, this.gad.y) <= this.gad.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad2.x, this.gad2.y) <= this.gad2.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.ultPos.x, this.ultPos.y) <= this.ultPos.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.mute.x, this.mute.y) <= this.mute.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.pauseBtn.x, this.pauseBtn.y) <= this.pauseBtn.r + 6,
+        const r = A => tt.Math.Distance.Between(A.worldX, A.worldY, this.bomb.x, this.bomb.y) <= this.bomb.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad.x, this.gad.y) <= this.gad.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad2.x, this.gad2.y) <= this.gad2.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.ultPos.x, this.ultPos.y) <= this.ultPos.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.mute.x, this.mute.y) <= this.mute.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.pauseBtn.x, this.pauseBtn.y) <= this.pauseBtn.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.messBtn.x, this.messBtn.y) <= this.messBtn.r + 6,
           n = 1.95;
         this.input.on("pointerdown", A => {
           if (this.audio.resume(), this.over) {
@@ -62007,6 +62014,18 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           this.audio.resume();
           const A = this.audio.toggle();
           this.muteText.setText(A ? "🔊" : "🔇")
+        });
+        // MESSTAFEL. Die vier Tipps in die Ecke haben auf dem Telefon nicht
+        // funktioniert: die Fangflaeche pruefte FENSTER-Koordinaten, und
+        // hochkant ist die Leinwand oben schwarz umrandet — die Knopfreihe
+        // sitzt bei y = 96, die Flaeche endete bei 56. Getippt wurde richtig,
+        // die Flaeche lag falsch. Ein Knopf, den man sieht, ist ohnehin
+        // besser als ein Griff, den man kennen muss.
+        const mb = this.add.circle(this.messBtn.x, this.messBtn.y, this.messBtn.r, 1451834, .7).setStrokeStyle(2, 10473710).setScrollFactor(0).setDepth(100).setInteractive();
+        this.add.text(this.messBtn.x, this.messBtn.y, "📊", {
+          fontSize: "18px"
+        }).setOrigin(.5).setScrollFactor(0).setDepth(101), mb.on("pointerdown", () => {
+          try { typeof window < "u" && window.__SKF_MESSTAFEL && window.__SKF_MESSTAFEL(); } catch (A) {}
         });
         const h = this.add.circle(this.pauseBtn.x, this.pauseBtn.y, this.pauseBtn.r, 1451834, .7).setStrokeStyle(2, 10473710).setScrollFactor(0).setDepth(100).setInteractive();
         this.add.text(this.pauseBtn.x, this.pauseBtn.y, "II", {

@@ -179,8 +179,21 @@
       // Stattdessen nur MITHOEREN, nie abfangen — vier schnelle Tipps in die
       // obere rechte Ecke. Vier statt drei, damit ein hektisches Pausieren die
       // Tafel nicht versehentlich aufzieht.
+      // Der Knopf im Gefecht ruft hier herein. Er ist der Weg, den man SIEHT;
+      // die vier Tipps bleiben als zweiter Weg, falls die Spielszene gar
+      // nicht hochkommt.
+      window.__SKF_MESSTAFEL = function () { anzeigen(!an); };
+
       window.addEventListener('pointerdown', function (e) {
-        if (e.clientX < innerWidth - 56 || e.clientY > 56) { tipps = 0; return; }
+        // Gemessen an der LEINWAND, nicht am Fenster. Hochkant ist die
+        // Leinwand oben und unten schwarz umrandet: bei 390x844 liegt ihre
+        // Oberkante bei y = 76, die Knopfreihe des Spiels bei y = 96 — die
+        // alte Flaeche endete bei 56 und lag damit vollstaendig im schwarzen
+        // Rand. Wer in die sichtbare obere rechte Ecke tippte, traf nie.
+        var lw = document.querySelector('canvas');
+        var k = lw ? lw.getBoundingClientRect() : { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
+        var ecke = Math.max(56, Math.min(k.right - k.left, k.bottom - k.top) * 0.18);
+        if (e.clientX < k.right - ecke || e.clientY < k.top || e.clientY > k.top + ecke) { tipps = 0; return; }
         var jetzt = Date.now();
         // Zwei Sekunden je Tipp, nicht 1,2: auf einem stotternden Geraet
         // kommen vier Tipps nicht schneller an. Gemessen in der langsamen
