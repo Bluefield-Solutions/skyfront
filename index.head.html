@@ -163,6 +163,26 @@
       var proben = [], vorher = 0, start = 0;
       var laengste = 0, laengsteBei = 0, letzte5 = [];
       var bilder = 0;
+      // Eine Pause ist kein Ruckler.
+      //
+      // Die erste Messung vom Geraet meldete eine laengste Bildluecke von
+      // 7295 ms. Das war kein Einbruch, sondern die App im Hintergrund: iOS
+      // haelt requestAnimationFrame an, sobald die Seite nicht sichtbar ist,
+      // und beim Zurueckkommen ist der erste Abstand die ganze Abwesenheit.
+      // Wer die Zeile kopiert und dazu die App verlaesst, erzeugt den
+      // Ausschlag selbst.
+      //
+      // Weggelassen wird der Abstand aber NICHT: er wird als Pause gezaehlt
+      // und angezeigt. Eine Zahl, die still verschwindet, ist schlimmer als
+      // eine, die falsch aussieht.
+      var versteckt = false, pausen = 0, pausenMs = 0;
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) versteckt = true;
+      });
+      // Wo wurde gemessen? Die Zahlen aus dem Menue sagen ueber das Gefecht
+      // nichts — dort laeuft nichts ausser der Kulisse. Beim ersten Bild im
+      // Gefecht faengt die Messung deshalb von vorn an, genau einmal.
+      var warImSpiel = false;
 
       function anzeigen(zustand) {
         an = zustand;
@@ -172,6 +192,7 @@
       function zuruecksetzen() {
         proben.length = 0; letzte5.length = 0;
         laengste = 0; laengsteBei = 0; bilder = 0;
+        pausen = 0; pausenMs = 0; versteckt = false;
         start = performance.now(); vorher = 0;
       }
       // Kein eigenes Element als Fangflaeche: auf einem 16:9-Geraet laege sie
@@ -248,13 +269,26 @@
       function schleife(t) {
         requestAnimationFrame(schleife);
         if (!an) { vorher = t; return; }
+        // Beim ersten Bild im Gefecht von vorn anfangen: Menuewerte sagen
+        // ueber das Gefecht nichts.
+        var s0 = window.__game && window.__game.scene && window.__game.scene.getScene
+                 ? window.__game.scene.getScene('Game') : null;
+        var drin = !!(s0 && s0.scene && s0.scene.isActive && s0.scene.isActive());
+        if (drin && !warImSpiel) { warImSpiel = true; zuruecksetzen(); vorher = t; return; }
+        if (!drin) warImSpiel = false;
+
         if (vorher) {
           var d = t - vorher;
-          bilder++;
-          if (proben.push(d) > 400) proben.shift();
-          letzte5.push([t, d]);
-          while (letzte5.length && t - letzte5[0][0] > 5000) letzte5.shift();
-          if (d > laengste) { laengste = d; laengsteBei = Math.round((t - start) / 100) / 10; }
+          if (versteckt) {
+            // Die App war weg. Als Pause buchen, nicht als Bildluecke.
+            versteckt = false; pausen++; pausenMs += d;
+          } else {
+            bilder++;
+            if (proben.push(d) > 400) proben.shift();
+            letzte5.push([t, d]);
+            while (letzte5.length && t - letzte5[0][0] > 5000) letzte5.shift();
+            if (d > laengste) { laengste = d; laengsteBei = Math.round((t - start) / 100) / 10; }
+          }
         }
         vorher = t;
         if (bilder % 12 === 0) zeichnen();
@@ -294,6 +328,9 @@
         z.push('Bildrate      <b>' + (reif ? zahl(1000 / med, 0) : '—') + '</b>/s   Anzeige ~' + (reif ? takt : '—') + ' Hz');
         z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, 1000 / takt * 1.6) + '">' + zahl(p95) + '</span> ms');
         z.push('Laengste      <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms bei ' + laengsteBei + ' s   ·   5 s: <span class="' + kl(l5, 50) + '">' + zahl(l5) + '</span> ms');
+        // Pausen stehen DANEBEN, nicht in der laengsten Bildluecke. Sie sind
+        // kein Ruckler — aber sie verschwinden auch nicht.
+        if (pausen) z.push('Pausen        ' + pausen + 'x App im Hintergrund, zusammen ' + zahl(pausenMs / 1000) + ' s (nicht als Ruckler gezaehlt)');
         if (g && g.loop) {
           z.push('Phaser        geglaettet ' + zahl(g.loop.delta) + ' ms   roh ' + zahl(g.loop.rawDelta || 0) + ' ms');
         }
@@ -335,6 +372,7 @@
         eine.push(zahl(1000 / (med || 1), 0) + '/s (~' + takt + 'Hz)');
         eine.push('p50 ' + zahl(med) + ' p95 ' + zahl(p95) + ' ms');
         eine.push('laengste ' + zahl(laengste) + ' ms bei ' + laengsteBei + ' s');
+        if (pausen) eine.push('Pausen ' + pausen + 'x/' + zahl(pausenMs / 1000) + ' s');
         eine.push('5s ' + zahl(l5) + ' ms');
         if (g && g.loop) eine.push('Phaser ' + zahl(g.loop.delta) + '/' + zahl(g.loop.rawDelta || 0));
         if (imSpiel) {

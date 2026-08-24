@@ -9,7 +9,7 @@ liest hier.
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle. Wo unten „✅"
 steht, ist im Quelltext nachgesehen worden und die Stelle ist genannt.
 
-Stand: v23.
+Stand: v24.
 
 ---
 
@@ -63,13 +63,32 @@ heutigen Breiten fest, damit es nicht schlechter wird.
 Skyfront hat keinen Rohbildvorrat. Höher aufgelöste Fassungen müssen von
 außen kommen.
 
-### 4. Die Gerätemessung — **braucht den Nutzer**
+### 4. Die Gerätemessung — **erste Zahl da, die entscheidende fehlt**
+
+Vom iPhone (iOS 18.7, Safari 26.6, 393×852@3x, Puffer 1080×1920):
+
+| | |
+|---|---|
+| Bildrate | **58,8/s** — das Gerät läuft mit 60 Hz |
+| Bildzeit | p50 **17,0 ms**, p95 **23,0 ms** |
+| Phaser | geglättet 16,3 / roh 17,0 — hier verbirgt die Glättung nichts |
+| längste Lücke | 7295 ms — **mit hoher Wahrscheinlichkeit die App im Hintergrund**, nicht das Spiel |
+
+**Gemessen im Menü.** Über das Gefecht sagt sie nichts. Seit v24 fängt die
+Tafel beim Betreten des Gefechts von vorn an und bucht Pausen getrennt.
+
+Offen bleibt: 90,3 s auf 4596 Bilder sind 50,9/s im Mittel gegen 58,8 aus
+dem Median — auch ohne die Pause 55,4. Es gab langsame Strecken, die der
+Median nicht zeigt. Und p95 23,0 ms heißt, jedes zwanzigste Bild reißt das
+Budget — **im Menü.**
+
+### 4b. Die Messung im Gefecht — **braucht den Nutzer**
 Alle Leistungszahlen hier entstehen unter SwiftShader, also **ohne
 Grafikkarte**. Der JavaScript-Anteil überträgt auf ein Telefon, Rastern und
 Zusammensetzen nicht.
 
 Auf dem iPhone: Seite laden → **Spielen** → 📊 rechts oben → die Zeile
-`SKYFRONT-MESSUNG v23 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
+`SKYFRONT-MESSUNG v24 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
 („noch zu wenig gemessen — N von 60").
 
 ### 5. Lesbarkeit auf hellen Biomen — **neu, v21**
