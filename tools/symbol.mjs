@@ -127,14 +127,51 @@ for (const g of GROESSEN)
   await sharp(QUELLE).resize(g, g, { fit: 'cover', kernel: 'lanczos3' })
     .flatten({ background: '#0a1a2e' }).removeAlpha()
     .png({ compressionLevel: 9 }).toFile(`web/icon-${g}.png`);
-writeFileSync('web/logo-512.png', await backen(512, true));   // freigestellt, fuer den Ladeschirm
+// Der Ladeschirm zeigt jetzt DAS SYMBOL, nicht mehr den freigestellten
+// SVG-Flieger.
+//
+// Nachgesehen, nicht vermutet: nebeneinander gelegt lesen sich die beiden
+// wie zwei verschiedene Spiele. Der SVG-Flieger ist eine einfache
+// Silhouette mit Glanzverlauf, senkrecht, ohne Umgebung — das Symbol ist
+// ein beplankter Rumpf mit gerichtetem Licht ueber einem Wolkenhorizont.
+// Formensprache, Licht, Umgebung und Farbklang gehen in allen vier Punkten
+// auseinander. Genau das ist der Befund "eine Sammlung unabhaengig
+// erzeugter Bilder", den dieses Projekt nicht sein will.
+//
+// Das Symbol freizustellen waere der zweite, schlechtere Weg gewesen — ein
+// aus einem Foto ausgeschnittener Flieger hat Rest-Himmel an den Kanten.
+// Stattdessen wird das Symbol GANZ genommen, mit derselben abgerundeten
+// Form, die iOS ihm auf dem Homescreen gibt. Damit sind Ladeschirm und
+// Symbol nicht bloss aehnlich, sondern dasselbe Bild — Kohaerenz durch
+// Bauart, nicht durch Nacharbeit.
+// 396 Bildpunkte und WebP, nicht 512 und PNG.
+//
+// Der Ladeschirm wird bei 132 CSS-Punkten gezeigt; auf einem Geraet mit
+// dreifacher Dichte sind das 396 Bildpunkte. Mehr ist verschenkt — und hier
+// besonders teuer, weil das Bild als Base64 IN der Datei steckt, deren
+// Ladezeit den Ladeschirm ueberhaupt erst noetig macht. Ein schoenerer
+// Ladeschirm, der das Laden verlaengert, waere ein schlechtes Geschaeft.
+//
+// Gemessen: PNG 512 = 105 KB, PNG 396 = 67 KB, WebP 396 = 23 KB. Der alte
+// freigestellte Flieger lag bei 72 KB. Es wird also zugleich besser UND
+// leichter. (WebP ist in diesem Verzeichnis schon im Einsatz und traegt auf
+// iOS ab 14.)
+const LADE_PUNKTE = 396;
+{
+  const g = LADE_PUNKTE, r = Math.round(g * 0.2237);
+  const rundung = Buffer.from(`<svg width="${g}" height="${g}"><rect width="${g}" height="${g}" rx="${r}" ry="${r}" fill="#fff"/></svg>`);
+  const quadrat = await sharp(QUELLE).resize(g, g, { fit: 'cover', kernel: 'lanczos3' }).png().toBuffer();
+  writeFileSync('web/logo-lade.webp',
+    await sharp(quadrat).composite([{ input: rundung, blend: 'dest-in' }])
+      .webp({ quality: 82, alphaQuality: 90, effort: 6 }).toBuffer());
+}
 await browser.close();
 
 // In die Huelle eintragen. Beide Verweise, aber NUR die data:-Adresse in den
 // beiden <link>-Zeilen — im Dokument stehen weiter unten noch 22 MB Base64
 // fuer die Spielbilder, die hier nichts zu suchen haben.
 const symbol = readFileSync('web/icon-180.png').toString('base64');
-const logo = readFileSync('web/logo-512.png').toString('base64');
+const logo = readFileSync('web/logo-lade.webp').toString('base64');
 let huelle = readFileSync('index.head.html', 'utf8');
 
 let ersetzt = 0;
@@ -148,14 +185,14 @@ if (ersetzt !== 2) { console.error(`✗ Erwartet 2 Symbolverweise, ${ersetzt} er
 // blauen Verlauf klebt.
 let logos = 0;
 huelle = huelle.replace(
-  /(<div id="splash">\s*<img src="data:image\/png;base64,)[A-Za-z0-9+/=]+/,
-  (_, kopf) => { logos++; return kopf + logo; }
+  /(<div id="splash">\s*<img src="data:image\/)(?:png|webp)(;base64,)[A-Za-z0-9+/=]+/,
+  (_, a, b) => { logos++; return a + 'webp' + b + logo; }
 );
 if (logos !== 1) { console.error(`✗ Ladeschirm-Bild nicht gefunden (${logos} Treffer).`); process.exit(1); }
 
 writeFileSync('index.head.html', huelle);
 
-console.log(`✓ ${GROESSEN.map(g => `icon-${g}.png`).join(' · ')} · logo-512.png`);
+console.log(`✓ ${GROESSEN.map(g => `icon-${g}.png`).join(' · ')} · logo-lade.webp (${LADE_PUNKTE} px)`);
 console.log(`✓ index.head.html: ${ersetzt} Symbolverweise (${(symbol.length / 1024).toFixed(0)} KB) + Ladeschirm-Bild (${(logo.length / 1024).toFixed(0)} KB)`);
 
 // --- iOS-Startbilder --------------------------------------------------------

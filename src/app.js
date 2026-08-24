@@ -54412,11 +54412,27 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v20",
+    SKF_VERSION = "v21",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
     LEUCHTE_ANTEIL = .06,    // oder so viel der Spritebreite, was groesser ist
+    // Gerichtetes Kantenlicht: ein heller Saum auf der Lichtseite, gebacken
+    // aus der Silhouette. Er holt kein Detail zurueck — das geht nicht und ist
+    // dreimal gemessen worden (Schaerfemaske, Deckkraft-Rampe, Saumreihenfolge,
+    // alle drei verworfen). Er fuegt FORM hinzu, und dafuer braucht er kein
+    // Quelldetail: er wird gezeichnet, nicht rekonstruiert.
+    //
+    // Der Versatz ist DURCHPROBIERT, nicht gesetzt. Der erste Versuch nahm
+    // 1,2 % der Spritebreite und war im Bild praktisch nicht zu sehen — ein
+    // Blick durchs Schluesselloch. Nebeneinander gelegt:
+    //   1,2 %  kaum sichtbar
+    //   3 %    gerichtetes Licht, beim Rotor werden die Rohre sichtbar rund
+    //   5 %    schon schwer, der Schlachttraeger flaut aus
+    //   8 %    weisser Schmier, der Fluegel des Elite verschwindet
+    LICHT_ANTEIL = .03,      // Breite des Lichtsaums, Anteil der Spritebreite
+    LICHT_DECK = .7,         // Deckkraft; darueber wird es Dunst statt Form
+    LICHT_FARBE = "#dceaff", // kuehles Streiflicht, passend zum Himmel
     // Mischt eine Farbe gegen Weiss. Gebraucht fuer den Kern der Leuchte:
     // ein REIN weisser Kern frisst die Kennfarbe auf, das war schon bei
     // eb_needle der Fehler. Der Kern ist jetzt die aufgehellte Farbe.
@@ -56041,6 +56057,32 @@ return new ` + this.key + `();
       a.globalCompositeOperation = "source-in", a.fillStyle = "#0a0f16", a.fillRect(0, 0, t, l), a.restore();
       // 2. Der Flieger selbst, mittig.
       a.drawImage(G, x, x);
+      // 2b. Das gerichtete Kantenlicht.
+      //
+      // Die Silhouette wird nach oben-links versetzt und die echte davon
+      // abgezogen; uebrig bleibt ein Band auf der Lichtseite. Mit
+      // 'source-atop' aufgelegt, damit es nirgends ueber den Flieger
+      // hinausragt und den Saum nicht aufhellt.
+      //
+      // KEIN filter:blur und KEIN 'lighter' auf sich selbst — auf iOS gibt
+      // das nach etwa einer Sekunde ein schwarzes Bild und faellt auf dem
+      // Schreibtisch nicht auf (eiserne Regel 11).
+      const lichtD = Math.max(1, Math.round(t * LICHT_ANTEIL));
+      if (lichtD >= 1) {
+        const lp = document.createElement("canvas");
+        lp.width = t, lp.height = l;
+        const lt = lp.getContext("2d", { willReadFrequently: !0 });
+        lt.drawImage(p, -lichtD, -lichtD);
+        lt.globalCompositeOperation = "destination-out";
+        lt.drawImage(p, 0, 0);
+        lt.globalCompositeOperation = "source-in";
+        lt.fillStyle = LICHT_FARBE, lt.fillRect(0, 0, t, l);
+        a.save();
+        a.globalAlpha = LICHT_DECK;
+        a.globalCompositeOperation = "source-atop";
+        a.drawImage(lp, lichtD, lichtD);
+        a.restore();
+      }
       // 3. Kennleuchte an den Fluegelspitzen — die breiteste Zeile der
       // Silhouette, links und rechts aussen. Gemessen, nicht je Gegner
       // gepflegt: so gilt es auch fuer eine vierzehnte Art.

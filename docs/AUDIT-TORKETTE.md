@@ -193,6 +193,7 @@ gehören nur an die richtige Stelle.
   der eigentliche Kostentreiber ist.
 - Ob die Parallelität auf dem CI-Läufer ebenso stabil ist, ist hier nicht zu
   prüfen — vier grüne Läufe auf 4 Kernen sind ein Anfang, kein Beweis.
+  **Nachgetragen (v20): geprüft, und es hält.** Siehe Abschnitt 9.
 
 ---
 
@@ -259,3 +260,43 @@ Das Urteil wurde vor der Buchung gefällt.
   die teuerste Sorte Fehler, die es hier gibt.
 - Ob die Parallelität auf dem CI-Läufer ebenso stabil ist, ist hier nicht zu
   prüfen.
+
+
+---
+
+## 9. Nachtrag v20 — auf dem CI-Läufer nachgemessen
+
+Der zweite Job ist zweimal gelaufen (Läufe 39 und 40). Beide grün.
+
+| | Dauer |
+|---|---:|
+| Job `check` (alles, streng) | 449 s, davon 410 s im Check-Schritt |
+| Job `proben` (8 Modusproben) | **265 s, parallel** |
+| Lauf insgesamt | 452 s |
+
+**Der Gegenproben-Job liegt vollständig im Fenster des Checks.** Vorhergesagt
+hatte ich 230 s für die Modusproben; auf dem Läufer sind es 227 s. Die
+Parallelität kostet keine Wartezeit — das war die Behauptung, und sie hält.
+
+### Eine Zahl aus Abschnitt 1 hält nicht
+
+Dort steht „30 CI-Läufe, Median **325 s**". Nachgezählt an den Läufen, die
+sich jetzt auslesen lassen (13 Läufe vor der Stufung):
+
+**Median 443 s, Spanne 281 bis 463 s.**
+
+Die Verteilung ist zweigipflig — sieben Läufe zwischen 443 und 463 s, drei
+zwischen 281 und 351 s. Woher die 325 kamen, kann ich nicht mehr belegen;
+möglicherweise habe ich Job- statt Laufdauer gemessen. **Die Zahl in
+Abschnitt 1 ist damit nicht mehr zu halten**, und sie bleibt hier stehen,
+statt still ausgetauscht zu werden.
+
+Für die Aussage des Audits ändert das nichts — im Gegenteil: wenn die CI
+443 s statt 325 s braucht, ist der Grund, sie unbeaufsichtigt laufen zu
+lassen, stärker, nicht schwächer.
+
+### Und was sie NICHT sagt
+
+Die Stufung hat die CI nicht verlangsamt: 455 und 452 s liegen mitten in der
+Spanne von vorher (281–463 s). Zwei Läufe sind aber kein Beweis für
+Stabilität, sondern nur die Abwesenheit eines groben Fehlers.
