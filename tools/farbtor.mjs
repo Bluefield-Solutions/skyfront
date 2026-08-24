@@ -590,6 +590,57 @@ else {
         melde(`H: Kennleuchten ${a.rolle} und ${b.rolle} liegen nur ${d.toFixed(0)} auseinander`);
     }
 
+  // WORAN DIE LEUCHTE GEFUNDEN WIRD — und woran nicht.
+  //
+  // Naheliegend waere: Kennfarbe gegen den Biom-Untergrund. Gemessen ueber
+  // alle dreizehn Biome kommt dabei heraus, dass Violett auf Frost nur
+  // 1,34:1 erreicht — was nach einem schweren Mangel aussieht und keiner
+  // ist. Es ist dieselbe falsche Messstelle wie bei den Kugeln (siehe D):
+  // die Leuchte sitzt IM dunklen Rumpf, nicht auf dem Biom.
+  //
+  // Gefunden wird sie ueber ihren hellen KERN gegen den dunklen Saum, und
+  // das sind 15 bis 18:1. Genau diese Kette war von keinem Tor geschuetzt:
+  // wer den Kern dunkler mischt, macht die Leuchte unsichtbar, und keine
+  // Zahl haette angeschlagen. Ein rein WEISSER Kern ist uebrigens auch
+  // falsch — er frisst die Kennfarbe auf (der Fehler von eb_needle, und
+  // beim ersten Anlauf der Leuchte noch einmal). Deshalb beides.
+  {
+    const mKern = /m\.addColorStop\(0, heller\(r, ([0-9.]+)\)\)/.exec(quelle);
+    const mRing = /m\.addColorStop\(\.3, heller\(r, ([0-9.]+)\)\)/.exec(quelle);
+    const mSaum = /a\.fillStyle = "(#[0-9a-fA-F]{6})", a\.fillRect/.exec(quelle);
+    if (!mKern) melde('H: der Kern der Kennleuchte ist nicht zu finden (heller(r, …) im Verlauf)');
+    else if (!mRing) melde('H: der Zwischenring der Kennleuchte ist nicht zu finden');
+    else if (!mSaum) melde('H: die Saumfarbe ist nicht zu finden');
+    else {
+      const anteil = Number(mKern[1]), ring = Number(mRing[1]), saum = hex(mSaum[1]);
+      // Die untere Grenze kommt aus dem VERLAUF selbst, nicht aus einer
+      // absoluten Zahl. Ein erster Anlauf verlangte nur "Kern gegen Saum
+      // >= 8:1" — und das konnte fuer die GRUENE Leuchte nie anschlagen:
+      // sie ist so hell, dass sie selbst mit Faktor 0 auf 13:1 kommt. Eine
+      // Pruefung, die fuer die Haelfte der Faelle tot ist, ist keine.
+      //
+      // Was den Kern zum Kern macht, ist der Abstand zum Zwischenring: ist
+      // er nicht deutlich heller, gibt es keinen Verlauf und damit kein
+      // Leuchten, sondern eine flache Scheibe.
+      const KERN_UEBER_RING = 0.15;
+      if (anteil < ring + KERN_UEBER_RING)
+        melde(`H: der Kern der Kennleuchte ist mit ${(anteil * 100).toFixed(0)} % kaum heller als der Zwischenring (${(ring * 100).toFixed(0)} %) — das ist kein Verlauf mehr, sondern eine flache Scheibe`);
+      const KERN_MIN = 8;        // gemessen 15,4 und 17,7 — reichlich Luft
+      const KERN_MAX_ANTEIL = 0.85;  // darueber frisst Weiss die Kennfarbe
+      const heller = (c, r) => c.map((v) => Math.round(v + (255 - v) * r));
+      console.log(`   Kern ${(anteil * 100).toFixed(0)} % · Zwischenring ${(ring * 100).toFixed(0)} % gegen Weiss gemischt, Saum ${alsHex(saum)}`);
+      for (const l of leuchten) {
+        const kern = heller(l.c, anteil);
+        const v = verhaeltnis(leucht(kern), leucht(saum));
+        console.log(`   ${l.rolle.padEnd(10)} Kern ${alsHex(kern)} gegen den Saum: ${v.toFixed(2)}:1 (Grenze ${KERN_MIN})`);
+        if (v < KERN_MIN)
+          melde(`H: der Kern der Kennleuchte ${l.rolle} loest sich nicht vom dunklen Saum (${v.toFixed(2)}:1, Grenze ${KERN_MIN}) — dann ist sie im Rumpf nicht zu finden`);
+      }
+      if (anteil > KERN_MAX_ANTEIL)
+        melde(`H: der Kern ist zu ${(anteil * 100).toFixed(0)} % weiss (Grenze ${KERN_MAX_ANTEIL * 100} %) — bei zuviel Weiss bleibt von der Kennfarbe nichts uebrig (der Fehler von eb_needle)`);
+    }
+  }
+
   // Die Groessenregel steht nicht hier, sondern in H2 weiter unten: sie
   // braucht die ECHTEN Texturbreiten, und die kommen erst aus dem WebP-Vorrat
   // des gebauten Spiels. Ein erster Anlauf rechnete sie hier statisch aus der

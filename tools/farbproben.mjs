@@ -108,6 +108,18 @@ const PROBEN = [
   // Beide Rollen auf dieselbe Farbe: dann sagt die Leuchte nichts mehr.
   ['beide Kennleuchten gleich', 'H',
     ['schuetze: "#a88cff"', 'schuetze: "#93f562"'], false],
+  // Den Kern der Leuchte dunkel mischen: dann loest sie sich nicht mehr vom
+  // dunklen Rumpf, und sie ist im Bild nicht zu finden. Gemessen traegt sie
+  // ueber 15:1 gegen den Saum — DAS ist die Messstelle, nicht der
+  // Biom-Untergrund (dort kommt Violett auf Frost nur auf 1,34:1 und ist
+  // trotzdem tadellos zu sehen).
+  ['Kern der Kennleuchte dunkel gemischt', 'H',
+    ['m.addColorStop(0, heller(r, .75))', 'm.addColorStop(0, heller(r, .02))'], false],
+  // Und das andere Ende: ein fast weisser Kern frisst die Kennfarbe auf.
+  // Genau der Fehler von eb_needle, und beim ersten Anlauf der Leuchte noch
+  // einmal — damals nur am Kontaktbogen gesehen, von keiner Zahl.
+  ['Kern der Kennleuchte fast weiss', 'H',
+    ['m.addColorStop(0, heller(r, .75))', 'm.addColorStop(0, heller(r, .96))'], false],
   // Und die Leuchte auf Aufsammlergroesse aufblasen: dann traegt der
   // Farbton die Trennung allein, und dafuer ist der Kreis zu voll.
   ['Kennleuchte auf Aufsammlergroesse', 'H2',
