@@ -281,6 +281,30 @@ Jede hat mindestens eine Runde gekostet.
    Formation sah aus wie drei einzelne. Ich habe daraufhin die Formation
    geaendert statt den Film. Das Ergebnis trug, die Reihenfolge war falsch.
 
+36. **Ein Kommentar ist keine Zusicherung.** In tools/bildtor.mjs stand
+   woertlich „solange alle acht ueber denselben Weg kommen, faellt der
+   Faktor heraus" — und nirgends war es durchgesetzt. Auf GitHub kam ein
+   gemischter Satz heraus (Menue ueber Phaser, sieben ueber den Abzug), der
+   Median lief auf den falschen Wert, und das Tor meldete einen Befund, den
+   es nicht gibt. Wer eine Bedingung aufschreibt, schreibt sie in den Code.
+
+37. **Ein frueher Abbruch darf nicht verschlucken, was schon gefunden
+   wurde.** `process.exit(1)` mitten im Lauf beendete das Bildtor, bevor die
+   bereits gesammelten Befunde ausgegeben waren — die Konstanten-Sperre hatte
+   angeschlagen und niemand sah es. Ein Befund, den niemand sieht, ist kein
+   Befund.
+
+38. **„Nicht messbar" ist kein Befund — aber es darf nicht leise sein.** Ein
+   Tor, das immer rot ist, weil die Laeufer kaputt sind, wird ignoriert, und
+   dann schuetzt es gar nichts mehr. Was nicht gemessen werden KONNTE, geht
+   in die Hinweise, wird laut ausgegeben und behauptet nichts. Was gemessen
+   werden konnte, urteilt weiter.
+
+39. **Gleiche Zahlen sind keine Messung.** Der Bildschirmabzug lieferte fuer
+   sieben Schirme sieben Mal 43,6 / 1,9. Der Median daraus ist trotzdem eine
+   Zahl. Wo mehrere Dinge gemessen werden, die verschieden sein MUESSEN,
+   gehoert eine Sperre hin, die genau das prueft.
+
 ---
 
 ## Aufbau

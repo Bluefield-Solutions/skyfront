@@ -175,6 +175,20 @@ const MASSFN = `window.__SKF_BILDMASS = (quelle, nurBand, mitBild, VON, BIS, BRE
 // eine Zahl ohne ihre Messstelle ist in diesem Verzeichnis kein Beleg.
 const wege = { phaser: 0, abzug: 0, verweigert: 0 };
 
+// NICHT MESSBAR IST KEIN BEFUND — aber es darf nicht leise sein.
+//
+// Faellt Phasers Schnappschuss ganz aus, kann die Querkanten-Pruefung nicht
+// urteilen: der Bildschirmabzug ist eine andere Messstelle (siehe oben), und
+// mit dem falschen Massstab zu urteilen ist schlimmer als gar nicht.
+//
+// Dann waere die Kette aber dauerhaft rot, solange die Laeufer so sind — und
+// ein Tor, das immer rot ist, schuetzt nichts mehr, es wird ignoriert.
+// Deshalb: in diesem Fall wandert die Querkanten-Pruefung nicht in die
+// Befunde, sondern in die HINWEISE. Sie faellt aus, sie sagt es laut, und
+// sie behauptet nichts. Die Menue-Haelfte urteilt weiter — ihr Massstab ist
+// der Median der acht und faellt damit heraus.
+const hinweise = [];
+
 // WO DER ERSATZWEG URTEILEN DARF — UND WO NICHT.
 //
 // Beide Wege nebeneinander gemessen, dieselbe Datei, derselbe Rechner:
@@ -204,8 +218,44 @@ const wege = { phaser: 0, abzug: 0, verweigert: 0 };
 // Fuer die Gegenprobe: `--abzug` schaltet den Phaser-Weg ab.
 const NUR_ABZUG = process.argv.includes('--abzug');
 
+// EIN WEG JE LAUF — vorher entschieden, nicht je Schirm.
+//
+// Der erste Anlauf entschied je Schirm: Phaser zuerst, Ersatzweg wenn er
+// ausfaellt. Auf GitHub kam dabei genau das heraus, wovor der Kommentar
+// oben warnt — ein GEMISCHTER Satz:
+//
+//     Menu      16.9 / 4.8   (Phaser)
+//     Hangar    43.6 / 1.9   (Abzug)
+//     Workshop  43.6 / 1.9   (Abzug)
+//     ...
+//
+// Der Median lief damit auf 43,6, und das Menue wurde als zu dunkel
+// gemeldet. Ein FALSCHER Befund, erzeugt vom Tor selbst. Die Warnung stand
+// im Kommentar und war nirgends durchgesetzt.
+//
+// Jetzt wird der Weg EINMAL zu Beginn ausprobiert und gilt dann fuer den
+// ganzen Lauf.
+let abzugModus = NUR_ABZUG;
+
+async function wegWaehlen(seite) {
+  if (FLACH) { console.log('  (i) --flach: jeder Schirm liefert dasselbe Wertepaar (Gegenprobe).'); return; }
+  if (NUR_ABZUG) { console.log('  (i) --abzug: der Phaser-Weg ist abgeschaltet.'); return; }
+  const m = await rohMessen(seite, false, false);
+  if (m.fehlt) {
+    abzugModus = true;
+    console.log(`  (i) Phaser gibt kein Bild her (${m.zustand}) — der ganze Lauf misst über den Bildschirmabzug.`);
+  }
+}
+
+// Nur fuer die Gegenprobe: `--flach` liefert fuer jeden Schirm dasselbe
+// Wertepaar. Damit laesst sich beweisen, dass die Konstanten-Sperre
+// anschlaegt — sonst waere sie eine Zusicherung, die nie jemand ausgeloest
+// hat, und genau davon hat dieses Verzeichnis schon zwei gehabt.
+const FLACH = process.argv.includes('--flach');
+
 async function messen(seite, nurBand, mitBild, ersatzErlaubt = false) {
-  for (let versuch = 0; versuch < (NUR_ABZUG ? 0 : 2); versuch++) {
+  if (FLACH) { wege.phaser++; return { sprung: 12, bei: 100, hell: 43.6, streuung: 1.9, bild: null, weg: 'flach' }; }
+  for (let versuch = 0; versuch < (abzugModus ? 0 : 2); versuch++) {
     const m = await rohMessen(seite, nurBand, mitBild);
     if (!m.fehlt) { wege.phaser++; return { ...m, weg: 'phaser' }; }
     if (versuch === 0) { console.log(`      (…) Schnappschuss verpasst (${m.zustand}) — noch einmal`); await seite.waitForTimeout(2500); }
@@ -223,9 +273,17 @@ async function messen(seite, nurBand, mitBild, ersatzErlaubt = false) {
 // derselben Funktion wie beim Phaser-Weg.
 async function ueberAbzug(seite, nurBand, mitBild) {
   try {
-    const el = await seite.$('canvas');
-    if (!el) return { fehlt: true, zustand: 'keine Leinwand gefunden' };
-    const png = await el.screenshot({ type: 'png', timeout: 15000 });
+    // Ueber `page.screenshot({clip})` statt `element.screenshot()`: der
+    // Elementabzug kann eine alte oder leere Zusammensetzung liefern —
+    // auf GitHub kam sieben Mal dasselbe Bild heraus.
+    const kasten = await seite.evaluate(() => {
+      const c = document.querySelector('canvas');
+      if (!c) return null;
+      const b = c.getBoundingClientRect();
+      return { x: Math.round(b.x), y: Math.round(b.y), width: Math.round(b.width), height: Math.round(b.height) };
+    });
+    if (!kasten || kasten.width < 10) return { fehlt: true, zustand: 'keine Leinwand gefunden' };
+    const png = await seite.screenshot({ type: 'png', clip: kasten, timeout: 15000, animations: 'allow' });
     const uri = 'data:image/png;base64,' + png.toString('base64');
     return await seite.evaluate(([uri, nurBand, mitBild, VON, BIS, BREIT]) =>
       window.__SKF_BILDMASS(uri, nurBand, mitBild, VON, BIS, BREIT),
@@ -276,6 +334,8 @@ await seite.waitForTimeout(2500);
 
 const r = await seite.evaluate(() => { const b = window.__game.canvas.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; });
 
+await wegWaehlen(seite);
+
 // Jeder Schirm: darf nicht einfarbig und nicht schwarz sein. Erst alle
 // messen, dann urteilen — die Schirme sind einander der Massstab.
 const schirme = [];
@@ -306,6 +366,24 @@ for (const key of SCHIRME) {
 }
 
 // Urteil: gegen den Median der Schirme, nicht gegen eine feste Zahl.
+// EINE KONSTANTE IST KEINE MESSUNG.
+//
+// Auf GitHub lieferte der Bildschirmabzug fuer sieben Schirme sieben Mal
+// exakt 43,6 / 1,9. Das sind nicht sieben Messungen, das ist ein Bild —
+// vermutlich ein leeres. Der Median daraus ist trotzdem eine Zahl, und das
+// Urteil daraus sieht aus wie ein Urteil.
+//
+// Geprueft wird deshalb, ob ueberhaupt verschiedene Bilder herausgekommen
+// sind. Bei acht Schirmen, die alle etwas anderes zeigen, muessen es
+// mindestens drei verschiedene Wertepaare sein.
+if (schirme.length >= 4) {
+  const paare = new Set(schirme.map((x) => x.hell + '/' + x.streuung));
+  if (paare.size < 3) {
+    befunde.push(`Alle ${schirme.length} Schirme messen (fast) dasselbe — ${paare.size} verschiedene(s) Wertepaar(e), mindestens 3 erwartet. Das ist kein Menue, das ist ein Bild: ${[...paare].join(' · ')}. Nicht gemessen.`);
+    schirme.length = 0;
+  }
+}
+
 if (schirme.length >= 4) {
   const med = (f) => { const w = schirme.map(f).sort((a, b) => a - b); return w[Math.floor(w.length / 2)]; };
   const mStreu = med(s => s.streuung), mHell = med(s => s.hell);
@@ -340,7 +418,19 @@ await seite.touchscreen.tap(r.x + 0.5 * r.w, r.y + 0.711 * r.h);
 const imSpiel = async () => seite.evaluate(() => !!(window.__game.scene.scenes || []).some(s => s.scene.key === 'Game' && s.scene.isActive()));
 let losGehts = false;
 for (let i = 0; i < 60; i++) { if (await imSpiel()) { losGehts = true; break; } await seite.waitForTimeout(250); }
-if (!losGehts) { console.error('✗ Bildtor: kommt nicht ins Spiel.'); await browser.close(); process.exit(1); }
+if (!losGehts) {
+  // Ein frueher Abbruch darf nicht verschlucken, was schon gefunden wurde.
+  // Genau das ist bei der Gegenprobe zur Konstanten-Sperre passiert: die
+  // Sperre hatte angeschlagen, der Befund lag in `befunde` — und der
+  // Abbruch beendete den Lauf, bevor irgendjemand ihn zu sehen bekam. Ein
+  // Befund, den niemand sieht, ist kein Befund.
+  if (befunde.length) {
+    console.error(`\n✗ Bildtor: ${befunde.length} Befund(e), bevor der Abbruch kam:`);
+    befunde.forEach(b => console.error('   · ' + b));
+  }
+  console.error('✗ Bildtor: kommt nicht ins Spiel.');
+  await browser.close(); process.exit(1);
+}
 await seite.waitForTimeout(1500);   // die Welle setzt sich, das Bild steht
 
 const cx = r.x + r.w * 0.5, unten = r.y + r.h * 0.82, oben = r.y + r.h * 0.22;
@@ -380,7 +470,7 @@ for (const [nr, name] of MODI) {
   // Ein Modus, von dem nicht alle Bilder da sind, ist NICHT gemessen — und
   // ein Mittelwert aus der Haelfte der Bilder sieht aus wie eine Messung.
   if (!genommen) {
-    befunde.push(`${name}: kein einziges Bild zu bekommen (${fehlend} verpasst) — Querkante nicht gemessen`);
+    (abzugModus ? hinweise : befunde).push(`${name}: kein einziges Bild zu bekommen (${fehlend} verpasst) — Querkante nicht gemessen`);
     await seite.mouse.up().catch(() => {});
     continue;
   }
@@ -398,7 +488,7 @@ await browser.close();
 const grund = gemessen.find(g => g.name === 'Aus');
 const grund2 = gemessen.find(g => g.name === 'Aus (2)');
 if (!grund) {
-  befunde.push('Grundlinie "Aus" wurde nicht gemessen — ohne sie ist kein Urteil moeglich.');
+  (abzugModus ? hinweise : befunde).push('Grundlinie "Aus" wurde nicht gemessen — ohne sie ist kein Urteil moeglich.');
 } else {
   const basis = grund2 ? (grund.sprung + grund2.sprung) / 2 : grund.sprung;
   const grenze = Math.min(KANTE_MAX, Math.max(KANTE_MIN, basis * FAKTOR));
@@ -429,10 +519,19 @@ if (!grund) {
   }
 }
 
+if (hinweise.length) {
+  console.log(`\n⚠ Bildtor: ${hinweise.length} Prüfung(en) NICHT DURCHGEFÜHRT — Phasers Schnappschuss gibt auf diesem Läufer kein Bild her.`);
+  hinweise.forEach(h => console.log('   ~ ' + h));
+  console.log('   Der Bildschirmabzug ist eine andere Messstelle (Helligkeit 20,4 gegen 48,4);');
+  console.log('   mit ihm zu urteilen hiesse, zwei Dinge zu messen und eins zu nennen.');
+}
+
 if (befunde.length) {
   console.error('\n✗ Bildtor: ' + befunde.length + ' Befund(e)');
   befunde.forEach(b => console.error('   · ' + b));
   process.exit(1);
 }
 console.log(`\n  Gemessen: ${wege.phaser}x über Phaser, ${wege.abzug}x über den Bildschirmabzug` + (wege.verweigert ? `, ${wege.verweigert}x gar nicht (Ersatzweg dort nicht zulässig)` : '') + '.');
-console.log('✓ Bildtor bestanden — keine harten Querkanten, Menü nicht einfarbig.');
+console.log(hinweise.length
+  ? '✓ Bildtor bestanden, soweit es messbar war — Menü geprüft, Querkanten NICHT.'
+  : '✓ Bildtor bestanden — keine harten Querkanten, Menü nicht einfarbig.');

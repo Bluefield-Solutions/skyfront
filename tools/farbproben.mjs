@@ -219,11 +219,30 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of PROBE
 //      Sprung 96,3" — einen Befund, den es nicht gibt. Ohne diese Probe
 //      koennte genau das unbemerkt zurueckkommen.
 const MODUSPROBEN = [{
+  // Phaser gibt kein Bild her. Erwartet: die acht Menue-Schirme werden ueber
+  // den Ersatzweg gemessen und beurteilt (ihr Massstab ist der Median der
+  // acht, der faellt heraus), die Querkanten sagen laut, dass sie NICHT
+  // durchgefuehrt wurden — und es entsteht kein erfundener Befund.
+  //
+  // "Nicht messbar" ist dabei KEIN Befund: das Tor bleibt gruen. Ein Tor,
+  // das immer rot ist, weil die Laeufer kaputt sind, wird ignoriert.
   name: 'Bildtor ohne Phaser-Schnappschuss (--abzug)',
   cmd: ['tools/bildtor.mjs', '--abzug'],
+  rotErwartet: false,
+  mussEnthalten: ['Median Streuung', 'NICHT DURCHGEFÜHRT', 'Querkante nicht gemessen',
+    'Menü geprüft, Querkanten NICHT'],
+  darfNichtEnthalten: ['harte Querkante', 'Das ist kein Menue'],
+  beweist: 'Menü gemessen und beurteilt, Querkanten laut verweigert, kein erfundener Befund',
+}, {
+  // Jeder Schirm liefert dasselbe Wertepaar. Auf GitHub kam genau das vor:
+  // sieben Mal 43,6 / 1,9. Das sind nicht sieben Messungen, das ist ein
+  // Bild — und der Median daraus sieht aus wie ein Massstab.
+  name: 'Bildtor mit lauter gleichen Schirmen (--flach)',
+  cmd: ['tools/bildtor.mjs', '--flach'],
   rotErwartet: true,
-  mussEnthalten: ['Median Streuung', 'Querkante nicht gemessen', 'ohne sie ist kein Urteil'],
-  darfNichtEnthalten: ['harte Querkante'],
+  mussEnthalten: ['Das ist kein Menue, das ist ein Bild', 'Nicht gemessen'],
+  darfNichtEnthalten: ['Median Streuung'],
+  beweist: 'lauter gleiche Schirme werden als „ein Bild" erkannt, nicht als Messung',
 }];
 
 let modusFehler = 0, modusGelaufen = 0;
@@ -241,9 +260,13 @@ if (ALLE) {
     for (const t of m.darfNichtEnthalten) if (text.includes(t)) mangel.push(`„${t}" steht im Bericht, darf aber nicht — der Ersatzweg urteilt, wo er nicht darf`);
     if (mangel.length) { console.log(`✗ ${m.name}: ${mangel.join(' · ')}`); modusFehler++; }
     else {
-      console.log(`✓ ${m.name} → Menü gemessen, Querkanten verweigert, kein erfundener Befund`);
-      const zeile = (text.split('\n').find((z) => z.includes('Querkante nicht gemessen')) || '').trim();
-      console.log(`    ${zeile.replace(/^[✗·]\s*/, '')}`);
+      console.log(`✓ ${m.name} → ${m.beweist}`);
+      // Gezeigt wird eine Zeile, die die Probe TATSAECHLICH belegt — nicht
+      // eine feste. Der erste Anlauf druckte fuer beide Proben denselben
+      // Satz, und der passte nur zur ersten.
+      const marke = m.mussEnthalten[m.mussEnthalten.length - 1];
+      const zeile = (text.split('\n').find((z) => z.includes(marke)) || '').trim();
+      console.log(`    ${zeile.replace(/^[✗·~]\s*/, '')}`);
     }
   }
 } else if (MODUSPROBEN.length) {
