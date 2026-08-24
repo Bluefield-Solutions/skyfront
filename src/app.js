@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v21",
+    SKF_VERSION = "v22",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61519,7 +61519,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     constructor(R, E = 1) {
       super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), E >= 3 && R.textures.exists("boss3") ? this.setTexture("boss3") : E >= 2 && R.textures.exists("boss2") && this.setTexture("boss2"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp, E >= 3 ? (this.baseTint = 13673215, this.setTint(this.baseTint), this.setScale(1.24)) : E >= 2 && (this.baseTint = 16751238, this.setTint(this.baseTint), this.setScale(1.14)), this.setDepth(10), this.setAngle(180);
       const b = this.body;
-      b.setImmovable(!0), b.setSize(this.width * .72, this.height * .6, !0), this.nextFire = 0
+      b.setImmovable(!0), b.setSize(this.width * .72, this.height * .6, !0), this.nextFire = 0, this.nextRauch = 0
     }
     setBaseTint(R) {
       this.baseTint = R, this.setTint(R)
@@ -61534,7 +61534,21 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }), this.hp <= 0
     }
     update(R) {
-      this.active && this.body.updateFromGameObject()
+      if (!this.active) return;
+      this.body.updateFromGameObject();
+      // Ab Phase 2 raucht er, ab Phase 3 staerker. Der Rauch kommt aus einem
+      // zufaelligen Punkt AUF dem Boss, nicht aus seiner Mitte — sonst sieht
+      // es aus wie ein Auspuff und nicht wie Schaden.
+      const st = this.phase();
+      if (st < 2 || !this.enterDone) return;
+      if (R < this.nextRauch) return;
+      // Der Abstand kommt aus dem Effekt-Budget der Szene, nicht fest: bei
+      // eingebrochener Bildrate senkt fxCount() ohnehin die Menge, und ein
+      // fester Takt wuerde dann trotzdem jedes Bild anfassen.
+      this.nextRauch = R + (st >= 3 ? 130 : 260);
+      const w = this.displayWidth * .34, h = this.displayHeight * .3;
+      this.scene.smoke.explode(this.scene.fxCount(st >= 3 ? 3 : 2),
+        this.x + (Math.random() * 2 - 1) * w, this.y + (Math.random() * 2 - 1) * h);
     }
   }
   const In = {
@@ -63340,6 +63354,30 @@ ${R.label}`, {
         const I = _t.bulletSpeed * .74;
         b.body.setVelocity(0, I), b.homing = !0, b.dieAt = this.time.now + 4200, this.audio.enemyShoot()
       }
+      // Der Phasenwechsel als EREIGNIS, nicht als leiserer Balken.
+      //
+      // Die Panzerung wird sichtbar rissig: der Grundton dunkelt je Stufe um
+      // ein Viertel ab, und es gibt einen Schlag aus Funken und Rauch. Danach
+      // raucht der Boss dauerhaft (siehe zn.update).
+      //
+      // Warum am Grundton und nicht mit einem zweiten Bild: ein zweites Bild
+      // fuer jede der drei Bossarten mal drei Stufen waeren neun neue
+      // Grafiken, und die gibt es nicht. Der Grundton ist das, was da ist.
+      bossSchadenStufe(boss, stufe) {
+        if (!boss || !boss.active) return;
+        const f = stufe >= 3 ? .56 : .76;
+        const t = boss.baseTint;
+        boss.setBaseTint(
+          Math.round((t >> 16 & 255) * f) << 16 |
+          Math.round((t >> 8 & 255) * f) << 8 |
+          Math.round((t & 255) * f));
+        // Ein Schlag AM BOSS. Ruck, Blitz und Ton macht der Aufrufer schon —
+        // der erste Anlauf hatte das hier ein zweites Mal, und zwei Ruecke
+        // uebereinander sind kein doppelter Nachdruck, sondern Zappeln.
+        this.explosions.explode(this.fxCount(stufe >= 3 ? 16 : 10), boss.x, boss.y);
+        this.smoke.explode(this.fxCount(stufe >= 3 ? 14 : 8), boss.x, boss.y);
+      }
+
       spawnBoss(R) {
         if (this.boss) return;
         this.stageCleared = !0, this.bossPhase = 1, this.nextBeam = 0, this.decor.getChildren().forEach(l => {
@@ -65287,7 +65325,12 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             this.bossWeak.lineStyle(1.5, o, .5).strokeCircle(e, s, n * .7)
           }
           if (p !== this.bossPhase) {
-            this.bossPhase = p, this.audio.phaseUp(), this.cameras.main.shake(260, .01), this.cameras.main.flash(200, 150, 40, 40);
+            // Hier ist der EINE Ort, an dem der Phasenwechsel bemerkt wird.
+            // Ruck, Blitz, Ton — und seit v22 auch das, was man dem Boss
+            // selbst ansieht. Ein zweiter Erkenner in zn.damage() war der
+            // erste Anlauf und ist wieder heraus: zwei Stellen, die dasselbe
+            // feststellen, laufen frueher oder spaeter auseinander.
+            this.bossPhase = p, this.audio.phaseUp(), this.cameras.main.shake(260, .01), this.cameras.main.flash(200, 150, 40, 40), this.bossSchadenStufe(this.boss, p);
             const a = p === 2 ? "PHASE 2 — härteres Feuer!" : "PHASE 3 — volle Breitseite!",
               r = this.add.text(J / 2, rt * .34, a, {
                 fontFamily: "sans-serif",

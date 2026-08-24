@@ -13,6 +13,7 @@
 
       Baut es?               build.mjs
       Stimmt die Version?    tools/version.mjs
+      Nummern eindeutig?     tools/nummern.mjs
       Startet alles?         build-variants.mjs --boot (elf Varianten)
       Farbbänder intakt?     tools/farbtor.mjs
       Silhouetten intakt?    tools/formen.mjs
@@ -43,6 +44,7 @@ const schritt = (name, cmd) => {
 try {
   schritt('Build (Master)', 'node build.mjs');
   schritt('Version (Quelle, Bericht, Bau)', 'node tools/version.mjs');
+  schritt('Nummern (keine Doppelbelegung)', 'node tools/nummern.mjs');
   schritt('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch {
   console.error('\n✗ SCHNELL fehlgeschlagen — es baut oder startet nicht.');

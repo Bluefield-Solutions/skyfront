@@ -72,6 +72,10 @@ try {
   if (existsSync('dist/boot-report.txt')) rmSync('dist/boot-report.txt');  // Stale-Schutz
   step('Build (Master)', 'node build.mjs');
   step('Version (Quelle, Bericht, Bau)', 'node tools/version.mjs');
+  // Kostet unter einer Sekunde und faengt etwas, das sonst niemand sieht:
+  // eine SKY-Nummer, die zwei verschiedene Dinge bezeichnet. Neun taten das,
+  // bevor es jemand nachgezaehlt hat.
+  step('Nummern (keine Doppelbelegung)', 'node tools/nummern.mjs');
   step('Build + Boot-Test aller Varianten', 'node build-variants.mjs --boot');
 } catch { ok = false; }
 
