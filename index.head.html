@@ -176,6 +176,36 @@
       // und angezeigt. Eine Zahl, die still verschwindet, ist schlimmer als
       // eine, die falsch aussieht.
       var versteckt = false, pausen = 0, pausenMs = 0;
+      // Was war LOS, als es am schlechtesten lief?
+      //
+      // Die erste Messung vom Geraet gab p95 23,0 ms — und keinen Hinweis
+      // darauf, wobei. Die Tafel zeigte Gegner- und Kugelzahlen, aber vom
+      // Augenblick des ABLESENS, nicht vom Augenblick des schlechtesten
+      // Bildes. Eine Zahl ohne ihren Anlass laesst sich nicht verfolgen.
+      //
+      // Deshalb wird die Lage beim neuen Hoechstwert mitgeschrieben. Kostet
+      // nichts: sie wird nur dann geholt, wenn ein Bild schlechter war als
+      // alle davor — bei 4600 Bildern sind das eine Handvoll Male.
+      var schlimmsteLage = null;
+      // Und die Verteilung. p50 und p95 sagen nicht, ob es gleichmaessig
+      // zaeh ist oder ob wenige Bilder ausreissen — das ist derselbe
+      // Unterschied wie zwischen Mittelwert und Median, nur eine Ebene
+      // hoeher. Die Grenzen sind Vielfache des 60-Hz-Budgets, nicht
+      // gegriffene Zahlen: 16,7 · 20 · 25 · 33 (= 30 Bilder/s) · 50.
+      var faecher = [0, 0, 0, 0, 0, 0];
+      function fach(d) {
+        return d <= 17 ? 0 : d <= 20 ? 1 : d <= 25 ? 2 : d <= 33 ? 3 : d <= 50 ? 4 : 5;
+      }
+      function lage() {
+        try {
+          var g = window.__game, sp = g && g.scene && g.scene.getScene ? g.scene.getScene('Game') : null;
+          if (!sp || !sp.scene.isActive()) return null;
+          var ak = function (gr) { return gr ? gr.countActive(true) : 0; };
+          return { g: ak(sp.enemies), k: ak(sp.bullets), gk: ak(sp.enemyBullets),
+                   fx: sp.fxActive || 0, obj: sp.children ? sp.children.list.length : 0,
+                   b: sp.bodenKey || '?', w: sp.waveIndex != null ? sp.waveIndex : -1 };
+        } catch (e) { return null; }
+      }
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) versteckt = true;
       });
@@ -193,6 +223,7 @@
         proben.length = 0; letzte5.length = 0;
         laengste = 0; laengsteBei = 0; bilder = 0;
         pausen = 0; pausenMs = 0; versteckt = false;
+        schlimmsteLage = null; faecher = [0, 0, 0, 0, 0, 0];
         start = performance.now(); vorher = 0;
       }
       // Kein eigenes Element als Fangflaeche: auf einem 16:9-Geraet laege sie
@@ -238,6 +269,12 @@
       // Knopf legt alles als EINE Zeile in die Zwischenablage; wenn die
       // Zwischenablage nicht mitspielt (aeltere Browser, kein sicherer
       // Kontext), erscheint stattdessen ein Feld, das man markieren kann.
+      // Prueefnaht: die fertige Zeile, ohne den Knopf zu druecken. Damit
+      // laesst sich von aussen pruefen, was der Nutzer kopieren WUERDE —
+      // eine Zeile, die nur ueber ein Tippereignis erreichbar ist, kann
+      // kein Werkzeug ansehen.
+      window.__SKF_MESSZEILE = function () { return letzteZeile; };
+
       function kopieren() {
         var txt = letzteZeile;
         function ersatz() {
@@ -287,7 +324,11 @@
             if (proben.push(d) > 400) proben.shift();
             letzte5.push([t, d]);
             while (letzte5.length && t - letzte5[0][0] > 5000) letzte5.shift();
-            if (d > laengste) { laengste = d; laengsteBei = Math.round((t - start) / 100) / 10; }
+            faecher[fach(d)]++;
+            if (d > laengste) {
+              laengste = d; laengsteBei = Math.round((t - start) / 100) / 10;
+              schlimmsteLage = lage();
+            }
           }
         }
         vorher = t;
@@ -331,6 +372,23 @@
         // Pausen stehen DANEBEN, nicht in der laengsten Bildluecke. Sie sind
         // kein Ruckler — aber sie verschwinden auch nicht.
         if (pausen) z.push('Pausen        ' + pausen + 'x App im Hintergrund, zusammen ' + zahl(pausenMs / 1000) + ' s (nicht als Ruckler gezaehlt)');
+        // Die Verteilung. Anteile, nicht Stueckzahlen: eine 90-Sekunden-Runde
+        // und eine 10-Sekunden-Runde sollen vergleichbar bleiben.
+        var summe = faecher.reduce(function (a, b) { return a + b; }, 0);
+        if (summe > 0) {
+          var pz = faecher.map(function (n) { return Math.round(n / summe * 100); });
+          z.push('Verteilung    &lt;=17 ' + pz[0] + '%  &lt;=20 ' + pz[1] + '%  &lt;=25 ' + pz[2] +
+                 '%  &lt;=33 <span class="' + kl(pz[3], 5) + '">' + pz[3] + '%</span>' +
+                 '  &lt;=50 <span class="' + kl(pz[4], 1) + '">' + pz[4] + '%</span>' +
+                 '  &gt;50 <span class="' + kl(pz[5], 0) + '">' + pz[5] + '%</span>');
+        }
+        if (schlimmsteLage) {
+          var L = schlimmsteLage;
+          z.push('dabei war       Gegner ' + L.g + '  Kugeln ' + L.k + '/' + L.gk +
+                 '  fx ' + L.fx + '  Bild ' + L.obj + '  Biom ' + L.b);
+        } else if (laengste > 0) {
+          z.push('dabei war       (im Menue — dort gibt es keine Lage zu melden)');
+        }
         if (g && g.loop) {
           z.push('Phaser        geglaettet ' + zahl(g.loop.delta) + ' ms   roh ' + zahl(g.loop.rawDelta || 0) + ' ms');
         }
@@ -373,6 +431,12 @@
         eine.push('p50 ' + zahl(med) + ' p95 ' + zahl(p95) + ' ms');
         eine.push('laengste ' + zahl(laengste) + ' ms bei ' + laengsteBei + ' s');
         if (pausen) eine.push('Pausen ' + pausen + 'x/' + zahl(pausenMs / 1000) + ' s');
+        var su = faecher.reduce(function (a, b) { return a + b; }, 0);
+        if (su > 0) eine.push('Verteilung ' + faecher.map(function (n) { return Math.round(n / su * 100); }).join('/') + ' % (<=17/20/25/33/50/>50)');
+        if (schlimmsteLage) {
+          var W = schlimmsteLage;
+          eine.push('dabei G' + W.g + ' K' + W.k + '/' + W.gk + ' fx' + W.fx + ' Obj' + W.obj + ' ' + W.b);
+        }
         eine.push('5s ' + zahl(l5) + ' ms');
         if (g && g.loop) eine.push('Phaser ' + zahl(g.loop.delta) + '/' + zahl(g.loop.rawDelta || 0));
         if (imSpiel) {

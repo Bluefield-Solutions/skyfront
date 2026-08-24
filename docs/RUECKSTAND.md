@@ -9,7 +9,7 @@ liest hier.
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle. Wo unten „✅"
 steht, ist im Quelltext nachgesehen worden und die Stelle ist genannt.
 
-Stand: v25.
+Stand: v26.
 
 ---
 
@@ -88,7 +88,7 @@ Grafikkarte**. Der JavaScript-Anteil überträgt auf ein Telefon, Rastern und
 Zusammensetzen nicht.
 
 Auf dem iPhone: Seite laden → **Spielen** → 📊 rechts oben → die Zeile
-`SKYFRONT-MESSUNG v25 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
+`SKYFRONT-MESSUNG v26 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
 („noch zu wenig gemessen — N von 60").
 
 ### 5. Lesbarkeit auf hellen Biomen — **neu, v21**
