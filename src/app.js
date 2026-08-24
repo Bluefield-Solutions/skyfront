@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v22",
+    SKF_VERSION = "v23",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61492,7 +61492,24 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         // uebergibt (Zeit, Delta) von selbst; R und E sind im Rumpf schon
         // vergeben, deshalb eigene Namen.
         const zf = ZF(dlt);
-        this.shadow.setPosition(this.x + Ae.SHADOW_DX, this.y + Ae.SHADOW_DY).setScale(this.scaleX, this.scaleY).setAlpha(.3);
+        // Der Schatten haengt am GRUND, nicht an einer festen Zahl.
+        //
+        // Gemessen (v22): auf der Stadt ist ein Gegner im Mittel 66 bis 82
+        // Helligkeitseinheiten HELLER als der Grund, auf Frost 19 bis 34
+        // DUNKLER — ein Drittel des Abstands, mit umgekehrtem Vorzeichen.
+        // Auf hellem Grund traegt die Silhouette also viel weniger.
+        //
+        // Warum nicht ueber den Saum: durchprobiert (1,6 bis 3,6 Punkte,
+        // 0,62 bis 1,0 Deckkraft). Die Breite bringt fast nichts (+6 %),
+        // die Dichte verdoppelt die Trennung auf Frost — kostet aber auf der
+        // Stadt die Haelfte. Ein fester Saum handelt nur das eine gegen das
+        // andere ein. Und er steckt in der gebackenen Textur: biomabhaengig
+        // hiesse, bei jedem Sektorwechsel neu zu backen.
+        //
+        // Der Schatten ist eine Eigenschaft des SPRITES und kostet nichts.
+        // Auf hellem Grund faellt er staerker aus — was ohnehin stimmt: heller
+        // Grund heisst starke Sonne.
+        this.shadow.setPosition(this.x + Ae.SHADOW_DX, this.y + Ae.SHADOW_DY).setScale(this.scaleX, this.scaleY).setAlpha(this.scene.schattenStaerke());
         const R = this.body,
           E = this.scene.time.now;
         if (E < this.entryUntil) {
@@ -62326,7 +62343,10 @@ dann ausweichen!`, {
         this.gradeTop.setTint(v.top).setAlpha(v.topA), this.gradeBot.setTint(v.bot).setAlpha(v.botA), this.swell.setTint(v.swellTint).setAlpha(v.swellA), this.clouds.setAlpha(R.cloud);
         if (this.spielfeld) {
           const w = this.untergrundRuhe(this.bodenKey || "sea");
-          this.spielfeld.setFillStyle(w.farbe, w.alpha).setVisible(w.alpha > .01)
+          this.spielfeld.setFillStyle(w.farbe, w.alpha).setVisible(w.alpha > .01);
+          // Der Schatten wird hier NICHT gesetzt. Der erste Anlauf tat das
+          // und traf die Textur im Zulauf an — siehe untergrundRuhe.
+          this.schattenKey = null;
         }
         const x = {
           bg_ocean: .5,
@@ -63286,8 +63306,38 @@ ${R.label}`, {
         var E;
         if ((E = this.ruheCache) != null && E[R]) return this.ruheCache[R];
         this.ruheCache = this.ruheCache || {};
-        const b = this.textures.exists(R) ? this.textures.get(R).getSourceImage() : null;
+        // Eine Messung an einer Textur, die es noch NICHT gibt, wird nicht
+        // gemerkt.
+        //
+        // Bis v23 stand hier keine Bedingung: beim ersten Betreten eines
+        // Bioms ist das Bild manchmal noch im Zulauf, bodenMessung(null)
+        // liefert Nullen — und die blieben fuer den ganzen Lauf im Cache
+        // stehen. Aufgefallen ist es am Schatten (bg_fields: Median 0,063,
+        // aber Staerke 0,300 statt 0,376); die Beruhigungsschicht des
+        // Spielfelds hing an derselben Zahl.
+        //
+        // Ein Zwischenstand, der sich als Endstand ausgibt, ist schlimmer
+        // als gar keine Zahl: er sieht aus wie eine Messung.
+        if (!this.textures.exists(R)) return bodenMessung(null);
+        const b = this.textures.get(R).getSourceImage();
+        if (!b || !b.width) return bodenMessung(null);
         return this.ruheCache[R] = bodenMessung(b)
+      }
+
+      // Wie stark faellt der Schatten in diesem Biom? ANTEILIG am gemessenen
+      // Median des Grundes, nicht je Biom gepflegt — so gilt es auch fuer ein
+      // vierzehntes. Der Median reicht ueber die dreizehn Biome von 0,009
+      // (Stadt) bis 0,261 (Wueste); 0,25 ist das Ende der Skala, kein Soll.
+      //
+      // Gefragt wird bei jedem Bild, nicht einmal beim Biomwechsel: die
+      // Antwort haengt an einer Textur, die dann noch fehlen kann. Teuer ist
+      // das nicht — untergrundRuhe merkt sich jede geglueckte Messung.
+      schattenStaerke() {
+        const k = this.bodenKey || "sea";
+        if (this.schattenKey === k && this.schattenDeck != null) return this.schattenDeck;
+        const w = this.untergrundRuhe(k);
+        if (!w || !(w.median > 0)) return .3;      // noch nicht messbar
+        return this.schattenKey = k, this.schattenDeck = .3 + .3 * Math.min(1, w.median / .25)
       }
       telegraph(R) {
         const E = R.cfg.scale;
