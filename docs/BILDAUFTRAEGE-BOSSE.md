@@ -25,6 +25,25 @@ Gemessen an: Kamera-Zoom 2, Welt 540 × 960, Puffer 1080 × 1920, iPhone
 
 ---
 
+## 1b. Erster Anlauf (v28) — was schiefging
+
+Die fünf gelieferten Bilder treffen die Gestaltung, aber nicht die Maße.
+Alle kamen im **selben Hochformat** (0,47 bis 0,60), verlangt waren fünf
+verschiedene (0,65 bis 2,05). Gemessen ist die Detaildichte danach
+**gleich hoch wie bei den alten Bossen** — kein Gewinn an Schärfe.
+
+> **Die Pixelzahl im Prompttext setzt die Ausgabegröße nicht.**
+> Sie kommt aus der **Format- oder Größeneinstellung des Werkzeugs** und
+> muss dort je Bild einzeln gesetzt werden.
+
+Beim nächsten Anlauf zuerst das Format einstellen, dann den Prompt
+einsetzen. Die Zahlen unten sind die Zielmaße; wenn das Werkzeug nur
+Seitenverhältnisse kennt, steht das passende in der Tabelle daneben.
+
+Einzelheiten und Zahlen: `art/roh/boss/README.md`.
+
+---
+
 ## 2. Vorgaben, die für ALLE fünf gelten
 
 ### 2.1 Auflösung — die einzige Rechnung, die man kennen muss
@@ -114,7 +133,7 @@ Kanonen und eine eigene Geschossart.
 |---|---|
 | Silhouette | **H-Form** — zwei Triebwerksgondeln außen, gedrungener Rumpf mittig |
 | im Bild | 340 × 250 Weltpunkte (63 % der Breite) |
-| **Quellbild** | **850 × 625 px** |
+| **Quellbild** | **850 × 625 px** · Seitenverhältnis **1,36 : 1** (quer) |
 | Kanonen | 2 Kettenkanonen an den Gondeln, 1 Doppelturm mittig |
 | Geschoss | `eb_bolzen` — kurzer, dicker Bolzen mit Leuchtspur |
 
@@ -148,7 +167,7 @@ ground, shadow on ground, text, watermark, red fuselage, crimson hull`
 |---|---|
 | Silhouette | **flacher, breiter Nurflügel** — sehr breit, sehr flach |
 | im Bild | 430 × 210 Weltpunkte (80 % der Breite) |
-| **Quellbild** | **1075 × 525 px** |
+| **Quellbild** | **1075 × 525 px** · Seitenverhältnis **2,05 : 1** (sehr breit) |
 | Kanonen | 4 Abwurfschächte an der Hinterkante, 2 Punktverteidigungstürme |
 | Geschoss | `eb_brut` — kleine Drohnenkapsel, die sich im Flug öffnet |
 
@@ -176,7 +195,7 @@ ground shadow, no background, no text. Sharp, crisp detail.
 |---|---|
 | Silhouette | **schmal und hoch** — die einzige, die höher als breit ist |
 | im Bild | 260 × 400 Weltpunkte (48 % der Breite) |
-| **Quellbild** | **650 × 1000 px** |
+| **Quellbild** | **650 × 1000 px** · Seitenverhältnis **0,65 : 1** (hoch) |
 | Kanonen | 1 durchgehende Bahnkanone auf der Mittelachse, 4 Flankentürme |
 | Geschoss | `eb_lanze` — sehr langer, dünner Strahlstab |
 
@@ -201,7 +220,7 @@ no background, no text. Sharp, crisp detail. 650 x 1000 pixels.
 |---|---|
 | Silhouette | **kreisrund mit offener Mitte** — als einzige rotationssymmetrisch |
 | im Bild | 460 × 460 Weltpunkte (85 % der Breite) |
-| **Quellbild** | **1150 × 1150 px** |
+| **Quellbild** | **1150 × 1150 px** · Seitenverhältnis **1 : 1** (quadratisch) |
 | Kanonen | 8 Türme gleichmäßig auf dem Ring, 1 Kern in der Mitte |
 | Geschoss | `eb_scherbe` — dreieckige Scherbe, die sich im Flug dreht |
 
@@ -227,7 +246,7 @@ crisp detail. 1150 x 1150 pixels.
 |---|---|
 | Silhouette | **kreuzförmig** — langer Rumpf mit weit ausladenden Querarmen |
 | im Bild | 520 × 400 Weltpunkte (96 % der Breite) |
-| **Quellbild** | **1300 × 1000 px** |
+| **Quellbild** | **1300 × 1000 px** · Seitenverhältnis **1,30 : 1** (quer) |
 | Kanonen | 2 Hauptbatterien auf den Querarmen, 3 Rumpftürme, 1 Bugwerfer |
 | Geschoss | `eb_hammer` — schwerer, langsamer Klotz mit Aufschlagsring |
 

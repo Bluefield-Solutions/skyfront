@@ -9,7 +9,7 @@ liest hier.
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle. Wo unten „✅"
 steht, ist im Quelltext nachgesehen worden und die Stelle ist genannt.
 
-Stand: v27.
+Stand: v28.
 
 ---
 
@@ -66,6 +66,33 @@ Unterschied zwischen „trifft" und „trifft die Panzerung".
 **0e · Der weiße Blitz beim Abschuss ist weg** (v27). Er war ein reinweißes
 `spark`-Bild im ADD-Modus, das in 190 ms von 0,6 auf 2,6 aufriss — bei jedem
 einzelnen Gegner. Beim Boss bleibt einer, warm statt reinweiß.
+
+### 0g. Die neuen Bossbilder sind da — aber nicht scharf genug (v28)
+
+Fünf Bilder geliefert, Gestaltung trifft (Materialsprache, Licht von oben
+links, Nase nach unten, fünf klar verschiedene Silhouetten). **Die Auflösung
+trifft nicht.**
+
+Detaildichte im Inneren, alle auf 650 px Breite gezogen:
+
+| | Quellbreite | Detaildichte |
+|---|---:|---:|
+| `boss1` (im Spiel) | 325 | 0,0922 |
+| B1 Sturmkanzel | 325 | 0,1090 |
+| B3 Lanzenträger | 290 | **0,0871** |
+| B5 Ambosskreuzer | 366 | 0,1062 |
+
+**Kein Gewinn an Schärfe** — B3 liegt sogar unter `boss1`. Ursache: alle
+fünf kamen im selben Hochformat (0,47–0,60), verlangt waren fünf
+verschiedene (0,65–2,05). Die Pixelzahl im Prompttext setzt die
+Ausgabegröße nicht; sie kommt aus der Formateinstellung des Werkzeugs.
+
+Die Bilder liegen unter `art/roh/boss/`, Einzelheiten in der README dort.
+Die Aufträge sind um die Seitenverhältnisse ergänzt.
+
+Die **Geschossbögen** sind Konzeptbögen, keine Sprites: Raketen mit
+eingebackenen Flammenschweifen, mehrere je Bogen, 390 px hoch. Das Spiel
+zeichnet Schweife selbst, und seine Geschosse messen 12–36 × 30–56 px.
 
 ### 0f. Die Bosse werden hochgerechnet — **neu, v27**
 
@@ -133,7 +160,7 @@ Grafikkarte**. Der JavaScript-Anteil überträgt auf ein Telefon, Rastern und
 Zusammensetzen nicht.
 
 Auf dem iPhone: Seite laden → **Spielen** → 📊 rechts oben → die Zeile
-`SKYFRONT-MESSUNG v27 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
+`SKYFRONT-MESSUNG v28 …` kopieren. Die Tafel sagt selbst, wann sie reif ist
 („noch zu wenig gemessen — N von 60").
 
 ### 5. Lesbarkeit auf hellen Biomen — **neu, v21**
