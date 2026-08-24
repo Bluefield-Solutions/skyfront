@@ -202,5 +202,54 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of PROBE
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
 }
 
+/* ---------- Modusproben ------------------------------------------------ */
+
+// Nicht jede Zusicherung laesst sich mit einem eingebauten Fehler pruefen.
+// Der Ersatzweg des Bildtors ist ein MODUS, kein Defekt: er springt nur ein,
+// wenn Phasers Schnappschuss ausfaellt, und das laesst sich nicht durch eine
+// Zeile in src/app.js herbeifuehren. `--abzug` schaltet den Phaser-Weg ab
+// und stellt damit genau den Zustand her, der am 23.08. auf GitHub eintrat.
+//
+// Geprueft wird DREIERLEI, und das dritte ist das eigentliche:
+//   1. Die acht Menue-Schirme werden trotzdem gemessen (der Ersatzweg traegt,
+//      wo sein Urteil massstabsfrei ist).
+//   2. Die Querkanten verweigern das Urteil mit Begruendung.
+//   3. Es entsteht KEIN erfundener Querkanten-Befund. Ein erster Anlauf liess
+//      den Ersatzweg ueberall urteilen und meldete "Nebel: harte Querkante,
+//      Sprung 96,3" — einen Befund, den es nicht gibt. Ohne diese Probe
+//      koennte genau das unbemerkt zurueckkommen.
+const MODUSPROBEN = [{
+  name: 'Bildtor ohne Phaser-Schnappschuss (--abzug)',
+  cmd: ['tools/bildtor.mjs', '--abzug'],
+  rotErwartet: true,
+  mussEnthalten: ['Median Streuung', 'Querkante nicht gemessen', 'ohne sie ist kein Urteil'],
+  darfNichtEnthalten: ['harte Querkante'],
+}];
+
+let modusFehler = 0, modusGelaufen = 0;
+if (ALLE) {
+  console.log('');
+  for (const m of MODUSPROBEN) {
+    let text = '', rot = false;
+    try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
+    catch (e) { rot = true; text = (e.stdout || '') + (e.stderr || ''); }
+    modusGelaufen++;
+    const mangel = [];
+    if (m.rotErwartet && !rot) mangel.push('Tor blieb GRÜN, rot erwartet');
+    if (!m.rotErwartet && rot) mangel.push('Tor wurde ROT, grün erwartet');
+    for (const t of m.mussEnthalten) if (!text.includes(t)) mangel.push(`„${t}" fehlt im Bericht`);
+    for (const t of m.darfNichtEnthalten) if (text.includes(t)) mangel.push(`„${t}" steht im Bericht, darf aber nicht — der Ersatzweg urteilt, wo er nicht darf`);
+    if (mangel.length) { console.log(`✗ ${m.name}: ${mangel.join(' · ')}`); modusFehler++; }
+    else {
+      console.log(`✓ ${m.name} → Menü gemessen, Querkanten verweigert, kein erfundener Befund`);
+      const zeile = (text.split('\n').find((z) => z.includes('Querkante nicht gemessen')) || '').trim();
+      console.log(`    ${zeile.replace(/^[✗·]\s*/, '')}`);
+    }
+  }
+} else if (MODUSPROBEN.length) {
+  console.log(`\n(—) ${MODUSPROBEN.length} Modusprobe(n) — brauchen den gebauten Stand, mit --alle`);
+}
+
 console.log(`\n${gelaufen} Probe(n) gelaufen, ${fehler} ohne Wirkung.`);
-process.exit(fehler ? 1 : 0);
+if (modusGelaufen) console.log(`${modusGelaufen} Modusprobe(n) gelaufen, ${modusFehler} ohne Wirkung.`);
+process.exit(fehler + modusFehler ? 1 : 0);

@@ -210,7 +210,11 @@ Werkzeuge stehen deshalb daneben und verlangen einen Blick:
   und in keiner Tabelle stehen).
 
   `npm run farbproben` baut dreiundzwanzig Fehler ein und verlangt, dass jeder
-  gefunden wird — und seit v9b auch, dass der Befund die richtige Prüfung
+  gefunden wird — dazu **Modusproben**, die ein Werkzeug in einer
+  Betriebsart starten, statt einen Fehler einzubauen: der Ersatzweg des
+  Bildtors ist kein Defekt, sondern ein Modus, und die Probe verlangt, dass
+  er die Menü-Schirme misst, die Querkanten verweigert und **keinen**
+  erfundenen Befund erzeugt — und seit v9b auch, dass der Befund die richtige Prüfung
   nennt. Genau das hat zwei Prüfungen als wirkungslos entlarvt
   (SKY-032) — darunter den alten Violettwert `#8a6cff`, der nur 38 von
   `pu_core` entfernt lag.

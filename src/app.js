@@ -63153,8 +63153,12 @@ ${R.label}`, {
                     // ESKORTE. Schmal und tief hinter dem Anfuehrer, leicht
                     // versetzt — kein Keil, der sich breit macht, sondern eine
                     // Kolonne, die ihm folgt.
+                    // Eskorten fliegen DICHT. Erster Anlauf: 34 Punkte
+                    // seitlich, 96 in der Tiefe — im Gefecht gefilmt waren
+                    // das drei einzelne Gegner, keine Kolonne. Enger und
+                    // breiter versetzt liest sie sich als eine Sache.
                     for (let G = 0; G < R.count; G++)
-                      this.spawnAt(R.kind, J / 2 + (G % 2 === 0 ? -34 : 34), 110 + G * 96);
+                      this.spawnAt(R.kind, J / 2 + (G % 2 === 0 ? -48 : 48), 90 + G * 62);
                   else if (R.formation === "trail")
                     // HETZE. Keine Reihe, die als Wand herunterkommt, sondern
                     // eine schraege Schleppe, die quer durch die Bahn zieht —

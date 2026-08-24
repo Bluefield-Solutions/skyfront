@@ -266,6 +266,21 @@ Jede hat mindestens eine Runde gekostet.
    traegt; die Querkanten messen an einer Grundlinie, das traegt nicht. Der
    erste Anlauf liess ihn ueberall urteilen und erfand eine harte Querkante.
 
+34. **`world.update()` bewegt die Koerper, `postUpdate()` die Bilder.** Wer
+   die Physik des Spiels selbst antreibt und nur `update()` ruft, sieht
+   unveraenderte Sprite-Koordinaten und schliesst daraus, dass sich nichts
+   bewegt. Gemessen: nach `update()` y = -50, nach `postUpdate()` y = 104,
+   Koerper bei 86. Dieselbe Sorte Fehler wie bei der Uhr — gerechnet, aber
+   an der falschen Stelle abgelesen.
+
+35. **Wer eine Wirkung filmt, filmt lang genug — und schuetzt BEIDE
+   Seiten.** Zwei Anlaeufe: erst endete der Durchgang mitten im Film, weil
+   die unsterblich gemachten Gegner den Spieler rammten (drei von vier
+   Formationen kamen gar nicht ins Bild). Dann war der Film zu kurz — bei
+   0,9 s je Bild ist ein langsamer Gegner noch nicht im Sichtfeld, und die
+   Formation sah aus wie drei einzelne. Ich habe daraufhin die Formation
+   geaendert statt den Film. Das Ergebnis trug, die Reihenfolge war falsch.
+
 ---
 
 ## Aufbau
