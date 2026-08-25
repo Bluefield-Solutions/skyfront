@@ -1,8 +1,36 @@
-# Bosse — Rohbilder, Stand v28
+# Bosse — Rohbilder, Stand v30
 
-**Diese fünf Bilder sind noch NICHT im Spiel.** Sie liegen hier, weil die
-Gestaltung stimmt und nichts davon verlorengehen soll — die Auflösung
-stimmt aber nicht.
+**B-1 STURMKANZEL ist ersetzt und hält den Auftrag ein.** Die vier anderen
+liegen noch in der Fassung vom ersten Anlauf: Gestaltung stimmt, Auflösung
+nicht.
+
+## B-1 Sturmkanzel — zweiter Anlauf, gemessen
+
+| | erster Anlauf | zweiter Anlauf | Soll |
+|---|---:|---:|---:|
+| Blatt | 325 × 590 | **1476 × 1114** | — |
+| Inhalt | 325 × 590 | **1438 × 1074** | 850 × 625 |
+| Seitenverhältnis | 0,55 | **1,34** | 1,36 (2 % daneben) |
+| Detaildichte (auf 650 px) | 0,1090 | **0,1344** | mehr als 0,1025 |
+| durchsichtiger Rand | 0 px | **18 px** | mindestens 6 |
+| Licht oben links / unten rechts | — | **1,58** | grösser als 1 |
+
+`npm run bildpruefung` meldet für diese Datei **keinen Befund**.
+
+Die Detaildichte liegt zum ersten Mal **über** allen drei Bildern, die
+heute im Spiel sind (0,0922 bis 0,1025). Der erste Anlauf lag mit 0,1090
+noch dazwischen — das war der Grund, ihn nicht einzubauen.
+
+Gemessen an: Detaildichte im Inneren, alle Bilder auf 650 px Breite
+gezogen; Lichtrichtung als mittlere Helligkeit der deckenden Punkte im
+Viertel oben links gegen das Viertel unten rechts, Schwelle Alpha 200.
+
+**Der Rand ist von Hand nachgezogen**, nicht neu erzeugt: das gelieferte
+Blatt hatte oben 4 Bildpunkte Rand statt der nötigen 6, und die
+Bildprüfung schlug an. 14 Punkte durchsichtige Leinwand ringsum kosten
+nichts und verlieren nichts — ein neuer Auftrag hätte das Bild verändert.
+
+---
 
 ## Was gut ist
 

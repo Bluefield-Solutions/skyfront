@@ -48,8 +48,11 @@ export function messstelle(name, gruen) {
       }
       if (befunde.length) {
         console.log(`\n${name.toUpperCase()} ROT — ${befunde.length} Befund(e):`);
-        for (const b of befunde.slice(0, 12)) console.log('  · ' + b);
-        if (befunde.length > 12) console.log(`  … und ${befunde.length - 12} weitere`);
+        // 40 statt 12: bei zwoelf verschwand der Befund zu genau der Datei,
+        // um die es gerade ging — die Reihenfolge ist alphabetisch, nicht
+        // nach Wichtigkeit. Ein abgeschnittener Befund liest sich wie keiner.
+        for (const b of befunde.slice(0, 40)) console.log('  · ' + b);
+        if (befunde.length > 40) console.log(`  … und ${befunde.length - 40} weitere`);
         process.exit(1);
       }
       if (ungemessen.length) {
