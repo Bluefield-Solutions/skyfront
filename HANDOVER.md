@@ -50,6 +50,8 @@ npm run rhythmus    # Druckkurve, Atemzüge, Vielfalt über 120 Sektoren
 npm run schirme     # jeden Bildschirm aufnehmen und nachmessen
 npm run symbol      # App-Symbol und die elf iOS-Startbilder neu backen
 npm run bilder      # Hintergrundbahnen neu codieren (verkleinert assets.js)
+npm run bildpruefung # gelieferte Rohbilder gegen den Auftrag messen
+npm run einbau      # geprueftes Rohbild in Zielgroesse nach assets.js backen
 npm run package     # verteilbares Skyfront-dist.zip
 ```
 

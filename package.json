@@ -33,7 +33,8 @@
     "release": "node build-all.mjs --zip --boot",
     "symbolprobe": "node tools/symbol.mjs --probe",
     "nummern": "node tools/nummern.mjs",
-    "bildpruefung": "node tools/bildpruefung.mjs"
+    "bildpruefung": "node tools/bildpruefung.mjs",
+    "einbau": "node tools/einbau.mjs"
   },
   "engines": {
     "node": ">=18"

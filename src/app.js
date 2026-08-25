@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v29",
+    SKF_VERSION = "v30",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61601,7 +61601,19 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   let oi = Ae;
   class zn extends tt.Physics.Arcade.Image {
     constructor(R, E = 1) {
-      super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), E >= 3 && R.textures.exists("boss3") ? this.setTexture("boss3") : E >= 2 && R.textures.exists("boss2") && this.setTexture("boss2"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp, E >= 3 ? (this.baseTint = 13673215, this.setTint(this.baseTint), this.setScale(1.24)) : E >= 2 && (this.baseTint = 16751238, this.setTint(this.baseTint), this.setScale(1.14)), this.setDepth(10), this.setAngle(180);
+      super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), E >= 3 && R.textures.exists("boss3") ? this.setTexture("boss3") : E >= 2 && R.textures.exists("boss2") && this.setTexture("boss2"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
+      // setScale(.5), weil die Texturen seit v30 in PUFFERgroesse gebacken
+      // werden: die Kamera zoomt zweifach, eine 680 Punkte breite Textur
+      // steht also 340 Weltpunkte breit im Bild. Vorher trug die Skalierung
+      // die Groesse (1 / 1,14 / 1,24) — jetzt traegt sie das Bild, und die
+      // drei Bosse sind verschieden gross, weil sie verschiedene Schiffe sind.
+      //
+      // Die Faerbung der Stufen 2 und 3 (orange, violett) ist weg. Sie war
+      // die einzige Unterscheidung, solange alle drei dieselbe Silhouette
+      // hatten. Jetzt unterscheiden sie sich am Umriss, und eine Faerbung
+      // ueber gebuerstetes Metall nimmt dem Bild seine Plastik.
+      // baseTint bleibt weiss — bossSchadenStufe dunkelt davon ab.
+      this.setScale(.5), this.setDepth(10), this.setAngle(180);
       const b = this.body;
       b.setImmovable(!0), b.setSize(this.width * .72, this.height * .6, !0), this.nextFire = 0, this.nextRauch = 0
     }
