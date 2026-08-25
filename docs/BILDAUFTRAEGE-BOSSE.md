@@ -302,16 +302,24 @@ side view
 > **Einstellung im Werkzeug, VOR dem Prompt:**
 > Seitenverhältnis **1,30 : 1 quer** (nächstliegende Voreinstellung: **4:3**),
 > Größe **1300 × 1000 px**.
+> Nur **wenig** breiter als hoch — nicht 16:9, nicht 2:1. Von den fünf ist dies
+> das ausgewogenste Format; die Breite kommt aus den Querarmen, nicht aus einer
+> Spannweite.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
 no vanishing point. Subject: an enormous cruciform battlecruiser, nose pointing DOWN
 toward the bottom edge of the frame, engine cluster at the top edge.
-Proportions: slightly wider than tall — the cross arms span about one and a third times
-the length of the spine. A landscape composition.
-Silhouette: a cross — one long armoured spine with two wide cross arms reaching far to the
-left and right at about one third of the length from the nose; the arms end in blunt
-armoured caps, the stern in four recessed engine bells.
+Proportions: only slightly wider than tall — the cross arms span about one and a third
+times the length of the spine, no more. A landscape composition, but a nearly balanced
+one: this is a blocky, massive shape, not a wide flying wing and not a plank.
+Silhouette: a CROSS, and it must read as a cross at a glance. One long armoured spine runs
+from the nose at the bottom to the engine block at the top. Two thick cross arms stick out
+sideways from that spine at right angles — straight out to the left and right, not swept
+back like wings — set at about one third of the length from the nose. The arms are deep
+and blocky, ending in blunt armoured caps. The stern carries four recessed engine bells.
+Between the arms and the stern the spine is narrow, so the four notches of the cross stand
+clearly against the background.
 Armament: two large main gun batteries with twin barrels mounted on top of the cross arms,
 three smaller hull turrets spaced along the spine, one heavy launcher tube set into the
 nose.
@@ -335,7 +343,9 @@ silhouette.
 
 **Negativ:**
 ```
-portrait composition, tall narrow composition, cartoon, anime, cel shading, toy,
+portrait composition, tall narrow composition, panoramic composition, flying wing,
+swept wings, delta wing, wide wingspan, plank shape, arrowhead, oval hull,
+subject touching frame edge, cartoon, anime, cel shading, toy,
 plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
 background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
 text, watermark, signature, red fuselage, crimson hull, blurry, soft focus, upscaled,
