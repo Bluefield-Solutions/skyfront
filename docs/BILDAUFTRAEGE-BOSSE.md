@@ -62,6 +62,9 @@ Negativprompt, Dateiname. Nichts davon muss zusammengesetzt werden.
    und alle fünf kamen im selben Hochformat.
 3. **Eines nach dem anderen bestellen.** Fünf Bilder in einem Rutsch haben
    beim ersten Mal fünf Mal denselben Fehler ergeben.
+4. **Der Rand wird ausdrücklich verlangt.** B-1 kam mit 4 Bildpunkten oben
+   statt der nötigen 6 und musste von Hand nachgezogen werden. Seither steht
+   in jedem Prompt, dass nichts die Bildkante berühren darf.
 
 Nach der Lieferung: Dateien nach `art/roh/boss/` legen und
 
@@ -99,8 +102,10 @@ discolouration around the exhaust nozzles.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading and self-shadowing across the plating, crisp
 specular highlights on raised panel edges.
-Framing: centred, filling the frame edge to edge, with only a small even transparent
-margin on all four sides.
+Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
+clear empty transparent margin of about 2 percent of the frame on all four sides — no part
+of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
+edge.
 Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
 vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
@@ -123,15 +128,23 @@ low detail, tilted view, three-quarter view, side view
 > **Einstellung im Werkzeug, VOR dem Prompt:**
 > Seitenverhältnis **2,05 : 1 sehr breit** (nächstliegende Voreinstellung: **2:1**),
 > Größe **1075 × 525 px**.
+> Gibt es kein 2:1, ist **16:9** (1,78) noch brauchbar — 13 % daneben, knapp innerhalb
+> der Toleranz. **3:2** (1,50) ist es nicht mehr, und ein Hochformat schon gar nicht.
+> Dies ist das einzige der fünf Formate, das ein Werkzeug wirklich haben muss.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
 no vanishing point. Subject: a massive flying-wing drone carrier, nose pointing DOWN
 toward the bottom edge of the frame, trailing edge and exhausts at the top edge.
-Proportions: extremely wide and very shallow — the wingspan is more than twice the depth
-from nose to trailing edge. A strongly letterboxed, panoramic composition.
-Silhouette: a single blended flying wing, no separate tail, no fuselage break; the hull
-swells only slightly at the centre and tapers into long swept wingtips.
+Proportions: this is the single most important requirement. The wingspan is MORE THAN
+TWICE the total depth from nose to trailing edge — an extremely wide, letterboxed,
+panoramic composition. Think of a boomerang or a shallow arrowhead lying on its side, not
+of a fighter jet. If it were placed inside a square frame it would fill only the middle
+half of that square vertically.
+Silhouette: one single blended flying wing — no separate tail, no fuselage break, no
+cockpit bulge. The hull swells only slightly at the centre and stretches out into two very
+long, gently swept wingtips that reach almost to the left and right frame edges. The
+leading edge is a shallow arc, the trailing edge is nearly straight.
 Armament: four rectangular drone launch bays set into the trailing edge with their hatches
 half open, two small point-defence turrets flanking the central spine.
 Surface: semi-realistic hard-surface military design, brushed gunmetal and slate blue
@@ -142,8 +155,10 @@ out of the open launch bays.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading across the wide plating, crisp specular
 highlights on the leading edges.
-Framing: centred, filling the frame edge to edge across its full width, with only a small
-even transparent margin on all four sides.
+Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
+clear empty transparent margin of about 2 percent of the frame on all four sides — no part
+of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
+edge.
 Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
 vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
@@ -152,8 +167,9 @@ silhouette.
 
 **Negativ:**
 ```
-portrait composition, square composition, tall narrow composition, separate tail,
-cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
+portrait composition, square composition, tall narrow composition, narrow wingspan,
+delta wing, narrow delta, fighter jet, jet fighter, separate tail, tail fins, fuselage,
+cockpit canopy, cropped wingtips, subject touching frame edge, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
 ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
 blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
@@ -186,8 +202,10 @@ coil segments.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading and self-shadowing, crisp specular highlights
 along the rail.
-Framing: centred, filling the frame from top to bottom, with only a small even transparent
-margin on all four sides.
+Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
+clear empty transparent margin of about 2 percent of the frame on all four sides — no part
+of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
+edge.
 Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
 vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
@@ -230,8 +248,10 @@ central core.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading around the ring so the upper-left arc is bright
 and the lower-right arc falls into shadow, the struts casting shadows onto the core.
-Framing: centred, the ring touching all four frame edges, with only a small even
-transparent margin.
+Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
+clear empty transparent margin of about 2 percent of the frame on all four sides — no part
+of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
+edge.
 Background: fully transparent, the centre of the ring fully transparent as well, no ground
 shadow, no sky, no clouds, no ground, no vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
@@ -276,8 +296,10 @@ engine bells.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, deep cast shadows between the armour layers and under the cross arms,
 crisp specular highlights on the raised armour edges.
-Framing: centred, filling the frame edge to edge, with only a small even transparent
-margin on all four sides.
+Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
+clear empty transparent margin of about 2 percent of the frame on all four sides — no part
+of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
+edge.
 Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
 vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
