@@ -186,15 +186,23 @@ blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side 
 > **Einstellung im Werkzeug, VOR dem Prompt:**
 > Seitenverhältnis **0,65 : 1 hoch** (nächstliegende Voreinstellung: **2:3**),
 > Größe **650 × 1000 px**.
+> **Das ist das einzige Hochformat der fünf.** Nach zwei Querformaten hintereinander
+> ist das die Stelle, an der eine Einstellung stehenbleibt — vor dem Absenden nachsehen,
+> ob wirklich hoch eingestellt ist. **3:4** (0,75) geht auch, **9:16** (0,56) ist
+> zu schmal.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
 no vanishing point. Subject: a narrow railgun frigate, nose pointing DOWN toward the
 bottom edge of the frame, engine block at the top edge.
-Proportions: tall and narrow — the hull is about one and a half times as long from nose to
-stern as it is wide. A portrait composition, like a spearhead standing upright.
-Silhouette: a slender lance-shaped hull, widest just behind the nose, tapering to a
-squared-off engine block; two thin dorsal fins run along the aft third.
+Proportions: a portrait composition — the ship is about one and a half times as long from
+nose to stern as it is wide, and no more than that. Upright like a spearhead. It must NOT
+become a needle, a pencil or a thin rod: this is a heavy, substantial warship that happens
+to be narrow, not a sliver. Half the frame height is hull, and the hull has real bulk.
+Silhouette: a lance-shaped hull, widest just behind the nose, tapering to a squared-off
+engine block at the top. Two thin dorsal fins run along the aft third, and short stubby
+sponsons bulge from the hull sides at mid-length — those sponsons and fins give the ship
+its width and keep the silhouette from reading as a line.
 Armament: one massive railgun rail running the entire length of the centreline, with
 exposed copper coil segments, cooling fins and capacitor blocks; four small flanking
 turrets sunk into recessed housings along the hull sides.
@@ -219,7 +227,8 @@ silhouette.
 **Negativ:**
 ```
 landscape composition, wide composition, square composition, wide wingspan, large wings,
-cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
+needle, pencil, thin rod, sliver, extremely elongated, spindly, fragile, cropped nose,
+subject touching frame edge, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
 ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
 blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
