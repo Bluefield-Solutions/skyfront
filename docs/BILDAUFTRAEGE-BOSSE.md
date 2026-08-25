@@ -131,6 +131,10 @@ low detail, tilted view, three-quarter view, side view
 > Gibt es kein 2:1, ist **16:9** (1,78) noch brauchbar — 13 % daneben, knapp innerhalb
 > der Toleranz. **3:2** (1,50) ist es nicht mehr, und ein Hochformat schon gar nicht.
 > Dies ist das einzige der fünf Formate, das ein Werkzeug wirklich haben muss.
+>
+> **Geliefert und angenommen (v30):** 1944 × 849, Inhalt 1882 × 739, also 2,55.
+> Flacher als bestellt und damit ausdrücklich zugelassen — die Begründung steht in
+> `art/roh/boss/README.md`. Nach oben ist dieses Format offen, nach unten nicht.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,

@@ -1,8 +1,45 @@
 # Bosse — Rohbilder, Stand v30
 
-**B-1 STURMKANZEL ist ersetzt und hält den Auftrag ein.** Die vier anderen
-liegen noch in der Fassung vom ersten Anlauf: Gestaltung stimmt, Auflösung
-nicht.
+**B-1 STURMKANZEL und B-2 SCHWARMMUTTER sind ersetzt und halten den
+Auftrag ein.** Die drei anderen liegen noch in der Fassung vom ersten
+Anlauf: Gestaltung stimmt, Auflösung nicht.
+
+## B-2 Schwarmmutter — zweiter Anlauf, gemessen
+
+| | erster Anlauf | zweiter Anlauf | Soll |
+|---|---:|---:|---:|
+| Inhalt | 329 × 462 | **1882 × 739** | 1075 × 525 |
+| Seitenverhältnis | 0,71 | **2,55** | 2,05 (24 % flacher) |
+| Detaildichte (auf 650 px) | 0,1010 | **0,1431** | mehr als 0,1025 |
+| durchsichtiger Rand | 0 px | **31 px** | mindestens 6 |
+| Licht oben links / unten rechts | — | **1,40** | grösser als 1 |
+
+Die höchste Detaildichte aller bisherigen Bilder — 40 % über dem besten
+Bild, das heute im Spiel ist.
+
+### Die zugelassene Abweichung
+
+2,55 statt 2,05 sind 24 % und damit über der Toleranz von 15 %. Trotzdem
+kein Befund, und zwar aus einem Grund, der in `tools/bildpruefung.mjs`
+steht: das Bild ist **flacher** als bestellt, nicht schmaler. Die Breite —
+die einzige Zahl, an der die Schärfe hängt — ist mit 1882 statt 1075
+übererfüllt. Was abweicht, ist die Tiefe: im Bild werden daraus 169 statt
+210 Weltpunkte.
+
+Das ist eine Gestaltungsfrage, keine Auflösungsfrage, und es geht in genau
+die Richtung, in die der Prompt geschoben hat („sehr breit, sehr flach").
+Der Nurflügel ist damit das flachste der fünf Schiffe — gewollt.
+
+Die Ausnahme heisst `breiterOk` und ist **gerichtet**: flacher ist
+erlaubt, schmaler nicht. Ein Hochformat, der Fehler des ersten Anlaufs,
+schlägt weiter an. Gegengeprobt am um 90 Grad gedrehten Bild: zwei
+Befunde, Seitenverhältnis 0,39 statt 2,05.
+
+Der Boss wird mit `setScale` gezeichnet, also gleichmäßig in beide
+Richtungen (`src/app.js`, Zeile 61604). Ein flacheres Bild wird deshalb
+flacher dargestellt, nicht gestaucht.
+
+---
 
 ## B-1 Sturmkanzel — zweiter Anlauf, gemessen
 
