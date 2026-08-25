@@ -41,7 +41,11 @@ const AUFTRAG = {
   // weiterhin an. Gegengeprobt am um 90 Grad gedrehten Bild.
   boss_schwarmmutter: { breite: 1075, hoehe:  525, breiterOk: true },
   boss_lanzentraeger: { breite:  650, hoehe: 1000 },
-  boss_ringfestung:   { breite: 1150, hoehe: 1150 },
+  // mitteOffen: bei diesem einen traegt der Alphakanal eine FORM. Der Ring
+  // hat ein Loch, und wenn das Bild dort gefuellt ist, ist es die falsche
+  // Silhouette — kein Ring, eine Scheibe. Am Seitenverhaeltnis 1:1 faellt
+  // das nicht auf, an der Detaildichte auch nicht.
+  boss_ringfestung:   { breite: 1150, hoehe: 1150, mitteOffen: true },
   boss_ambosskreuzer: { breite: 1300, hoehe: 1000 },
 
   // Kein Boss, sondern ein schwerer Gegner zwischendurch: die Begleitung
@@ -79,6 +83,7 @@ const RUNDLAUF_MAX = .90;
 const ORDNER_LISTE = ['art/roh/boss', 'art/roh/gegner'];
 const RAND_MIN = 6;        // durchsichtiger Rand fuer Saum und Kantenlicht
 const SEITE_TOLERANZ = .15;
+const MITTE_MIN = .55;     // so viel vom mittleren Viertel muss beim Ring durchsichtig sein
 
 const ORDNER = ORDNER_LISTE.filter((o) => existsSync(o));
 if (!ORDNER.length) M.abbruch(`keiner der Ordner ${ORDNER_LISTE.join(', ')} da — nichts zu pruefen.`);
@@ -116,6 +121,17 @@ async function dichte(datei, breite, bb) {
     s += Math.sqrt(gx * gx + gy * gy) / 255; n++;
   }
   return n ? s / n : 0;
+}
+
+// Anteil durchsichtiger Punkte im mittleren Viertel des Inhalts.
+async function mitteDurchsichtig(datei, i) {
+  const bx = Math.round(i.x0 + i.breite * 3 / 8), by = Math.round(i.y0 + i.hoehe * 3 / 8);
+  const bw = Math.max(1, Math.round(i.breite / 4)), bh = Math.max(1, Math.round(i.hoehe / 4));
+  const { data, info } = await sharp(datei).ensureAlpha()
+    .extract({ left: bx, top: by, width: bw, height: bh }).raw().toBuffer({ resolveWithObject: true });
+  let frei = 0;
+  for (let k = 0; k < info.width * info.height; k++) if (data[k * info.channels + 3] < 24) frei++;
+  return frei / (info.width * info.height);
 }
 
 async function inhalt(datei) {
@@ -175,6 +191,19 @@ for (const pfad of dateien.sort()) {
   const verh = nativ > 0 ? rund / nativ : 1;
   if (verh >= RUNDLAUF_MAX)
     M.befund(`${f}: das Bild ist bei ${m.width} px selbst schon hochgerechnet (Rundlauf ${verh.toFixed(3)}, Grenze ${RUNDLAUF_MAX}). Ein kleines Bild aufzuziehen macht es nicht groesser, nur weicher.`);
+
+  // 3b. Traegt der Alphakanal die Form? Gemessen im mittleren Viertel des
+  //     Inhalts (also einem Sechzehntel der Flaeche): dort muss beim Ring
+  //     das Loch liegen. Der Kern in der Mitte ist kleiner als dieses
+  //     Viertel, deshalb wird nicht "ganz leer" verlangt, sondern
+  //     mehrheitlich durchsichtig.
+  if (soll.mitteOffen) {
+    const anteil = await mitteDurchsichtig(pfad, i);
+    if (anteil < MITTE_MIN)
+      M.befund(`${f}: die Mitte ist zu ${Math.round((1 - anteil) * 100)} % gefuellt, hoechstens ${Math.round((1 - MITTE_MIN) * 100)} % erlaubt — das ist eine Scheibe, kein Ring. Die offene Mitte ist die halbe Silhouette.`);
+    else
+      console.log(`     ↳ Mitte zu ${Math.round(anteil * 100)} % durchsichtig — der Ring ist ein Ring.`);
+  }
 
   // 4. Rand fuer Saum und Kantenlicht.
   const rand = Math.min(i.x0, i.y0, m.width - 1 - i.x1, m.height - 1 - i.y1);

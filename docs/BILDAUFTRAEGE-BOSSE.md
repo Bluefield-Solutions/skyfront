@@ -241,16 +241,27 @@ blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side 
 > **Einstellung im Werkzeug, VOR dem Prompt:**
 > Seitenverhältnis **1 : 1 quadratisch**,
 > Größe **1150 × 1150 px**.
+>
+> **Diese eine ist anders als die vier übrigen.** Sie hat keine Nase — sie ist
+> rotationssymmetrisch, und im Prompt steht deshalb keine Flugrichtung. Und ihre
+> **Mitte muss durchsichtig sein**: der Alphakanal trägt hier eine Form, nicht nur
+> einen Umriss. `npm run bildpruefung` misst das seit v30 nach und meldet
+> „das ist eine Scheibe, kein Ring", wenn das mittlere Viertel zugemalt ist.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
 no vanishing point. Subject: a circular orbital fortress platform seen from straight
 above. It has no nose and no front — it is rotationally symmetric.
-Proportions: exactly as wide as it is tall. A square composition, a perfect circle
-inscribed in the frame.
-Silhouette: a heavy armoured ring with an open centre; a smaller armoured core hangs in
-the middle, held by four thin radial struts; the ring is segmented into eight armour
-blocks with recessed maintenance channels between them.
+Proportions: exactly as wide as it is tall — a square composition holding a perfect
+circle, not an oval, not an egg. No perspective foreshortening: seen from straight above,
+a circle stays a circle.
+Silhouette: a heavy armoured torus — a thick ring of armour with a WIDE OPEN HOLE through
+the middle. The hole is the defining feature: its diameter is more than half the diameter
+of the whole platform, and you can see straight through it. A small armoured core hangs
+suspended in the centre of that hole, no wider than a fifth of the platform, held by four
+thin radial struts. Between core and ring there is nothing but empty space. The ring
+itself is segmented into eight armour blocks with recessed maintenance channels between
+them.
 Armament: eight identical turret emplacements spaced evenly around the ring, each with a
 short stubby barrel pointing outward; a cluster of sensor domes on the central core.
 Surface: semi-realistic hard-surface military structure, brushed gunmetal and dark
@@ -265,16 +276,19 @@ Framing: centred, occupying about 96 percent of the frame in its longest directi
 clear empty transparent margin of about 2 percent of the frame on all four sides — no part
 of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
 edge.
-Background: fully transparent, the centre of the ring fully transparent as well, no ground
-shadow, no sky, no clouds, no ground, no vignette, no frame, no text, no logos.
+Background: fully transparent — and the hole inside the ring is background too, so it is
+fully transparent as well, right up to the four struts and the central core. Nothing fills
+it: no glass, no membrane, no glow plate, no energy field, no haze. No ground shadow, no
+sky, no clouds, no ground, no vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
 silhouette.
 ```
 
 **Negativ:**
 ```
-portrait composition, landscape composition, oval, ellipse, filled centre, solid disc,
-aircraft, wings, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book,
+portrait composition, landscape composition, oval, ellipse, egg shape, filled centre,
+solid disc, closed hub, glass dome, energy field in the centre, membrane, small hole,
+narrow opening, aircraft, wings, nose, cockpit, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book,
 photorealistic photograph, studio product render, background, sky, clouds, ground,
 terrain, shadow on ground, vignette, frame, border, text, watermark, signature, red hull,
 crimson hull, blurry, soft focus, upscaled, low detail, tilted view, three-quarter view,
