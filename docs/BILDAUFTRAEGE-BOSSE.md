@@ -44,6 +44,149 @@ Einzelheiten und Zahlen: `art/roh/boss/README.md`.
 
 ---
 
+## 1c. Zum Kopieren — fünf Bestellungen, eine nach der anderen
+
+Jeder Block ist für sich vollständig. **Die Größe kommt aus der Einstellung
+des Werkzeugs, nicht aus dem Prompttext** — deshalb steht sie über dem
+Prompt und nicht darin.
+
+Nach der Lieferung: Dateien nach `art/roh/boss/` legen und
+
+```
+npm run bildpruefung
+```
+
+Das prüft Größe, Seitenverhältnis, durchsichtigen Rand und ob im Bild bei
+seiner Größe wirklich Detail steckt — Letzteres, damit ein zu kleines Bild
+nicht einfach aufgezogen und durchgewinkt wird.
+
+### B-1 · STURMKANZEL → `boss_sturmkanzel.png`
+
+**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1,36 : 1 (quer, etwa 4:3)**, Größe **850 × 625 px**.
+Erst danach den Prompt einsetzen.
+
+```
+Top-down orthographic view of a heavy assault gunship, nose pointing DOWN toward the bottom of
+the frame. Wide H-shaped silhouette: two large engine nacelles on the outer edges connected by a stocky central fuselage. Two chain cannons with ribbed barrels mounted on the nacelles, one twin turret on the spine. Semi-realistic hard-surface military design, brushed
+gunmetal and blue-grey armour plating with visible panel seams, rivet lines
+and worn edges. Amber running lights, heat discoloration around the exhaust
+nozzles. Lit from the upper left at a 45-degree angle, strong directional
+light, soft ambient fill, clear cast shading across the plating. The subject
+fills the frame edge to edge with only a thin empty margin. Isolated on a
+fully transparent background, no ground shadow, no background elements, no
+text, no logos. Sharp, crisp detail throughout.
+```
+
+**Negativ:**
+```
+cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
+photorealistic photograph, studio render, background, sky, clouds, ground,
+shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
+soft focus, upscaled, low detail
+```
+
+### B-2 · SCHWARMMUTTER → `boss_schwarmmutter.png`
+
+**Zuerst im Werkzeug einstellen:** Seitenverhältnis **2,05 : 1 (sehr breit, etwa 2:1)**, Größe **1075 × 525 px**.
+Erst danach den Prompt einsetzen.
+
+```
+Top-down orthographic view of a massive flying-wing drone carrier, nose pointing DOWN toward the bottom of
+the frame. Very wide and very shallow blended flying-wing silhouette, no separate tail, wingspan more than twice the depth. Four rectangular drone launch bays along the trailing edge, two small point-defence turrets near the centre. Semi-realistic hard-surface military design, brushed
+gunmetal and blue-grey armour plating with visible panel seams, rivet lines
+and worn edges. Amber running lights, heat discoloration around the exhaust
+nozzles. Lit from the upper left at a 45-degree angle, strong directional
+light, soft ambient fill, clear cast shading across the plating. The subject
+fills the frame edge to edge with only a thin empty margin. Isolated on a
+fully transparent background, no ground shadow, no background elements, no
+text, no logos. Sharp, crisp detail throughout.
+```
+
+**Negativ:**
+```
+cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
+photorealistic photograph, studio render, background, sky, clouds, ground,
+shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
+soft focus, upscaled, low detail
+```
+
+### B-3 · LANZENTRÄGER → `boss_lanzentraeger.png`
+
+**Zuerst im Werkzeug einstellen:** Seitenverhältnis **0,65 : 1 (hoch, etwa 2:3)**, Größe **650 × 1000 px**.
+Erst danach den Prompt einsetzen.
+
+```
+Top-down orthographic view of a narrow railgun frigate, nose pointing DOWN toward the bottom of
+the frame. Tall narrow silhouette, clearly longer than wide, like a spearhead. A single massive railgun rail runs the full length of the centreline with exposed copper coil segments and cooling fins. Four small flanking turrets in recessed housings. Semi-realistic hard-surface military design, brushed
+gunmetal and blue-grey armour plating with visible panel seams, rivet lines
+and worn edges. Amber running lights, heat discoloration around the exhaust
+nozzles. Lit from the upper left at a 45-degree angle, strong directional
+light, soft ambient fill, clear cast shading across the plating. The subject
+fills the frame edge to edge with only a thin empty margin. Isolated on a
+fully transparent background, no ground shadow, no background elements, no
+text, no logos. Sharp, crisp detail throughout.
+```
+
+**Negativ:**
+```
+cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
+photorealistic photograph, studio render, background, sky, clouds, ground,
+shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
+soft focus, upscaled, low detail
+```
+
+### B-4 · RINGFESTUNG → `boss_ringfestung.png`
+
+**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1 : 1 (quadratisch)**, Größe **1150 × 1150 px**.
+Erst danach den Prompt einsetzen.
+
+```
+Top-down orthographic view of a circular orbital fortress platform, nose pointing DOWN toward the bottom of
+the frame. Perfectly circular ring-shaped silhouette with an open centre; a smaller armoured core floats in the middle connected by four thin struts. Eight identical turret emplacements spaced evenly around the ring, each with a short stubby barrel. Semi-realistic hard-surface military design, brushed
+gunmetal and blue-grey armour plating with visible panel seams, rivet lines
+and worn edges. Amber running lights, heat discoloration around the exhaust
+nozzles. Lit from the upper left at a 45-degree angle, strong directional
+light, soft ambient fill, clear cast shading across the plating. The subject
+fills the frame edge to edge with only a thin empty margin. Isolated on a
+fully transparent background, no ground shadow, no background elements, no
+text, no logos. Sharp, crisp detail throughout.
+```
+
+**Negativ:**
+```
+cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
+photorealistic photograph, studio render, background, sky, clouds, ground,
+shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
+soft focus, upscaled, low detail
+```
+
+### B-5 · AMBOSSKREUZER → `boss_ambosskreuzer.png`
+
+**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1,30 : 1 (quer)**, Größe **1300 × 1000 px**.
+Erst danach den Prompt einsetzen.
+
+```
+Top-down orthographic view of an enormous cruciform battlecruiser, nose pointing DOWN toward the bottom of
+the frame. Cruciform silhouette: a long armoured spine with two wide cross arms reaching far to the left and right. Two large main gun batteries with twin barrels on the cross arms, three smaller hull turrets along the spine, one heavy launcher at the nose. Semi-realistic hard-surface military design, brushed
+gunmetal and blue-grey armour plating with visible panel seams, rivet lines
+and worn edges. Amber running lights, heat discoloration around the exhaust
+nozzles. Lit from the upper left at a 45-degree angle, strong directional
+light, soft ambient fill, clear cast shading across the plating. The subject
+fills the frame edge to edge with only a thin empty margin. Isolated on a
+fully transparent background, no ground shadow, no background elements, no
+text, no logos. Sharp, crisp detail throughout.
+```
+
+**Negativ:**
+```
+cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
+photorealistic photograph, studio render, background, sky, clouds, ground,
+shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
+soft focus, upscaled, low detail
+```
+
+---
+
 ## 2. Vorgaben, die für ALLE fünf gelten
 
 ### 2.1 Auflösung — die einzige Rechnung, die man kennen muss

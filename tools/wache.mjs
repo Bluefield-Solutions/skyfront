@@ -19,6 +19,7 @@
   Diese Wache urteilt nicht, sie sagt an. Was sie nennt, ist auszufuehren.
 */
 import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 const BASIS = process.argv[2] || 'origin/main';
 
@@ -43,11 +44,28 @@ if (!alle.length) {
   process.exit(0);
 }
 
-const tore = alle.filter((f) => f.startsWith('tools/') || f === 'check.mjs' || f === 'schnell.mjs');
+// Welche Dateien sind TORE der Kette — und welche nur Werkzeuge?
+//
+// Der erste Anlauf zaehlte alles unter tools/ als Tor und verlangte die
+// Gegenproben auch dann, wenn nur tools/symbol.mjs oder
+// tools/bildpruefung.mjs angefasst war. Beide stehen in keiner Kette; die
+// Gegenproben haetten ueber sie nichts ausgesagt und zwanzig Minuten
+// gekostet. Zweimal passiert, bevor es jemand gemerkt hat.
+//
+// Die Liste wird ABGELEITET, nicht gefuehrt: sie steht in check.mjs und in
+// schnell.mjs, und eine zweite Liste hier waere binnen zweier Runden
+// veraltet.
+const kettenText = ['check.mjs', 'schnell.mjs']
+  .map((f) => { try { return readFileSync(f, 'utf8'); } catch { return ''; } }).join('\n');
+const inDerKette = new Set([...kettenText.matchAll(/tools\/[a-z]+\.mjs/g)].map((m) => m[0]));
+
+const tore = alle.filter((f) => inDerKette.has(f) || f === 'check.mjs' || f === 'schnell.mjs');
+const werkzeuge = alle.filter((f) => f.startsWith('tools/') && !inDerKette.has(f));
 const spiel = alle.filter((f) => f.startsWith('src/') || f.startsWith('profiles/') || f.endsWith('.html') || f.startsWith('build'));
 
 console.log(`Wache — ${alle.length} Datei(en) gegen ${BASIS}\n`);
-if (tore.length) console.log(`  Tore beruehrt:  ${tore.join(' ')}`);
+if (tore.length) console.log(`  Tore beruehrt:      ${tore.join(' ')}`);
+if (werkzeuge.length) console.log(`  Werkzeuge (keine Tore): ${werkzeuge.join(' ')}`);
 if (spiel.length) console.log(`  Spiel beruehrt: ${spiel.slice(0, 8).join(' ')}${spiel.length > 8 ? ` … (+${spiel.length - 8})` : ''}`);
 
 console.log('\nVerlangt wird:');

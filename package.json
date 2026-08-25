@@ -32,7 +32,8 @@
     "package:master": "node build-all.mjs --zip=master",
     "release": "node build-all.mjs --zip --boot",
     "symbolprobe": "node tools/symbol.mjs --probe",
-    "nummern": "node tools/nummern.mjs"
+    "nummern": "node tools/nummern.mjs",
+    "bildpruefung": "node tools/bildpruefung.mjs"
   },
   "engines": {
     "node": ">=18"

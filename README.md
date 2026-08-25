@@ -34,6 +34,7 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Stufe 1 — bei jeder Änderung** | `npm run schnell` — Bau, Version, Boot aller elf Varianten, dann Farbtor, Formentor, Untergrund und Rhythmus **parallel**. **48 s gemessen** |
 | **Stufe 2 — vor dem Push** | `npm run check` — alle Tore **ohne** das Bildtor, `dist/check-report.md`. **127 s gemessen** |
 | **Stufe 3 — CI / vor der Lieferung** | `npm run torkette` — alles, inklusive Bildtor, und **streng**: „nicht gemessen" zählt als Fehlschlag. **291–293 s** über drei Läufe |
+| **Gelieferte Bilder prüfen** | `npm run bildpruefung` — Größe, Seitenverhältnis, Rand und ob wirklich Detail drinsteckt (nicht bloß hochgerechnet) |
 | **Bildaufträge** | `docs/BILDAUFTRAEGE-BOSSE.md` — fünf Bosse mit gemessenen Maßen, Prompts und Geschossen |
 | **Was ist offen?** | `docs/RUECKSTAND.md` — der Stand, am Code geprüft. `docs/AUDIT-2026-08.md` ist das Archiv |
 | **Ticketnummern prüfen** | `npm run nummern` — belegt eine SKY-Nummer zwei verschiedene Dinge? Neue Arbeit nimmt Nummern **ab SKY-210** |
