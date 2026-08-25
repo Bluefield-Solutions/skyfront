@@ -46,9 +46,22 @@ Einzelheiten und Zahlen: `art/roh/boss/README.md`.
 
 ## 1c. Zum Kopieren — fünf Bestellungen, eine nach der anderen
 
-Jeder Block ist für sich vollständig. **Die Größe kommt aus der Einstellung
-des Werkzeugs, nicht aus dem Prompttext** — deshalb steht sie über dem
-Prompt und nicht darin.
+Jeder Block ist für sich vollständig: Formateinstellung, Prompt,
+Negativprompt, Dateiname. Nichts davon muss zusammengesetzt werden.
+
+**Drei Regeln, jede aus dem gescheiterten ersten Anlauf:**
+
+1. **Zuerst das Format im Werkzeug einstellen, dann den Prompt einsetzen.**
+   Die Pixelzahl im Prompttext setzt die Ausgabegröße nicht. Kennt das
+   Werkzeug nur Seitenverhältnisse, steht das nächstliegende dabei — eine
+   Abweichung bis 15 % lässt `npm run bildpruefung` durchgehen, ein
+   Hochformat statt eines Querformats nicht.
+2. **Jeder Prompt beschreibt seine Proportion in Worten.** Das ist die
+   zweite Sicherung: geht die Formateinstellung verloren, zieht wenigstens
+   der Text noch in die richtige Richtung. Beim ersten Anlauf fehlte beides,
+   und alle fünf kamen im selben Hochformat.
+3. **Eines nach dem anderen bestellen.** Fünf Bilder in einem Rutsch haben
+   beim ersten Mal fünf Mal denselben Fehler ergeben.
 
 Nach der Lieferung: Dateien nach `art/roh/boss/` legen und
 
@@ -60,130 +73,237 @@ Das prüft Größe, Seitenverhältnis, durchsichtigen Rand und ob im Bild bei
 seiner Größe wirklich Detail steckt — Letzteres, damit ein zu kleines Bild
 nicht einfach aufgezogen und durchgewinkt wird.
 
+---
+
 ### B-1 · STURMKANZEL → `boss_sturmkanzel.png`
 
-**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1,36 : 1 (quer, etwa 4:3)**, Größe **850 × 625 px**.
-Erst danach den Prompt einsetzen.
+> **Einstellung im Werkzeug, VOR dem Prompt:**
+> Seitenverhältnis **1,36 : 1 quer** (nächstliegende Voreinstellung: **4:3**),
+> Größe **850 × 625 px**.
 
 ```
-Top-down orthographic view of a heavy assault gunship, nose pointing DOWN toward the bottom of
-the frame. Wide H-shaped silhouette: two large engine nacelles on the outer edges connected by a stocky central fuselage. Two chain cannons with ribbed barrels mounted on the nacelles, one twin turret on the spine. Semi-realistic hard-surface military design, brushed
-gunmetal and blue-grey armour plating with visible panel seams, rivet lines
-and worn edges. Amber running lights, heat discoloration around the exhaust
-nozzles. Lit from the upper left at a 45-degree angle, strong directional
-light, soft ambient fill, clear cast shading across the plating. The subject
-fills the frame edge to edge with only a thin empty margin. Isolated on a
-fully transparent background, no ground shadow, no background elements, no
-text, no logos. Sharp, crisp detail throughout.
+Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
+no vanishing point. Subject: a heavy assault gunship, nose pointing DOWN toward the bottom
+edge of the frame, engines and exhaust nozzles at the top edge.
+Proportions: clearly wider than tall — the wingspan is about one and a third times the
+length from nose to tail. A landscape composition.
+Silhouette: a broad H — two large engine nacelles on the outer edges, joined by a short
+stocky central fuselage and a thick wing box between them.
+Armament: two chain cannons with ribbed, vented barrels slung under the nacelles and
+pointing down-frame, one twin turret on the spine behind the armoured cockpit.
+Surface: semi-realistic hard-surface military design, brushed gunmetal and blue-grey
+armour plating, visible panel seams, rivet lines, hex bolt heads, chipped and worn edges,
+soot streaks trailing back from the exhausts.
+Accents: amber running lights along the nacelle tops, deep bronze-to-violet heat
+discolouration around the exhaust nozzles.
+Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
+the lower right, clear directional shading and self-shadowing across the plating, crisp
+specular highlights on raised panel edges.
+Framing: centred, filling the frame edge to edge, with only a small even transparent
+margin on all four sides.
+Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
+vignette, no frame, no text, no logos.
+Rendering: sharp crisp native detail at full resolution, instantly readable as a
+silhouette.
 ```
 
 **Negativ:**
 ```
-cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
-photorealistic photograph, studio render, background, sky, clouds, ground,
-shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
-soft focus, upscaled, low detail
+portrait composition, tall narrow composition, cartoon, anime, cel shading, toy,
+plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
+background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
+text, watermark, signature, red fuselage, crimson hull, blurry, soft focus, upscaled,
+low detail, tilted view, three-quarter view, side view
 ```
+
+---
 
 ### B-2 · SCHWARMMUTTER → `boss_schwarmmutter.png`
 
-**Zuerst im Werkzeug einstellen:** Seitenverhältnis **2,05 : 1 (sehr breit, etwa 2:1)**, Größe **1075 × 525 px**.
-Erst danach den Prompt einsetzen.
+> **Einstellung im Werkzeug, VOR dem Prompt:**
+> Seitenverhältnis **2,05 : 1 sehr breit** (nächstliegende Voreinstellung: **2:1**),
+> Größe **1075 × 525 px**.
 
 ```
-Top-down orthographic view of a massive flying-wing drone carrier, nose pointing DOWN toward the bottom of
-the frame. Very wide and very shallow blended flying-wing silhouette, no separate tail, wingspan more than twice the depth. Four rectangular drone launch bays along the trailing edge, two small point-defence turrets near the centre. Semi-realistic hard-surface military design, brushed
-gunmetal and blue-grey armour plating with visible panel seams, rivet lines
-and worn edges. Amber running lights, heat discoloration around the exhaust
-nozzles. Lit from the upper left at a 45-degree angle, strong directional
-light, soft ambient fill, clear cast shading across the plating. The subject
-fills the frame edge to edge with only a thin empty margin. Isolated on a
-fully transparent background, no ground shadow, no background elements, no
-text, no logos. Sharp, crisp detail throughout.
+Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
+no vanishing point. Subject: a massive flying-wing drone carrier, nose pointing DOWN
+toward the bottom edge of the frame, trailing edge and exhausts at the top edge.
+Proportions: extremely wide and very shallow — the wingspan is more than twice the depth
+from nose to trailing edge. A strongly letterboxed, panoramic composition.
+Silhouette: a single blended flying wing, no separate tail, no fuselage break; the hull
+swells only slightly at the centre and tapers into long swept wingtips.
+Armament: four rectangular drone launch bays set into the trailing edge with their hatches
+half open, two small point-defence turrets flanking the central spine.
+Surface: semi-realistic hard-surface military design, brushed gunmetal and slate blue
+armour plating, visible panel seams, rivet lines, recessed intake grilles, weathered and
+pitted leading edges.
+Accents: amber navigation strips running along both wing edges, pale cyan light spilling
+out of the open launch bays.
+Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
+the lower right, clear directional shading across the wide plating, crisp specular
+highlights on the leading edges.
+Framing: centred, filling the frame edge to edge across its full width, with only a small
+even transparent margin on all four sides.
+Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
+vignette, no frame, no text, no logos.
+Rendering: sharp crisp native detail at full resolution, instantly readable as a
+silhouette.
 ```
 
 **Negativ:**
 ```
-cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
-photorealistic photograph, studio render, background, sky, clouds, ground,
-shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
-soft focus, upscaled, low detail
+portrait composition, square composition, tall narrow composition, separate tail,
+cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
+photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
+ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
+blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
+
+---
 
 ### B-3 · LANZENTRÄGER → `boss_lanzentraeger.png`
 
-**Zuerst im Werkzeug einstellen:** Seitenverhältnis **0,65 : 1 (hoch, etwa 2:3)**, Größe **650 × 1000 px**.
-Erst danach den Prompt einsetzen.
+> **Einstellung im Werkzeug, VOR dem Prompt:**
+> Seitenverhältnis **0,65 : 1 hoch** (nächstliegende Voreinstellung: **2:3**),
+> Größe **650 × 1000 px**.
 
 ```
-Top-down orthographic view of a narrow railgun frigate, nose pointing DOWN toward the bottom of
-the frame. Tall narrow silhouette, clearly longer than wide, like a spearhead. A single massive railgun rail runs the full length of the centreline with exposed copper coil segments and cooling fins. Four small flanking turrets in recessed housings. Semi-realistic hard-surface military design, brushed
-gunmetal and blue-grey armour plating with visible panel seams, rivet lines
-and worn edges. Amber running lights, heat discoloration around the exhaust
-nozzles. Lit from the upper left at a 45-degree angle, strong directional
-light, soft ambient fill, clear cast shading across the plating. The subject
-fills the frame edge to edge with only a thin empty margin. Isolated on a
-fully transparent background, no ground shadow, no background elements, no
-text, no logos. Sharp, crisp detail throughout.
+Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
+no vanishing point. Subject: a narrow railgun frigate, nose pointing DOWN toward the
+bottom edge of the frame, engine block at the top edge.
+Proportions: tall and narrow — the hull is about one and a half times as long from nose to
+stern as it is wide. A portrait composition, like a spearhead standing upright.
+Silhouette: a slender lance-shaped hull, widest just behind the nose, tapering to a
+squared-off engine block; two thin dorsal fins run along the aft third.
+Armament: one massive railgun rail running the entire length of the centreline, with
+exposed copper coil segments, cooling fins and capacitor blocks; four small flanking
+turrets sunk into recessed housings along the hull sides.
+Surface: semi-realistic hard-surface military design, brushed gunmetal and cold grey
+armour plating, visible panel seams, rivet lines, heat-stained plating around the rail,
+worn edges.
+Accents: amber status lights along the spine, faint blue-white glow between the copper
+coil segments.
+Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
+the lower right, clear directional shading and self-shadowing, crisp specular highlights
+along the rail.
+Framing: centred, filling the frame from top to bottom, with only a small even transparent
+margin on all four sides.
+Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
+vignette, no frame, no text, no logos.
+Rendering: sharp crisp native detail at full resolution, instantly readable as a
+silhouette.
 ```
 
 **Negativ:**
 ```
-cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
-photorealistic photograph, studio render, background, sky, clouds, ground,
-shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
-soft focus, upscaled, low detail
+landscape composition, wide composition, square composition, wide wingspan, large wings,
+cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
+photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
+ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
+blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
+
+---
 
 ### B-4 · RINGFESTUNG → `boss_ringfestung.png`
 
-**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1 : 1 (quadratisch)**, Größe **1150 × 1150 px**.
-Erst danach den Prompt einsetzen.
+> **Einstellung im Werkzeug, VOR dem Prompt:**
+> Seitenverhältnis **1 : 1 quadratisch**,
+> Größe **1150 × 1150 px**.
 
 ```
-Top-down orthographic view of a circular orbital fortress platform, nose pointing DOWN toward the bottom of
-the frame. Perfectly circular ring-shaped silhouette with an open centre; a smaller armoured core floats in the middle connected by four thin struts. Eight identical turret emplacements spaced evenly around the ring, each with a short stubby barrel. Semi-realistic hard-surface military design, brushed
-gunmetal and blue-grey armour plating with visible panel seams, rivet lines
-and worn edges. Amber running lights, heat discoloration around the exhaust
-nozzles. Lit from the upper left at a 45-degree angle, strong directional
-light, soft ambient fill, clear cast shading across the plating. The subject
-fills the frame edge to edge with only a thin empty margin. Isolated on a
-fully transparent background, no ground shadow, no background elements, no
-text, no logos. Sharp, crisp detail throughout.
+Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
+no vanishing point. Subject: a circular orbital fortress platform seen from straight
+above. It has no nose and no front — it is rotationally symmetric.
+Proportions: exactly as wide as it is tall. A square composition, a perfect circle
+inscribed in the frame.
+Silhouette: a heavy armoured ring with an open centre; a smaller armoured core hangs in
+the middle, held by four thin radial struts; the ring is segmented into eight armour
+blocks with recessed maintenance channels between them.
+Armament: eight identical turret emplacements spaced evenly around the ring, each with a
+short stubby barrel pointing outward; a cluster of sensor domes on the central core.
+Surface: semi-realistic hard-surface military structure, brushed gunmetal and dark
+blue-grey armour plating, heavy panel seams, rivet rows, scorched and pitted plating,
+exposed conduit runs along the struts.
+Accents: amber warning lights on the turret housings, a pale cyan glow in the seams of the
+central core.
+Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
+the lower right, clear directional shading around the ring so the upper-left arc is bright
+and the lower-right arc falls into shadow, the struts casting shadows onto the core.
+Framing: centred, the ring touching all four frame edges, with only a small even
+transparent margin.
+Background: fully transparent, the centre of the ring fully transparent as well, no ground
+shadow, no sky, no clouds, no ground, no vignette, no frame, no text, no logos.
+Rendering: sharp crisp native detail at full resolution, instantly readable as a
+silhouette.
 ```
 
 **Negativ:**
 ```
-cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
-photorealistic photograph, studio render, background, sky, clouds, ground,
-shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
-soft focus, upscaled, low detail
+portrait composition, landscape composition, oval, ellipse, filled centre, solid disc,
+aircraft, wings, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book,
+photorealistic photograph, studio product render, background, sky, clouds, ground,
+terrain, shadow on ground, vignette, frame, border, text, watermark, signature, red hull,
+crimson hull, blurry, soft focus, upscaled, low detail, tilted view, three-quarter view,
+side view
 ```
+
+---
 
 ### B-5 · AMBOSSKREUZER → `boss_ambosskreuzer.png`
 
-**Zuerst im Werkzeug einstellen:** Seitenverhältnis **1,30 : 1 (quer)**, Größe **1300 × 1000 px**.
-Erst danach den Prompt einsetzen.
+> **Einstellung im Werkzeug, VOR dem Prompt:**
+> Seitenverhältnis **1,30 : 1 quer** (nächstliegende Voreinstellung: **4:3**),
+> Größe **1300 × 1000 px**.
 
 ```
-Top-down orthographic view of an enormous cruciform battlecruiser, nose pointing DOWN toward the bottom of
-the frame. Cruciform silhouette: a long armoured spine with two wide cross arms reaching far to the left and right. Two large main gun batteries with twin barrels on the cross arms, three smaller hull turrets along the spine, one heavy launcher at the nose. Semi-realistic hard-surface military design, brushed
-gunmetal and blue-grey armour plating with visible panel seams, rivet lines
-and worn edges. Amber running lights, heat discoloration around the exhaust
-nozzles. Lit from the upper left at a 45-degree angle, strong directional
-light, soft ambient fill, clear cast shading across the plating. The subject
-fills the frame edge to edge with only a thin empty margin. Isolated on a
-fully transparent background, no ground shadow, no background elements, no
-text, no logos. Sharp, crisp detail throughout.
+Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
+no vanishing point. Subject: an enormous cruciform battlecruiser, nose pointing DOWN
+toward the bottom edge of the frame, engine cluster at the top edge.
+Proportions: slightly wider than tall — the cross arms span about one and a third times
+the length of the spine. A landscape composition.
+Silhouette: a cross — one long armoured spine with two wide cross arms reaching far to the
+left and right at about one third of the length from the nose; the arms end in blunt
+armoured caps, the stern in four recessed engine bells.
+Armament: two large main gun batteries with twin barrels mounted on top of the cross arms,
+three smaller hull turrets spaced along the spine, one heavy launcher tube set into the
+nose.
+Surface: semi-realistic hard-surface military design, brushed gunmetal and deep slate
+armour plating in heavy overlapping layers, weld beams, exposed structural ribs, rivet
+rows, armoured bulkheads, battle scarring and scorch marks.
+Accents: amber floodlights in recessed wells along the spine, dull orange heat glow at the
+engine bells.
+Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
+the lower right, deep cast shadows between the armour layers and under the cross arms,
+crisp specular highlights on the raised armour edges.
+Framing: centred, filling the frame edge to edge, with only a small even transparent
+margin on all four sides.
+Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
+vignette, no frame, no text, no logos.
+Rendering: sharp crisp native detail at full resolution, instantly readable as a
+silhouette.
 ```
 
 **Negativ:**
 ```
-cartoon, anime, cel shading, toy, plastic toy, outline, comic book,
-photorealistic photograph, studio render, background, sky, clouds, ground,
-shadow on ground, text, watermark, red fuselage, crimson hull, blurry,
-soft focus, upscaled, low detail
+portrait composition, tall narrow composition, cartoon, anime, cel shading, toy,
+plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
+background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
+text, watermark, signature, red fuselage, crimson hull, blurry, soft focus, upscaled,
+low detail, tilted view, three-quarter view, side view
 ```
+
+---
+
+### Was `npm run bildpruefung` danach sagt
+
+| Meldung | Bedeutung | Abhilfe |
+|---|---|---|
+| `Seitenverhaeltnis X statt Y` | Format war im Werkzeug nicht eingestellt | neu bestellen, Format zuerst |
+| `Inhalt AxB, verlangt CxD` | zu klein geliefert, das Spiel rechnet hoch | in der Zielgroesse neu erzeugen |
+| `selbst schon hochgerechnet` | kleines Bild aufgezogen statt gross erzeugt | nicht skalieren, neu erzeugen |
+| `nur N Bildpunkte durchsichtiger Rand` | zu eng beschnitten | Leinwand ringsum vergroessern |
+| `kein Alphakanal` | Hintergrund nicht durchsichtig | als PNG mit Transparenz ausgeben |
 
 ---
 
