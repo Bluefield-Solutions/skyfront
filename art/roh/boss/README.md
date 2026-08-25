@@ -1,8 +1,33 @@
 # Bosse — Rohbilder, Stand v30
 
-**B-1 STURMKANZEL und B-2 SCHWARMMUTTER sind ersetzt und halten den
-Auftrag ein.** Die drei anderen liegen noch in der Fassung vom ersten
+**B-1, B-2 und B-3 sind ersetzt und halten den Auftrag ein.** B-4
+Ringfestung und B-5 Ambosskreuzer liegen noch in der Fassung vom ersten
 Anlauf: Gestaltung stimmt, Auflösung nicht.
+
+## B-3 Lanzenträger — zweiter Anlauf, gemessen
+
+| | erster Anlauf | zweiter Anlauf | Soll |
+|---|---:|---:|---:|
+| Inhalt | 290 × 573 | **998 × 1515** | 650 × 1000 |
+| Seitenverhältnis | 0,51 | **0,66** | 0,65 (1,4 % daneben) |
+| Detaildichte | 0,0872 | **0,1244** | mehr als 0,1025 |
+| durchsichtiger Rand | 0 px | **22 px** | mindestens 6 |
+| Licht oben links / unten rechts | — | **1,55** | grösser als 1 |
+
+Kein Befund. Das genaueste Seitenverhältnis der drei bisherigen
+Lieferungen, und die Nadel des ersten Anlaufs (0,51) ist es nicht
+geworden: die Sponsons an den Rumpfseiten und die vier Türme tragen die
+Breite, so wie im nachgezogenen Prompt verlangt.
+
+**Eine Sache zum Nachhalten:** Lanzenträger und Lanzenwache
+(`art/roh/gegner/`) sind aus derselben Familie — beide hochkant, beide mit
+Spulenschiene auf der Mittelachse. Das ist gewollt, die Wache ist seine
+Begleitung. Ob sie sich auf dem Schirm trotzdem auseinanderhalten lassen,
+ist eine Frage an `npm run formen`, und sie lässt sich erst beantworten,
+wenn beide eingebaut sind. Die Seitenverhältnisse sprechen dafür: 0,38
+gegen 0,66.
+
+---
 
 ## B-2 Schwarmmutter — zweiter Anlauf, gemessen
 
