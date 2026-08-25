@@ -622,3 +622,49 @@ Isolated on a fully transparent background, no background, no text.
    Boden auch für sie.
 5. `npm run formen` prüft die Silhouetten gegeneinander; `npm run farbtor`
    prüft die Geschossfarben. Beide laufen in der Torkette.
+
+---
+
+## 6. Der schwere Gegner zwischendurch — Vorschlag
+
+Angestoßen von einem gelieferten Bild, das als Boss nicht taugt und als
+Gegner sehr wohl: `art/roh/gegner/gegner_lanzenwache.png`.
+
+### 6.1 Was fehlt heute
+
+Zwischen den dreizehn Gegnerarten und den drei Bossen liegt nichts. Ein
+Pulk ist in Sekunden weg, ein Boss dauert eine halbe Minute. Die Stufe
+dazwischen — ein Ding, das man einzeln bemerkt, zwei bis vier Sekunden
+beschäftigt und nicht ignorieren kann — gibt es nicht.
+
+Das hängt mit der Levellänge zusammen: wer 60 bis 90 Sekunden füllen will,
+braucht mehr als schneller nachrückende Pulks.
+
+### 6.2 Zahlen
+
+| | Vorschlag | woher |
+|---|---|---|
+| Größe im Bild | 90 × 236 Weltpunkte | gesetzt; 17 % der Feldbreite |
+| Trefferpunkte | 90 | fünffache Elite (18), ein Siebtel von Boss 1 (160) |
+| Auftritt | ab Sektor 4, danach alle 3 bis 4 Wellen, höchstens eine gleichzeitig | „bemerkt man", nicht „schon wieder" |
+| Bewegung | fährt bis auf ein Drittel Höhe ein, hält, feuert, zieht seitlich ab | steht still genug, dass Zielen lohnt |
+| Geschoss | `eb_lanze` — derselbe Strahlstab wie beim Lanzenträger | sie ist seine Begleitung; wer sie kennt, kennt den Boss |
+| Punkte | 500 | zwischen Elite (120) und Boss (2000) |
+
+Der letzte Punkt ist der eigentliche Grund für diese Gegnerart: **sie
+zeigt den Angriff des Bosses, bevor der Boss kommt.** Wer zum ersten Mal
+gegen den Lanzenträger fliegt, hat den Strahlstab dann schon zweimal
+ausgewichen.
+
+### 6.3 Was daran zu prüfen ist
+
+Kein Bildwechsel, sondern eine Mechanik. Betroffen sind:
+
+- `npm run rhythmus` — 120 Sektoren, die Wellenverteilung verschiebt sich
+- `npm run feuerkraft` — der Zeitbedarf je Sektor steigt
+- `npm run formationen` — die Lanzenwache braucht einen eigenen Baustein
+- `npm run formen` — eine vierzehnte Silhouette, die sich von den
+  dreizehn anderen unterscheiden muss
+
+Solange diese vier nicht nachgemessen sind, ist die Zahl 90 für die
+Trefferpunkte geraten und nichts weiter.

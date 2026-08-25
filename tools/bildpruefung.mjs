@@ -43,6 +43,21 @@ const AUFTRAG = {
   boss_lanzentraeger: { breite:  650, hoehe: 1000 },
   boss_ringfestung:   { breite: 1150, hoehe: 1150 },
   boss_ambosskreuzer: { breite: 1300, hoehe: 1000 },
+
+  // Kein Boss, sondern ein schwerer Gegner zwischendurch: die Begleitung
+  // des Lanzentraegers, die seinen Angriff vorher einmal zeigt.
+  //
+  // Ehrlich zur Herkunft dieser beiden Zahlen: die BREITE ist gesetzt —
+  // 90 Weltpunkte im Bild, also 180 im Puffer, mit dem ueblichen Aufschlag
+  // von 1,25 sind es 225. Das ist eine Entscheidung ueber die Groesse im
+  // Spiel und faellt unabhaengig vom Bild.
+  // Die HOEHE dagegen folgt dem gelieferten Bild (Verhaeltnis 0,38). Anders
+  // als beim Nurfluegel, wo die flache Form die halbe Gestaltungsabsicht
+  // war, gibt es hier keinen Grund, eine Tiefe vorzuschreiben: ein
+  // schwerer Gegner darf so lang sein, wie er gezeichnet ist.
+  // Wer spaeter eine zweite Lanzenwache bestellt, haelt sich an 0,38 —
+  // damit die beiden nebeneinander gleich gross wirken.
+  gegner_lanzenwache: { breite: 225, hoehe: 590 },
 };
 
 // Ist in dem Bild bei SEINER Groesse wirklich Detail — oder ist es schon
@@ -60,11 +75,13 @@ const AUFTRAG = {
 // 0,90 liegt zwischen beiden Gruppen, mit Abstand nach beiden Seiten.
 const RUNDLAUF_MAX = .90;
 
-const ORDNER = 'art/roh/boss';
+// Zwei Ordner, ein Auftragsbuch: der Name entscheidet, nicht der Ordner.
+const ORDNER_LISTE = ['art/roh/boss', 'art/roh/gegner'];
 const RAND_MIN = 6;        // durchsichtiger Rand fuer Saum und Kantenlicht
 const SEITE_TOLERANZ = .15;
 
-if (!existsSync(ORDNER)) M.abbruch(`${ORDNER} fehlt — nichts zu pruefen.`);
+const ORDNER = ORDNER_LISTE.filter((o) => existsSync(o));
+if (!ORDNER.length) M.abbruch(`keiner der Ordner ${ORDNER_LISTE.join(', ')} da — nichts zu pruefen.`);
 
 // Die Vergleichszahl fuer die Detaildichte kommt aus den Bildern, die HEUTE
 // im Spiel sind. Ein festes Soll waere hier falsch: wie dicht ein Bild ist,
@@ -72,10 +89,19 @@ if (!existsSync(ORDNER)) M.abbruch(`${ORDNER} fehlt — nichts zu pruefen.`);
 // werden soll".
 const VERGLEICHSBREITE = 650;
 
-async function dichte(datei, breite) {
-  const m = await sharp(datei).metadata();
+// Gezogen wird auf die Breite des INHALTS, nicht auf die des Blattes.
+//
+// Das ist nachtraeglich korrigiert worden, und der Fehler war nicht
+// harmlos: solange jedes Blatt eng um sein Schiff sass, waren beide Zahlen
+// dieselbe. Dann kam ein Bild, dessen Schiff nur 565 von 1024 Bildpunkten
+// einnahm — auf Blattbreite gezogen wurde es mit 359 statt 650 Punkten
+// gemessen, also viel kleiner, und kleiner heisst hoehere Dichte. Zwei
+// Bilder waeren so bei verschiedenen Groessen verglichen worden.
+async function dichte(datei, breite, bb) {
+  const roh = bb ? await sharp(datei).extract(bb).png().toBuffer() : datei;
+  const m = await sharp(roh).metadata();
   const h = Math.max(1, Math.round(m.height * breite / m.width));
-  const { data, info } = await sharp(datei).ensureAlpha()
+  const { data, info } = await sharp(roh).ensureAlpha()
     .resize(breite, h, { kernel: 'lanczos3' }).raw().toBuffer({ resolveWithObject: true });
   const { width: W, height: H, channels: C } = info;
   const L = (x, y) => { const i = (y * W + x) * C; return .2126 * data[i] + .7152 * data[i + 1] + .0722 * data[i + 2]; };
@@ -105,16 +131,16 @@ async function inhalt(datei) {
   return { x0, y0, x1, y1, breite: x1 - x0 + 1, hoehe: y1 - y0 + 1, blatt: [W, H] };
 }
 
-const dateien = readdirSync(ORDNER).filter((f) => f.endsWith('.png'));
-if (!dateien.length) M.abbruch(`keine PNG in ${ORDNER}.`);
+const dateien = ORDNER.flatMap((o) => readdirSync(o).filter((f) => f.endsWith('.png')).map((f) => `${o}/${f}`));
+if (!dateien.length) M.abbruch(`keine PNG in ${ORDNER.join(', ')}.`);
 
-console.log(`Bildpruefung — ${dateien.length} Datei(en) in ${ORDNER}\n`);
+console.log(`Bildpruefung — ${dateien.length} Datei(en) in ${ORDNER.join(', ')}\n`);
 console.log('  Datei                    Blatt        Inhalt       Soll         Seite Ist/Soll   Dichte');
 
-for (const f of dateien.sort()) {
+for (const pfad of dateien.sort()) {
+  const f = pfad.split('/').pop();
   const name = f.replace(/\.png$/, '');
   const soll = AUFTRAG[name];
-  const pfad = `${ORDNER}/${f}`;
   const m = await sharp(pfad).metadata();
 
   if (!soll) { M.ungemessen(`${f}: steht nicht im Auftrag — kein Soll, keine Aussage.`); continue; }
@@ -123,7 +149,7 @@ for (const f of dateien.sort()) {
   const i = await inhalt(pfad);
   if (!i) { M.ungemessen(`${f}: kein deckender Bildpunkt gefunden.`); continue; }
 
-  const d = await dichte(pfad, VERGLEICHSBREITE);
+  const d = await dichte(pfad, VERGLEICHSBREITE, { left: i.x0, top: i.y0, width: i.breite, height: i.hoehe });
   const sIst = i.breite / i.hoehe, sSoll = soll.breite / soll.hoehe;
   console.log(`  ${f.padEnd(24)} ${(m.width + 'x' + m.height).padEnd(12)} ${(i.breite + 'x' + i.hoehe).padEnd(12)} ${(soll.breite + 'x' + soll.hoehe).padEnd(12)} ${(sIst.toFixed(2) + ' / ' + sSoll.toFixed(2)).padEnd(13)} ${d.toFixed(4)}`);
 
