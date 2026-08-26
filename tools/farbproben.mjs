@@ -28,6 +28,14 @@ const NUR_MODUS = process.argv.includes('--nurmodus');
 // sie weg: die sechs uebrigen kosten dann zusammen 56 s und sind damit
 // billig genug, um bei jedem Lauf mitzukommen.
 const OHNE_BILD = process.argv.includes('--ohnebild');
+// --nur=<Text>: nur die Proben laufen lassen, deren Name den Text enthaelt.
+//
+// Der ganze Satz dauert zehn Minuten. Wer EINE Probe nachziehen will, hat
+// bisher entweder zehn Minuten gewartet oder den Lauf in den Hintergrund
+// geschoben — und genau das hat in v36 die frische Arbeit geloescht, weil
+// der Lauf src/app.js zurueckschreibt. Ein Filter ist die einfachere
+// Antwort als Disziplin.
+const NUR = (process.argv.find((a) => a.startsWith('--nur=')) || '').slice(6).toLowerCase();
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
 
@@ -283,7 +291,7 @@ console.log('');
 }
 
 let fehler = 0, gelaufen = 0;
-for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_MODUS ? [] : PROBEN)) {
+for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_MODUS ? [] : PROBEN).filter(([n]) => !NUR || n.toLowerCase().includes(NUR))) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const roh = readFileSync(SICHER, 'utf8');
   const n = roh.split(alt).length - 1;

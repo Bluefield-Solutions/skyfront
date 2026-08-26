@@ -61,6 +61,16 @@ export const EINBAU = [
   // geleert, aber nie entfernt werden, weil die Nummern Positionen sind,
   // die app.js anspringt. Anhaengen verschiebt nichts.
   { datei: 'art/roh/gegner/gegner_lanzenwache.png', platz: 71, schluessel: 'e_lanzenwache', welt: 90 },
+
+  // Die drei weichen Gegner. Noch nicht geliefert — sie stehen hier, damit
+  // npm run einbau "fehlt" meldet statt gruen. Die Weltbreiten sind
+  // gemessen (npm run formen, Zielgeraet 390 Anzeigepunkte):
+  //   elite    78,0 Anzeigepunkte → 108 Weltpunkte → Textur 216
+  //   carrier 106,5              → 148            →        295
+  //   rotor    48,7              →  67            →        135
+  { datei: 'art/roh/gegner/gegner_elite.png',      platz: 74, schluessel: 'e_elite',   welt: 108 },
+  { datei: 'art/roh/gegner/gegner_carrier.png',    platz: 75, schluessel: 'e_carrier', welt: 148 },
+  { datei: 'art/roh/gegner/gegner_rotor.png',      platz: 76, schluessel: 'e_rotor',   welt: 67 },
 ];
 
 async function inhalt(datei) {

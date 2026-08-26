@@ -324,9 +324,17 @@ if (biome.length) {
     if (!rumpf) melde('K: gegnerLeisten() nicht gefunden');
     else {
       const farben = [...rumpf.matchAll(/fillStyle\((\d+)/g)].map((x) => ausZahl(Number(x[1])));
+      // Die ERSTE Farbe, nicht irgendeine.
+      //
+      // Der erste Entwurf fragte "kommt irgendwo eine dunkle Farbe vor" —
+      // und die Gegenprobe (Unterlage auf Hellblau) liess ihn gruen: der
+      // Balkengrund darunter ist ebenfalls dunkel und hat die Pruefung
+      // erfuellt, waehrend die Unterlage, um die es geht, leuchtete.
+      // Zuerst gezeichnet heisst zuunterst und am groessten — das ist die
+      // Schicht, die ueber hellem Untergrund traegt.
       if (!farben.length) melde('K: der Kraftstreifen zeichnet keine Farbe');
-      else if (!farben.some((c) => leucht(c) <= .05))
-        melde('K: der Kraftstreifen hat keine dunkle Unterlage — ueber hellem Untergrund traegt er nicht, genau wie ein Geschoss ohne Rand');
+      else if (leucht(farben[0]) > .05)
+        melde(`K: die Unterlage des Kraftstreifens ist zu hell (Leuchtdichte ${leucht(farben[0]).toFixed(3)}, hoechstens 0.05) — ueber hellem Untergrund traegt er nicht, genau wie ein Geschoss ohne Rand`);
     }
   }
 }

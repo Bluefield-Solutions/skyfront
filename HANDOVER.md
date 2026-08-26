@@ -55,6 +55,7 @@ npm run einbau      # geprueftes Rohbild in Zielgroesse nach assets.js backen
 npm run zeitachse   # wie lange ein Sektor mindestens dauert (Wellen + Boss)
 npm run bossmuster  # feuert jede Bossphase anders, oder nur mehr vom Gleichen
 npm run steuerung   # zieht die Maschine bei 30/60/120 Hz gleich schnell nach
+npm run proben -- --nur=<text>  # nur die Proben mit <text> im Namen (der ganze Satz dauert 10 min)
 npm run package     # verteilbares Skyfront-dist.zip
 ```
 
