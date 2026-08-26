@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v35",
+    SKF_VERSION = "v36",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61451,6 +61451,21 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     }
   }
 
+  // Der Kraftstreifen ueber den Gegnern.
+  //
+  // Nicht jeder bekommt einen: bei vierzig Kleingegnern waeren vierzig
+  // Balken auf dem Schirm, und der Blick haette nichts mehr, woran er sich
+  // haelt. Es gibt ihn fuer alles, was mehr als zwei Treffer aushaelt — und
+  // erst, wenn es getroffen ist. Ein voller Balken sagt nichts.
+  //
+  // LEISTE_HOCH ist in LAYOUTpunkten. Auf dem Zielgeraet (390 von 540)
+  // sind das 3,6 Anzeigepunkte. Vier waeren 2,9 gewesen, und darunter ist
+  // ein Balken kein Balken mehr, sondern eine Linie.
+  const LEISTE_AB = 6, LEISTE_HOCH = 5, LEISTE_BREIT_MAX = 56, LEISTE_BREIT_MIN = 22;
+  function zeigtLeiste(maxHp, hp) {
+    return maxHp >= LEISTE_AB && hp < maxHp && hp > 0
+  }
+
   class Fn extends tt.Physics.Arcade.Image {
     constructor(R, E, b, I = "p_fighter1") {
       spielerBacken(R, R.textures.exists(I) ? I : "p_fighter1"),
@@ -63754,6 +63769,26 @@ ${G}`, {
           dur: 110
         })
       }
+      // Zeichnet alle Kraftstreifen in EIN Graphics-Objekt. Eines je Gegner
+      // waere sauberer zu lesen und teurer zu zeichnen — bei vierzig
+      // Gegnern vierzig Objekte, die jedes Bild neu gefuellt werden.
+      gegnerLeisten() {
+        const R = this.gegnerBar || (this.gegnerBar = this.add.graphics().setDepth(12));
+        R.clear();
+        this.enemies.getChildren().forEach((E) => {
+          if (!E.active || !E.maxHp || !zeigtLeiste(E.maxHp, E.hp)) return;
+          const b = tt.Math.Clamp(E.hp / E.maxHp, 0, 1),
+            I = tt.Math.Clamp(E.displayWidth * .8, LEISTE_BREIT_MIN, LEISTE_BREIT_MAX),
+            G = E.x - I / 2,
+            v = E.y - E.displayHeight / 2 - 9;
+          // Dunkle Unterlage zuerst — derselbe Grund wie bei den Geschossen:
+          // ueber hellem Untergrund traegt sonst nichts.
+          R.fillStyle(659224, .85).fillRoundedRect(G - 2, v - 2, I + 4, LEISTE_HOCH + 4, 3);
+          R.fillStyle(4195850, 1).fillRoundedRect(G, v, I, LEISTE_HOCH, 2);
+          const x = b > .5 ? 16734794 : b > .25 ? 16751162 : 16765498;
+          R.fillStyle(x, 1).fillRoundedRect(G, v, Math.max(2, I * b), LEISTE_HOCH, 2)
+        })
+      }
       fireBoss(R) {
         const E = this.boss,
           b = this.player.x,
@@ -65580,6 +65615,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             p.nextFire = b + p.cfg.fireEvery * this.fireRateMul * a, p.telegraphed = !1
           }
         }), this.miniBar.clear();
+        this.gegnerLeisten();
         const l = this.enemies.getChildren().find(p => p.active && p.kind === "rotor");
         if (l) {
           const p = l.maxHp || Ke.rotor.hp,
@@ -65940,6 +65976,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     // beim Auftauchen benutzt — nicht eine nachgebaute.
     window.__SKF_GEGNERBACKEN = gegnerBacken;
     window.__SKF_BOSSLEBEN = bossLeben;
+    window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
     window.__SKF_KAPITEL = se;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,

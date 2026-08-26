@@ -222,6 +222,25 @@ const PROBEN = [
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
+
+// Zwei Laeufe zugleich waeren toedlich: beide sichern src/app.js, beide
+// schreiben es am Ende zurueck — und der zweite legt den Stand des ersten
+// ueber die Arbeit, die inzwischen entstanden ist. Genau das ist in v36
+// passiert: ein Lauf im Hintergrund hat den fertigen Kraftstreifen wieder
+// aus der Quelle entfernt, waehrend nebenher daran gearbeitet wurde. Der
+// Warnsatz weiter unten stand da, und er hat nicht gereicht.
+//
+// Die Sicherungsdatei ist ab jetzt das Schloss. Sie ist auch der Grund,
+// warum ein abgestuerzter Lauf hier gemeldet wird, statt still zu
+// ueberschreiben.
+if (existsSync(SICHER)) {
+  console.error(`✗ ${SICHER} liegt schon da.`);
+  console.error('  Entweder laeuft gerade eine zweite Gegenprobe — dann diese abwarten,');
+  console.error('  NICHT beide laufen lassen: sie schreiben einander die Quelle zurueck.');
+  console.error(`  Oder ein Lauf ist abgestuerzt — dann von Hand pruefen, ob ${SICHER}`);
+  console.error(`  der Stand ist, den man will, und ihn nach ${APP} zurueckkopieren.`);
+  process.exit(1);
+}
 copyFileSync(APP, SICHER);
 const zurueck = () => copyFileSync(SICHER, APP);
 process.on('exit', () => { if (existsSync(SICHER)) { zurueck(); unlinkSync(SICHER); } });
