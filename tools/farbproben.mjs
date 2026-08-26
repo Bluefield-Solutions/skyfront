@@ -194,8 +194,15 @@ const PROBEN = [
     ['const a = takt % 2 ? [-.55, -.4, -.25, -.1] : [.1, .25, .4, .55];', 'const a = [-.3, -.1, .1, .3];'],
     true, 'muster', 'nur mehr vom Gleichen'],
   // Die Maschine springt wieder auf den Finger — der Zustand bis v34.
-  ['Steuerung ohne Glaettung (speedLerp 1)', '✗',
-    ['speedLerp: 0.5,', 'speedLerp: 1,'],
+  //
+  // Der erste Anlauf setzte speedLerp in src/app.js von 0.5 auf 1 zurueck
+  // und das Tor blieb GRUEN: der Eingriff kam nie an, weil buildcore den
+  // Wert beim Bauen aus balance.js wieder einspielt. Eiserne Regel 3 —
+  // pruefen, ob der Eingriff ankommt. Ein Wert, der aus balance.js
+  // stammt, laesst sich nicht durch Aendern von app.js proben; hier muss
+  // die STELLE getroffen werden, die ihn benutzt.
+  ['Steuerung ohne Glaettung (Sprung je Bild)', '✗',
+    ['f = Ft.speedLerp >= 1 ? 1 : 1 - Math.pow(1 - Ft.speedLerp, v),', 'f = 1,'],
     true, 'steuer', 'das ist ein Sprung, keine Nachfuehrung'],
   // Und die Nachfuehrung ohne Zeitkorrektur: dann haengt sie wieder an der
   // Bildrate, und auf zwei Telefonen fuehlt sich dasselbe Spiel anders an.
