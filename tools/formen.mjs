@@ -73,7 +73,7 @@ const eb = /yt\.EB_STYLE = \{[\s\S]*?\n  \}/.exec(quelle);
 if (!eb) { console.error('✗ EB_STYLE nicht in src/app.js gefunden'); process.exit(1); }
 const KUGELN = [...eb[0].matchAll(/tex: "([a-z_0-9]+)",[\s\S]*?spin: (\d+)/g)]
   .map((m) => ({ name: m[1], tex: m[1], spin: Number(m[2]), skala: 1 }));
-if (KUGELN.length !== 10) { console.error(`✗ EB_STYLE: ${KUGELN.length} Eintraege, 10 erwartet`); process.exit(1); }
+if (KUGELN.length !== 11) { console.error(`✗ EB_STYLE: ${KUGELN.length} Eintraege, 11 erwartet`); process.exit(1); }
 // Die Rakete des Rocketeers fliegt ebenso auf den Spieler zu und gehoert dazu.
 KUGELN.push({ name: 'missile', tex: 'missile', spin: 0, skala: 1 });
 
@@ -306,6 +306,11 @@ const BILDBODEN = {
   elite: 80, carrier: 125, rotor: 71, kamikaze: 37, gunship: 204,
   bomber: 167, arcer: 76, rocketeer: 60, weaver: 162, sniper: 80,
   scout: 42, strafer: 79, grunt: 180,
+  // Die Lanzenwache kam mit v34 dazu und ist die erste Grafik, die in
+  // ZIELgroesse gebacken wurde: Textur 180 Punkte breit, im Bild 90
+  // Weltpunkte, auf dem Geraet also punktgenau. Der Boden ist deshalb die
+  // gelieferte Breite selbst.
+  lanzenwache: 180,
 };
 {
   console.log(`\nAufloesung auf dem Zielgeraet (${GERAETE_PUNKTE.toFixed(2)} Bildpunkte je Anzeigepunkt)`);

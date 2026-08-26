@@ -49,6 +49,11 @@ export const EINBAU = [
   { datei: 'art/roh/boss/boss_sturmkanzel.png',   platz: 16, schluessel: 'boss1', welt: 340 },
   { datei: 'art/roh/boss/boss_schwarmmutter.png', platz: 17, schluessel: 'boss2', welt: 430 },
   { datei: 'art/roh/boss/boss_lanzentraeger.png', platz: 18, schluessel: 'boss3', welt: 260 },
+  // Kein Boss: der schwere Gegner zwischendurch. Sein Platz haengt HINTEN
+  // an — eiserne Regel 9 aus CLAUDE.md: ein Eintrag in assets.js darf
+  // geleert, aber nie entfernt werden, weil die Nummern Positionen sind,
+  // die app.js anspringt. Anhaengen verschiebt nichts.
+  { datei: 'art/roh/gegner/gegner_lanzenwache.png', platz: 71, schluessel: 'e_lanzenwache', welt: 90 },
 ];
 
 async function inhalt(datei) {
@@ -91,7 +96,7 @@ for (const e of EINBAU) {
     M.befund(`${e.schluessel}: ${m.width} statt ${zielBreite} Punkte breit — die Rechnung stimmt nicht.`);
 
   const alt = liste[e.platz];
-  const altBytes = Buffer.from(alt.slice(alt.indexOf(',') + 1), 'base64').length;
+  const altBytes = alt ? Buffer.from(alt.slice(alt.indexOf(',') + 1), 'base64').length : 0;
   vorher += altBytes; nachher += bild.length;
 
   console.log(`  ${e.schluessel.padEnd(11)} ${e.datei.split('/').pop().replace('.png', '').padEnd(15)} `

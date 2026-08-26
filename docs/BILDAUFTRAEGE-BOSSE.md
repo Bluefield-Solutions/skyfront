@@ -826,14 +826,22 @@ braucht mehr als schneller nachrückende Pulks.
 
 ### 6.2 Zahlen
 
-| | Vorschlag | woher |
-|---|---|---|
-| Größe im Bild | 90 × 236 Weltpunkte | gesetzt; 17 % der Feldbreite |
-| Trefferpunkte | 90 | fünffache Elite (18), ein Siebtel von Boss 1 (160) |
-| Auftritt | ab Sektor 4, danach alle 3 bis 4 Wellen, höchstens eine gleichzeitig | „bemerkt man", nicht „schon wieder" |
-| Bewegung | fährt bis auf ein Drittel Höhe ein, hält, feuert, zieht seitlich ab | steht still genug, dass Zielen lohnt |
-| Geschoss | `eb_lanze` — derselbe Strahlstab wie beim Lanzenträger | sie ist seine Begleitung; wer sie kennt, kennt den Boss |
-| Punkte | 500 | zwischen Elite (120) und Boss (2000) |
+**Eingebaut in v34.** Die Zahlen unten waren der Vorschlag; daneben steht,
+was daraus geworden ist — und wo der Vorschlag falsch lag.
+
+| | Vorschlag | eingebaut | woher |
+|---|---|---|---|
+| Größe im Bild | 90 × 236 Weltpunkte | **90 × 223** | Textur 180 × 446, `scale .5` |
+| Trefferpunkte | 90 | **100** | zäher als die Elite (60), weicher als der Rotor (120) |
+| Auftritt | ab Sektor 4 | **ab Sektor 4**, bei 32 % des Sektors, ab Sektor 40 zwei | wie Rotor und Träger: ein gesetzter Moment, keine Formel |
+| Geschoss | `eb_lanze` | **`eb_lanze`**, neu gezeichnet | sie ist seine Begleitung; wer sie kennt, kennt den Boss |
+| Punkte | 500 | **1400** | zwischen Elite (1100) und Träger (1800) |
+
+**Zwei Zahlen im Vorschlag waren falsch**, und zwar aus demselben Grund:
+sie stammten aus dem Kopf statt aus `balance.js`. „Fünffache Elite (18)" —
+die Elite hat 60 Trefferpunkte, nicht 18. „Zwischen Elite (120) und Boss
+(2000)" — die Elite gibt 1100 Punkte. Beides ist beim Einbauen aufgefallen,
+weil die Werte dort neben den echten stehen.
 
 Der letzte Punkt ist der eigentliche Grund für diese Gegnerart: **sie
 zeigt den Angriff des Bosses, bevor der Boss kommt.** Wer zum ersten Mal

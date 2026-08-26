@@ -148,7 +148,7 @@ const farbenDerTextur = (name) => {
 /* ---------- die drei Mengen ------------------------------------------- */
 
 const GEGNER_TEX = ['eb_orb', 'eb_bolt', 'eb_ring', 'eb_dart', 'eb_diamond',
-  'eb_wave', 'eb_star', 'eb_needle', 'eb_flame', 'eb_saw', 'missile'];
+  'eb_wave', 'eb_star', 'eb_needle', 'eb_flame', 'eb_saw', 'eb_lanze', 'missile'];
 const SPIELER_TEX = ['bullet_p', 'bullet_spread', 'bullet_focus', 'bullet_heavy', 'missile_p'];
 
 const sammle = (liste) => {
@@ -165,7 +165,7 @@ const ebBlock = /yt\.EB_STYLE = \{[\s\S]*?\n  \}/.exec(quelle);
 if (!ebBlock) melde('EB_STYLE nicht gefunden');
 else {
   const cols = [...ebBlock[0].matchAll(/col: (GEFAHR_N|\d+)/g)];
-  if (cols.length !== 10) melde(`EB_STYLE: ${cols.length} col-Einträge, 10 erwartet`);
+  if (cols.length !== 11) melde(`EB_STYLE: ${cols.length} col-Einträge, 11 erwartet`);
   for (const m of cols) gegner.push({ c: m[1] === 'GEFAHR_N' ? GEFAHR_N : ausZahl(Number(m[1])), quelle: 'EB_STYLE.col' });
 }
 
@@ -309,10 +309,19 @@ if (biome.length) {
 const schichten = (t) => {
   const arg = texturen.get(t);
   if (arg === undefined) return null;
+  // Bis zu 24 Zeichen, nicht bis zu drei.
+  //
+  // Der erste Entwurf suchte nur Bezeichner von einem bis drei Zeichen —
+  // die Laenge, die der Minifizierer vergibt. Beim ersten von Hand
+  // geschriebenen Zeichner (lanzeZeichnen, dreizehn Zeichen) fand die
+  // Pruefung den Rumpf deshalb gar nicht und meldete "kein heller Kern,
+  // kein dunkler Rand" fuer eine Textur, die beides hat. koerper() gibt
+  // fuer unbekannte Namen einen leeren Text zurueck, weiter zu suchen
+  // kostet also nichts.
   let text = arg;
-  for (const m of arg.matchAll(/\b([A-Za-z]{1,3})\(/g)) text += koerper(m[1]);
-  const rein = /^\s*([A-Za-z]{1,3})\s*$/.exec(arg);
-  if (rein) { text += koerper(rein[1]); for (const m of koerper(rein[1]).matchAll(/\b([A-Za-z]{1,3})\(/g)) text += koerper(m[1]); }
+  for (const m of arg.matchAll(/\b([A-Za-z]{1,24})\(/g)) text += koerper(m[1]);
+  const rein = /^\s*([A-Za-z]{1,24})\s*$/.exec(arg);
+  if (rein) { text += koerper(rein[1]); for (const m of koerper(rein[1]).matchAll(/\b([A-Za-z]{1,24})\(/g)) text += koerper(m[1]); }
   const farben = [...text.matchAll(/#[0-9a-fA-F]{6}|rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)]
     .map((m) => m[0][0] === '#' ? hex(m[0]) : [Number(m[1]), Number(m[2]), Number(m[3])]);
   // Gemessen an der Leuchtdichte, nicht an Farbton und Saettigung: was zaehlt,

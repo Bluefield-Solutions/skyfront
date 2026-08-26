@@ -98,7 +98,7 @@ const TORE = [
   { schluessel: 'farbtor',     lauf: 'Farbtor (Gefahr · Eigenfeuer · Aufsammler)', zeile: 'Farbtor (17 Projektile)', datei: 'tools/farbtor.mjs' },
   // Seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die FORM der
   // einzige Traeger der Information "wer hat geschossen".
-  { schluessel: 'formen',      lauf: 'Formentor (Silhouetten bei Anzeigegroesse)', zeile: 'Formentor (11 Silhouetten)', datei: 'tools/formen.mjs' },
+  { schluessel: 'formen',      lauf: 'Formentor (Silhouetten bei Anzeigegroesse)', zeile: 'Formentor (12 Silhouetten)', datei: 'tools/formen.mjs' },
   // Die Beruhigungsschicht muss Kontrast nehmen und nicht Helligkeit —
   // Abdunkeln wuerde der Gegnerkugel den dunklen Rand nehmen.
   { schluessel: 'untergrund',  lauf: 'Untergrund (13 Biome)',                zeile: 'Untergrund (13 Biome)',      datei: 'tools/untergrund.mjs' },

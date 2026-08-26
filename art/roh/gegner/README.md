@@ -31,8 +31,13 @@ daneben, und zwar in der Richtung, vor der der Auftrag ausdrücklich warnt:
 zu schmal. Als schwerer Gegner ist genau das richtig — schmal und lang
 liest sich auf dem Schirm anders als alles, was heute fliegt.
 
-**Was noch fehlt, bevor sie fliegen kann:** eine Gegnerart im Spiel.
-Das ist kein Bildwechsel, sondern Trefferpunkte, ein Feuermuster, eine
-Regel, wann sie erscheint, und die Wirkung auf `npm run rhythmus` und
-`npm run feuerkraft`. Vorschlag und Zahlen stehen in
-`docs/BILDAUFTRAEGE-BOSSE.md`, Abschnitt 6.
+**Sie fliegt seit v34.** Textur 180 × 446 (`npm run einbau`, Platz 71 in
+`assets.js`), im Bild 90 × 223 Weltpunkte, 100 Trefferpunkte, ab Sektor 4
+bei 32 % des Sektors, ab Sektor 40 zwei. Sie schiesst `eb_lanze` — dasselbe
+Geschoss wie der Lanzenträger, dessen Begleitung sie ist.
+
+Auf dem Gerät sitzt sie mit **Faktor 1,00**: ein Texturpunkt ist ein
+Bildpunkt. Das ist die einzige Grafik im Spiel, für die das gilt — alle
+anderen Gegner werden zwischen 0,53× und 0,9× hochgerechnet.
+
+Einzelheiten: `docs/AUDIT-2026-08.md`, SKY-232.

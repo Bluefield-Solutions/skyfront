@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v33",
+    SKF_VERSION = "v34",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -54996,6 +54996,29 @@ return new ` + this.key + `();
       tex: "e_carrier",
       bullet: "flame"
     },
+    // Die Lanzenwache: der schwere Gegner zwischendurch, und die
+    // Begleitung des Lanzentraegers. Sie schiesst SEINE Lanze — wer zum
+    // ersten Mal gegen ihn fliegt, ist ihr vorher zweimal ausgewichen.
+    //
+    // Die Zahlen stehen zwischen Elite und Traeger, so wie sie im Spiel
+    // stehen soll: zaeher als die Elite (60), weicher als der Rotor (120).
+    // scale .5, weil die Textur in PUFFERgroesse gebacken ist (180 x 446)
+    // und damit 90 x 223 Weltpunkte im Bild steht.
+    lanzenwache: {
+      rolle: "panzer",
+      hp: 100,
+      speed: 42,
+      scale: .5,
+      tint: 16777215,
+      score: 1400,
+      fireEvery: 1500,
+      pattern: "burst3",
+      drop: .6,
+      cls: "XL",
+      role: "Lanzenwache",
+      tex: "e_lanzenwache",
+      bullet: "lanze"
+    },
     rotor: {
       rolle: "panzer",
       hp: 90,
@@ -55023,7 +55046,7 @@ return new ` + this.key + `();
     // Nur der Rueckfall entsteht sofort — er wird von `sea` und vom
     // Faerbeweg gebraucht. Die anderen neun auf Zuruf, siehe verlaufTextur.
     ht(T, "bg_ocean", 540, 540, (R, E) => gi(R, E, pi.bg_ocean));
-    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
+    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "eb_lanze", 14, 46, (R, E, b) => lanzeZeichnen(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
       dunkel: "#7fb8dc",
       hell: EIGEN,
       flosse: "#9fd0ee",
@@ -56203,6 +56226,36 @@ return new ` + this.key + `();
     T.fillStyle = "#08060e", v(R * .46, R * .12, 0), T.fill(), v(R * .46, R * .12, Math.PI / 2), T.fill(), T.fillStyle = b, v(R * .42, R * .09, 0), T.fill(), v(R * .42, R * .09, Math.PI / 2), T.fill(), T.fillStyle = "rgba(255,206,186,0.95)", T.beginPath(), T.arc(I, G, R * .1, 0, 7), T.fill()
   }
 
+  // Die Lanze des Lanzentraegers und seiner Wache.
+  //
+  // Bis v33 schoss der Boss der Stufe 3 den "star" des Bogenschuetzen. Ein
+  // Boss, der schiesst wie ein normaler Gegner, sieht auch nach zwanzig
+  // Sekunden nicht nach Boss aus.
+  //
+  // Kein weisses Mittelband — das war der Fehler von eb_needle: bei zuviel
+  // Weiss bleibt von der Kennfarbe nichts uebrig, und das Farbtor schlaegt
+  // an. Die Spulenglieder sind DUNKEL, nicht hell.
+  function lanzeZeichnen(T, R, E, b) {
+    const I = R / 2;
+    Zt(T, I, E / 2, R * .8);
+    const G = (x) => {
+      T.beginPath(), T.moveTo(I, E * .01 - x), T.lineTo(I + R * .3 + x, E * .2),
+      T.lineTo(I + R * .21 + x, E * .97 + x), T.lineTo(I - R * .21 - x, E * .97 + x),
+      T.lineTo(I - R * .3 - x, E * .2), T.closePath()
+    };
+    T.fillStyle = "#08060e", G(1.8), T.fill();
+    const v = T.createLinearGradient(I - R * .3, 0, I + R * .3, 0);
+    v.addColorStop(0, "#6d1206"), v.addColorStop(.42, b), v.addColorStop(.58, b), v.addColorStop(1, "#6d1206");
+    T.fillStyle = v, G(0), T.fill();
+    T.fillStyle = "rgba(16,5,3,0.5)";
+    for (let n = 0; n < 3; n++) T.fillRect(I - R * .24, E * (.33 + n * .19), R * .48, E * .045);
+    // Die Spitze leuchtet. Ein schmaler heller Fleck, kein Mittelband:
+    // der Farbtor verlangt einen hellen Kern (sonst traegt die Kugel auf
+    // dunklem Grund nicht) und deckelt zugleich den Weissanteil.
+    T.fillStyle = "rgba(255,214,196,0.9)", T.beginPath(),
+    T.ellipse(I, E * .12, R * .09, E * .07, 0, 0, 7), T.fill()
+  }
+
   function Ns(T, R, E, b) {
     const I = R / 2;
     Zt(T, I, E / 2, R * .9);
@@ -56450,6 +56503,7 @@ return new ` + this.key + `();
       e_sniper: __SKFA[29],
       e_strafer: __SKFA[30],
       e_weaver: __SKFA[31],
+      e_lanzenwache: __SKFA[71],
       p_falcon: __SKFA[32],
       p_goliath: __SKFA[33],
       p_komet: __SKFA[34],
@@ -56732,6 +56786,12 @@ return new ` + this.key + `();
     if (T >= 5) {
       const a = E.reduce((r, n) => Math.max(r, n.at), 0);
       E.push({ at: a + 1600, kind: "carrier", count: T >= 16 ? 2 : 1, formation: "single", baustein: "Traeger" })
+    }
+    // Und ein dritter: die Lanzenwache. Sie kommt frueh im Sektor, damit
+    // ihre Lanze noch etwas zu bedeuten hat, wenn am Ende der Boss steht.
+    if (T >= 4 && E.length > 6) {
+      const a = E[Math.floor(E.length * .32)].at;
+      E.push({ at: a + 400, kind: "lanzenwache", count: T >= 40 ? 2 : 1, formation: "single", baustein: "Lanzenwache" })
     }
     return E.sort((a, r) => a.at - r.at)
   }
@@ -63684,7 +63744,7 @@ ${G}`, {
           x = Math.atan2(I - v.y, b - v.x),
           t = E.phase(),
           l = E.tier >= 3 ? 12607743 : E.tier >= 2 ? 16742986 : 16734794;
-        this.ebStyle = E.tier >= 3 ? "star" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
+        this.ebStyle = E.tier >= 3 ? "lanze" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
         const p = Math.PI * 2;
         // Das Feuermuster je Stufe und Phase. Gemessen mit npm run bossmuster.
         //
@@ -65722,6 +65782,14 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       spin: 0,
       hit: 7,
       col: GEFAHR_N
+    },
+    lanze: {
+      tex: "eb_lanze",
+      aim: !0,
+      spin: 0,
+      hit: 5,
+      col: GEFAHR_N,
+      trail: !0
     },
     saw: {
       tex: "eb_saw",
