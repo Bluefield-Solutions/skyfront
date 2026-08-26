@@ -120,6 +120,10 @@ const TORE = [
   // beim ersten Lauf daneben: 26 Sektoren unter einer Minute, Boss Stufe 3
   // mit Faktor 1,00 ueber 110 Sektoren.
   { schluessel: 'zeitachse',   lauf: 'Zeitachse (120 Sektoren + Gefecht)',   zeile: 'Zeitachse (120 Sektoren)',   datei: 'tools/zeitachse.mjs' },
+  // Feuert jede Bossphase anders, oder nur mehr vom Gleichen? Solange ein
+  // Boss drei Sekunden lebte, war das gleichgueltig. Seit v32 lebt er
+  // zwanzig.
+  { schluessel: 'bossmuster',  lauf: 'Bossmuster (3 Stufen x 3 Phasen)',     zeile: 'Bossmuster (9 Muster)',      datei: 'tools/bossmuster.mjs' },
 ];
 
 const torZeilen = [];

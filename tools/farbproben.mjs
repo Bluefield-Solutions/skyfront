@@ -182,6 +182,17 @@ const PROBEN = [
   ['nur noch halb so viele Wellen je Sektor', '✗',
     ['E.length < I && a < 400', 'E.length < Math.round(I * .55) && a < 400'],
     true, 'zeit', 'bleiben unter 60 s'],
+  // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
+  // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
+  // hat bis zur ersten Messung niemand gesehen.
+  ['Ring von Stufe 3 wieder duenn (t+1 Kugeln)', '✗',
+    ['const a = t === 1 ? 6 : t === 2 ? 12 : 14,', 'const a = t + 1,'],
+    true, 'muster', 'duennere Schuetze'],
+  // Phase 2 von Stufe 1 wieder als blosser Faecher: mehr Kugeln, dieselbe
+  // Art. Ohne diese Probe belegte das Tor nur den Druck, nicht den Wechsel.
+  ['Phase 2 von Stufe 1 ist nur ein breiterer Faecher', '✗',
+    ['const a = takt % 2 ? [-.55, -.4, -.25, -.1] : [.1, .25, .4, .55];', 'const a = [-.3, -.1, .1, .3];'],
+    true, 'muster', 'nur mehr vom Gleichen'],
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
@@ -197,6 +208,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'rhythmus' ? ['tools/rhythmus.mjs']
     : tor === 'formation' ? ['tools/formationen.mjs']
     : tor === 'zeit' ? ['tools/zeitachse.mjs']
+    : tor === 'muster' ? ['tools/bossmuster.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -247,7 +259,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -329,6 +341,7 @@ const MODUSPROBEN = [{
   ['Rhythmus-Tafel',   'tools/rhythmus.mjs',     '__SKF_BAUSTEINE.kurve fehlt'],
   ['Formationentafel', 'tools/formationen.mjs',  '__SKF_BAUSTEINE fehlt'],
   ['Zeitachse',        'tools/zeitachse.mjs',    '__SKF_BOSSLEBEN'],
+  ['Bossmuster',       'tools/bossmuster.mjs',   'fireBoss ist nicht zu erreichen'],
 ].map(([name, datei, marke]) => ({
   name: `${name} ohne Messstelle (--ohne-naht)`,
   cmd: [datei, '--ohne-naht'],

@@ -35,7 +35,8 @@
     "nummern": "node tools/nummern.mjs",
     "bildpruefung": "node tools/bildpruefung.mjs",
     "einbau": "node tools/einbau.mjs",
-    "zeitachse": "node tools/zeitachse.mjs"
+    "zeitachse": "node tools/zeitachse.mjs",
+    "bossmuster": "node tools/bossmuster.mjs"
   },
   "engines": {
     "node": ">=18"

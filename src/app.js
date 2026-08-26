@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v32",
+    SKF_VERSION = "v33",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -63686,27 +63686,89 @@ ${G}`, {
           l = E.tier >= 3 ? 12607743 : E.tier >= 2 ? 16742986 : 16734794;
         this.ebStyle = E.tier >= 3 ? "star" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
         const p = Math.PI * 2;
+        // Das Feuermuster je Stufe und Phase. Gemessen mit npm run bossmuster.
+        //
+        // Vorher unterschieden sich die Phasen nur in ZAHL und TAKT — das
+        // fiel nicht auf, solange ein Boss drei Sekunden lebte. Seit v32
+        // dauert er zwanzig, und dann ist "mehr vom Gleichen" keine Phase,
+        // sondern Warten. Jede Phase wechselt jetzt die ART.
+        //
+        // Und der Befund, den die Messung zuerst lieferte: Stufe 3 feuerte
+        // WENIGER als Stufe 2 (7,1 bis 13,6 gegen 9,6 bis 21,1 je Sekunde).
+        // Der haerteste Boss war der duennste Schuetze. Ursache war der
+        // Ring mit t+1 Kugeln — also zwei bis vier, waehrend Stufe 2 zehn
+        // bis achtzehn stellte.
+        const takt = E.takt = (E.takt || 0) + 1;
         if (E.tier === 1) {
-          const a = t === 1 ? [-.22, 0, .22] : t === 2 ? [-.42, -.21, 0, .21, .42] : [-.5, -.33, -.16, 0, .16, .33, .5];
-          for (const r of a) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
-          E.nextFire = R + (t === 3 ? 820 : 1e3) * this.fireRateMul
-        } else if (E.tier === 2) {
-          const a = t === 1 ? 10 : t === 2 ? 14 : 18,
-            r = R * 7e-4;
-          for (let n = 0; n < a; n++) {
-            const e = r + n / a * p;
-            this.spawnEB(v.x, v.y, Math.cos(e) * G * .72, Math.sin(e) * G * .72)
+          // Sturmkanzel: zwei Kettenkanonen an den Gondeln.
+          if (t === 1) {
+            for (const r of [-.22, 0, .22]) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
+            E.nextFire = R + 900 * this.fireRateMul
+          } else if (t === 2) {
+            // Abwechselnd links und rechts am Spieler VORBEI. Wer stehen
+            // bleibt, wird abwechselnd von beiden Seiten eingerahmt.
+            const a = takt % 2 ? [-.55, -.4, -.25, -.1] : [.1, .25, .4, .55];
+            for (const r of a) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
+            E.nextFire = R + 620 * this.fireRateMul
+          } else {
+            // Volle Breitseite: der gezielte Faecher bleibt, dazu kommt der
+            // Doppelturm auf dem Ruecken als Ring. Erst dadurch aendert sich
+            // die ART und nicht nur die Zahl — gemessen am gezielten Anteil,
+            // der von 75 auf gut 50 Prozent faellt.
+            for (const r of [-.5, -.33, -.16, 0, .16, .33, .5]) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
+            const w = R * 6e-4;
+            for (let n = 0; n < 6; n++) {
+              const e = w + n / 6 * p;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .62, Math.sin(e) * G * .62)
+            }
+            E.nextFire = R + 700 * this.fireRateMul
           }
-          this.spawnEB(v.x, v.y, Math.cos(x) * G, Math.sin(x) * G), E.nextFire = R + (t === 3 ? 900 : 1150) * this.fireRateMul
+        } else if (E.tier === 2) {
+          // Schwarmmutter: Abwurfschaechte. Zwei gegenlaeufige Ringe waren
+          // der erste Versuch fuer Phase 2 — gemessen war das KEIN anderes
+          // Muster: ueber mehrere Salven ist ein Ring wie zwei, beide
+          // gleichverteilt. Der Unterschied lag nur im Gefuehl. Jetzt wirft
+          // sie die Drohnen in Phase 2 gezielt AUF den Spieler statt um ihn
+          // herum, und der gezielte Anteil springt von einem Viertel auf
+          // zwei Drittel.
+          const r = R * 7e-4;
+          if (t === 2) {
+            for (const n of [-.25, -.15, -.05, .05, .15, .25]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .95, Math.sin(x + n) * G * .95);
+            for (const n of [-1, -.8, .8, 1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .7, Math.sin(x + n) * G * .7);
+            E.nextFire = R + 620 * this.fireRateMul
+          } else {
+            const a = t === 1 ? 10 : 16;
+            for (let n = 0; n < a; n++) {
+              const e = r + n / a * p;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .72, Math.sin(e) * G * .72)
+            }
+            if (t === 3) for (const n of [-.3, -.15, 0, .15, .3]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
+            else this.spawnEB(v.x, v.y, Math.cos(x) * G, Math.sin(x) * G);
+            E.nextFire = R + (t === 3 ? 780 : 1e3) * this.fireRateMul
+          }
         } else {
-          const a = t + 1,
+          // Lanzentraeger: die Bahnkanone ist sein Kennzeichen. Schnelle,
+          // schmale Lanzen auf den Spieler, dazu ein Ring als Grundrauschen.
+          // Phase 1 und 3 sind Lanzen: schnell, schmal, auf den Spieler.
+          // Phase 2 laesst sie WEG und deckt statt dessen die Flaeche —
+          // wer in Phase 1 gelernt hat auszuweichen, muss in Phase 2 das
+          // Gegenteil tun. Der gezielte Anteil faellt dabei von gut 40 auf
+          // gut 10 Prozent; das ist der messbare Wechsel der Art.
+          const a = t === 1 ? 6 : t === 2 ? 12 : 14,
             r = R * .004;
           for (let n = 0; n < a; n++) {
             const e = r + n / a * p;
             this.spawnEB(v.x, v.y, Math.cos(e) * G * .72, Math.sin(e) * G * .72)
           }
-          for (const n of [-.12, .12]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
-          E.nextFire = R + (t === 3 ? 440 : 560) * this.fireRateMul
+          if (t === 2) {
+            // Zwei wandernde Schuesse streichen ueber das Feld und nehmen
+            // die Raender, die der Ring frei laesst.
+            const w = Math.sin(R * .0016) * .9;
+            for (const n of [w - 1.2, w + 1.2]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .8, Math.sin(x + n) * G * .8)
+          } else
+            for (const n of (t === 3 ? [-.16, -.08, 0, .08, .16] : [-.1, 0, .1]))
+              this.spawnEB(v.x, v.y, Math.cos(x + n) * G * 1.3, Math.sin(x + n) * G * 1.3);
+          E.nextFire = R + (t === 3 ? 620 : t === 2 ? 520 : 560) * this.fireRateMul
         }
         if (E.pattern === 1 && t >= 2 && R > E.nextAccent) {
           E.nextAccent = R + 3200;
