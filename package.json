@@ -34,7 +34,8 @@
     "symbolprobe": "node tools/symbol.mjs --probe",
     "nummern": "node tools/nummern.mjs",
     "bildpruefung": "node tools/bildpruefung.mjs",
-    "einbau": "node tools/einbau.mjs"
+    "einbau": "node tools/einbau.mjs",
+    "zeitachse": "node tools/zeitachse.mjs"
   },
   "engines": {
     "node": ">=18"

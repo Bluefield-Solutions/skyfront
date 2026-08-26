@@ -57904,6 +57904,22 @@ return new ` + this.key + `();
       if (T >= se[R].start) return R;
     return 0
   }
+
+  // Die Lebenspunkte des Bosses an EINER Stelle.
+  //
+  // Vorher standen sie als Kette mitten in spawnBoss. Wer sie ausserhalb
+  // des Spiels braucht — die Zeitachse braucht sie —, haette sie
+  // nachrechnen muessen, und eine nachgerechnete Formel ist keine Messung:
+  // sie stimmt genau so lange, bis jemand die Kette anfasst. Eiserne
+  // Regel 4. Jetzt fragt das Werkzeug dieselbe Funktion, die das Spiel
+  // benutzt.
+  function bossLeben(basis, kapitel, stufeImKapitel, hpMul, endlos, endlosRunde) {
+    let h = basis;
+    if (kapitel === 1) h = Math.round(h * 1.25);
+    else if (kapitel === 2) h = Math.round(h * 1.35);
+    if (!endlos) h = Math.round(h * (1 + stufeImKapitel * .03));
+    return Math.round(h * hpMul * (endlos ? 1 + endlosRunde * .08 : 1))
+  }
   const Ye = [7319807, 9427050, 5226330, 16764778, 10477823, 8376512, 10128639, 16747066, 6084351, 16739024, 16732208, 11559167];
 
   function ke(T) {
@@ -63516,7 +63532,7 @@ ${R.label}`, {
         }), this.boss = new zn(this, R);
         const E = ne(this.stage),
           b = se[E];
-        this.kap2Boss = E >= 1, this.finalBoss = this.stage === b.start + b.count - 1, E === 1 ? (this.boss.setBaseTint(this.finalBoss ? 16738900 : 16747130), this.boss.maxHp = Math.round(this.boss.maxHp * 1.25)) : E === 2 && (this.boss.setBaseTint(this.finalBoss ? 8052826 : 10153594), this.boss.maxHp = Math.round(this.boss.maxHp * 1.35)), this.endless || (this.boss.maxHp = Math.round(this.boss.maxHp * (1 + (this.stage - b.start) * .03))), this.boss.maxHp = Math.round(this.boss.maxHp * this.enemyHpMul * (this.endless ? 1 + this.endlessRound * .08 : 1)), this.boss.hp = this.boss.maxHp, this.boss.pattern = this.endless ? this.endlessRound % 4 : (this.stage - 1) % 4, this.tweens.add({
+        this.kap2Boss = E >= 1, this.finalBoss = this.stage === b.start + b.count - 1, E === 1 ? this.boss.setBaseTint(this.finalBoss ? 16738900 : 16747130) : E === 2 && this.boss.setBaseTint(this.finalBoss ? 8052826 : 10153594), this.boss.maxHp = bossLeben(this.boss.maxHp, E, this.stage - b.start, this.enemyHpMul, this.endless, this.endlessRound), this.boss.hp = this.boss.maxHp, this.boss.pattern = this.endless ? this.endlessRound % 4 : (this.stage - 1) % 4, this.tweens.add({
           targets: this.boss,
           y: 185,
           duration: 1300,
@@ -65760,6 +65776,8 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     // Pruefnaht: die Tore backen damit dieselbe Funktion, die das Spiel
     // beim Auftauchen benutzt — nicht eine nachgebaute.
     window.__SKF_GEGNERBACKEN = gegnerBacken;
+    window.__SKF_BOSSLEBEN = bossLeben;
+    window.__SKF_KAPITEL = se;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,
