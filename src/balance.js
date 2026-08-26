@@ -53,10 +53,14 @@ export const BALANCE = {
   },
 
   // ---- Gegner-HP je Typ (Basis-Lebenspunkte) --------------------------------
+  // Runde v36: alle Werte um 30 % angehoben, auf Rückmeldung vom Gerät
+  // („die anderen Gegner können auch noch ein bisschen mehr Power vertragen").
+  // scout und lanzenwache stehen jetzt mit hier — vorher lagen sie allein in
+  // app.js, und wer die Gegner-HP drehen wollte, hätte sie übersehen.
   enemyHp: {
-    grunt: 3,     weaver: 6,   kamikaze: 3,  bomber: 21,  gunship: 29,
-    rocketeer: 8, elite: 60,   strafer: 4,   arcer: 14,   sniper: 9,
-    carrier: 80,  rotor: 120,   // Runde: Schwergegner (spätes Spiel) zäher
+    scout: 3,     grunt: 4,    weaver: 8,    kamikaze: 4,  bomber: 27,
+    gunship: 38,  rocketeer: 10, elite: 78,  strafer: 5,   arcer: 18,
+    sniper: 12,   carrier: 104, rotor: 156,  lanzenwache: 130,
   },
 
   // ---- Gegner-Punkte je Typ (Score bei Abschuss) ----------------------------
@@ -104,7 +108,7 @@ export const BALANCE = {
     // leicht". Nachmessen mit `npm run zeitachse`: dort steht, wie viele
     // Sekunden ein Boss MINDESTENS hält — bei voller Feuerkraft und wenn
     // jeder Schuss trifft. Auf dem Gerät dauert es länger.
-    bossGrund:    5400,   // (orig 160) Leben des ersten Bosses
+    bossGrund:    7020,   // (orig 160) Leben des ersten Bosses
     bossZuwachs:  0.005,  // (orig ---) Aufschlag je Sektor
   },
 

@@ -209,6 +209,16 @@ const PROBEN = [
   ['Nachfuehrung ohne Zeitkorrektur', '✗',
     ['f = Ft.speedLerp >= 1 ? 1 : 1 - Math.pow(1 - Ft.speedLerp, v),', 'f = Ft.speedLerp,'],
     true, 'steuer', 'haengt an der Bildrate'],
+  // Der Kraftstreifen duenner: vier Layoutpunkte sind auf dem Geraet 2,9
+  // Anzeigepunkte, und das ist eine Linie. Genau diese Umrechnung hat in
+  // diesem Projekt schon einmal 300 Phantombefunde erzeugt.
+  ['Kraftstreifen auf vier Layoutpunkte', 'K',
+    ['LEISTE_HOCH = 5,', 'LEISTE_HOCH = 4,'], false],
+  // Und ohne dunkle Unterlage: dann traegt er ueber hellem Untergrund nicht,
+  // genau wie ein Geschoss ohne Rand.
+  ['Kraftstreifen ohne dunkle Unterlage', 'K',
+    ['R.fillStyle(659224, .85).fillRoundedRect(G - 2, v - 2, I + 4, LEISTE_HOCH + 4, 3);',
+     'R.fillStyle(12578815, .85).fillRoundedRect(G - 2, v - 2, I + 4, LEISTE_HOCH + 4, 3);'], false],
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }

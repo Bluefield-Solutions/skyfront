@@ -301,6 +301,36 @@ if (biome.length) {
   for (const z of zeilen) console.log('     ' + z);
 }
 
+/* ---------- Pruefung K: der Kraftstreifen ueber den Gegnern ------------ */
+
+// Er wird nicht als Textur gezeichnet, sondern als Graphics — die
+// Texturpruefungen unten sehen ihn also gar nicht. Geprueft wird deshalb
+// statisch an der Quelle, und zwar dasselbe wie bei jedem Geschoss: hat er
+// eine dunkle Unterlage, und ist er auf dem ZIELGERAET ueberhaupt zu sehen?
+//
+// Die Hoehe steht in Layoutpunkten (Raum 540 breit), das Geraet hat 390.
+// Vier Layoutpunkte waeren 2,9 Anzeigepunkte — eine Linie, kein Balken.
+{
+  const LEISTE_MIN_ANZEIGE = 3;      // Anzeigepunkte
+  const RAUM = 540, GERAET = 390;
+  const m = /const LEISTE_AB = (\d+), LEISTE_HOCH = (\d+)/.exec(quelle);
+  if (!m) melde('K: LEISTE_AB / LEISTE_HOCH nicht in src/app.js gefunden — der Kraftstreifen ist nicht zu pruefen');
+  else {
+    const hoch = Number(m[2]), anzeige = hoch * GERAET / RAUM;
+    console.log(`K  Kraftstreifen ab ${m[1]} Trefferpunkten, ${hoch} Layoutpunkte hoch = ${anzeige.toFixed(1)} Anzeigepunkte`);
+    if (anzeige < LEISTE_MIN_ANZEIGE)
+      melde(`K: der Kraftstreifen ist auf dem Geraet nur ${anzeige.toFixed(1)} Punkte hoch (mindestens ${LEISTE_MIN_ANZEIGE}) — das ist eine Linie, kein Balken`);
+    const rumpf = koerper('gegnerLeisten') || (/gegnerLeisten\(\)\s*\{[\s\S]*?\n      \}/.exec(quelle) || [''])[0];
+    if (!rumpf) melde('K: gegnerLeisten() nicht gefunden');
+    else {
+      const farben = [...rumpf.matchAll(/fillStyle\((\d+)/g)].map((x) => ausZahl(Number(x[1])));
+      if (!farben.length) melde('K: der Kraftstreifen zeichnet keine Farbe');
+      else if (!farben.some((c) => leucht(c) <= .05))
+        melde('K: der Kraftstreifen hat keine dunkle Unterlage — ueber hellem Untergrund traegt er nicht, genau wie ein Geschoss ohne Rand');
+    }
+  }
+}
+
 /* ---------- Pruefung E: haben die Texturen die Schichten ueberhaupt? --- */
 
 // Der Nachweis oben rechnet mit Kern und Rand. Er ist nur so viel wert wie
