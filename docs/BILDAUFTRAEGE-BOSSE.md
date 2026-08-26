@@ -618,21 +618,181 @@ verschießt `missile`. Der Rückfall auf `orb` greift dort nie.
 | Rand | **dunkler Rand** ringsum — er trägt die Lesbarkeit über hellem Grund |
 | Mitte | **kein weißes Mittelband.** Das war der Fehler von `eb_needle`: bei zuviel Weiß bleibt von der Kennfarbe nichts übrig, und das Farbtor schlägt an |
 
+### 4.3 Warum hier alles anders läuft als bei den Bossen
+
+Ein Geschoss ist 12 bis 36 Bildpunkte groß. **Kein Bildwerkzeug gibt so
+etwas aus** — und die Pixelzahl in den Prompt zu schreiben, war schon bei
+den Bossen der Fehler, der zwei Anläufe gekostet hat.
+
+Also andersherum, in drei Schritten:
+
+1. **Groß bestellen**, in dem Seitenverhältnis, das die Form verlangt —
+   1024 Bildpunkte auf der langen Seite.
+2. **`npm run bildpruefung`** misst Seitenverhältnis und Rand wie bei den
+   Bossen.
+3. **`npm run einbau`** verkleinert auf die Spielgröße. Das ist dieselbe
+   Rechnung wie beim Boss: Puffergröße = doppelte Weltgröße, gezeichnet
+   mit `setScale(.5)`.
+
+Die Spielgrößen unten sind so gewählt, dass sie zu einem **gängigen
+Seitenverhältnis** passen. Ein Werkzeug, das nur 1:1, 9:16 und 16:9 kennt,
+reicht für alle fünf.
+
+> **Noch nicht gebaut:** `npm run einbau` kennt bis heute nur die drei
+> Bosse. Die Geschosse kommen dort dazu, sobald die Bilder da sind — und
+> mit ihnen der Umbau von `EB_STYLE`, das die fünf Arten heute noch
+> zeichnet statt sie zu laden. Das ist Arbeit am Code, keine Bildfrage.
+
+---
+
+### G-1 · BOLZEN → `eb_bolzen.png` (Sturmkanzel)
+
+> **Erst einstellen:** Seitenverhältnis **9:16 hoch**, Größe **576 × 1024 px**.
+> Im Spiel: 24 × 42 Weltpunkte.
+
 ```
-Top-down game projectile sprite, <FORM>, pointing DOWN. Glowing hot orange-
-red core (#ff3a2a) with a darker crimson rim and a thin near-black outline.
-Semi-realistic energy-projectile look, slight inner glow, no white centre.
-Isolated on a fully transparent background, no background, no text.
-<BREITE> x <HOEHE> pixels.
+Top-down view of a single game projectile, seen from straight above, flying DOWN toward
+the bottom of the frame. Shape: a short, thick bolt — a stubby cylinder with a tapered,
+pointed tip at the bottom and a blunt tail, about twice as long as it is wide.
+Colour: a glowing hot orange-red core (#ff3a2a), a darker crimson rim around it, and a
+thin near-black outline at the very edge so it stays readable over a bright background.
+There is NO white centre — the core must keep its red-orange hue all the way through.
+Look: semi-realistic energy projectile with a faint inner glow, hard edges, not a soft
+blur. No motion trail, no smoke, no sparks — the game draws the trail itself.
+Framing: centred, filling about 80 percent of the frame height, with clear empty
+transparent margin on all four sides.
+Background: fully transparent. No background, no glow halo bleeding into the background,
+no ground, no text, no logos.
 ```
 
-| Geschoss | `<FORM>` | Maß |
-|---|---|---|
-| `eb_bolzen` (B-1) | `a short thick bolt with a tapered tip and a short motion trail` | 22 × 40 |
-| `eb_brut` (B-2) | `a small armoured drone pod with two folded fins` | 26 × 30 |
-| `eb_lanze` (B-3) | `a very long thin lance of focused energy` | 12 × 56 |
-| `eb_scherbe` (B-4) | `an angular triangular shard with sharp facets` | 30 × 30 |
-| `eb_hammer` (B-5) | `a heavy blunt slug with a wide impact ring around it` | 36 × 34 |
+**Negativ:**
+```
+white centre, white core, pale core, motion trail, streak, smoke, sparks, glow halo,
+multiple projectiles, background, sky, ground, gradient background, text, watermark,
+cartoon, cel shading, soft focus, blurry, low detail, landscape composition
+```
+
+---
+
+### G-2 · BRUT → `eb_brut.png` (Schwarmmutter)
+
+> **Erst einstellen:** Seitenverhältnis **1:1 quadratisch**, Größe **1024 × 1024 px**.
+> Im Spiel: 30 × 30 Weltpunkte.
+
+```
+Top-down view of a single game projectile, seen from straight above, flying DOWN toward
+the bottom of the frame. Shape: a small armoured drone pod — a compact rounded capsule
+with two short fins folded tight against its sides, roughly as wide as it is long.
+Colour: a glowing hot orange-red core (#ff3a2a) showing through a seam down the middle,
+dark crimson armour plates around it, and a thin near-black outline at the very edge so
+it stays readable over a bright background. There is NO white centre.
+Look: semi-realistic hard-surface pod with a faint inner glow at the seam, hard edges,
+not a soft blur. No motion trail, no smoke, no sparks.
+Framing: centred, filling about 80 percent of the frame, with clear empty transparent
+margin on all four sides.
+Background: fully transparent. No background, no glow halo bleeding into the background,
+no ground, no text, no logos.
+```
+
+**Negativ:**
+```
+white centre, white core, pale core, motion trail, streak, smoke, sparks, glow halo,
+open wings, spread fins, multiple projectiles, background, sky, ground, gradient
+background, text, watermark, cartoon, cel shading, soft focus, blurry, low detail
+```
+
+---
+
+### G-3 · LANZE → `eb_lanze.png` (Lanzenträger)
+
+> **Erst einstellen:** Seitenverhältnis **9:16 hoch**, Größe **576 × 1024 px**.
+> Im Spiel: 18 × 32 Weltpunkte.
+> Die Lanze soll **im Bild** schlank sein, nicht durch das Format — der Stab
+> füllt die Höhe und nur ein Drittel der Breite. Der Rest ist durchsichtig.
+
+```
+Top-down view of a single game projectile, seen from straight above, flying DOWN toward
+the bottom of the frame. Shape: a very long, very thin lance of focused energy — a
+straight slender rod with a sharp point at the bottom end, at least four times as long as
+it is wide. It occupies the full height of the frame and only a narrow strip in the
+middle; everything to the left and right of it is empty.
+Colour: a glowing hot orange-red core (#ff3a2a) running the full length, a darker crimson
+sheath around it, and a thin near-black outline at the very edge so it stays readable
+over a bright background. There is NO white centre.
+Look: semi-realistic focused-energy beam with a faint inner glow, hard parallel edges,
+not a soft blur. No motion trail, no smoke, no sparks.
+Framing: centred, filling about 90 percent of the frame height and about a third of its
+width, with clear empty transparent margin at top and bottom.
+Background: fully transparent. No background, no glow halo bleeding into the background,
+no ground, no text, no logos.
+```
+
+**Negativ:**
+```
+white centre, white core, pale core, thick rod, short bolt, motion trail, streak, smoke,
+sparks, glow halo, multiple projectiles, background, sky, ground, gradient background,
+text, watermark, cartoon, cel shading, soft focus, blurry, low detail
+```
+
+---
+
+### G-4 · SCHERBE → `eb_scherbe.png` (Ringfestung)
+
+> **Erst einstellen:** Seitenverhältnis **1:1 quadratisch**, Größe **1024 × 1024 px**.
+> Im Spiel: 30 × 30 Weltpunkte.
+
+```
+Top-down view of a single game projectile, seen from straight above. Shape: an angular
+triangular shard with sharp flat facets and clean straight edges, like a splinter of
+armour plate — roughly as wide as it is tall, with no obvious front or back, because the
+game spins it as it flies.
+Colour: a glowing hot orange-red core (#ff3a2a) along the facet edges, darker crimson
+faces between them, and a thin near-black outline at the very edge so it stays readable
+over a bright background. There is NO white centre.
+Look: semi-realistic hard-surface shard with a faint inner glow, hard edges, not a soft
+blur. No motion trail, no smoke, no sparks.
+Framing: centred, filling about 80 percent of the frame, with clear empty transparent
+margin on all four sides.
+Background: fully transparent. No background, no glow halo bleeding into the background,
+no ground, no text, no logos.
+```
+
+**Negativ:**
+```
+white centre, white core, pale core, rounded shape, smooth blob, motion trail, streak,
+smoke, sparks, glow halo, multiple projectiles, background, sky, ground, gradient
+background, text, watermark, cartoon, cel shading, soft focus, blurry, low detail
+```
+
+---
+
+### G-5 · HAMMER → `eb_hammer.png` (Ambosskreuzer)
+
+> **Erst einstellen:** Seitenverhältnis **1:1 quadratisch**, Größe **1024 × 1024 px**.
+> Im Spiel: 34 × 34 Weltpunkte — das größte der fünf.
+
+```
+Top-down view of a single game projectile, seen from straight above, flying DOWN toward
+the bottom of the frame. Shape: a heavy blunt slug — a thick, squat cylinder with a flat
+front face, surrounded by a wide flat ring like a shockwave collar at its widest point.
+The ring makes it as wide as it is long.
+Colour: a glowing hot orange-red core (#ff3a2a) in the slug, a darker crimson ring around
+it, and a thin near-black outline at the very edge so it stays readable over a bright
+background. There is NO white centre.
+Look: semi-realistic heavy ordnance with a faint inner glow, hard edges, not a soft blur.
+It should read as SLOW and HEAVY, not fast. No motion trail, no smoke, no sparks.
+Framing: centred, filling about 85 percent of the frame, with clear empty transparent
+margin on all four sides.
+Background: fully transparent. No background, no glow halo bleeding into the background,
+no ground, no text, no logos.
+```
+
+**Negativ:**
+```
+white centre, white core, pale core, thin shape, needle, dart, motion trail, streak,
+smoke, sparks, glow halo, multiple projectiles, background, sky, ground, gradient
+background, text, watermark, cartoon, cel shading, soft focus, blurry, low detail
+```
 
 ---
 
