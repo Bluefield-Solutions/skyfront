@@ -80,18 +80,21 @@ export const BALANCE = {
   // vom Spiel ignoriert). Original-Werte in Klammern.
   curve: {
     waveBase:     37,   // (orig 34)  Wellen-Basiszahl früh — kleiner = leichterer Einstieg
-    waveSlope:    1.15, // (orig 1.1) Zuwachs pro Level — größer = härteres Spätspiel
+    waveSlope:    1.0,  // (orig 1.1) Zuwachs pro Level — größer = härteres Spätspiel
     spacingBase:  2650, // (orig 2150) Basis-Wellenabstand ms — größer = früh lockerer
     spacingSlope: 60,   // (orig 45)  Verdichtung pro Level — größer = spät hektischer
 
-    // Die Bosse. bossStaerke wirkt auf ALLE gleichmäßig (Grundleben 160 /
-    // 400 / 620 je Stufe), bossKapitel ist der Aufschlag je Kapitel — bei
-    // 0.14 hat der Boss im zwölften Kapitel das 2,54-fache Leben des ersten.
-    // Vorher gab es diesen Aufschlag nur für Kapitel 2 und 3; gemessen hiess
-    // das, dass Boss Stufe 3 in Sektor 120 genauso viel Leben hatte wie in
-    // Sektor 10. Nachmessen mit `npm run zeitachse`.
-    bossStaerke:  1.5,  // (orig 1.0) Grundleben aller Bosse
-    bossKapitel:  0.14, // (orig ---) Aufschlag je Kapitel
+    // Die Bosse. bossGrund ist das Leben des ERSTEN Bosses (Stufe 1,
+    // Sektor 1, vor dem Schwierigkeitsgrad). bossZuwachs ist der Aufschlag
+    // je Sektor: bei 0.0125 hat der Boss in Sektor 120 das 2,49-fache.
+    // Obendrauf kommt die Bossstufe mit 1,0 / 1,25 / 1,5.
+    //
+    // Diese beiden Zahlen sind die Stellschraube für „der Boss ist zu
+    // leicht". Nachmessen mit `npm run zeitachse`: dort steht, wie viele
+    // Sekunden ein Boss MINDESTENS hält — bei voller Feuerkraft und wenn
+    // jeder Schuss trifft. Auf dem Gerät dauert es länger.
+    bossGrund:    2000,   // (orig 160) Leben des ersten Bosses
+    bossZuwachs:  0.009, // (orig ---) Aufschlag je Sektor
   },
 
   // ---- Spieler-Upgrades (Hangar): max = Stufen-Obergrenze, cost* = Goldpreise --

@@ -91,18 +91,15 @@ const daten = await seite.evaluate(() => {
   try { spiel.fire(); } catch (e) { n = -1; }
   spiel.shootBullet = echtSchuss; spiel.fireSecondary = echtZweit; spiel.player = echtSpieler;
 
-  const kapitelVon = (st) => { for (let k = kapitel.length - 1; k >= 0; k--) if (st >= kapitel[k].start) return k; return 0; };
-
   return {
     salve: n, schaden: spiel.playerBulletDamage, takt: spiel.fireDelay,
     waffe: spiel.weapon, bossDmgMul: spiel.bossDmgMul, hpMul: spiel.enemyHpMul,
     sektoren: stufen.map((s, i) => {
       const st = i + 1, w = s.waves || [], at = w.map((x) => x.at || 0);
-      const k = kapitelVon(st), basis = s.boss >= 3 ? 620 : s.boss >= 2 ? 400 : 160;
       return {
         nr: st, label: s.label, wellen: w.length, stufe: s.boss,
         fenster: w.length ? (Math.max(...at) - Math.min(...at)) / 1000 : 0,
-        bossHp: s.boss > 0 ? leben(basis, k, st - kapitel[k].start, spiel.enemyHpMul, false, 0) : 0,
+        bossHp: s.boss > 0 ? leben(s.boss, st, spiel.enemyHpMul, false, 0) : 0,
       };
     }),
   };

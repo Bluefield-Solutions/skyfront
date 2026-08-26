@@ -173,8 +173,8 @@ const PROBEN = [
   // buildcore.mjs sucht beim Bauen genau diesen Ausdruck und wuerde sonst
   // mit "Kurven-Fragment nicht eindeutig" abbrechen — die Probe waere dann
   // am Bau gescheitert, nicht am Tor, und haette nichts bewiesen.
-  ['Bosskurve flach — kein Zuwachs ueber die Kapitel', '✗',
-    ['basis * 1.5 * (1 + kapitel * .14);', 'basis * 1.5 * (1 + kapitel * .14) * 0 + basis;'],
+  ['Bosskurve flach — kein Zuwachs ueber die Sektoren', '✗',
+    ['const h = 1450 * (1 + (sektor - 1) * .0125) * (stufe', 'const h = 1450 * (1 + (sektor - 1) * .0125) * 0 + 1450 * (stufe'],
     true, 'zeit', 'waechst ueber die ganze Kampagne nur um das'],
   // Die Wellenzahl zurueck auf den Stand vor v31: dann fallen die ersten
   // Sektoren wieder unter eine Minute. Das ist die andere Haelfte dessen,

@@ -78,7 +78,7 @@ export function applyCurve(src, C, log = () => {}) {
     { from: '2150 - T * 45', to: `${C.spacingBase} - T * ${C.spacingSlope}`, path: 'curve.spacing' },
     // Die Bosskurve steht in derselben Form: ein Literal in src/app.js, das
     // beim Bauen ersetzt wird. Gemessen wird sie mit npm run zeitachse.
-    { from: 'basis * 1.5 * (1 + kapitel * .14)', to: `basis * ${C.bossStaerke} * (1 + kapitel * ${C.bossKapitel})`, path: 'curve.boss' },
+    { from: '1450 * (1 + (sektor - 1) * .0125)', to: `${C.bossGrund} * (1 + (sektor - 1) * ${C.bossZuwachs})`, path: 'curve.boss' },
   ];
   let changed = 0;
   const errors = [];

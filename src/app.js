@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v31",
+    SKF_VERSION = "v32",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -57913,14 +57913,25 @@ return new ` + this.key + `();
   // sie stimmt genau so lange, bis jemand die Kette anfasst. Eiserne
   // Regel 4. Jetzt fragt das Werkzeug dieselbe Funktion, die das Spiel
   // benutzt.
-  function bossLeben(basis, kapitel, stufeImKapitel, hpMul, endlos, endlosRunde) {
-    // Vorher: nur Kapitel 2 und 3 bekamen einen Aufschlag (1,25 und 1,35),
-    // alle anderen keinen. Gemessen mit npm run zeitachse hiess das: Boss
-    // Stufe 3 hatte in Sektor 120 exakt so viele Lebenspunkte wie in
-    // Sektor 10 — Faktor 1,00 ueber 110 Sektoren, waehrend die Feuerkraft
-    // des Spielers waechst. Jetzt traegt jedes der zwoelf Kapitel.
-    let h = basis * 1.5 * (1 + kapitel * .14);
-    if (!endlos) h = Math.round(h * (1 + stufeImKapitel * .03));
+  // Zwei Anlaeufe hat diese Funktion gebraucht, beide aus demselben Grund
+  // falsch: die Progression hing an Dingen, die sich WIEDERHOLEN.
+  //
+  // Anlauf 1 (bis v30): einen Aufschlag bekamen nur Kapitel 2 und 3. Boss
+  // Stufe 3 hatte in Sektor 120 exakt so viele Lebenspunkte wie in
+  // Sektor 10 — Faktor 1,00 ueber 110 Sektoren.
+  //
+  // Anlauf 2 (v31): Kapitelrampe plus Grundaufschlag 1,5. Gemessen 0,9 s
+  // fuer den ersten Boss — und auf dem Telefon war er "nach dem ersten
+  // Schuss tot". Der Aufschlag war zu klein, und die Stufe (1, 2, 3) trug
+  // immer noch die halbe Progression, obwohl sie alle 15 Sektoren von vorn
+  // beginnt: ein Stufe-1-Boss in Sektor 109 war so zaeh wie in Sektor 1.
+  //
+  // Jetzt traegt der SEKTOR die Progression, und die Stufe ist nur noch
+  // ein Aufschlag darauf. Das ist die einzige Groesse, die monoton waechst.
+  // Nachzumessen mit npm run zeitachse — dort steht, wie viele Sekunden ein
+  // Boss mindestens haelt.
+  function bossLeben(stufe, sektor, hpMul, endlos, endlosRunde) {
+    const h = 1450 * (1 + (sektor - 1) * .0125) * (stufe >= 3 ? 1.5 : stufe >= 2 ? 1.25 : 1);
     return Math.round(h * hpMul * (endlos ? 1 + endlosRunde * .08 : 1))
   }
   const Ye = [7319807, 9427050, 5226330, 16764778, 10477823, 8376512, 10128639, 16747066, 6084351, 16739024, 16732208, 11559167];
@@ -63535,7 +63546,7 @@ ${R.label}`, {
         }), this.boss = new zn(this, R);
         const E = ne(this.stage),
           b = se[E];
-        this.kap2Boss = E >= 1, this.finalBoss = this.stage === b.start + b.count - 1, E === 1 ? this.boss.setBaseTint(this.finalBoss ? 16738900 : 16747130) : E === 2 && this.boss.setBaseTint(this.finalBoss ? 8052826 : 10153594), this.boss.maxHp = bossLeben(this.boss.maxHp, E, this.stage - b.start, this.enemyHpMul, this.endless, this.endlessRound), this.boss.hp = this.boss.maxHp, this.boss.pattern = this.endless ? this.endlessRound % 4 : (this.stage - 1) % 4, this.tweens.add({
+        this.kap2Boss = E >= 1, this.finalBoss = this.stage === b.start + b.count - 1, E === 1 ? this.boss.setBaseTint(this.finalBoss ? 16738900 : 16747130) : E === 2 && this.boss.setBaseTint(this.finalBoss ? 8052826 : 10153594), this.boss.maxHp = bossLeben(this.boss.tier, this.stage, this.enemyHpMul, this.endless, this.endlessRound), this.boss.hp = this.boss.maxHp, this.boss.pattern = this.endless ? this.endlessRound % 4 : (this.stage - 1) % 4, this.tweens.add({
           targets: this.boss,
           y: 185,
           duration: 1300,
