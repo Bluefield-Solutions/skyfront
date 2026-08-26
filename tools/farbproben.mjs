@@ -217,6 +217,17 @@ const PROBEN = [
   ['Nachfuehrung ohne Zeitkorrektur', '✗',
     ['f = Ft.speedLerp >= 1 ? 1 : 1 - Math.pow(1 - Ft.speedLerp, v),', 'f = Ft.speedLerp,'],
     true, 'steuer', 'haengt an der Bildrate'],
+  // Die Ringfestung richtet in Phase 2 nicht mehr aus, sondern streut wie
+  // in Phase 1. Dann ist der Wechsel der Art weg, den ihr Muster ausmacht.
+  ['Ringfestung feuert in Phase 2 wie in Phase 1', '✗',
+    ["for (const n of [-.35, -.25, -.15, -.05, .05, .15, .25, .35]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);",
+     "for (let n = 0; n < 8; n++) { const e = r + n / 8 * p; this.spawnEB(v.x, v.y, Math.cos(e) * G, Math.sin(e) * G) }"],
+    true, 'muster', 'nur mehr vom Gleichen'],
+  // Und eine Stufenliste, die Stufe 5 vergibt, obwohl das Bild fehlt.
+  ['Sektor 120 bekommt Bossstufe 5 ohne Bild', '✗',
+    ['label: "Biolumineszenz 10",\n      bg: "bg_biolum_10",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 3,',
+     'label: "Biolumineszenz 10",\n      bg: "bg_biolum_10",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 5,'],
+    true, 'zeit', 'vergeben Bossstufe 4 oder 5'],
   // Der Kraftstreifen duenner: vier Layoutpunkte sind auf dem Geraet 2,9
   // Anzeigepunkte, und das ist eine Linie. Genau diese Umrechnung hat in
   // diesem Projekt schon einmal 300 Phantombefunde erzeugt.

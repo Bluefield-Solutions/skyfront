@@ -50,7 +50,18 @@ import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 const M = messstelle('Bossmuster', 'jede Phase feuert anders, und die haertere Stufe feuert mehr.');
 
 const AUFRUFE = 6;
-const DECKEL = 32;          // Kugeln je Sekunde, Obergrenze
+// Obergrenze der Kugeln je Sekunde.
+//
+// Bis v37 stand sie bei 32, und Stufe 3 lag mit 30,6 knapp darunter. Mit
+// den Stufen 4 und 5 war die Leiter damit zu Ende: mehr Druck ging nicht
+// mehr, ohne den Deckel zu reissen.
+//
+// 38 ist die bewusste Entscheidung, sie zu heben, und zwar EINMAL: der
+// Ambosskreuzer ist der letzte Boss der Kampagne, und ab hier muss die
+// Schwierigkeit aus Muster, Geschwindigkeit und Lebenspunkten kommen,
+// nicht aus noch mehr Kugeln. Wer sie weiter hebt, sollte einen besseren
+// Grund haben als \"das neue Muster passt sonst nicht\".
+const DECKEL = 38;          // Kugeln je Sekunde, Obergrenze
 const ART_LUECKE = 60;      // Grad Unterschied in der groessten Luecke
 const ART_GEZIELT = .2;     // oder dieser Unterschied im gezielten Anteil
 
@@ -89,7 +100,7 @@ const daten = await seite.evaluate(({ aufrufe, ohneNaht }) => {
   g.bossMuzzle = () => ({ x: 270, y: 185 });
   g.fireRateMul = 1; g.bossExtraBullets = 0; g.kap2Boss = false; g.finalBoss = false;
   const zielX = Math.atan2(700 - 185, 0);            // Spieler mittig unten
-  for (const stufe of [1, 2, 3]) for (const phase of [1, 2, 3]) {
+  for (const stufe of [1, 2, 3, 4, 5]) for (const phase of [1, 2, 3]) {
     const winkel = []; let takt = 0, fehler = null;
     const boss = { x: 270, y: 185, tier: stufe, phase: () => phase, nextFire: 0, nextAccent: 1e9, pattern: 0, enterDone: true };
     g.boss = boss;
@@ -129,9 +140,9 @@ if (daten.fehler) M.abbruch(daten.fehler);
 const z = daten.aus;
 for (const e of z) if (e.fehler) M.ungemessen(`Stufe ${e.stufe} Phase ${e.phase}: ${e.fehler}`);
 const gut = z.filter((e) => !e.fehler);
-if (gut.length < 9) M.ungemessen(`nur ${gut.length} von 9 Mustern gemessen.`);
+if (gut.length < 15) M.ungemessen(`nur ${gut.length} von 15 Mustern gemessen.`);
 
-console.log(`Bossmuster — 3 Stufen x 3 Phasen, je ${AUFRUFE} Salven\n`);
+console.log(`Bossmuster — 5 Stufen x 3 Phasen, je ${AUFRUFE} Salven\n`);
 console.log('  Stufe  Phase   Schuss    Takt   pro Sek   gezielt   Luecke   (Spanne)');
 for (const e of gut)
   console.log(`  ${String(e.stufe).padStart(5)}  ${String(e.phase).padStart(5)}   ${e.schuss.toFixed(1).padStart(6)}  ${Math.round(e.takt).toString().padStart(5)} ms  ${e.proSek.toFixed(1).padStart(6)}   ${(e.gezielt * 100).toFixed(0).padStart(5)} %   ${Math.round(e.luecke).toString().padStart(4)}°   ${Math.round(e.spanne).toString().padStart(6)}°`);
@@ -139,21 +150,21 @@ for (const e of gut)
 const hol = (s, p) => gut.find((e) => e.stufe === s && e.phase === p);
 
 // 1. Steigt der Druck mit der Phase?
-for (const s of [1, 2, 3]) for (const p of [2, 3]) {
+for (const s of [1, 2, 3, 4, 5]) for (const p of [2, 3]) {
   const a = hol(s, p - 1), b = hol(s, p);
   if (a && b && b.proSek <= a.proSek)
     M.befund(`Stufe ${s}: Phase ${p} feuert nicht mehr als Phase ${p - 1} (${b.proSek.toFixed(1)} gegen ${a.proSek.toFixed(1)} je Sekunde).`);
 }
 
 // 2. Steigt der Druck mit der Stufe? Das war der erste Befund ueberhaupt.
-for (const p of [1, 2, 3]) for (const s of [2, 3]) {
+for (const p of [1, 2, 3]) for (const s of [2, 3, 4, 5]) {
   const a = hol(s - 1, p), b = hol(s, p);
   if (a && b && b.proSek <= a.proSek)
     M.befund(`Phase ${p}: Stufe ${s} feuert nicht mehr als Stufe ${s - 1} (${b.proSek.toFixed(1)} gegen ${a.proSek.toFixed(1)} je Sekunde). Der haertere Boss ist der duennere Schuetze.`);
 }
 
 // 3. Wechselt die ART, oder nur die Zahl?
-for (const s of [1, 2, 3]) for (const p of [2, 3]) {
+for (const s of [1, 2, 3, 4, 5]) for (const p of [2, 3]) {
   const a = hol(s, p - 1), b = hol(s, p);
   if (!a || !b) continue;
   const dL = Math.abs(b.luecke - a.luecke), dG = Math.abs(b.gezielt - a.gezielt);

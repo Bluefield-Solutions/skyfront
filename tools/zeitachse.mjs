@@ -99,6 +99,7 @@ const daten = await seite.evaluate(() => {
   spiel.shootBullet = echtSchuss; spiel.fireSecondary = echtZweit; spiel.player = echtSpieler;
 
   return {
+    bild4: window.__game.textures.exists('boss4'), bild5: window.__game.textures.exists('boss5'),
     salve: n, schaden: spiel.playerBulletDamage, takt: spiel.fireDelay,
     waffe: spiel.weapon, bossDmgMul: spiel.bossDmgMul, hpMul: spiel.enemyHpMul,
     sektoren: stufen.map((s, i) => {
@@ -148,6 +149,21 @@ if (kurz.length)
     + `(Sektor ${kurz.map((z) => z.nr).slice(0, 12).join(', ')}${kurz.length > 12 ? ' …' : ''}).`);
 if (lang.length)
   M.befund(`${lang.length} Sektor(en) liegen ueber ${OBEN} s, laengster ${lang[lang.length - 1].label} mit ${lang[lang.length - 1].gesamt.toFixed(1)} s.`);
+
+// Vergibt die Stufenliste Bosse, fuer die es gar kein Bild gibt?
+//
+// Die Stufen 4 und 5 sind seit v38 gerechnet und feuern eigene Muster, aber
+// ihre Bilder (Ringfestung, Ambosskreuzer) sind bestellt und nicht
+// geliefert. Wer sie in der Stufenliste vergibt, bevor die Bilder da sind,
+// bekommt drei Bosse, die gleich AUSSEHEN und verschieden schiessen — und
+// merkt es erst auf dem Geraet. Diese Pruefung merkt es vorher.
+{
+  const ohne = zeilen.filter((z) => (z.stufe === 4 && !daten.bild4) || (z.stufe === 5 && !daten.bild5));
+  if (ohne.length)
+    M.befund(`${ohne.length} Sektor(en) vergeben Bossstufe 4 oder 5, aber die Textur dafuer fehlt `
+      + `(Sektor ${ohne.map((z) => z.nr).slice(0, 8).join(', ')}${ohne.length > 8 ? ' …' : ''}). `
+      + `Der Boss faellt dann auf das Bild der Stufe 3 zurueck: gleiches Aussehen, anderes Feuer. Erst npm run einbau.`);
+}
 
 // Waechst der Boss ueberhaupt mit? Ohne diese Frage misst die Tafel die
 // Laenge und uebersieht, dass die Schwierigkeit stehenbleibt.

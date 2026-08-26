@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v37",
+    SKF_VERSION = "v38",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -57992,7 +57992,11 @@ return new ` + this.key + `();
   // Nachzumessen mit npm run zeitachse — dort steht, wie viele Sekunden ein
   // Boss mindestens haelt.
   function bossLeben(stufe, sektor, hpMul, endlos, endlosRunde) {
-    const h = 1450 * (1 + (sektor - 1) * .0125) * (stufe >= 3 ? 1.5 : stufe >= 2 ? 1.25 : 1);
+    // Stufenaufschlag, seit v38 fuer fuenf Stufen. Die Bilder fuer 4 und 5
+    // (Ringfestung, Ambosskreuzer) sind bestellt, aber noch nicht da —
+    // deshalb vergibt die Stufenliste sie noch nicht. Die Rechnung steht
+    // trotzdem schon hier, damit spaeter ein Tabelleneintrag reicht.
+    const h = 1450 * (1 + (sektor - 1) * .0125) * (stufe >= 5 ? 2 : stufe >= 4 ? 1.75 : stufe >= 3 ? 1.5 : stufe >= 2 ? 1.25 : 1);
     return Math.round(h * hpMul * (endlos ? 1 + endlosRunde * .08 : 1))
   }
   const Ye = [7319807, 9427050, 5226330, 16764778, 10477823, 8376512, 10128639, 16747066, 6084351, 16739024, 16732208, 11559167];
@@ -61725,7 +61729,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   let oi = Ae;
   class zn extends tt.Physics.Arcade.Image {
     constructor(R, E = 1) {
-      super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), E >= 3 && R.textures.exists("boss3") ? this.setTexture("boss3") : E >= 2 && R.textures.exists("boss2") && this.setTexture("boss2"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
+      super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), this.setTexture(["boss5", "boss4", "boss3", "boss2", "boss1"].slice(Math.max(0, 5 - E)).find((I) => R.textures.exists(I)) || "boss1"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
       // setScale(.5), weil die Texturen seit v30 in PUFFERgroesse gebacken
       // werden: die Kamera zoomt zweifach, eine 680 Punkte breite Textur
       // steht also 340 Weltpunkte breit im Bild. Vorher trug die Skalierung
@@ -63797,8 +63801,8 @@ ${G}`, {
           v = this.bossMuzzle(),
           x = Math.atan2(I - v.y, b - v.x),
           t = E.phase(),
-          l = E.tier >= 3 ? 12607743 : E.tier >= 2 ? 16742986 : 16734794;
-        this.ebStyle = E.tier >= 3 ? "lanze" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
+          l = E.tier >= 4 ? 16765498 : E.tier >= 3 ? 12607743 : E.tier >= 2 ? 16742986 : 16734794;
+        this.ebStyle = E.tier >= 5 ? "saw" : E.tier >= 4 ? "star" : E.tier >= 3 ? "lanze" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
         const p = Math.PI * 2;
         // Das Feuermuster je Stufe und Phase. Gemessen mit npm run bossmuster.
         //
@@ -63860,7 +63864,7 @@ ${G}`, {
             else this.spawnEB(v.x, v.y, Math.cos(x) * G, Math.sin(x) * G);
             E.nextFire = R + (t === 3 ? 780 : 1e3) * this.fireRateMul
           }
-        } else {
+        } else if (E.tier === 3) {
           // Lanzentraeger: die Bahnkanone ist sein Kennzeichen. Schnelle,
           // schmale Lanzen auf den Spieler, dazu ein Ring als Grundrauschen.
           // Phase 1 und 3 sind Lanzen: schnell, schmal, auf den Spieler.
@@ -63883,6 +63887,57 @@ ${G}`, {
             for (const n of (t === 3 ? [-.16, -.08, 0, .08, .16] : [-.1, 0, .1]))
               this.spawnEB(v.x, v.y, Math.cos(x + n) * G * 1.3, Math.sin(x + n) * G * 1.3);
           E.nextFire = R + (t === 3 ? 620 : t === 2 ? 520 : 560) * this.fireRateMul
+        } else if (E.tier === 4) {
+          // Ringfestung: acht Tuerme auf einem Ring, keine Nase. Ihr
+          // Kennzeichen ist, dass sie in alle Richtungen zugleich kann —
+          // und in Phase 2 ausgerechnet nicht: da richten sich alle acht
+          // auf den Spieler. Der gezielte Anteil springt von einem Achtel
+          // auf zwei Drittel und faellt wieder.
+          const r = R * 5e-4;
+          if (t === 2) {
+            for (const n of [-.35, -.25, -.15, -.05, .05, .15, .25, .35]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
+            for (const n of [-1.1, -.9, .9, 1.1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .7, Math.sin(x + n) * G * .7);
+            E.nextFire = R + 430 * this.fireRateMul
+          } else if (t === 1) {
+            for (let n = 0; n < 8; n++) {
+              const e = r + n / 8 * p;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .78, Math.sin(e) * G * .78)
+            }
+            E.nextFire = R + 450 * this.fireRateMul
+          } else {
+            for (let n = 0; n < 10; n++) {
+              const e = r + n / 10 * p;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .78, Math.sin(e) * G * .78)
+            }
+            for (let n = 0; n < 8; n++) {
+              const e = -r + n / 8 * p + p / 16;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .6, Math.sin(e) * G * .6)
+            }
+            for (const n of [-.1, .1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
+            E.nextFire = R + 600 * this.fireRateMul
+          }
+        } else {
+          // Ambosskreuzer: zwei Hauptbatterien auf den Querarmen. Phase 1
+          // und 3 sind schwere gezielte Salven mit einem Ring darunter,
+          // Phase 2 ist die Breitseite — ein weiter Faecher ohne Ring, der
+          // die Raender nimmt. Gemessen wechselt dabei nicht der gezielte
+          // Anteil, sondern die LUECKE: mit Ring ist sie klein, ohne Ring
+          // steht ein Loch von ueber zweihundert Grad im Muster.
+          const r = R * .003;
+          if (t === 2) {
+            for (const n of [-1.2, -.95, -.7, -.45, -.2, -.08, .08, .2, .45, .7, .95, 1.2])
+              this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .9, Math.sin(x + n) * G * .9);
+            E.nextFire = R + 400 * this.fireRateMul
+          } else {
+            const a = t === 1 ? 6 : 12;
+            for (let n = 0; n < a; n++) {
+              const e = r + n / a * p;
+              this.spawnEB(v.x, v.y, Math.cos(e) * G * .7, Math.sin(e) * G * .7)
+            }
+            for (const n of (t === 3 ? [-.3, -.18, -.06, .06, .18, .3] : [-.18, -.06, .06, .18]))
+              this.spawnEB(v.x, v.y, Math.cos(x + n) * G * 1.15, Math.sin(x + n) * G * 1.15);
+            E.nextFire = R + 500 * this.fireRateMul
+          }
         }
         if (E.pattern === 1 && t >= 2 && R > E.nextAccent) {
           E.nextAccent = R + 3200;
