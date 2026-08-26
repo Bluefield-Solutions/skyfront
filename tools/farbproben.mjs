@@ -165,6 +165,23 @@ const PROBEN = [
   ['eb_diamond zurueck zur Scheibenform', '✗', [
     'T.beginPath(), T.moveTo(I, E * .02 - t), T.lineTo(I + R * .19 + t, G), T.lineTo(I, E * .98 + t), T.lineTo(I - R * .19 - t, G), T.closePath()',
     'T.beginPath(), T.arc(I, G, R * .3 + t, 0, 7), T.closePath()'], true, 'form'],
+  // Die Bosskurve wieder flach: dann hat der Boss im zwoelften Kapitel
+  // genauso viel Leben wie im ersten. Genau der Zustand, den die Zeitachse
+  // beim ersten Lauf vorfand (Stufe 3: Faktor 1,00 ueber 110 Sektoren) und
+  // den bis dahin kein Tor gesehen hat.
+  // Der Eingriff haengt sich HINTER das Literal, statt es zu ersetzen:
+  // buildcore.mjs sucht beim Bauen genau diesen Ausdruck und wuerde sonst
+  // mit "Kurven-Fragment nicht eindeutig" abbrechen — die Probe waere dann
+  // am Bau gescheitert, nicht am Tor, und haette nichts bewiesen.
+  ['Bosskurve flach — kein Zuwachs ueber die Kapitel', '✗',
+    ['basis * 1.5 * (1 + kapitel * .14);', 'basis * 1.5 * (1 + kapitel * .14) * 0 + basis;'],
+    true, 'zeit', 'waechst ueber die ganze Kampagne nur um das'],
+  // Die Wellenzahl zurueck auf den Stand vor v31: dann fallen die ersten
+  // Sektoren wieder unter eine Minute. Das ist die andere Haelfte dessen,
+  // was die Zeitachse misst — ohne diese Probe belegte sie nur die Bosse.
+  ['nur noch halb so viele Wellen je Sektor', '✗',
+    ['E.length < I && a < 400', 'E.length < Math.round(I * .55) && a < 400'],
+    true, 'zeit', 'bleiben unter 60 s'],
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
@@ -179,6 +196,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'speicher' ? ['tools/speicher.mjs']
     : tor === 'rhythmus' ? ['tools/rhythmus.mjs']
     : tor === 'formation' ? ['tools/formationen.mjs']
+    : tor === 'zeit' ? ['tools/zeitachse.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -310,6 +328,7 @@ const MODUSPROBEN = [{
   ['Speicher-Tafel',   'tools/speicher.mjs',     'Texturbestand aendert sich noch'],
   ['Rhythmus-Tafel',   'tools/rhythmus.mjs',     '__SKF_BAUSTEINE.kurve fehlt'],
   ['Formationentafel', 'tools/formationen.mjs',  '__SKF_BAUSTEINE fehlt'],
+  ['Zeitachse',        'tools/zeitachse.mjs',    '__SKF_BOSSLEBEN'],
 ].map(([name, datei, marke]) => ({
   name: `${name} ohne Messstelle (--ohne-naht)`,
   cmd: [datei, '--ohne-naht'],

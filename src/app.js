@@ -57914,9 +57914,12 @@ return new ` + this.key + `();
   // Regel 4. Jetzt fragt das Werkzeug dieselbe Funktion, die das Spiel
   // benutzt.
   function bossLeben(basis, kapitel, stufeImKapitel, hpMul, endlos, endlosRunde) {
-    let h = basis;
-    if (kapitel === 1) h = Math.round(h * 1.25);
-    else if (kapitel === 2) h = Math.round(h * 1.35);
+    // Vorher: nur Kapitel 2 und 3 bekamen einen Aufschlag (1,25 und 1,35),
+    // alle anderen keinen. Gemessen mit npm run zeitachse hiess das: Boss
+    // Stufe 3 hatte in Sektor 120 exakt so viele Lebenspunkte wie in
+    // Sektor 10 — Faktor 1,00 ueber 110 Sektoren, waehrend die Feuerkraft
+    // des Spielers waechst. Jetzt traegt jedes der zwoelf Kapitel.
+    let h = basis * 1.5 * (1 + kapitel * .14);
     if (!endlos) h = Math.round(h * (1 + stufeImKapitel * .03));
     return Math.round(h * hpMul * (endlos ? 1 + endlosRunde * .08 : 1))
   }

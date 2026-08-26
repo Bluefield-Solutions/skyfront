@@ -115,6 +115,11 @@ const TORE = [
   // unterschiedlich aussehen. Zwoelf Namen fuer dasselbe Bild waeren nach
   // jeder anderen Zahl gruen.
   { schluessel: 'formationen', lauf: 'Formationen (12 Bausteine)',           zeile: 'Formationen (12 Bausteine)', datei: 'tools/formationen.mjs' },
+  // Wie lange dauert ein Sektor mindestens — und waechst der Boss ueber die
+  // Kampagne ueberhaupt mit? Beides war bis v31 ungemessen, und beides lag
+  // beim ersten Lauf daneben: 26 Sektoren unter einer Minute, Boss Stufe 3
+  // mit Faktor 1,00 ueber 110 Sektoren.
+  { schluessel: 'zeitachse',   lauf: 'Zeitachse (120 Sektoren + Gefecht)',   zeile: 'Zeitachse (120 Sektoren)',   datei: 'tools/zeitachse.mjs' },
 ];
 
 const torZeilen = [];

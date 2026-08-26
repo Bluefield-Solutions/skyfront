@@ -79,10 +79,19 @@ export const BALANCE = {
   // härter" WIRKLICH pro Level formen lässt (die intensity im Stage-Array wird
   // vom Spiel ignoriert). Original-Werte in Klammern.
   curve: {
-    waveBase:     26,   // (orig 34)  Wellen-Basiszahl früh — kleiner = leichterer Einstieg
-    waveSlope:    1.4,  // (orig 1.1) Zuwachs pro Level — größer = härteres Spätspiel
+    waveBase:     43,   // (orig 34)  Wellen-Basiszahl früh — kleiner = leichterer Einstieg
+    waveSlope:    1.15, // (orig 1.1) Zuwachs pro Level — größer = härteres Spätspiel
     spacingBase:  2350, // (orig 2150) Basis-Wellenabstand ms — größer = früh lockerer
     spacingSlope: 60,   // (orig 45)  Verdichtung pro Level — größer = spät hektischer
+
+    // Die Bosse. bossStaerke wirkt auf ALLE gleichmäßig (Grundleben 160 /
+    // 400 / 620 je Stufe), bossKapitel ist der Aufschlag je Kapitel — bei
+    // 0.14 hat der Boss im zwölften Kapitel das 2,54-fache Leben des ersten.
+    // Vorher gab es diesen Aufschlag nur für Kapitel 2 und 3; gemessen hiess
+    // das, dass Boss Stufe 3 in Sektor 120 genauso viel Leben hatte wie in
+    // Sektor 10. Nachmessen mit `npm run zeitachse`.
+    bossStaerke:  1.5,  // (orig 1.0) Grundleben aller Bosse
+    bossKapitel:  0.14, // (orig ---) Aufschlag je Kapitel
   },
 
   // ---- Spieler-Upgrades (Hangar): max = Stufen-Obergrenze, cost* = Goldpreise --
