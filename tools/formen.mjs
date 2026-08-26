@@ -300,18 +300,46 @@ auswerten('Gegner', rohGegner, 96, 12);
    Das Ziel steht darunter in der Bildanforderung.                          */
 
 // Gemessen am Stand v19. Quellbreite in Bildpunkten je Gegner.
-// Wer bessere Bilder einbaut, hebt diese Zahlen mit — sonst haelt der Boden
-// bald etwas fest, das laengst ueberholt ist.
-const BILDBODEN = {
+//
+// Diese Zahlen gelten fuer die Gegner, die GEZEICHNET werden. Wer bessere
+// Bilder einbaut, hebt sie mit — sonst haelt der Boden bald etwas fest, das
+// laengst ueberholt ist.
+const BILDBODEN_HAND = {
   elite: 80, carrier: 125, rotor: 71, kamikaze: 37, gunship: 204,
   bomber: 167, arcer: 76, rocketeer: 60, weaver: 162, sniper: 80,
   scout: 42, strafer: 79, grunt: 180,
-  // Die Lanzenwache kam mit v34 dazu und ist die erste Grafik, die in
-  // ZIELgroesse gebacken wurde: Textur 180 Punkte breit, im Bild 90
-  // Weltpunkte, auf dem Geraet also punktgenau. Der Boden ist deshalb die
-  // gelieferte Breite selbst.
-  lanzenwache: 180,
 };
+
+// Und fuer alles, was ueber npm run einbau aus einem Rohbild gebacken wird,
+// kommt der Boden aus dem AUFTRAG, nicht aus dieser Datei.
+//
+// Der Grund ist eine Falle, die sonst zuschnappt, sobald ein Bild getauscht
+// wird: das neue Bild ist breiter, der Boden bleibt auf dem alten Wert, und
+// das Tor fuehrt ab da einen ueberholten Stand als Soll. Es meldet dann
+// nichts mehr, wenn jemand spaeter wieder ein kleineres Bild unterschiebt —
+// genau der Fall, der bis v19 unbemerkt blieb.
+//
+// Ein Merkzettel im Kommentar hat dafuer nicht gereicht (er stand da). Also
+// wird der Boden abgeleitet: die gebackene Texturbreite ist Weltbreite mal
+// zwei. Wer den Auftrag aendert, aendert den Boden mit, ohne es zu wissen.
+//
+// NUR wenn das Rohbild auch DA ist. Der erste Anlauf leitete aus dem
+// blossen Auftrag ab und machte das Tor sofort rot: elite, carrier und
+// rotor sind bestellt, aber nicht geliefert — der Boden stand damit auf
+// 216, 296 und 134, waehrend im Spiel noch 80, 125 und 71 stecken. Ein
+// Boden ist kein Ziel. Er haelt fest, was DA ist, damit es nicht
+// unbemerkt schlechter wird; das Ziel steht in der Bildanforderung.
+let BILDBODEN = { ...BILDBODEN_HAND };
+try {
+  const { EINBAU } = await import('./einbau.mjs');
+  for (const e of EINBAU) {
+    if (!e.schluessel.startsWith('e_')) continue;
+    if (!existsSync(e.datei)) continue;
+    BILDBODEN[e.schluessel.replace(/^e_/, '')] = e.welt * 2;
+  }
+} catch (e) {
+  M.ungemessen(`der Auftrag aus tools/einbau.mjs ist nicht zu lesen (${e.message}) — die Boeden der gebackenen Bilder stehen nicht fest.`);
+}
 {
   console.log(`\nAufloesung auf dem Zielgeraet (${GERAETE_PUNKTE.toFixed(2)} Bildpunkte je Anzeigepunkt)`);
   const zeilen = [];

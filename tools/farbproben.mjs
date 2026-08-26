@@ -413,7 +413,7 @@ const MODUSPROBEN = [{
 let modusFehler = 0, modusGelaufen = 0;
 if (ALLE || NUR_MODUS) {
   console.log('');
-  for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor')))) {
+  for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor'))).filter((m) => !NUR || m.name.toLowerCase().includes(NUR))) {
     let text = '', rot = false, code = 0;
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
     catch (e) { code = e.status; rot = true; text = (e.stdout || '') + (e.stderr || ''); }

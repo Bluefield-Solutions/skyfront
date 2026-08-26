@@ -207,7 +207,13 @@ npm run formen          der Faktor muss auf 1,00 stehen
 Weltbreite (108, 148, 67). Die Plätze hängen hinten an — eiserne Regel 9:
 ein Eintrag in `assets.js` darf geleert, aber nie entfernt werden.
 
-**Der Bildboden in `tools/formen.mjs` muss mit.** Heute stehen dort die
-alten Werte (80, 125, 71). Wer die Bilder tauscht und den Boden stehen
-lässt, hat ein Tor, das den alten Stand als Soll führt — genau der Fehler,
-der bis v19 unbemerkt blieb.
+**Der Bildboden zieht seit v37 von selbst mit.** `tools/formen.mjs` liest
+die Auftragsliste aus `tools/einbau.mjs` und setzt den Boden für jedes
+gebackene Gegnerbild auf die Texturbreite — **sobald das Rohbild da ist**.
+Vorher gilt der Handwert.
+
+Das ist der Unterschied, an dem der erste Anlauf scheiterte: leitet man aus
+dem blossen **Auftrag** ab, steht der Boden auf 216, 296 und 134, während
+im Spiel noch 80, 125 und 71 stecken — das Tor ist sofort rot. Ein Boden
+ist kein Ziel. Er hält fest, was **da** ist, damit es nicht unbemerkt
+schlechter wird.
