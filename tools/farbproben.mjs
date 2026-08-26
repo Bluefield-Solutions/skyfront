@@ -193,6 +193,15 @@ const PROBEN = [
   ['Phase 2 von Stufe 1 ist nur ein breiterer Faecher', '✗',
     ['const a = takt % 2 ? [-.55, -.4, -.25, -.1] : [.1, .25, .4, .55];', 'const a = [-.3, -.1, .1, .3];'],
     true, 'muster', 'nur mehr vom Gleichen'],
+  // Die Maschine springt wieder auf den Finger — der Zustand bis v34.
+  ['Steuerung ohne Glaettung (speedLerp 1)', '✗',
+    ['speedLerp: 0.5,', 'speedLerp: 1,'],
+    true, 'steuer', 'das ist ein Sprung, keine Nachfuehrung'],
+  // Und die Nachfuehrung ohne Zeitkorrektur: dann haengt sie wieder an der
+  // Bildrate, und auf zwei Telefonen fuehlt sich dasselbe Spiel anders an.
+  ['Nachfuehrung ohne Zeitkorrektur', '✗',
+    ['f = Ft.speedLerp >= 1 ? 1 : 1 - Math.pow(1 - Ft.speedLerp, v),', 'f = Ft.speedLerp,'],
+    true, 'steuer', 'haengt an der Bildrate'],
 ];
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
@@ -209,6 +218,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'formation' ? ['tools/formationen.mjs']
     : tor === 'zeit' ? ['tools/zeitachse.mjs']
     : tor === 'muster' ? ['tools/bossmuster.mjs']
+    : tor === 'steuer' ? ['tools/steuerung.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -259,7 +269,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -342,6 +352,7 @@ const MODUSPROBEN = [{
   ['Formationentafel', 'tools/formationen.mjs',  '__SKF_BAUSTEINE fehlt'],
   ['Zeitachse',        'tools/zeitachse.mjs',    '__SKF_BOSSLEBEN'],
   ['Bossmuster',       'tools/bossmuster.mjs',   'fireBoss ist nicht zu erreichen'],
+  ['Steuerung',        'tools/steuerung.mjs',    'der Spieler ist nicht zu erreichen'],
 ].map(([name, datei, marke]) => ({
   name: `${name} ohne Messstelle (--ohne-naht)`,
   cmd: [datei, '--ohne-naht'],

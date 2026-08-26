@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v34",
+    SKF_VERSION = "v35",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -54457,7 +54457,8 @@ return new ` + this.key + `();
     EIGEN = "#bfefff",
     EIGEN_N = 12578815,
     Ft = {
-      speedLerp: 1,
+      speedLerp: 0.5,
+      zugFaktor: 2.1,
       scale: .56,
       fireEveryMs: 135,
       bulletSpeed: 780,
@@ -61490,8 +61491,23 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       this.targetX = tt.Math.Clamp(this.targetX, b, I);
       // Der Weg, den die Maschine in DIESEM Bild geht — vor dem Zug gemessen,
       // denn mit speedLerp = 1 ist die Differenz danach null.
-      const G = this.targetX - this.x;
-      this.x += G * Ft.speedLerp, this.y += (this.targetY - this.y) * Ft.speedLerp, this.setAlpha(this.isInvulnerable(R) && Math.floor(R / 80) % 2 ? .35 : 1);
+      // Der Zeitfaktor steht jetzt VORNE: nicht nur die Rolle braucht ihn,
+      // die Nachfuehrung auch.
+      //
+      // Bis v34 stand hier speedLerp = 1, also: die Maschine SPRINGT jedes
+      // Bild auf den Finger. Kein Glaetten, und der Fingerweg wirkt mit
+      // Faktor 1,95 — jedes Zittern kam doppelt und sofort an. Das ist das
+      // Ruckeln, das auf dem Geraet aufgefallen ist.
+      //
+      // Jetzt eine kurze Nachfuehrung, und zwar BILDRATENUNABHAENGIG:
+      // 1 - (1 - lerp)^v statt lerp. Ohne diese Zeile haengt das Gefuehl an
+      // der Bildrate — auf 120 Hz zog die Maschine doppelt so schnell nach
+      // wie auf 60 Hz, bei gleicher Zahl. Gemessen mit npm run steuerung.
+      const v = tt.Math.Clamp((E || 16.667) / 16.667, .25, 3),
+        f = Ft.speedLerp >= 1 ? 1 : 1 - Math.pow(1 - Ft.speedLerp, v),
+        G = this.targetX - this.x,
+        gegangenX = G * f;
+      this.x += gegangenX, this.y += (this.targetY - this.y) * f, this.setAlpha(this.isInvulnerable(R) && Math.floor(R / 80) % 2 ? .35 : 1);
       // SKY-100 — Rollwinkel aus der eigenen Bewegung. Ohne ihn wirkt die
       // Maschine wie ein Schieber: sie faehrt seitwaerts, ohne sich in die
       // Kurve zu legen.
@@ -61499,8 +61515,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       // Der Seitweg wird durch den Zeitfaktor geteilt, sonst haengt der Winkel
       // an der Bildrate: bei 120 Hz ist derselbe Fingerzug je Bild halb so
       // weit, und die Maschine legte sich halb so weit.
-      const v = tt.Math.Clamp((E || 16.667) / 16.667, .25, 3),
-        x = tt.Math.Clamp(G / v * Fn.ROLL_JE_PUNKT, -Fn.ROLL_MAX, Fn.ROLL_MAX);
+      // Die Rolle kommt jetzt aus dem TATSAECHLICH gegangenen Weg, nicht aus
+      // dem Abstand zum Ziel. Mit speedLerp = 1 war beides dasselbe; mit
+      // einer Nachfuehrung laeuft der Abstand voraus, und die Maschine haette
+      // sich in eine Kurve gelegt, die sie noch gar nicht fliegt.
+      const x = tt.Math.Clamp(gegangenX / v * Fn.ROLL_JE_PUNKT, -Fn.ROLL_MAX, Fn.ROLL_MAX);
       this.rolle += (x - this.rolle) * Math.min(1, Fn.ROLL_TRAEGE * v);
       // Das ruhige Wiegen bleibt, aber leiser — sonst kaempft es mit der Rolle.
       this.setAngle(this.rolle + Math.sin(R * .006) * 1.6);
@@ -62201,7 +62220,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           }
         }), this.escortDrone = this.add.image(this.player.x, this.player.y + 42, this.player.texture.key).setScale(.18).setTint(12576511).setAlpha(.85).setDepth(8), this.shieldSprite = this.add.image(this.player.x, this.player.y, "shieldRing").setDepth(11).setVisible(!1).setBlendMode(tt.BlendModes.ADD);
         const r = A => tt.Math.Distance.Between(A.worldX, A.worldY, this.bomb.x, this.bomb.y) <= this.bomb.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad.x, this.gad.y) <= this.gad.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad2.x, this.gad2.y) <= this.gad2.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.ultPos.x, this.ultPos.y) <= this.ultPos.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.mute.x, this.mute.y) <= this.mute.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.pauseBtn.x, this.pauseBtn.y) <= this.pauseBtn.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.messBtn.x, this.messBtn.y) <= this.messBtn.r + 6,
-          n = 1.95;
+          n = Ft.zugFaktor;
         this.input.on("pointerdown", A => {
           if (this.audio.resume(), this.over) {
             this.scene.start(this.endless ? "Menu" : "Levels");

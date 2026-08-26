@@ -7,7 +7,7 @@ export function collectPatches(B) {
     if (value !== undefined && value !== null) P.push({ anchor, field, value, path });
   };
   const p = B.player || {};
-  for (const f of ['maxHp', 'fireEveryMs', 'bulletSpeed', 'bombStart', 'bombMax', 'maxPower'])
+  for (const f of ['maxHp', 'fireEveryMs', 'bulletSpeed', 'bombStart', 'bombMax', 'maxPower', 'speedLerp', 'zugFaktor'])
     add('Ft = {', f, p[f], 'player.' + f);
   const g = B.enemyGeneric || {};
   for (const f of ['touchDamage', 'bulletDamage', 'bulletSpeed'])

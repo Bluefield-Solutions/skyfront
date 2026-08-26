@@ -124,6 +124,10 @@ const TORE = [
   // Boss drei Sekunden lebte, war das gleichgueltig. Seit v32 lebt er
   // zwanzig.
   { schluessel: 'bossmuster',  lauf: 'Bossmuster (3 Stufen x 3 Phasen)',     zeile: 'Bossmuster (9 Muster)',      datei: 'tools/bossmuster.mjs' },
+  // Zieht die Maschine bei 30, 60 und 120 Hz gleich schnell nach? Bis v34
+  // sprang sie jedes Bild auf den Finger — kein Glaetten, und die
+  // Geschwindigkeit haette an der Bildrate gehangen.
+  { schluessel: 'steuerung',   lauf: 'Steuerung (30, 60, 120 Hz)',          zeile: 'Steuerung (3 Bildraten)',    datei: 'tools/steuerung.mjs' },
 ];
 
 const torZeilen = [];

@@ -40,11 +40,18 @@ import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 const M = messstelle('Zeitachse', 'jeder Sektor traegt mindestens das untere Band.');
 const TAFEL = process.argv.includes('--tafel');
 
-// Das Band. Die Untergrenze kommt aus dem Ziel („mindestens 60 bis 90 s"),
-// die Obergrenze aus dem Gegenteil: ein Sektor, der auch als Untergrenze
-// ueber zwei Minuten laeuft, ist auf dem Telefon keine Runde mehr, sondern
-// eine Sitzung.
-const UNTEN = 60, OBEN = 130;
+// Das Band. Die Untergrenze kommt aus dem Ziel („mindestens 60 bis 90 s").
+//
+// Die Obergrenze stand zuerst bei 130 s. Sie war meine Zahl, nicht die des
+// Ziels, und sie war zu eng: als der Boss von drei auf zwanzig Sekunden
+// wuchs — genau das war verlangt —, schlug sie an, obwohl nichts falsch
+// war. Der genannte Massstab ist 1945 Air Force, und dort laeuft ein
+// spaeter Abschnitt samt Boss zwei bis drei Minuten.
+//
+// 160 s ist deshalb aus dem Massstab genommen, nicht aus dem Ergebnis:
+// Wellen (bis 96 s gemessen) plus ein Boss, der als UNTERgrenze bis 45 s
+// haelt. Wer sie weiter aufmacht, sollte denselben Satz schreiben koennen.
+const UNTEN = 60, OBEN = 160;
 
 if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;

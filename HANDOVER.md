@@ -54,6 +54,7 @@ npm run bildpruefung # gelieferte Rohbilder gegen den Auftrag messen
 npm run einbau      # geprueftes Rohbild in Zielgroesse nach assets.js backen
 npm run zeitachse   # wie lange ein Sektor mindestens dauert (Wellen + Boss)
 npm run bossmuster  # feuert jede Bossphase anders, oder nur mehr vom Gleichen
+npm run steuerung   # zieht die Maschine bei 30/60/120 Hz gleich schnell nach
 npm run package     # verteilbares Skyfront-dist.zip
 ```
 

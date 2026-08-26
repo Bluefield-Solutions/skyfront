@@ -25,6 +25,17 @@ export const BALANCE = {
     bombStart: 2,      // Bomben bei Start  (Wunsch-Set: großzügiger)
     bombMax: 4,        // Bomben-Maximum  (Wunsch-Set: +1)
     maxPower: 10,      // maximales Feuerlevel
+
+    // ---- Steuergefühl ------------------------------------------------------
+    // speedLerp: wie schnell die Maschine dem Finger nachzieht, je Bild bei
+    //   60 Hz. 1 = springt sofort (bis v34, fühlte sich hart und zittrig an),
+    //   0.5 = weich in rund 25 ms. Kleiner = weicher und träger.
+    // zugFaktor: wie weit die Maschine je Fingerweg geht. Größer = direkter,
+    //   aber auch nervöser.
+    // Beides zusammen macht „schnell UND weich": der Zug ist groß, die
+    // Nachführung glättet. Nachmessen mit `npm run steuerung`.
+    speedLerp: 0.5,    // (orig 1)    Nachführung je Bild bei 60 Hz
+    zugFaktor: 2.1,    // (orig 1.95) Fingerweg → Flugweg
   },
 
   // ---- Gegner allgemein -----------------------------------------------------
@@ -93,8 +104,8 @@ export const BALANCE = {
     // leicht". Nachmessen mit `npm run zeitachse`: dort steht, wie viele
     // Sekunden ein Boss MINDESTENS hält — bei voller Feuerkraft und wenn
     // jeder Schuss trifft. Auf dem Gerät dauert es länger.
-    bossGrund:    2000,   // (orig 160) Leben des ersten Bosses
-    bossZuwachs:  0.009, // (orig ---) Aufschlag je Sektor
+    bossGrund:    5400,   // (orig 160) Leben des ersten Bosses
+    bossZuwachs:  0.005,  // (orig ---) Aufschlag je Sektor
   },
 
   // ---- Spieler-Upgrades (Hangar): max = Stufen-Obergrenze, cost* = Goldpreise --
