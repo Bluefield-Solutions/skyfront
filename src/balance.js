@@ -79,9 +79,9 @@ export const BALANCE = {
   // härter" WIRKLICH pro Level formen lässt (die intensity im Stage-Array wird
   // vom Spiel ignoriert). Original-Werte in Klammern.
   curve: {
-    waveBase:     43,   // (orig 34)  Wellen-Basiszahl früh — kleiner = leichterer Einstieg
+    waveBase:     37,   // (orig 34)  Wellen-Basiszahl früh — kleiner = leichterer Einstieg
     waveSlope:    1.15, // (orig 1.1) Zuwachs pro Level — größer = härteres Spätspiel
-    spacingBase:  2350, // (orig 2150) Basis-Wellenabstand ms — größer = früh lockerer
+    spacingBase:  2650, // (orig 2150) Basis-Wellenabstand ms — größer = früh lockerer
     spacingSlope: 60,   // (orig 45)  Verdichtung pro Level — größer = spät hektischer
 
     // Die Bosse. bossStaerke wirkt auf ALLE gleichmäßig (Grundleben 160 /
