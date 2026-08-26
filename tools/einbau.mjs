@@ -49,6 +49,13 @@ export const EINBAU = [
   { datei: 'art/roh/boss/boss_sturmkanzel.png',   platz: 16, schluessel: 'boss1', welt: 340 },
   { datei: 'art/roh/boss/boss_schwarmmutter.png', platz: 17, schluessel: 'boss2', welt: 430 },
   { datei: 'art/roh/boss/boss_lanzentraeger.png', platz: 18, schluessel: 'boss3', welt: 260 },
+  // B-4 und B-5 sind noch nicht geliefert. Sie stehen hier trotzdem: dann
+  // meldet npm run einbau "fehlt" statt gruen, und niemand haelt die Serie
+  // fuer vollstaendig. Ihre Plaetze haengen hinten an, wie der der
+  // Lanzenwache — eiserne Regel 9.
+  { datei: 'art/roh/boss/boss_ringfestung.png',    platz: 72, schluessel: 'boss4', welt: 460 },
+  { datei: 'art/roh/boss/boss_ambosskreuzer.png',  platz: 73, schluessel: 'boss5', welt: 520 },
+
   // Kein Boss: der schwere Gegner zwischendurch. Sein Platz haengt HINTEN
   // an — eiserne Regel 9 aus CLAUDE.md: ein Eintrag in assets.js darf
   // geleert, aber nie entfernt werden, weil die Nummern Positionen sind,
@@ -84,6 +91,20 @@ for (const e of EINBAU) {
   const zielBreite = e.welt * 2;                       // Zoom 2
   const innen = zielBreite - 2 * RAND;
   if (innen < 32) { M.befund(`${e.schluessel}: Zielbreite ${zielBreite} zu klein fuer ${RAND} Punkte Rand.`); continue; }
+
+  // Nichts hochrechnen. Ohne diese Sperre backt das Werkzeug jedes Bild
+  // klaglos ein, auch eines, das npm run bildpruefung ablehnt — und genau
+  // das ist einmal passiert: die beiden Fassungen von B-4 und B-5 aus dem
+  // ersten Anlauf (313 und 353 Punkte Inhalt) wurden auf 920 und 1040
+  // aufgezogen und landeten mit 424 KB in assets.js. Weich, gross, und in
+  // der Datei, die ausgeliefert wird.
+  //
+  // Die Sperre ist bewusst hier UND in bildpruefung: das eine Werkzeug
+  // misst, das andere baut ein. Wer nur baut, umgeht sonst die Messung.
+  if (bb.width < innen) {
+    M.befund(`${e.schluessel}: Inhalt nur ${bb.width} Punkte breit, gebraucht werden ${innen} — das waere Hochrechnen um das ${(innen / bb.width).toFixed(2)}-fache. Erst npm run bildpruefung, dann einbauen.`);
+    continue;
+  }
 
   const bild = await sharp(e.datei).extract(bb)
     .resize(innen, null, { kernel: 'lanczos3' })
