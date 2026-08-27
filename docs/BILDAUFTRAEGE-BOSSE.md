@@ -62,6 +62,14 @@ Negativprompt, Dateiname. Nichts davon muss zusammengesetzt werden.
    und alle fünf kamen im selben Hochformat.
 3. **Eines nach dem anderen bestellen.** Fünf Bilder in einem Rutsch haben
    beim ersten Mal fünf Mal denselben Fehler ergeben.
+5. **Keine Hoheitszeichen, keine Abzeichen, keine Symbole.** Kein
+   Landeplatten-Emblem, kein Wappen, kein Zeichen auf einer Fläche — auch
+   kein erfundenes. Bildmodelle greifen für „militärische Markierung" auf
+   historische Vorlagen zurück, und in der ersten Lieferung der Ringfestung
+   standen zwei **Hakenkreuze** auf den Landeplattformen. Kein Werkzeug
+   findet das; es findet nur, wer hineinsieht. Deshalb steht es im
+   Negativprompt jedes Auftrags — und deshalb wird jede Lieferung vor dem
+   Einbau angesehen.
 4. **Der Rand wird ausdrücklich verlangt.** B-1 kam mit 4 Bildpunkten oben
    statt der nötigen 6 und musste von Hand nachgezogen werden. Seither steht
    in jedem Prompt, dass nichts die Bildkante berühren darf.
@@ -117,7 +125,9 @@ silhouette.
 portrait composition, tall narrow composition, cartoon, anime, cel shading, toy,
 plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
 background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
-text, watermark, signature, red fuselage, crimson hull, blurry, soft focus, upscaled,
+text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red fuselage, crimson hull, blurry, soft focus, upscaled,
 low detail, tilted view, three-quarter view, side view
 ```
 
@@ -175,7 +185,9 @@ portrait composition, square composition, tall narrow composition, narrow wingsp
 delta wing, narrow delta, fighter jet, jet fighter, separate tail, tail fins, fuselage,
 cockpit canopy, cropped wingtips, subject touching frame edge, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
-ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
+ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red fuselage, crimson hull,
 blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
 
@@ -230,7 +242,9 @@ landscape composition, wide composition, square composition, wide wingspan, larg
 needle, pencil, thin rod, sliver, extremely elongated, spindly, fragile, cropped nose,
 subject touching frame edge, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
-ground, vignette, frame, border, text, watermark, signature, red fuselage, crimson hull,
+ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red fuselage, crimson hull,
 blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
 
@@ -290,7 +304,9 @@ portrait composition, landscape composition, oval, ellipse, egg shape, filled ce
 solid disc, closed hub, glass dome, energy field in the centre, membrane, small hole,
 narrow opening, aircraft, wings, nose, cockpit, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book,
 photorealistic photograph, studio product render, background, sky, clouds, ground,
-terrain, shadow on ground, vignette, frame, border, text, watermark, signature, red hull,
+terrain, shadow on ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red hull,
 crimson hull, blurry, soft focus, upscaled, low detail, tilted view, three-quarter view,
 side view
 ```
@@ -348,7 +364,9 @@ swept wings, delta wing, wide wingspan, plank shape, arrowhead, oval hull,
 subject touching frame edge, cartoon, anime, cel shading, toy,
 plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
 background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
-text, watermark, signature, red fuselage, crimson hull, blurry, soft focus, upscaled,
+text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red fuselage, crimson hull, blurry, soft focus, upscaled,
 low detail, tilted view, three-quarter view, side view
 ```
 

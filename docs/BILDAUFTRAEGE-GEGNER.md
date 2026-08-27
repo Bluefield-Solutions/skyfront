@@ -41,6 +41,15 @@ Dieselben Regeln wie bei den Bossen, sie haben sich bewährt:
 5. **Groß bestellen.** Die Zielgröße macht `npm run einbau`; wer klein
    liefert, wird von der Sperre abgewiesen (seit SKY-233).
 
+**Keine Hoheitszeichen, keine Abzeichen, keine Symbole.** Kein
+Landeplatten-Emblem, kein Wappen, kein Zeichen auf einer Fläche — auch
+kein erfundenes. Bildmodelle greifen für „militärische Markierung" auf
+historische Vorlagen zurück, und in einer Lieferung dieser Serie standen
+zwei **Hakenkreuze** auf den Landeplattformen. Kein Werkzeug findet das;
+es findet nur, wer hineinsieht. Deshalb steht es im Negativprompt jedes
+Auftrags, und deshalb wird jede Lieferung vor dem Einbau angesehen.
+
+
 Ablage: `art/roh/gegner/`. Danach `npm run bildpruefung`, dann
 `npm run einbau`.
 
@@ -94,7 +103,9 @@ portrait composition, tall narrow composition, long fuselage, airliner, bomber, 
 ship, over-detailed, busy greebles, subject touching frame edge, cartoon, anime,
 cel shading, toy, plastic toy, thick outline, comic book, photorealistic photograph,
 studio product render, background, sky, clouds, ground, terrain, shadow on ground,
-vignette, frame, border, text, watermark, signature, red fuselage, crimson hull, blurry,
+vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red fuselage, crimson hull, blurry,
 soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
 
@@ -142,7 +153,9 @@ portrait composition, square composition, tall narrow composition, slender fight
 swept wings, delta wing, over-detailed, busy greebles, subject touching frame edge,
 cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
-ground, vignette, frame, border, text, watermark, signature, red hull, crimson hull,
+ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, red hull, crimson hull,
 blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
 
@@ -189,7 +202,9 @@ portrait composition, landscape composition, fixed-wing aircraft, jet, over-deta
 busy greebles, cropped blades, subject touching frame edge, cartoon, anime, cel shading,
 toy, plastic toy, thick outline, comic book, photorealistic photograph, studio product
 render, background, sky, clouds, ground, terrain, shadow on ground, vignette, frame,
-border, text, watermark, signature, blurry, soft focus, upscaled, low detail, tilted view,
+border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
+national marking, roundel, swastika, hooked cross, iron cross, runes,
+military decal, painted symbol, logo on hull, blurry, soft focus, upscaled, low detail, tilted view,
 three-quarter view, side view
 ```
 
