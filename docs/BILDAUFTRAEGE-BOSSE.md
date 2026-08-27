@@ -570,22 +570,20 @@ no background, no text. Sharp, crisp detail. 650 x 1000 pixels.
 | Silhouette | **kreisrund mit offener Mitte** — als einzige rotationssymmetrisch |
 | im Bild | 460 × 460 Weltpunkte (85 % der Breite) |
 | **Quellbild** | **1150 × 1150 px** · Seitenverhältnis **1 : 1** (quadratisch) |
-| Kanonen | 8 Türme gleichmäßig auf dem Ring, 1 Kern in der Mitte |
+| Kanonen | 8 Türme gleichmäßig auf dem Ring, **kein Kern** |
 | Geschoss | `eb_scherbe` — dreieckige Scherbe, die sich im Flug dreht |
 
-```
-Top-down orthographic view of a circular orbital fortress platform, seen
-from directly above. Semi-realistic hard-surface military structure,
-brushed gunmetal and dark blue-grey armour with heavy panel seams, rivet
-rows and scorched plating. Ring-shaped silhouette with an open centre; a
-smaller armoured core floats in the middle connected by four thin struts.
-Eight identical turret emplacements spaced evenly around the ring, each with
-a short stubby barrel. Recessed maintenance channels. Amber warning lights
-on the turret housings. Lit from the upper left at a 45-degree angle, strong
-directional light, clear cast shading across the ring. Isolated on a fully
-transparent background, no ground shadow, no background, no text. Sharp,
-crisp detail. 1150 x 1150 pixels.
-```
+**Der Prompt steht in Abschnitt 1c und ist der dritte.** Zwei Lieferungen
+kamen als Rad mit Nabe zurück, gemessen „Mitte durchsichtig 0,0 %" bei
+verlangten 55. Beim dritten Anlauf ist deshalb nicht der Prompt geschärft,
+sondern der Kern gestrichen: kein Kern, keine Streben, keine Speichen — nur
+ein Ring, und innen nichts. Der Kern war ohnehin billig aufzugeben: bei
+460 Weltpunkten wäre er ein Fleck von 90 Punkten, und das Feuermuster der
+Stufe 4 hängt an den acht Türmen auf dem Band, nicht an ihm.
+
+Der alte Prompt von v28 steht hier nicht mehr — er hat den Fehler
+beschrieben, den wir zweimal geliefert bekommen haben („a smaller armoured
+core floats in the middle connected by four thin struts").
 
 ---
 
