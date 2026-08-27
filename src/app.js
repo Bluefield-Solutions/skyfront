@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v38",
+    SKF_VERSION = "v39",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -56848,7 +56848,7 @@ return new ` + this.key + `();
       sky: 659488,
       skyAlpha: .08,
       cloud: .12,
-      boss: 2,
+      boss: 1,
       intensity: 6,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "bomber", "elite"]
     }, {
@@ -56857,7 +56857,7 @@ return new ` + this.key + `();
       sky: 659488,
       skyAlpha: .08,
       cloud: .12,
-      boss: 2,
+      boss: 1,
       intensity: 7,
       pool: ["grunt", "kamikaze", "gunship", "bomber", "sniper", "weaver", "strafer"]
     }, {
@@ -56885,7 +56885,7 @@ return new ` + this.key + `();
       sky: 659488,
       skyAlpha: .08,
       cloud: .12,
-      boss: 3,
+      boss: 2,
       intensity: 10,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "rocketeer", "gunship", "arcer", "bomber", "grunt", "elite"]
     }, {
@@ -56958,7 +56958,7 @@ return new ` + this.key + `();
       sky: 2372632,
       skyAlpha: .05,
       cloud: .18,
-      boss: 2,
+      boss: 1,
       intensity: 18,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship"]
@@ -56968,7 +56968,7 @@ return new ` + this.key + `();
       sky: 2372632,
       skyAlpha: .05,
       cloud: .18,
-      boss: 1,
+      boss: 2,
       intensity: 19,
       pool: ["grunt", "strafer", "sniper", "gunship", "bomber", "arcer"]
     }, {
@@ -57004,7 +57004,7 @@ return new ` + this.key + `();
       sky: 926224,
       skyAlpha: .07,
       cloud: .22,
-      boss: 2,
+      boss: 1,
       intensity: 23,
       corridor: !0,
       pool: ["strafer", "kamikaze", "arcer", "gunship", "sniper"]
@@ -57014,7 +57014,7 @@ return new ` + this.key + `();
       sky: 926224,
       skyAlpha: .07,
       cloud: .22,
-      boss: 1,
+      boss: 2,
       intensity: 24,
       pool: ["weaver", "strafer", "sniper", "bomber", "gunship"]
     }, {
@@ -57087,7 +57087,7 @@ return new ` + this.key + `();
       sky: 9067050,
       skyAlpha: .06,
       cloud: .15,
-      boss: 1,
+      boss: 2,
       intensity: 12,
       corridor: !0,
       pool: ["strafer", "weaver", "arcer", "gunship", "bomber"]
@@ -57151,7 +57151,7 @@ return new ` + this.key + `();
       sky: 9067050,
       skyAlpha: .06,
       cloud: .15,
-      boss: 1,
+      boss: 2,
       intensity: 19,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57178,7 +57178,7 @@ return new ` + this.key + `();
       sky: 2771562,
       skyAlpha: .1,
       cloud: .25,
-      boss: 1,
+      boss: 2,
       intensity: 22,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57242,7 +57242,7 @@ return new ` + this.key + `();
       sky: 2771562,
       skyAlpha: .1,
       cloud: .25,
-      boss: 1,
+      boss: 2,
       intensity: 29,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57260,7 +57260,7 @@ return new ` + this.key + `();
       sky: 3824250,
       skyAlpha: .1,
       cloud: .3,
-      boss: 1,
+      boss: 2,
       intensity: 31,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57269,7 +57269,7 @@ return new ` + this.key + `();
       sky: 3824250,
       skyAlpha: .1,
       cloud: .3,
-      boss: 1,
+      boss: 2,
       intensity: 32,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57288,7 +57288,7 @@ return new ` + this.key + `();
       sky: 3824250,
       skyAlpha: .1,
       cloud: .3,
-      boss: 2,
+      boss: 3,
       intensity: 34,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57306,7 +57306,7 @@ return new ` + this.key + `();
       sky: 3824250,
       skyAlpha: .1,
       cloud: .3,
-      boss: 1,
+      boss: 2,
       intensity: 36,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57333,7 +57333,7 @@ return new ` + this.key + `();
       sky: 3824250,
       skyAlpha: .1,
       cloud: .3,
-      boss: 1,
+      boss: 2,
       intensity: 39,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57351,7 +57351,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 1,
+      boss: 2,
       intensity: 41,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57369,7 +57369,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 2,
+      boss: 3,
       intensity: 43,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57379,7 +57379,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 2,
+      boss: 3,
       intensity: 44,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57397,7 +57397,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 1,
+      boss: 2,
       intensity: 46,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57425,7 +57425,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 1,
+      boss: 3,
       intensity: 49,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57443,7 +57443,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 1,
+      boss: 2,
       intensity: 51,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57452,7 +57452,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 2,
+      boss: 3,
       intensity: 52,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57461,7 +57461,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 2,
+      boss: 3,
       intensity: 53,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57471,7 +57471,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 2,
+      boss: 3,
       intensity: 54,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57489,7 +57489,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 1,
+      boss: 2,
       intensity: 56,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57507,7 +57507,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 2,
+      boss: 3,
       intensity: 58,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57517,7 +57517,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 1,
+      boss: 3,
       intensity: 59,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57535,7 +57535,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 1,
+      boss: 3,
       intensity: 61,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57544,7 +57544,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 2,
+      boss: 3,
       intensity: 62,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57553,7 +57553,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 2,
+      boss: 3,
       intensity: 63,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57563,7 +57563,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 2,
+      boss: 3,
       intensity: 64,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57581,7 +57581,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 1,
+      boss: 2,
       intensity: 66,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57599,7 +57599,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 2,
+      boss: 3,
       intensity: 68,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57609,7 +57609,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 1,
+      boss: 3,
       intensity: 69,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57627,7 +57627,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 1,
+      boss: 3,
       intensity: 71,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57636,7 +57636,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 2,
+      boss: 3,
       intensity: 72,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57645,7 +57645,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 2,
+      boss: 3,
       intensity: 73,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57673,7 +57673,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 1,
+      boss: 3,
       intensity: 76,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57691,7 +57691,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 2,
+      boss: 3,
       intensity: 78,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57701,7 +57701,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 1,
+      boss: 3,
       intensity: 79,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57719,7 +57719,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 1,
+      boss: 3,
       intensity: 81,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57728,7 +57728,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 2,
+      boss: 3,
       intensity: 82,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57737,7 +57737,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 2,
+      boss: 3,
       intensity: 83,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57747,7 +57747,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 2,
+      boss: 3,
       intensity: 84,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57765,7 +57765,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 1,
+      boss: 3,
       intensity: 86,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57774,7 +57774,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 2,
       intensity: 87,
       pool: ["gunship", "arcer", "bomber", "strafer", "sniper", "elite"]
     }, {
@@ -57783,7 +57783,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 2,
+      boss: 3,
       intensity: 88,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57793,7 +57793,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 1,
+      boss: 3,
       intensity: 89,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57811,7 +57811,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 111,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "gunship"]
     }, {
@@ -57820,7 +57820,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 112,
       pool: ["strafer", "kamikaze", "gunship", "bomber", "sniper"]
     }, {
@@ -57829,7 +57829,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 113,
       corridor: !0,
       pool: ["weaver", "arcer", "rocketeer", "gunship", "bomber", "sniper"]
@@ -57839,7 +57839,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 114,
       pool: ["strafer", "kamikaze", "sniper", "gunship", "bomber", "elite"]
     }, {
@@ -57857,7 +57857,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 116,
       pool: ["kamikaze", "strafer", "sniper", "gunship", "arcer", "bomber"]
     }, {
@@ -57866,7 +57866,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 117,
       pool: ["strafer", "gunship", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57875,7 +57875,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 2,
+      boss: 3,
       intensity: 118,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]

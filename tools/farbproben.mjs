@@ -190,6 +190,27 @@ const PROBEN = [
   ['nur noch halb so viele Wellen je Sektor', '✗',
     ['E.length < I && a < 400', 'E.length < Math.round(I * .55) && a < 400'],
     true, 'zeit', 'bleiben unter 60 s'],
+  // Die Kampagne stehenbleiben lassen — beide Haelften einzeln.
+  //
+  // Bis v38 trugen die Kapitel VII bis XI FUENF MAL dieselbe Bossreihe, und
+  // kein Tor hat es gemeldet: die Zeitachse sah nur Laenge und Bosswerte,
+  // und beide waren in Ordnung. Die zwei Pruefungen, die es seit v39 sehen,
+  // brauchen je eine Probe — sonst bezeugen sie nur den Zustand, den sie
+  // vorgefunden haben.
+  //
+  // Ein einziges Feld genuegt fuer beide Faelle, und der Anker ist das
+  // Hintergrundbild: "bg_lava_07" kommt genau einmal vor, "boss: 2," allein
+  // kaeme 39 Mal. Ohne den Anker waere der Eingriff nicht angekommen, und
+  // ein nicht angekommener Eingriff sieht aus wie ein bestandenes Tor.
+  ['Kapitel XI wiederholt Kapitel XII Zeichen fuer Zeichen', '✗', [
+    'bg: "bg_lava_07",\n      sky: 3805702,\n      skyAlpha: .14,\n      cloud: .15,\n      boss: 2,',
+    'bg: "bg_lava_07",\n      sky: 3805702,\n      skyAlpha: .14,\n      cloud: .15,\n      boss: 3,'],
+    true, 'zeit', 'wiederholen die Bossreihe'],
+  // Und die andere Haelfte: das letzte Kapitel schwaecher als das vorletzte.
+  ['letztes Kapitel faellt hinter das vorletzte zurueck', '✗', [
+    'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 3,',
+    'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 1,'],
+    true, 'zeit', 'SCHWAECHERE Bosse'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.

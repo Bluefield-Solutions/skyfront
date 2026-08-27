@@ -98,9 +98,18 @@ const daten = await seite.evaluate(() => {
   try { spiel.fire(); } catch (e) { n = -1; }
   spiel.shootBullet = echtSchuss; spiel.fireSecondary = echtZweit; spiel.player = echtSpieler;
 
+  const letzter = stufen.length;
   return {
     bild4: window.__game.textures.exists('boss4'), bild5: window.__game.textures.exists('boss5'),
     salve: n, schaden: spiel.playerBulletDamage, takt: spiel.fireDelay,
+    kapitel: kapitel.map((k) => ({ name: k.name, roman: k.roman, start: k.start, count: k.count })),
+    // Das Modell fuer sich: DIESELBE Stufe im ersten und im letzten Sektor.
+    // Ohne Zuordnung, damit die Frage "waechst der Boss?" nicht davon
+    // abhaengt, wo die Stufenliste ihn gerade hinstellt (eiserne Regel 4).
+    modell: [1, 2, 3, 4, 5].map((st) => ({
+      stufe: st, erst: leben(st, 1, spiel.enemyHpMul, false, 0), letzt: leben(st, letzter, spiel.enemyHpMul, false, 0),
+    })),
+    letzter,
     waffe: spiel.weapon, bossDmgMul: spiel.bossDmgMul, hpMul: spiel.enemyHpMul,
     sektoren: stufen.map((s, i) => {
       const st = i + 1, w = s.waves || [], at = w.map((x) => x.at || 0);
@@ -167,15 +176,52 @@ if (lang.length)
 
 // Waechst der Boss ueberhaupt mit? Ohne diese Frage misst die Tafel die
 // Laenge und uebersieht, dass die Schwierigkeit stehenbleibt.
-const jeStufe = {};
-for (const z of zeilen) if (z.stufe > 0) (jeStufe[z.stufe] ||= []).push(z);
-for (const [st, liste] of Object.entries(jeStufe)) {
-  const erst = liste[0], letzt = liste[liste.length - 1];
-  const zuwachs = letzt.bossHp / erst.bossHp;
-  console.log(`  Boss Stufe ${st}: Sektor ${erst.nr} ${erst.bossHp} HP → Sektor ${letzt.nr} ${letzt.bossHp} HP  (${zuwachs.toFixed(2)}x)`);
+//
+// Gemessen wird am MODELL, nicht an der Zuordnung: dieselbe Stufe im ersten
+// und im letzten Sektor. Vorher stand hier der erste und der letzte Sektor,
+// dem diese Stufe ZUGETEILT ist — das mass zwei Dinge auf einmal. Sobald
+// Stufe 1 nur noch in den ersten Kapiteln vorkommt (v39), faellt ihre
+// Spanne, ohne dass am Boss etwas flacher geworden waere: ein Befund, der
+// die Zuordnung meldet und den Boss meint (eiserne Regel 4).
+for (const m of daten.modell) {
+  if (!(m.erst > 0)) continue;
+  const zuwachs = m.letzt / m.erst;
+  if (daten.sektoren.some((s) => s.stufe === m.stufe))
+    console.log(`  Boss Stufe ${m.stufe}: Sektor 1 ${m.erst} HP → Sektor ${daten.letzter} ${m.letzt} HP  (${zuwachs.toFixed(2)}x)`);
   if (zuwachs < 1.5)
-    M.befund(`Boss Stufe ${st} waechst ueber die ganze Kampagne nur um das ${zuwachs.toFixed(2)}-fache `
-      + `(Sektor ${erst.nr}: ${erst.bossHp} HP, Sektor ${letzt.nr}: ${letzt.bossHp} HP). Die Feuerkraft des Spielers waechst um mehr.`);
+    M.befund(`Boss Stufe ${m.stufe} waechst ueber die ganze Kampagne nur um das ${zuwachs.toFixed(2)}-fache `
+      + `(Sektor 1: ${m.erst} HP, Sektor ${daten.letzter}: ${m.letzt} HP). Die Feuerkraft des Spielers waechst um mehr.`);
+}
+
+// Und steigt die ZUORDNUNG mit? Das ist die andere Haelfte: der Boss kann
+// mitwachsen und die Kampagne trotzdem stehenbleiben, wenn jedes Kapitel
+// dieselben Stufen vergibt.
+//
+// Beim ersten Lauf dieser Pruefung (v39) war genau das der Fall: die
+// Kapitel VII bis XI trugen FUENF MAL dieselbe Reihe 1,2,2,2,3,1,3,2,1,3 —
+// fuenfzig Sektoren ohne eine einzige Aenderung. Kein Tor hatte das je
+// gesehen, weil alle nur auf die Laenge und auf die Bosswerte schauten.
+{
+  const kap = daten.kapitel.map((k) => {
+    const s = daten.sektoren.filter((z) => z.nr >= k.start && z.nr < k.start + k.count);
+    return { ...k, reihe: s.map((z) => z.stufe), mittel: s.reduce((a, z) => a + z.stufe, 0) / (s.length || 1) };
+  });
+  console.log('\n  Kapitel   mittlere Bossstufe   Reihe');
+  for (const k of kap)
+    console.log(`  ${k.roman.padEnd(6)} ${k.mittel.toFixed(2).padStart(12)}         ${k.reihe.join(' ')}`);
+
+  const faellt = kap.filter((k, i) => i > 0 && k.mittel < kap[i - 1].mittel - 1e-9);
+  if (faellt.length)
+    M.befund(`${faellt.length} Kapitel vergeben im Mittel SCHWAECHERE Bosse als das Kapitel davor `
+      + `(${faellt.map((k) => `${k.roman} ${k.mittel.toFixed(2)}`).join(', ')}). Die Kampagne faellt zurueck.`);
+
+  const gleich = kap.filter((k, i) => i > 0 && k.reihe.join() === kap[i - 1].reihe.join());
+  if (gleich.length)
+    M.befund(`${gleich.length} Kapitel wiederholen die Bossreihe des vorigen Kapitels Zeichen fuer Zeichen `
+      + `(${gleich.map((k) => k.roman).join(', ')}). Wer sie spielt, spielt dasselbe Kapitel noch einmal.`);
+
+  const anstieg = kap[kap.length - 1].mittel - kap[0].mittel;
+  console.log(`  Anstieg ueber die Kampagne: ${kap[0].mittel.toFixed(2)} → ${kap[kap.length - 1].mittel.toFixed(2)}  (+${anstieg.toFixed(2)} Stufen)`);
 }
 
 M.urteil();
