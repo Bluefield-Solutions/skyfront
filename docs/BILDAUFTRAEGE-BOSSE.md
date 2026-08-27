@@ -253,65 +253,74 @@ blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side 
 ### B-4 · RINGFESTUNG → `boss_ringfestung.png`
 
 > **Einstellung im Werkzeug, VOR dem Prompt:**
-> Seitenverhältnis **1 : 1 quadratisch**,
-> Größe **1150 × 1150 px**.
+> Seitenverhältnis **1 : 1 quadratisch**, Größe **1150 × 1150 px**.
 >
-> **Diese eine ist anders als die vier übrigen.** Sie hat keine Nase — sie ist
-> rotationssymmetrisch, und im Prompt steht deshalb keine Flugrichtung. Und ihre
-> **Mitte muss durchsichtig sein**: der Alphakanal trägt hier eine Form, nicht nur
-> einen Umriss. `npm run bildpruefung` misst das seit v30 nach und meldet
-> „das ist eine Scheibe, kein Ring", wenn das mittlere Viertel zugemalt ist.
+> **Dritter Anlauf.** Zweimal kam ein Rad mit Nabe statt eines Rings:
+> „Mitte durchsichtig 0,0 %" bei verlangten 55. Der Prompt sagte es
+> dreimal, und das Modell hat es zweimal überschrieben — „Raumstation von
+> oben" hat in den Trainingsdaten fast immer eine Nabe, weil Speichen ein
+> Zentrum brauchen.
+>
+> Deshalb ist diesmal nicht der Prompt geschärft, sondern **das Motiv
+> geändert**: der Kern in der Mitte ist gestrichen. Kein Kern, keine
+> Streben, keine Speichen. Nur ein Ring, und innen nichts.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
-no vanishing point. Subject: a circular orbital fortress platform seen from straight
-above. It has no nose and no front — it is rotationally symmetric.
-Proportions: exactly as wide as it is tall — a square composition holding a perfect
-circle, not an oval, not an egg. No perspective foreshortening: seen from straight above,
-a circle stays a circle.
-Silhouette: a heavy armoured torus — a thick ring of armour with a WIDE OPEN HOLE through
-the middle. The hole is the defining feature: its diameter is more than half the diameter
-of the whole platform, and you can see straight through it. A small armoured core hangs
-suspended in the centre of that hole, no wider than a fifth of the platform, held by four
-thin radial struts. Between core and ring there is nothing but empty space. The ring
-itself is segmented into eight armour blocks with recessed maintenance channels between
-them.
-Armament: eight identical turret emplacements spaced evenly around the ring, each with a
-short stubby barrel pointing outward; a cluster of sensor domes on the central core.
+no vanishing point.
+Subject: a single closed ring of armour, floating in empty space, seen from straight
+above. Think of a bracelet lying flat on a table, or a car tyre seen from above. Nothing
+is inside it and nothing crosses it: the middle of the image is EMPTY.
+This is the most important part of the design: more than half of the image is empty. The
+ring is a band; the hole it encloses is at least half the width of the whole object, and
+that hole contains nothing at all — no core, no hub, no station, no platform, no struts,
+no spokes, no bridges, no cables, no antennae, no glow, no haze. Empty.
+Proportions: a perfect circle, exactly as wide as it is tall. The band of the ring is
+roughly a fifth of the total diameter thick. No oval, no egg.
+Structure: the band is segmented into eight armoured blocks, separated by recessed
+maintenance channels. Eight identical turret emplacements sit on the band, one per block,
+spaced evenly around it, each with a short stubby barrel pointing outward away from the
+centre. Between the blocks the band steps and layers, so the outer edge is not a smooth
+circle but a faceted one.
 Surface: semi-realistic hard-surface military structure, brushed gunmetal and dark
 blue-grey armour plating, heavy panel seams, rivet rows, scorched and pitted plating,
-exposed conduit runs along the struts.
-Accents: amber warning lights on the turret housings, a pale cyan glow in the seams of the
-central core.
+exposed conduit runs along the band. Restrained detail — this reads at a glance as a ring,
+not as a city.
+Accents: amber warning lights on the turret housings, a few pale cyan strips in the
+recessed channels.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
-the lower right, clear directional shading around the ring so the upper-left arc is bright
-and the lower-right arc falls into shadow, the struts casting shadows onto the core.
-Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
-clear empty transparent margin of about 2 percent of the frame on all four sides — no part
-of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
-edge.
-Background: fully transparent — and the hole inside the ring is background too, so it is
-fully transparent as well, right up to the four struts and the central core. Nothing fills
-it: no glass, no membrane, no glow plate, no energy field, no haze. No ground shadow, no
-sky, no clouds, no ground, no vignette, no frame, no text, no logos.
+the lower right, so the upper-left arc of the band is bright and the lower-right arc falls
+into shadow. Clear directional shading across the plating.
+Framing: the ring is centred and its outer edge occupies about 96 percent of the frame.
+Leave a clear empty transparent margin of about 2 percent on all four sides — no barrel
+tip may touch or be cut off by a frame edge.
+Background: fully transparent, and the hole in the middle is background as well — fully
+transparent, right up to the inner edge of the band. No ground shadow, no sky, no clouds,
+no ground, no vignette, no frame, no text, no logos, no emblems, no markings.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
-silhouette.
+silhouette: a bright ring around an empty middle.
 ```
 
 **Negativ:**
 ```
-portrait composition, landscape composition, oval, ellipse, egg shape, filled centre,
-solid disc, closed hub, glass dome, energy field in the centre, membrane, small hole,
-narrow opening, aircraft, wings, nose, cockpit, cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book,
-photorealistic photograph, studio product render, background, sky, clouds, ground,
-terrain, shadow on ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
-national marking, roundel, swastika, hooked cross, iron cross, runes,
-military decal, painted symbol, logo on hull, red hull,
-crimson hull, blurry, soft focus, upscaled, low detail, tilted view, three-quarter view,
-side view
+central hub, hub, core, central core, station core, central tower, spokes, struts, bridges,
+cables crossing the centre, wheel, cartwheel, spoked wheel, space station, filled centre,
+solid disc, closed centre, glass dome, energy field in the centre, membrane, haze in the
+centre, small hole, narrow opening, oval, ellipse, egg shape, portrait composition,
+landscape composition, aircraft, wings, nose, cockpit, insignia, emblem, badge, heraldry,
+crest, national marking, roundel, swastika, hooked cross, iron cross, runes, military
+decal, painted symbol, logo on hull, cartoon, anime, cel shading, toy, plastic toy,
+thick outline, comic book, photorealistic photograph, studio product render, background,
+sky, clouds, ground, terrain, shadow on ground, vignette, frame, border, text, watermark,
+signature, red hull, crimson hull, blurry, soft focus, upscaled, low detail, tilted view,
+three-quarter view, side view
 ```
 
----
+**Was `npm run bildpruefung` daran misst:** das mittlere Viertel des Bildes
+muss zu mindestens 55 % durchsichtig sein. Bei einem Loch von der halben
+Objektbreite sind es rechnerisch 100 % — die Prüfung ist also weit weg vom
+Rand, sobald das Motiv stimmt. Sie hat beide bisherigen Lieferungen mit
+0,0 % abgewiesen.
 
 ### B-5 · AMBOSSKREUZER → `boss_ambosskreuzer.png`
 
