@@ -102,7 +102,7 @@ await seite.waitForTimeout(1200);
 
 const daten = await seite.evaluate(() => {
   const spiel = window.__game.scene.getScene('Game');
-  const stufen = window.__SKF_STUFEN, kapitel = window.__SKF_KAPITEL, leben = window.__SKF_BOSSLEBEN;
+  const stufen = window.__SKF_STUFEN, kapitel = window.__SKF_KAPITEL, leben = window.__SKF_BOSSLEBEN, deckel = window.__SKF_BOSSDECKEL;
   if (!stufen || !kapitel || !leben) return { fehler: 'Naht fehlt (__SKF_STUFEN / __SKF_KAPITEL / __SKF_BOSSLEBEN)' };
 
   // Die Salve zaehlt das Spiel. Wir haengen uns nur an den Abschuss.
@@ -131,10 +131,17 @@ const daten = await seite.evaluate(() => {
     waffe: spiel.weapon, bossDmgMul: spiel.bossDmgMul, hpMul: spiel.enemyHpMul,
     sektoren: stufen.map((s, i) => {
       const st = i + 1, w = s.waves || [], at = w.map((x) => x.at || 0);
+      // VORGESEHEN ist, was in der Stufenliste steht. WIRKSAM ist, was der
+      // Spieler heute trifft — das Spiel deckelt die Stufe am Bildvorrat.
+      // Beide Zahlen werden gebraucht: die Laenge misst sich am Wirksamen,
+      // die Kampagnenkurve am Vorgesehenen. Gedeckelt wird mit der
+      // Funktion des Spiels, nicht mit einer nachgebauten (Regel 4).
+      const wirksam = deckel ? deckel(spiel, s.boss) : s.boss;
       return {
-        nr: st, label: s.label, wellen: w.length, stufe: s.boss,
+        nr: st, label: s.label, wellen: w.length, stufe: wirksam, vorgesehen: s.boss,
         fenster: w.length ? (Math.max(...at) - Math.min(...at)) / 1000 : 0,
-        bossHp: s.boss > 0 ? leben(s.boss, st, spiel.enemyHpMul, false, 0) : 0,
+        bossHp: wirksam > 0 ? leben(wirksam, st, spiel.enemyHpMul, false, 0) : 0,
+        bossHpVor: s.boss > 0 ? leben(s.boss, st, spiel.enemyHpMul, false, 0) : 0,
       };
     }),
   };
@@ -156,7 +163,8 @@ console.log('  (volle Feuerkraft, jeder Schuss trifft — Untergrenze, keine Spi
 const zeilen = [];
 for (const s of daten.sektoren) {
   const boss = dps > 0 && s.bossHp > 0 ? s.bossHp / dps : 0;
-  zeilen.push({ ...s, boss, gesamt: s.fenster + boss });
+  const bossVor = dps > 0 && s.bossHpVor > 0 ? s.bossHpVor / dps : 0;
+  zeilen.push({ ...s, boss, gesamt: s.fenster + boss, gesamtVor: s.fenster + bossVor });
 }
 
 if (JSON_AUS) {
@@ -187,19 +195,39 @@ if (weit.length)
 if (lang.length)
   M.befund(`${lang.length} Sektor(en) liegen ueber ${OBEN} s, laengster ${lang[lang.length - 1].label} mit ${lang[lang.length - 1].gesamt.toFixed(1)} s.`);
 
-// Vergibt die Stufenliste Bosse, fuer die es gar kein Bild gibt?
+// Die Stufenliste vergibt seit v41 alle fuenf Stufen; das Spiel deckelt
+// sie am Bildvorrat. Zwei Fragen bleiben, und es sind andere als vorher.
 //
-// Die Stufen 4 und 5 sind seit v38 gerechnet und feuern eigene Muster, aber
-// ihre Bilder (Ringfestung, Ambosskreuzer) sind bestellt und nicht
-// geliefert. Wer sie in der Stufenliste vergibt, bevor die Bilder da sind,
-// bekommt drei Bosse, die gleich AUSSEHEN und verschieden schiessen — und
-// merkt es erst auf dem Geraet. Diese Pruefung merkt es vorher.
+// ERSTENS: greift der Deckel ueberhaupt? Ein Boss, dessen wirksame Stufe
+// kein Bild hat, saehe aus wie Stufe 3 und schoesse wie Stufe 5 — genau
+// der Zustand, vor dem hier seit v38 gewarnt wird. Bis v40 war das eine
+// Warnung an den, der die Liste umstellt; jetzt ist es eine Pruefung des
+// Deckels selbst.
 {
   const ohne = zeilen.filter((z) => (z.stufe === 4 && !daten.bild4) || (z.stufe === 5 && !daten.bild5));
   if (ohne.length)
-    M.befund(`${ohne.length} Sektor(en) vergeben Bossstufe 4 oder 5, aber die Textur dafuer fehlt `
+    M.befund(`${ohne.length} Sektor(en) setzen WIRKSAM Bossstufe 4 oder 5, obwohl die Textur fehlt `
       + `(Sektor ${ohne.map((z) => z.nr).slice(0, 8).join(', ')}${ohne.length > 8 ? ' …' : ''}). `
-      + `Der Boss faellt dann auf das Bild der Stufe 3 zurueck: gleiches Aussehen, anderes Feuer. Erst npm run einbau.`);
+      + `Der Deckel greift nicht: gleiches Aussehen, anderes Feuer.`);
+  const gedeckelt = zeilen.filter((z) => z.vorgesehen > z.stufe);
+  if (gedeckelt.length)
+    console.log(`\n  ${gedeckelt.length} Sektor(en) sind heute gedeckelt (Bild fehlt): `
+      + `vorgesehen bis Stufe ${Math.max(...gedeckelt.map((z) => z.vorgesehen))}, gespielt bis Stufe ${Math.max(...zeilen.map((z) => z.stufe))}.`);
+}
+
+// ZWEITENS: passt die Kampagne, wenn die Bilder da sind? Das ist die
+// Frage, an der v39 gescheitert ist — damals lagen die vorgesehenen
+// Stufen 20 s ueber der Obergrenze, und es fiel erst beim Rechnen auf.
+// Sie wird ab jetzt bei jedem Lauf gestellt, nicht einmal von Hand.
+{
+  const zuLang = zeilen.filter((z) => z.gesamtVor > OBEN);
+  const laengst = zeilen.reduce((a, z) => (z.gesamtVor > a.gesamtVor ? z : a), zeilen[0]);
+  console.log(`  Mit den vorgesehenen Stufen: laengster Sektor ${laengst.label} mit ${laengst.gesamtVor.toFixed(1)} s `
+    + `(Obergrenze ${OBEN} s, also ${(OBEN - laengst.gesamtVor).toFixed(1)} s Luft).`);
+  if (zuLang.length)
+    M.befund(`${zuLang.length} Sektor(en) wuerden mit ihrer VORGESEHENEN Bossstufe ueber ${OBEN} s gehen, `
+      + `laengster ${zuLang[zuLang.length - 1].label} mit ${zuLang[zuLang.length - 1].gesamtVor.toFixed(1)} s. `
+      + `Sobald die Bilder da sind, reisst die Kampagne das Band.`);
 }
 
 // Waechst der Boss ueberhaupt mit? Ohne diese Frage misst die Tafel die
@@ -232,7 +260,10 @@ for (const m of daten.modell) {
 {
   const kap = daten.kapitel.map((k) => {
     const s = daten.sektoren.filter((z) => z.nr >= k.start && z.nr < k.start + k.count);
-    return { ...k, reihe: s.map((z) => z.stufe), mittel: s.reduce((a, z) => a + z.stufe, 0) / (s.length || 1) };
+    // Die Kurve ist eine Aussage ueber den ENTWURF, nicht ueber den
+    // Bildvorrat: gemessen wird die vorgesehene Stufe. Sonst saehen die
+    // letzten vier Kapitel heute alle gleich aus — gedeckelt auf drei.
+    return { ...k, reihe: s.map((z) => z.vorgesehen), mittel: s.reduce((a, z) => a + z.vorgesehen, 0) / (s.length || 1) };
   });
   console.log('\n  Kapitel   mittlere Bossstufe   Reihe');
   for (const k of kap)

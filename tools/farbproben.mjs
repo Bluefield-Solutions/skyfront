@@ -224,6 +224,21 @@ const PROBEN = [
   ['halb so viele Wellen mehr je Sektor', '\u2717',
     ['E.length < I && a < 400', 'E.length < Math.round(I * 1.45) && a < 400'],
     true, 'zeit', 'Wellenfenster ueber'],
+  // Den Deckel wegnehmen, der die Bossstufe an den Bildvorrat bindet.
+  // Dann steht in Sektor 120 wirksam Stufe 5, ohne dass es ein Bild dafuer
+  // gibt: ein Boss, der aussieht wie Stufe 3 und schiesst wie Stufe 5.
+  // Genau davor warnt die Zeitachse seit v38 — bis v40 als Hinweis an den,
+  // der die Liste umstellt, seit v41 als Pruefung des Deckels selbst.
+  ['Bossstufe nicht mehr am Bildvorrat gedeckelt', '\u2717',
+    ['E = bossStufeGedeckelt(R, E),', 'E = Math.min(5, E),'],
+    true, 'zeit', 'Der Deckel greift nicht'],
+  // Und die zweite neue Pruefung: haelt die Kampagne das Band, wenn die
+  // Bilder da sind? Der Aufschlag der obersten Stufe von 2,0 auf 2,6 laesst
+  // den letzten Sektor auf ueber drei Minuten wachsen. Ohne diese Probe
+  // bezeugte die Pruefung nur den Entwurf, den sie vorgefunden hat.
+  ['oberste Bossstufe mit 2,6-fachem Leben', '\u2717',
+    ['stufe >= 5 ? 2 : stufe >= 4 ? 1.75', 'stufe >= 5 ? 2.6 : stufe >= 4 ? 1.75'],
+    true, 'zeit', 'VORGESEHENEN Bossstufe ueber'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.

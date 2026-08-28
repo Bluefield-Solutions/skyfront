@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v40",
+    SKF_VERSION = "v41",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -57434,7 +57434,7 @@ return new ` + this.key + `();
       sky: 1713208,
       skyAlpha: .16,
       cloud: .6,
-      boss: 3,
+      boss: 4,
       intensity: 50,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }, {
@@ -57526,7 +57526,7 @@ return new ` + this.key + `();
       sky: 6961690,
       skyAlpha: .1,
       cloud: .1,
-      boss: 3,
+      boss: 4,
       intensity: 60,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }, {
@@ -57572,7 +57572,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 3,
+      boss: 4,
       intensity: 65,
       pool: ["grunt", "strafer", "kamikaze", "gunship", "bomber", "sniper"]
     }, {
@@ -57590,7 +57590,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 3,
+      boss: 4,
       intensity: 67,
       pool: ["gunship", "arcer", "bomber", "strafer", "sniper", "elite"]
     }, {
@@ -57618,7 +57618,7 @@ return new ` + this.key + `();
       sky: 1718874,
       skyAlpha: .12,
       cloud: .3,
-      boss: 3,
+      boss: 4,
       intensity: 70,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }, {
@@ -57645,7 +57645,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 3,
+      boss: 4,
       intensity: 73,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57655,7 +57655,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 2,
+      boss: 3,
       intensity: 74,
       pool: ["weaver", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57664,7 +57664,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 3,
+      boss: 4,
       intensity: 75,
       pool: ["grunt", "strafer", "kamikaze", "gunship", "bomber", "sniper"]
     }, {
@@ -57682,7 +57682,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 3,
+      boss: 4,
       intensity: 77,
       pool: ["gunship", "arcer", "bomber", "strafer", "sniper", "elite"]
     }, {
@@ -57701,7 +57701,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 3,
+      boss: 4,
       intensity: 79,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57710,7 +57710,7 @@ return new ` + this.key + `();
       sky: 658970,
       skyAlpha: .14,
       cloud: .05,
-      boss: 3,
+      boss: 4,
       intensity: 80,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }, {
@@ -57719,7 +57719,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 81,
       pool: ["weaver", "strafer", "kamikaze", "sniper", "arcer"]
     }, {
@@ -57728,7 +57728,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 82,
       pool: ["strafer", "weaver", "gunship", "bomber", "sniper"]
     }, {
@@ -57737,7 +57737,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 83,
       corridor: !0,
       pool: ["kamikaze", "strafer", "arcer", "bomber", "gunship", "sniper"]
@@ -57756,7 +57756,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 85,
       pool: ["grunt", "strafer", "kamikaze", "gunship", "bomber", "sniper"]
     }, {
@@ -57765,7 +57765,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 86,
       pool: ["weaver", "strafer", "arcer", "kamikaze", "rocketeer", "bomber"]
     }, {
@@ -57774,7 +57774,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 2,
+      boss: 4,
       intensity: 87,
       pool: ["gunship", "arcer", "bomber", "strafer", "sniper", "elite"]
     }, {
@@ -57783,7 +57783,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 88,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57793,7 +57793,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 4,
       intensity: 89,
       pool: ["grunt", "strafer", "sniper", "gunship", "arcer", "bomber", "elite"]
     }, {
@@ -57802,7 +57802,7 @@ return new ` + this.key + `();
       sky: 3805702,
       skyAlpha: .14,
       cloud: .15,
-      boss: 3,
+      boss: 5,
       intensity: 90,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }, {
@@ -57811,7 +57811,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 4,
       intensity: 111,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "gunship"]
     }, {
@@ -57820,7 +57820,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 4,
       intensity: 112,
       pool: ["strafer", "kamikaze", "gunship", "bomber", "sniper"]
     }, {
@@ -57829,7 +57829,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 5,
       intensity: 113,
       corridor: !0,
       pool: ["weaver", "arcer", "rocketeer", "gunship", "bomber", "sniper"]
@@ -57839,7 +57839,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 4,
       intensity: 114,
       pool: ["strafer", "kamikaze", "sniper", "gunship", "bomber", "elite"]
     }, {
@@ -57848,7 +57848,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 5,
       intensity: 115,
       pool: ["weaver", "strafer", "arcer", "rocketeer", "gunship", "bomber", "elite"]
     }, {
@@ -57857,7 +57857,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 4,
       intensity: 116,
       pool: ["kamikaze", "strafer", "sniper", "gunship", "arcer", "bomber"]
     }, {
@@ -57866,7 +57866,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 5,
       intensity: 117,
       pool: ["strafer", "gunship", "arcer", "rocketeer", "bomber", "sniper", "elite"]
     }, {
@@ -57875,7 +57875,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 4,
       intensity: 118,
       corridor: !0,
       pool: ["weaver", "strafer", "kamikaze", "arcer", "rocketeer", "gunship", "elite"]
@@ -57885,7 +57885,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 5,
       intensity: 119,
       pool: ["sniper", "strafer", "gunship", "arcer", "rocketeer", "bomber", "kamikaze", "elite"]
     }, {
@@ -57894,7 +57894,7 @@ return new ` + this.key + `();
       sky: 656664,
       skyAlpha: .16,
       cloud: .14,
-      boss: 3,
+      boss: 5,
       intensity: 120,
       pool: ["strafer", "sniper", "kamikaze", "rocketeer", "gunship", "arcer", "bomber", "weaver", "grunt", "elite"]
     }],
@@ -57991,11 +57991,32 @@ return new ` + this.key + `();
   // ein Aufschlag darauf. Das ist die einzige Groesse, die monoton waechst.
   // Nachzumessen mit npm run zeitachse — dort steht, wie viele Sekunden ein
   // Boss mindestens haelt.
+  // Die hoechste Bossstufe, fuer die es ein Bild GIBT — und damit die
+  // Stufe, die der Spieler wirklich zu sehen bekommt.
+  //
+  // Die Stufenliste vergibt seit v41 alle fuenf Stufen. Die Bilder fuer 4
+  // und 5 (Ringfestung, Ambosskreuzer) sind bestellt und noch nicht da.
+  // Statt die Liste solange auf drei zu beschneiden und sie spaeter von
+  // Hand umzustellen, wird hier GEDECKELT: kein Schalter, den man
+  // vergessen kann, sondern eine Ableitung aus dem Bildvorrat. Sobald
+  // `npm run einbau` boss4 und boss5 gebacken hat, stehen sie im Spiel,
+  // ohne dass eine Zahl geaendert wird.
+  //
+  // Gedeckelt wird die STUFE, nicht nur die Textur: sonst haette man einen
+  // Boss, der aussieht wie Stufe 3 und schiesst wie Stufe 5. Genau davor
+  // hat die Zeitachse seit v38 gewarnt.
+  function bossStufeGedeckelt(szene, stufe) {
+    const t = szene && szene.textures;
+    if (!t) return stufe;
+    for (let s = Math.min(5, Math.max(1, stufe | 0)); s > 1; s--)
+      if (t.exists("boss" + s)) return s;
+    return 1
+  }
+
   function bossLeben(stufe, sektor, hpMul, endlos, endlosRunde) {
-    // Stufenaufschlag, seit v38 fuer fuenf Stufen. Die Bilder fuer 4 und 5
-    // (Ringfestung, Ambosskreuzer) sind bestellt, aber noch nicht da —
-    // deshalb vergibt die Stufenliste sie noch nicht. Die Rechnung steht
-    // trotzdem schon hier, damit spaeter ein Tabelleneintrag reicht.
+    // Stufenaufschlag, seit v38 fuer fuenf Stufen. Die Stufenliste vergibt
+    // sie seit v41 alle; wo das Bild fehlt, deckelt bossStufeGedeckelt
+    // vorher ab. Diese Rechnung sieht also immer die WIRKSAME Stufe.
     const h = 1450 * (1 + (sektor - 1) * .0125) * (stufe >= 5 ? 2 : stufe >= 4 ? 1.75 : stufe >= 3 ? 1.5 : stufe >= 2 ? 1.25 : 1);
     return Math.round(h * hpMul * (endlos ? 1 + endlosRunde * .08 : 1))
   }
@@ -61729,7 +61750,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   let oi = Ae;
   class zn extends tt.Physics.Arcade.Image {
     constructor(R, E = 1) {
-      super(R, J / 2, -150, "boss1"), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), this.setTexture(["boss5", "boss4", "boss3", "boss2", "boss1"].slice(Math.max(0, 5 - E)).find((I) => R.textures.exists(I)) || "boss1"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
+      super(R, J / 2, -150, "boss1"), E = bossStufeGedeckelt(R, E), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), this.setTexture(["boss5", "boss4", "boss3", "boss2", "boss1"].slice(Math.max(0, 5 - E)).find((I) => R.textures.exists(I)) || "boss1"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
       // setScale(.5), weil die Texturen seit v30 in PUFFERgroesse gebacken
       // werden: die Kamera zoomt zweifach, eine 680 Punkte breite Textur
       // steht also 340 Weltpunkte breit im Bild. Vorher trug die Skalierung
@@ -66032,7 +66053,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_GEGNERBACKEN = gegnerBacken;
     window.__SKF_BOSSLEBEN = bossLeben;
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
-    window.__SKF_KAPITEL = se;
+    window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,
