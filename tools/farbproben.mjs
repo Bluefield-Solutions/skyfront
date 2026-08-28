@@ -239,6 +239,13 @@ const PROBEN = [
   ['oberste Bossstufe mit 2,6-fachem Leben', '\u2717',
     ['stufe >= 5 ? 2 : stufe >= 4 ? 1.75', 'stufe >= 5 ? 2.6 : stufe >= 4 ? 1.75'],
     true, 'zeit', 'VORGESEHENEN Bossstufe ueber'],
+  // Den Hof wieder ueber den Bildrand laufen lassen — der Zustand bis v42.
+  // Dann steht um die grossen Geschosse ein dunkles Rechteck mit harten
+  // Kanten. Auf dunklem Grund sieht man es nie, auf Wueste und Schnee
+  // sofort: gefunden auf dem Geschossbogen, nicht von einem Tor.
+  ['Hof der Geschosse laeuft ueber den Bildrand', '\u2717',
+    ['b = Math.min(b, T.canvas.width / 2, T.canvas.height / 2);', 'b = b;'],
+    true, 'bogen', 'abgeschnittenen Hof'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.
@@ -322,6 +329,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'zeit' ? ['tools/zeitachse.mjs']
     : tor === 'muster' ? ['tools/bossmuster.mjs']
     : tor === 'steuer' ? ['tools/steuerung.mjs']
+    : tor === 'bogen' ? ['tools/geschossbogen.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -372,7 +380,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Geschossbogen' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem

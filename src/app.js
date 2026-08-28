@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v41",
+    SKF_VERSION = "v42",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -55047,7 +55047,7 @@ return new ` + this.key + `();
     // Nur der Rueckfall entsteht sofort — er wird von `sea` und vom
     // Faerbeweg gebraucht. Die anderen neun auf Zuruf, siehe verlaufTextur.
     ht(T, "bg_ocean", 540, 540, (R, E) => gi(R, E, pi.bg_ocean));
-    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "eb_lanze", 14, 46, (R, E, b) => lanzeZeichnen(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
+    ht(T, "sea", 540, 540, (R, E) => gi(R, E, pi.bg_ocean)), ht(T, "sunglint", 540, 540, Hs), ht(T, "islandsLayer", 540, 540, Ks), ht(T, "cloudsLayer", 540, 540, Qs), ht(T, "pu_power", 44, 44, (R, E, b) => oe(R, E, b, "#2a86ff", "P")), ht(T, "pu_shield", 44, 44, (R, E, b) => oe(R, E, b, "#2fbf71", "S")), ht(T, "pu_bomb", 44, 44, (R, E, b) => oe(R, E, b, "#ffc21f", "B")), ht(T, "pu_coin", 44, 44, (R, E, b) => oe(R, E, b, "#e8b400", "€")), ht(T, "pu_part", 44, 44, (R, E, b) => oe(R, E, b, "#7fb4d8", "⚙")), ht(T, "pu_core", 44, 44, (R, E, b) => oe(R, E, b, "#d84ffa", "◆")), ht(T, "pu_slow", 44, 44, (R, E, b) => oe(R, E, b, "#22b8d8", "Z")), ht(T, "shieldRing", 96, 96, Xs), ht(T, "vignette", 540, 960, Ws), ht(T, "bullet_p", 19, 42, Os), ht(T, "bullet_spread", 24, 34, Es), ht(T, "bullet_focus", 13, 48, ws), ht(T, "bullet_heavy", 26, 40, Ms), ht(T, "eb_orb", 28, 28, (R, E, b) => Ls(R, E, b, GEFAHR)), ht(T, "eb_bolt", 18, 40, (R, E, b) => zs(R, E, b, GEFAHR)), ht(T, "eb_ring", 30, 30, (R, E, b) => Is(R, E, b, GEFAHR)), ht(T, "eb_dart", 22, 32, (R, E, b) => Ys(R, E, b, GEFAHR)), ht(T, "eb_diamond", 28, 28, (R, E, b) => Bs(R, E, b, GEFAHR)), ht(T, "eb_wave", 34, 22, (R, E, b) => Gs(R, E, b, GEFAHR)), ht(T, "eb_star", 30, 30, (R, E, b) => Ds(R, E, b, GEFAHR)), ht(T, "eb_needle", 14, 44, (R, E, b) => Ns(R, E, b, GEFAHR)), ht(T, "eb_flame", 24, 36, (R, E, b) => Vs(R, E, b, GEFAHR)), ht(T, "eb_saw", 34, 34, (R, E, b) => js(R, E, b, GEFAHR)), ht(T, "eb_lanze", 14, 46, (R, E, b) => lanzeZeichnen(R, E, b, GEFAHR)), ht(T, "eb_bolzen", 22, 42, (R, E, b) => bolzenZeichnen(R, E, b, GEFAHR)), ht(T, "eb_brut", 30, 30, (R, E, b) => brutZeichnen(R, E, b, GEFAHR)), ht(T, "eb_scherbe", 30, 30, (R, E, b) => scherbeZeichnen(R, E, b, GEFAHR)), ht(T, "eb_hammer", 34, 34, (R, E, b) => hammerZeichnen(R, E, b, GEFAHR)), ht(T, "shard", 12, 14, Us), ht(T, "missile", 16, 34, Fs), ht(T, "missile_p", 16, 34, (R, E, b) => Fs(R, E, b, {
       dunkel: "#7fb8dc",
       hell: EIGEN,
       flosse: "#9fd0ee",
@@ -55994,6 +55994,13 @@ return new ` + this.key + `();
 
 
   function Zt(T, R, E, b) {
+    // Der Hof muss INS BILD passen. Tut er das nicht, wird der Kreis am
+    // Rand der Textur abgeschnitten und steht als dunkles RECHTECK mit
+    // harten Kanten um die Kugel — auf dunklem Grund unsichtbar, auf
+    // Wueste und Schnee deutlich. Gefunden auf dem Geschossbogen (v42),
+    // nicht von einem Tor: eb_hammer (34x34) bekam einen Hof von 30,6
+    // Punkten Radius, der noch in den Ecken 19 % Deckung hatte.
+    b = Math.min(b, T.canvas.width / 2, T.canvas.height / 2);
     const I = T.createRadialGradient(R, E, b * .35, R, E, b);
     I.addColorStop(0, "rgba(4,6,12,0.55)"), I.addColorStop(.7, "rgba(4,6,12,0.26)"), I.addColorStop(1, "rgba(4,6,12,0)"), T.fillStyle = I, T.beginPath(), T.arc(R, E, b, 0, 7), T.fill()
   }
@@ -56255,6 +56262,115 @@ return new ` + this.key + `();
     // dunklem Grund nicht) und deckelt zugleich den Weissanteil.
     T.fillStyle = "rgba(255,214,196,0.9)", T.beginPath(),
     T.ellipse(I, E * .12, R * .09, E * .07, 0, 0, 7), T.fill()
+  }
+
+  // ---- die vier Bossgeschosse, die bis v41 geliehen waren --------------
+  //
+  // Jede Bossstufe wirft ab v42 etwas Eigenes. Vorher waren es `diamond`
+  // (Elite), `ring` (Bomber), `star` (Bogenschuetze) und `saw` (Traeger) —
+  // ein Boss, der schiesst wie ein Bomber, ist kein Boss.
+  //
+  // Alle vier folgen der Bauart der uebrigen Geschosse: dunkler Hof
+  // (Zt), der Umriss zweimal — einmal um 1,8 Punkte groesser in #08060e als
+  // Rand, dann in der Kennfarbe —, und zum Schluss ein SCHMALER heller
+  // Fleck. Kein weisses Mittelband: der Farbtor verlangt einen hellen Kern
+  // (sonst traegt die Kugel auf dunklem Grund nicht) und deckelt zugleich
+  // den Weissanteil, weil ein helles Band die Kennfarbe frisst.
+
+  // G-1 Bolzen (Sturmkanzel, Stufe 1): kurzer dicker Bolzen mit
+  // angeschraegter Spitze und stumpfem Ende.
+  function bolzenZeichnen(T, R, E, b) {
+    const I = R / 2;
+    Zt(T, I, E / 2, R * .85);
+    const G = (x) => {
+      T.beginPath(), T.moveTo(I, E * .02 - x), T.lineTo(I + R * .34 + x, E * .26),
+      T.lineTo(I + R * .34 + x, E * .82), T.lineTo(I + R * .24 + x, E * .98 + x),
+      T.lineTo(I - R * .24 - x, E * .98 + x), T.lineTo(I - R * .34 - x, E * .82),
+      T.lineTo(I - R * .34 - x, E * .26), T.closePath()
+    };
+    T.fillStyle = "#08060e", G(1.8), T.fill();
+    const v = T.createLinearGradient(I - R * .34, 0, I + R * .34, 0);
+    v.addColorStop(0, "#6d1206"), v.addColorStop(.38, b), v.addColorStop(.62, b), v.addColorStop(1, "#6d1206");
+    T.fillStyle = v, G(0), T.fill();
+    T.fillStyle = "rgba(16,5,3,0.45)", T.fillRect(I - R * .28, E * .68, R * .56, E * .07);
+    T.fillStyle = "rgba(255,214,196,0.9)", T.beginPath(),
+    T.ellipse(I, E * .17, R * .1, E * .08, 0, 0, 7), T.fill()
+  }
+
+  // G-2 Brut (Schwarmmutter, Stufe 2): gedrungene Kapsel mit zwei eng
+  // angelegten Flossen und einer leuchtenden Naht in der Mitte.
+  function brutZeichnen(T, R, E, b) {
+    const I = R / 2;
+    Zt(T, I, E / 2, R * .8);
+    const G = (x) => {
+      T.beginPath(), T.moveTo(I, E * .03 - x);
+      T.quadraticCurveTo(I + R * .3 + x, E * .16, I + R * .28 + x, E * .5);
+      T.lineTo(I + R * .42 + x, E * .84 + x), T.lineTo(I + R * .16 + x, E * .8);
+      T.quadraticCurveTo(I, E * .99 + x, I - R * .16 - x, E * .8);
+      T.lineTo(I - R * .42 - x, E * .84 + x), T.lineTo(I - R * .28 - x, E * .5);
+      T.quadraticCurveTo(I - R * .3 - x, E * .16, I, E * .03 - x), T.closePath()
+    };
+    T.fillStyle = "#08060e", G(1.8), T.fill();
+    const v = T.createLinearGradient(I - R * .3, 0, I + R * .3, 0);
+    v.addColorStop(0, "#5e1005"), v.addColorStop(.34, b), v.addColorStop(.66, b), v.addColorStop(1, "#5e1005");
+    T.fillStyle = v, G(0), T.fill();
+    T.fillStyle = "rgba(14,4,2,0.45)", T.fillRect(I - R * .03, E * .18, R * .06, E * .6);
+    T.fillStyle = "rgba(255,206,186,0.85)", T.beginPath(),
+    T.ellipse(I, E * .38, R * .07, E * .14, 0, 0, 7), T.fill()
+  }
+
+  // G-4 Scherbe (Ringfestung, Stufe 4): dreieckige Scherbe mit
+  // gebrochenen Kanten, die sich im Flug dreht.
+  function scherbeZeichnen(T, R, E, b) {
+    const I = R / 2, W = E / 2;
+    Zt(T, I, W, R * .78);
+    // Drei scharfe Spitzen, eine abgebrochene Kante. Der erste Entwurf war
+    // ein Fuenfeck mit fast gleich langen Seiten — auf dem Bogen las er
+    // sich als Klumpen, nicht als Scherbe. Eine Scherbe erkennt man an
+    // SPITZEN WINKELN, nicht an der Zahl der Ecken.
+    const G = (x) => {
+      T.beginPath(), T.moveTo(I - R * .06, W - E * .46 - x);
+      T.lineTo(I + R * .46 + x, W + E * .22 + x);
+      T.lineTo(I + R * .1, W + E * .3);
+      T.lineTo(I - R * .34 - x, W + E * .46 + x);
+      T.lineTo(I - R * .3 - x, W - E * .04), T.closePath()
+    };
+    T.fillStyle = "#08060e", G(1.8), T.fill();
+    const v = T.createLinearGradient(I - R * .3, W - E * .46, I + R * .46, W + E * .3);
+    v.addColorStop(0, b), v.addColorStop(.46, "#a01d09"), v.addColorStop(.62, b), v.addColorStop(1, "#7d1607");
+    T.fillStyle = v, G(0), T.fill();
+    // Die Bruchkante: eine dunkle Facette laengs durch die Scherbe.
+    T.fillStyle = "rgba(18,5,3,0.42)", T.beginPath(),
+    T.moveTo(I - R * .06, W - E * .42), T.lineTo(I + R * .12, W + E * .26),
+    T.lineTo(I - R * .26, W + E * .38), T.closePath(), T.fill();
+    T.fillStyle = "rgba(255,222,204,0.92)", T.beginPath(),
+    T.moveTo(I - R * .06, W - E * .44), T.lineTo(I + R * .12, W - E * .12),
+    T.lineTo(I - R * .16, W - E * .06), T.closePath(), T.fill()
+  }
+
+  // G-5 Hammer (Ambosskreuzer, Stufe 5): schwerer Klotz mit flachem Kopf
+  // und einem Aufschlagsring darum. Das groesste der fuenf.
+  function hammerZeichnen(T, R, E, b) {
+    const I = R / 2;
+    Zt(T, I, E / 2, R * .9);
+    const G = (x) => {
+      T.beginPath(), T.moveTo(I - R * .3 - x, E * .1 - x), T.lineTo(I + R * .3 + x, E * .1 - x),
+      T.lineTo(I + R * .36 + x, E * .58), T.lineTo(I + R * .2 + x, E * .9 + x),
+      T.lineTo(I - R * .2 - x, E * .9 + x), T.lineTo(I - R * .36 - x, E * .58), T.closePath()
+    };
+    // Der Aufschlagsring liegt UNTER dem Klotz und ragt seitlich heraus.
+    T.strokeStyle = "rgba(20,6,3,0.55)", T.lineWidth = 3, T.beginPath(),
+    T.ellipse(I, E * .5, R * .46, E * .34, 0, 0, 7), T.stroke();
+    T.strokeStyle = "#c22a12", T.lineWidth = 2, T.beginPath(),
+    T.ellipse(I, E * .5, R * .43, E * .31, 0, 0, 7), T.stroke();
+    T.fillStyle = "#08060e", G(1.8), T.fill();
+    const v = T.createLinearGradient(I - R * .36, 0, I + R * .36, 0);
+    v.addColorStop(0, "#6d1206"), v.addColorStop(.36, b), v.addColorStop(.64, b), v.addColorStop(1, "#6d1206");
+    T.fillStyle = v, G(0), T.fill();
+    T.fillStyle = "rgba(16,5,3,0.45)";
+    for (let n = 0; n < 2; n++) T.fillRect(I - R * .26, E * (.3 + n * .24), R * .52, E * .06);
+    T.fillStyle = "rgba(255,214,196,0.9)", T.beginPath(),
+    T.ellipse(I, E * .22, R * .12, E * .06, 0, 0, 7), T.fill()
   }
 
   function Ns(T, R, E, b) {
@@ -63823,7 +63939,7 @@ ${G}`, {
           x = Math.atan2(I - v.y, b - v.x),
           t = E.phase(),
           l = E.tier >= 4 ? 16765498 : E.tier >= 3 ? 12607743 : E.tier >= 2 ? 16742986 : 16734794;
-        this.ebStyle = E.tier >= 5 ? "saw" : E.tier >= 4 ? "star" : E.tier >= 3 ? "lanze" : E.tier >= 2 ? "ring" : "diamond", this.muzzleFlash(v.x, v.y, l);
+        this.ebStyle = E.tier >= 5 ? "hammer" : E.tier >= 4 ? "scherbe" : E.tier >= 3 ? "lanze" : E.tier >= 2 ? "brut" : "bolzen", this.muzzleFlash(v.x, v.y, l);
         const p = Math.PI * 2;
         // Das Feuermuster je Stufe und Phase. Gemessen mit npm run bossmuster.
         //
@@ -65926,6 +66042,40 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       tex: "eb_saw",
       aim: !1,
       spin: 560,
+      hit: 9,
+      col: GEFAHR_N
+    },
+    // Die vier eigenen Bossgeschosse (v42). Die Trefferradien sind
+    // ABSICHTLICH die der geliehenen Arten: bolzen wie diamond (8), brut
+    // wie ring (9), scherbe wie star (8), hammer wie saw (9). Sonst waere
+    // mit dem neuen Bild still auch die Schwierigkeit umgestellt worden,
+    // und niemand haette sagen koennen, woran eine Aenderung liegt.
+    bolzen: {
+      tex: "eb_bolzen",
+      aim: !0,
+      spin: 0,
+      hit: 8,
+      col: GEFAHR_N,
+      trail: !0
+    },
+    brut: {
+      tex: "eb_brut",
+      aim: !0,
+      spin: 0,
+      hit: 9,
+      col: GEFAHR_N
+    },
+    scherbe: {
+      tex: "eb_scherbe",
+      aim: !1,
+      spin: 240,
+      hit: 8,
+      col: GEFAHR_N
+    },
+    hammer: {
+      tex: "eb_hammer",
+      aim: !0,
+      spin: 0,
       hit: 9,
       col: GEFAHR_N
     }

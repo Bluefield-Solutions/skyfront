@@ -38,7 +38,8 @@
     "zeitachse": "node tools/zeitachse.mjs",
     "bossmuster": "node tools/bossmuster.mjs",
     "steuerung": "node tools/steuerung.mjs",
-    "fenstereichen": "node tools/fenstereichen.mjs"
+    "fenstereichen": "node tools/fenstereichen.mjs",
+    "geschossbogen": "node tools/geschossbogen.mjs"
   },
   "engines": {
     "node": ">=18"

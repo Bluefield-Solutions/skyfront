@@ -95,10 +95,10 @@ const TORE = [
   // Die drei Farbbaender duerfen sich nicht ueberschneiden — Gefahr,
   // Eigenfeuer, Aufsammler. Gezaehlt werden die Bildpunkte des GEBAUTEN
   // Spiels, nicht nachgebaute Werte.
-  { schluessel: 'farbtor',     lauf: 'Farbtor (Gefahr · Eigenfeuer · Aufsammler)', zeile: 'Farbtor (17 Projektile)', datei: 'tools/farbtor.mjs' },
+  { schluessel: 'farbtor',     lauf: 'Farbtor (Gefahr · Eigenfeuer · Aufsammler)', zeile: 'Farbtor (Projektile und Aufsammler)', datei: 'tools/farbtor.mjs' },
   // Seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die FORM der
   // einzige Traeger der Information "wer hat geschossen".
-  { schluessel: 'formen',      lauf: 'Formentor (Silhouetten bei Anzeigegroesse)', zeile: 'Formentor (12 Silhouetten)', datei: 'tools/formen.mjs' },
+  { schluessel: 'formen',      lauf: 'Formentor (Silhouetten bei Anzeigegroesse)', zeile: 'Formentor (Silhouetten)', datei: 'tools/formen.mjs' },
   // Die Beruhigungsschicht muss Kontrast nehmen und nicht Helligkeit —
   // Abdunkeln wuerde der Gegnerkugel den dunklen Rand nehmen.
   { schluessel: 'untergrund',  lauf: 'Untergrund (13 Biome)',                zeile: 'Untergrund (13 Biome)',      datei: 'tools/untergrund.mjs' },
@@ -124,6 +124,12 @@ const TORE = [
   // Boss drei Sekunden lebte, war das gleichgueltig. Seit v32 lebt er
   // zwanzig.
   { schluessel: 'bossmuster',  lauf: 'Bossmuster (5 Stufen x 3 Phasen)',     zeile: 'Bossmuster (15 Muster)',      datei: 'tools/bossmuster.mjs' },
+  // Legt alle Gegnergeschosse gross nebeneinander, auf dunklem UND
+  // hellem Grund, und misst dabei die Eckdeckung: ein Hof, der nicht ins
+  // Bild passt, steht als dunkles Rechteck um die Kugel. Auf dunklem
+  // Grund sieht man das nie — der Farbtor sah es auch nicht, er zaehlt
+  // Anteile und keine Kanten.
+  { schluessel: 'geschossbogen', lauf: 'Geschossbogen (alle eb_-Texturen)',      zeile: 'Geschossbogen (alle eb_-Texturen)', datei: 'tools/geschossbogen.mjs' },
   // Zieht die Maschine bei 30, 60 und 120 Hz gleich schnell nach? Bis v34
   // sprang sie jedes Bild auf den Finger — kein Glaetten, und die
   // Geschwindigkeit haette an der Bildrate gehangen.

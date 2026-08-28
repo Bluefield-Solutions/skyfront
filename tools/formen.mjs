@@ -73,7 +73,16 @@ const eb = /yt\.EB_STYLE = \{[\s\S]*?\n  \}/.exec(quelle);
 if (!eb) { console.error('✗ EB_STYLE nicht in src/app.js gefunden'); process.exit(1); }
 const KUGELN = [...eb[0].matchAll(/tex: "([a-z_0-9]+)",[\s\S]*?spin: (\d+)/g)]
   .map((m) => ({ name: m[1], tex: m[1], spin: Number(m[2]), skala: 1 }));
-if (KUGELN.length !== 11) { console.error(`✗ EB_STYLE: ${KUGELN.length} Eintraege, 11 erwartet`); process.exit(1); }
+// Geprueft wird auf VOLLSTAENDIGKEIT, nicht auf eine feste Zahl. Bis v41
+// stand hier "11 erwartet" — und als in v42 vier Bossgeschosse dazukamen,
+// brach das Tor mit einem Befund ueber die ANZAHL ab, obwohl nichts fehlte.
+// Eine feste Zahl schuetzt gegen eine gekuerzte Liste; das tut ein
+// Abgleich mit den tex-Eintraegen auch, und der haelt eine Erweiterung aus.
+const TEX_ZAHL = [...eb[0].matchAll(/tex: "/g)].length;
+if (KUGELN.length !== TEX_ZAHL || KUGELN.length < 11) {
+  console.error(`✗ EB_STYLE: ${TEX_ZAHL} Arten, davon ${KUGELN.length} gelesen (mindestens 11 erwartet)`);
+  process.exit(1);
+}
 // Die Rakete des Rocketeers fliegt ebenso auf den Spieler zu und gehoert dazu.
 KUGELN.push({ name: 'missile', tex: 'missile', spin: 0, skala: 1 });
 

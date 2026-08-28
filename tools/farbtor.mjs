@@ -148,7 +148,9 @@ const farbenDerTextur = (name) => {
 /* ---------- die drei Mengen ------------------------------------------- */
 
 const GEGNER_TEX = ['eb_orb', 'eb_bolt', 'eb_ring', 'eb_dart', 'eb_diamond',
-  'eb_wave', 'eb_star', 'eb_needle', 'eb_flame', 'eb_saw', 'eb_lanze', 'missile'];
+  'eb_wave', 'eb_star', 'eb_needle', 'eb_flame', 'eb_saw', 'eb_lanze',
+  // Die vier eigenen Bossgeschosse (v42).
+  'eb_bolzen', 'eb_brut', 'eb_scherbe', 'eb_hammer', 'missile'];
 const SPIELER_TEX = ['bullet_p', 'bullet_spread', 'bullet_focus', 'bullet_heavy', 'missile_p'];
 
 const sammle = (liste) => {
@@ -165,7 +167,15 @@ const ebBlock = /yt\.EB_STYLE = \{[\s\S]*?\n  \}/.exec(quelle);
 if (!ebBlock) melde('EB_STYLE nicht gefunden');
 else {
   const cols = [...ebBlock[0].matchAll(/col: (GEFAHR_N|\d+)/g)];
-  if (cols.length !== 11) melde(`EB_STYLE: ${cols.length} col-Einträge, 11 erwartet`);
+  // Erwartet wird nicht mehr eine feste Zahl (bis v41: elf), sondern so
+  // viele col-Eintraege wie Arten. Die feste Zahl war eine Wartungsfalle:
+  // wer eine Art hinzufuegt, bekommt einen Befund ueber die ANZAHL statt
+  // ueber die fehlende Farbe — und macht dann die Zahl gross, nicht die
+  // Farbe richtig. Gezaehlt werden die tex-Eintraege, weil jede Art genau
+  // einen hat.
+  const arten = [...ebBlock[0].matchAll(/tex: "/g)];
+  if (cols.length !== arten.length)
+    melde(`EB_STYLE: ${arten.length} Arten, aber ${cols.length} col-Einträge — mindestens einer Art fehlt die Farbe`);
   for (const m of cols) gegner.push({ c: m[1] === 'GEFAHR_N' ? GEFAHR_N : ausZahl(Number(m[1])), quelle: 'EB_STYLE.col' });
 }
 
