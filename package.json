@@ -39,7 +39,8 @@
     "bossmuster": "node tools/bossmuster.mjs",
     "steuerung": "node tools/steuerung.mjs",
     "fenstereichen": "node tools/fenstereichen.mjs",
-    "bildbogen": "node tools/geschossbogen.mjs"
+    "bildbogen": "node tools/geschossbogen.mjs",
+    "bestellung": "node tools/bestellung.mjs"
   },
   "engines": {
     "node": ">=18"

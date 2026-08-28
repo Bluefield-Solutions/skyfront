@@ -95,6 +95,11 @@ const TORE = [
   // Die drei Farbbaender duerfen sich nicht ueberschneiden — Gefahr,
   // Eigenfeuer, Aufsammler. Gezaehlt werden die Bildpunkte des GEBAUTEN
   // Spiels, nicht nachgebaute Werte.
+  // Steht zu jeder offenen Bestellung ein Prompt im Auftragsbogen? Kostet
+  // keine Sekunde und faengt den Fall, in dem jemand die Einbauliste
+  // erweitert und den Auftrag vergisst — dann verschwindet eine Bestellung
+  // still, und auffallen wuerde es erst, wenn das Bild nie kommt.
+  { schluessel: 'bestellung', lauf: 'Bestellung (offene Bildauftraege)',   zeile: 'Bestellung (Bildauftraege)', datei: 'tools/bestellung.mjs' },
   { schluessel: 'farbtor',     lauf: 'Farbtor (Gefahr · Eigenfeuer · Aufsammler)', zeile: 'Farbtor (Projektile und Aufsammler)', datei: 'tools/farbtor.mjs' },
   // Seit alle Gegnerprojektile dieselbe Kennfarbe tragen, ist die FORM der
   // einzige Traeger der Information "wer hat geschossen".
