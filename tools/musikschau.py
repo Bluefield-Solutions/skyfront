@@ -69,7 +69,7 @@ def bild(st, name, pfad, sek):
                 px[x, y] = (v, int(v*0.55), int(v*0.3)) if i==0 else ((int(v*0.4), v, int(v*0.8)) if i==1 else (int(v*0.7), int(v*0.8), v))
     im.save(pfad)
 
-def messe(st, sek, name):
+def messe(st, sek, name, melodisch=None):
     mono = st.mean(axis=1)
     rms = float(np.sqrt(np.mean(mono**2)))
     spitze = float(np.max(np.abs(mono)))
@@ -114,5 +114,39 @@ def messe(st, sek, name):
     def band(lo, hi):
         m = (hzs>=lo)&(hzs<hi); return float(sp[m].sum())
     ges = band(20, 20000) or 1.0
+    # ABWECHSLUNG: wie sehr unterscheiden sich die Abschnitte voneinander?
+    #
+    # „Zu gleichfoermig" ist ein Urteil; hier ist die Zahl dazu. Das Stueck
+    # wird in Achtel geschnitten, von jedem das Spektrum genommen, und
+    # jedes mit jedem anderen verglichen (Kosinus). Sind alle Abschnitte
+    # gleich, steht dort 1,0 und die Abwechslung ist null. Je weiter die
+    # Abschnitte auseinanderliegen, desto groesser die Zahl.
+    #
+    # Sie misst NICHT, ob die Abwechslung musikalisch Sinn ergibt. Rauschen
+    # haette den besten Wert. Sie ist ein Vergleichsmass zwischen zwei
+    # Fassungen desselben Stuecks, nicht eine Note.
+    #
+    # GEMESSEN WIRD OHNE SCHLAGWERK. Der erste Anlauf nahm die fertige
+    # Mischung — und sah zwischen zwei Fassungen keinen Unterschied,
+    # obwohl in der zweiten eine ganze Melodiestimme dazugekommen war.
+    # Nachgesehen: das Schlagwerk traegt 91 % der Energie und ist in jedem
+    # Abschnitt gleich. Es hat das Spektrum so beherrscht, dass eine
+    # Stimme mit 12 % darin nicht mehr auftauchte. Gemessen wurde die
+    # Gleichfoermigkeit des Pulses, gemeint war die der Musik.
+    stuecke = 8
+    quelle = melodisch if melodisch is not None else mono
+    kurven = []
+    for i in range(stuecke):
+        a0 = len(quelle)*i//stuecke; a1 = len(quelle)*(i+1)//stuecke
+        f = np.abs(np.fft.rfft(quelle[a0:a1]*np.hanning(a1-a0)))
+        # In Terzbaender zusammenfassen, sonst dominiert das Rauschen
+        hz2 = np.fft.rfftfreq(a1-a0, 1/SR)
+        b = [float(f[(hz2>=lo)&(hz2<lo*1.26)].sum()) for lo in np.geomspace(60, 12000, 40)]
+        v = np.array(b); v = v/max(1e-9, np.linalg.norm(v))
+        kurven.append(v)
+    paare = [float(np.dot(kurven[i], kurven[j])) for i in range(stuecke) for j in range(i+1, stuecke)]
+    abwechslung = float(1.0 - np.mean(paare))
+
     return dict(name=name, sek=sek, rms=rms, spitze=spitze, crest=crest, pump=pump, naht=naht, stufe=stufe,
+                abwechslung=abwechslung,
                 tief=band(20,180)/ges, mitte=band(180,1200)/ges, hoch=band(1200,16000)/ges)

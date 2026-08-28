@@ -47,7 +47,8 @@
     "klang": "node tools/klang.mjs",
     "musik": "node tools/musik.mjs",
     "musikeinbau": "node tools/musikeinbau.mjs",
-    "musikbacken": "python3 tools/musikbacken.py"
+    "musikbacken": "python3 tools/musikbacken.py",
+    "musikschau": "sh tools/musikschau.sh"
   },
   "engines": {
     "node": ">=18"
