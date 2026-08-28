@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v45",
+    SKF_VERSION = "v46",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -54933,7 +54933,7 @@ return new ` + this.key + `();
       scale: 1.35,
       tint: 16777215,
       score: 950,
-      fireEvery: 1e3,
+      fireEvery: 1600,
       pattern: "ring",
       drop: .55,
       cls: "XL",
@@ -55027,7 +55027,7 @@ return new ` + this.key + `();
       scale: .95,
       tint: 16777215,
       score: 2200,
-      fireEvery: 900,
+      fireEvery: 1100,
       pattern: "rotorspin",
       drop: .95,
       cls: "XL",
@@ -63750,8 +63750,16 @@ ${R.label}`, {
         else if (R.cfg.pattern === "spread3")
           for (const G of [-.35, 0, .35]) this.spawnEB(R.x, R.y, Math.sin(G) * I, Math.cos(G) * I);
         else if (R.cfg.pattern === "ring")
-          for (let G = 0; G < 14; G++) {
-            const v = G / 14 * Math.PI * 2;
+          // Sieben statt vierzehn (v46). Der Elite hielt bei Tempo 300
+          // FUENFUNDVIERZIG Geschosse gleichzeitig im Bild — mit Abstand
+          // die dichteste Quelle im Spiel, alle anderen unter zehn. Zwei
+          // Elites zugleich, und Ausweichen war Gluecksssache.
+          //
+          // Die Luecken zwischen den Kugeln sind damit doppelt so breit
+          // wie der Spieler. Das ist der Punkt: ein Ring soll zum
+          // Durchfliegen zwingen, nicht zum Hoffen.
+          for (let G = 0; G < 7; G++) {
+            const v = G / 7 * Math.PI * 2;
             this.spawnEB(R.x, R.y, Math.cos(v) * I * .78, Math.sin(v) * I * .78)
           } else if (R.cfg.pattern === "burst3")
             for (let G = 0; G < 3; G++) this.time.delayedCall(G * 110, () => {
@@ -63777,8 +63785,10 @@ ${R.label}`, {
             const t = G + x * (Math.PI / 2);
             this.spawnEB(R.x, R.y, Math.cos(t) * I * .72, Math.sin(t) * I * .72)
           }
-          const v = Math.atan2(b - R.y, E - R.x);
-          this.spawnEB(R.x, R.y + 8, Math.cos(v) * I, Math.sin(v) * I)
+          // Der gezielte fuenfte Schuss faellt weg (v46): der Rotor lag
+          // mit 18 gleichzeitigen Geschossen als einziger neben dem Elite
+          // ueber dem Band. Die vier Speichen sind sein Kennzeichen, der
+          // gezielte Schuss war nur Menge.
         }
       }
       spawnHoming(R, E) {
@@ -66265,7 +66275,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_GEGNERBACKEN = gegnerBacken;
     window.__SKF_BOSSLEBEN = bossLeben;
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
-    window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt;
+    window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_GEGNERWERTE = _t;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,

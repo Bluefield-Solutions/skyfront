@@ -42,7 +42,12 @@ export const BALANCE = {
   enemyGeneric: {
     touchDamage: 20,   // Schaden bei Kollision mit Gegner
     bulletDamage: 11,  // Schaden pro Gegner-Kugel
-    bulletSpeed: 300,  // Geschwindigkeit Gegner-Kugeln
+    // 360 statt 300 (v46). Ein schnelleres Geschoss ist KUERZER im Bild —
+    // Flugzeit 2,67 statt 3,20 Sekunden —, also sind weniger gleichzeitig
+    // unterwegs, ohne dass ein Gegner seltener schiesst. Das ist der
+    // Hebel aus „ein paar weniger Geschosse, die aber auch ein bisschen
+    // schneller sind". Nachmessen: npm run geschossdichte.
+    bulletSpeed: 360,  // Geschwindigkeit Gegner-Kugeln
   },
 
   // ---- Schwierigkeitsgrade (Multiplikatoren) --------------------------------

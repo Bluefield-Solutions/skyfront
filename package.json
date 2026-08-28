@@ -42,7 +42,8 @@
     "bildbogen": "node tools/geschossbogen.mjs",
     "bestellung": "node tools/bestellung.mjs",
     "vorwaermen": "node tools/vorwaermen.mjs",
-    "niederlage": "node tools/niederlage.mjs"
+    "niederlage": "node tools/niederlage.mjs",
+    "geschossdichte": "node tools/geschossdichte.mjs"
   },
   "engines": {
     "node": ">=18"

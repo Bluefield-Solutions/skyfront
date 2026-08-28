@@ -143,6 +143,9 @@ const TORE = [
   // beim ersten Spawn jeder Art — bis zu acht Bildschlaege je Sektor,
   // jeder genau im Einflug der Welle. Das war der Ruckler, den man auf dem
   // Telefon sieht, "wenn die Gegner kommen".
+  // Wieviele Geschosse haelt EIN Gegner gleichzeitig im Bild? Der Elite
+  // hielt 45 — mit Abstand die dichteste Quelle, alle anderen unter zehn.
+  { schluessel: 'geschossdichte', lauf: 'Geschossdichte (je Gegnerart)',    zeile: 'Geschossdichte (12 Arten)', datei: 'tools/geschossdichte.mjs' },
   { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
   // Kommt man aus dem Ergebnisbildschirm wieder heraus? Der Rauchtest
   // prueft, dass man ins Spiel KOMMT — hinaus hat nie jemand geprueft.
