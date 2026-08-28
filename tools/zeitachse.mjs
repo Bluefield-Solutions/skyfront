@@ -100,9 +100,31 @@ for (let i = 0; i < 60; i++) {
 if (!imSpiel) { await browser.close(); M.abbruch('kommt nicht ins Gefecht — ohne laufendes Spiel gibt es keine Kampfwerte.'); }
 await seite.waitForTimeout(1200);
 
-const daten = await seite.evaluate(() => {
+// Was fuer eine Bossstufe wirklich herauskommt, fragen wir nicht die
+// Deckelfunktion, sondern das Spiel: fuer jede Stufe wird ein Boss
+// GESPAWNT und abgelesen, welche Stufe und welche Textur er traegt.
+//
+// Der Unterschied ist nicht theoretisch. Beim ersten Anlauf (v41) fragte
+// diese Datei `__SKF_BOSSDECKEL` direkt — und die Gegenprobe, die den
+// Deckel aus dem Konstruktor nimmt, liess das Tor gruen: die Funktion war
+// ja noch heil, nur benutzte sie niemand mehr. Eine Pruefung, die den
+// Helfer misst statt den Weg, bezeugt nichts (eiserne Regel 13).
+const echteStufen = await seite.evaluate(() => {
   const spiel = window.__game.scene.getScene('Game');
-  const stufen = window.__SKF_STUFEN, kapitel = window.__SKF_KAPITEL, leben = window.__SKF_BOSSLEBEN, deckel = window.__SKF_BOSSDECKEL;
+  const aus = [];
+  for (const st of [1, 2, 3, 4, 5]) {
+    if (spiel.boss) { spiel.boss.destroy(); spiel.boss = null; }
+    try { spiel.spawnBoss(st); } catch (e) { aus.push({ vorgesehen: st, fehler: e.message }); continue; }
+    aus.push({ vorgesehen: st, wirksam: spiel.boss ? spiel.boss.tier : 0, textur: spiel.boss ? spiel.boss.texture.key : '' });
+  }
+  if (spiel.boss) { spiel.boss.destroy(); spiel.boss = null; }
+  return aus;
+});
+const karte = Object.fromEntries(echteStufen.map((e) => [e.vorgesehen, e.wirksam || e.vorgesehen]));
+
+const daten = await seite.evaluate((karte) => {
+  const spiel = window.__game.scene.getScene('Game');
+  const stufen = window.__SKF_STUFEN, kapitel = window.__SKF_KAPITEL, leben = window.__SKF_BOSSLEBEN;
   if (!stufen || !kapitel || !leben) return { fehler: 'Naht fehlt (__SKF_STUFEN / __SKF_KAPITEL / __SKF_BOSSLEBEN)' };
 
   // Die Salve zaehlt das Spiel. Wir haengen uns nur an den Abschuss.
@@ -134,9 +156,10 @@ const daten = await seite.evaluate(() => {
       // VORGESEHEN ist, was in der Stufenliste steht. WIRKSAM ist, was der
       // Spieler heute trifft — das Spiel deckelt die Stufe am Bildvorrat.
       // Beide Zahlen werden gebraucht: die Laenge misst sich am Wirksamen,
-      // die Kampagnenkurve am Vorgesehenen. Gedeckelt wird mit der
-      // Funktion des Spiels, nicht mit einer nachgebauten (Regel 4).
-      const wirksam = deckel ? deckel(spiel, s.boss) : s.boss;
+      // die Kampagnenkurve am Vorgesehenen. Die Zuordnung kommt aus echten
+      // Bossen, die vorher gespawnt und abgelesen wurden — nicht aus der
+      // Deckelfunktion (die koennte heil sein und trotzdem ungenutzt).
+      const wirksam = karte[s.boss] || s.boss;
       return {
         nr: st, label: s.label, wellen: w.length, stufe: wirksam, vorgesehen: s.boss,
         fenster: w.length ? (Math.max(...at) - Math.min(...at)) / 1000 : 0,
@@ -145,7 +168,7 @@ const daten = await seite.evaluate(() => {
       };
     }),
   };
-});
+}, karte);
 await browser.close();
 
 if (daten.fehler) M.abbruch(daten.fehler);
@@ -204,11 +227,13 @@ if (lang.length)
 // Warnung an den, der die Liste umstellt; jetzt ist es eine Pruefung des
 // Deckels selbst.
 {
-  const ohne = zeilen.filter((z) => (z.stufe === 4 && !daten.bild4) || (z.stufe === 5 && !daten.bild5));
-  if (ohne.length)
-    M.befund(`${ohne.length} Sektor(en) setzen WIRKSAM Bossstufe 4 oder 5, obwohl die Textur fehlt `
-      + `(Sektor ${ohne.map((z) => z.nr).slice(0, 8).join(', ')}${ohne.length > 8 ? ' …' : ''}). `
-      + `Der Deckel greift nicht: gleiches Aussehen, anderes Feuer.`);
+  console.log('\n  Vorgesehen → gespawnt:  '
+    + echteStufen.map((e) => `${e.vorgesehen}→${e.fehler ? 'Fehler' : e.wirksam} (${e.textur || '—'})`).join('  '));
+  const schief = echteStufen.filter((e) => e.fehler || !e.wirksam || e.textur !== 'boss' + e.wirksam || e.wirksam > e.vorgesehen);
+  if (schief.length)
+    M.befund(`${schief.length} Bossstufe(n) kommen anders heraus als sie duerfen `
+      + `(${schief.map((e) => `${e.vorgesehen}→${e.fehler || `${e.wirksam}/${e.textur}`}`).join(', ')}). `
+      + `Der Deckel greift nicht: die Stufe traegt ein Bild, das nicht ihres ist — gleiches Aussehen, anderes Feuer.`);
   const gedeckelt = zeilen.filter((z) => z.vorgesehen > z.stufe);
   if (gedeckelt.length)
     console.log(`\n  ${gedeckelt.length} Sektor(en) sind heute gedeckelt (Bild fehlt): `
