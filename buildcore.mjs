@@ -155,6 +155,10 @@ export function loadParts() {
     tail: readFileSync('index.tail.html', 'utf8'),
     modopen: readFileSync('.modopen', 'utf8'),
     assets: readFileSync('src/assets.js', 'utf8'),
+    // Die Musik liegt getrennt von den Bildern: dort sind die Nummern
+    // Positionen, hier sind es Namen. Fehlt die Datei, faellt das Spiel
+    // auf den erzeugten Klang zurueck — es ist kein Baufehler.
+    musik: existsSync('src/musik.js') ? readFileSync('src/musik.js', 'utf8') : '',
     appBase: readFileSync('src/app.js', 'utf8'),
     modifier: existsSync('src/modifier.js')
       ? '\n<script>/*SKF_MODIFIER*/\n' + readFileSync('src/modifier.js', 'utf8') + '\n</script>\n'
@@ -185,6 +189,7 @@ export function assemble(parts, B, log = () => {}) {
   head = head.split('%%SKF_VERSION%%').join(mv[1]);
 
   const html = head + '<script>/*SKF_ASSETS*/\n' + parts.assets + '\n</script>\n' +
+    (parts.musik ? '<script>/*SKF_MUSIK*/\n' + parts.musik + '\n</script>\n' : '') +
     parts.modopen + '\n' + app + '\n</script>' + parts.modifier + parts.tail;
   return { html, changed, hasModifier: !!parts.modifier, version: mv[1] };
 }

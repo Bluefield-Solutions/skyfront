@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v48",
+    SKF_VERSION = "v49",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -58824,14 +58824,64 @@ return new ` + this.key + `();
     phaseUp() {
       this.tone(480, .3, "sawtooth", .12, 1500), this.tone(660, .14, "square", .16, void 0, .16), this.tone(990, .16, "square", .16, void 0, .26)
     }
+    // ---- Musik ---------------------------------------------------------
+    //
+    // Seit v49 laufen drei fertig produzierte Stuecke (menu, normal, boss)
+    // statt der Oszillatoren. Der erzeugte Klang BLEIBT als Rueckfall: wo
+    // __SKFM fehlt oder das Element sich nicht anhaengen laesst, spielt
+    // wieder der Sequenzer. Ein Spiel ohne Musik gibt es nicht.
+    //
+    // ABGESPIELT WIRD ueber ein <audio>-Element, nicht ueber
+    // decodeAudioData. Ein Stueck von 93 Sekunden waere als AudioBuffer
+    // 34 MB entpackt, drei davon ueber hundert — und Safari beendet auf
+    // iOS eine Seite, die zuviel Speicher haelt, ohne Vorwarnung. Das
+    // Element streamt stattdessen. Ueber createMediaElementSource haengt
+    // es trotzdem am Kompressor und an der Musiklautstaerke, das Ducking
+    // beim Boss wirkt weiter.
+    musikSpur(R) {
+      if (!this.ensure() || typeof __SKFM > "u" || !__SKFM[R]) return null;
+      this.spuren || (this.spuren = {});
+      if (this.spuren[R]) return this.spuren[R];
+      try {
+        const E = new Audio(__SKFM[R]);
+        E.loop = !0, E.preload = "auto";
+        const b = this.ctx.createMediaElementSource(E),
+          I = this.ctx.createGain();
+        return I.gain.value = 0, b.connect(I), I.connect(this.musicGain), this.spuren[R] = { el: E, g: I }
+      } catch (E) {
+        return null
+      }
+    }
+    // Blende statt Schnitt. Anderthalb Sekunden sind lang genug, dass der
+    // Wechsel zum Boss nicht schneidet, und kurz genug, dass er kommt.
+    musikBlende(R, E, b = 1.5) {
+      const I = this.ctx.currentTime;
+      R.g.gain.cancelScheduledValues(I), R.g.gain.setValueAtTime(R.g.gain.value, I),
+      R.g.gain.linearRampToValueAtTime(E, I + b),
+      E === 0 && window.setTimeout(() => {
+        try {
+          R.g.gain.value < .02 && R.el.pause()
+        } catch (G) {}
+      }, b * 1e3 + 80)
+    }
+    musikAn(R) {
+      const E = this.musikSpur(R);
+      if (!E) return !1;
+      for (const b of Object.keys(this.spuren)) b !== R && this.spuren[b].g.gain.value > 0 && this.musikBlende(this.spuren[b], 0);
+      try {
+        E.el.play()
+      } catch (b) {}
+      return this.musikBlende(E, this.enabled ? 1 : 0), !0
+    }
     startMusic(R) {
-      this.mode = R, this.timer == null && (this.step = 0, this.timer = window.setInterval(() => this.tick(), 140))
+      this.mode = R, !this.musikAn(R) && this.timer == null && (this.step = 0, this.timer = window.setInterval(() => this.tick(), 140))
     }
     setBossMusic() {
-      this.mode !== "off" && (this.mode = "boss")
+      this.mode !== "off" && (this.mode = "boss", this.musikAn("boss"))
     }
     stopMusic() {
-      this.timer != null && (clearInterval(this.timer), this.timer = null), this.mode = "off"
+      if (this.timer != null && (clearInterval(this.timer), this.timer = null), this.mode = "off", this.spuren)
+        for (const R of Object.keys(this.spuren)) this.spuren[R].g.gain.value > 0 && this.musikBlende(this.spuren[R], 0, .8)
     }
     tick() {
       const R = this.step % 64,

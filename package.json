@@ -45,7 +45,9 @@
     "niederlage": "node tools/niederlage.mjs",
     "geschossdichte": "node tools/geschossdichte.mjs",
     "klang": "node tools/klang.mjs",
-    "musik": "node tools/musik.mjs"
+    "musik": "node tools/musik.mjs",
+    "musikeinbau": "node tools/musikeinbau.mjs",
+    "musikbacken": "python3 tools/musikbacken.py"
   },
   "engines": {
     "node": ">=18"

@@ -4,3 +4,8 @@ node_modules
 *.zip
 package-lock.json
 _*.mjs
+
+# Die gerenderten Musikstuecke. Sie entstehen aus tools/musikbacken.py und
+# liegen als base64 in src/musik.js — zweimal im Verzeichnis waeren drei
+# Megabyte doppelt. Wer sie braucht: npm run musikbacken.
+art/musik/*.mp3

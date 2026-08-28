@@ -274,6 +274,13 @@ const PROBEN = [
   ['Abschuss wieder fuer alle gleich gross', '\u2717',
     ['if (K === "L") {', 'if (K === "L" || 1) {'],
     true, 'klang', 'wie ein Traeger'],
+  // Den Musikvorrat wegnehmen: dann faellt das Spiel auf den erzeugten
+  // Klang von v48 zurueck. Das SOLL es koennen — aber das Tor muss es
+  // merken, sonst laeuft irgendwann wieder der Achttakter und niemand
+  // sieht es.
+  ['kein Musikvorrat im Bau', '\u2717',
+    ['window.__SKF_STUFEN = Ut,', 'window.__SKFM = void 0, window.__SKF_STUFEN = Ut,'],
+    true, 'musik', 'kein Musikvorrat im Bau'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.
@@ -362,6 +369,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'ende' ? ['tools/niederlage.mjs']
     : tor === 'dichte' ? ['tools/geschossdichte.mjs']
     : tor === 'klang' ? ['tools/klang.mjs']
+    : tor === 'musik' ? ['tools/musik.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -412,7 +420,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem

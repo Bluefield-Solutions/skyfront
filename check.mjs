@@ -148,6 +148,10 @@ const TORE = [
   // Stapeln sich die Treffertoene, und klingt ein Abschuss nach seiner
   // Groesse? Bis v46 lief hit() ohne Sperre auf einer festen Tonhoehe,
   // und jeder Gegner starb mit demselben grossen Klang.
+  // Laeuft in jedem Modus ein Stueck, und wie oft wiederholt es sich? Bis
+  // v48 ein Achttakter von 9 s aus Oszillatoren, im laengsten Sektor
+  // sechzehn Mal.
+  { schluessel: 'musik',      lauf: 'Musik (drei Stuecke am Bau)',         zeile: 'Musik (3 Modi)', datei: 'tools/musik.mjs' },
   { schluessel: 'klang',      lauf: 'Klang (Treffer und Abschuss)',        zeile: 'Klang (Treffer, 4 Klassen)', datei: 'tools/klang.mjs' },
   { schluessel: 'geschossdichte', lauf: 'Geschossdichte (je Gegnerart)',    zeile: 'Geschossdichte (12 Arten)', datei: 'tools/geschossdichte.mjs' },
   { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
