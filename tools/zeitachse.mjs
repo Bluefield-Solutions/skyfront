@@ -39,6 +39,14 @@ import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
 const M = messstelle('Zeitachse', 'jeder Sektor traegt mindestens das untere Band.');
 const TAFEL = process.argv.includes('--tafel');
+// --json: nur die Zeilen, maschinenlesbar. Dafuer da, dass ein Eichlauf
+// (tools/fenstereichen.mjs) mit DEMSELBEN Werkzeug misst wie das Tor und
+// nicht mit einer zweiten, nachgebauten Rechnung (eiserne Regel 4).
+const JSON_AUS = process.argv.includes('--json');
+// Bei --json schweigt die Tafel: sonst stuende vor dem JSON die halbe
+// Ausgabe, und der Eichlauf muesste raten, wo sie aufhoert.
+const AUSGABE = console.log;
+if (JSON_AUS) console.log = () => {};
 
 // Das Band. Die Untergrenze kommt aus dem Ziel („mindestens 60 bis 90 s").
 //
@@ -52,6 +60,16 @@ const TAFEL = process.argv.includes('--tafel');
 // Wellen (bis 96 s gemessen) plus ein Boss, der als UNTERgrenze bis 45 s
 // haelt. Wer sie weiter aufmacht, sollte denselben Satz schreiben koennen.
 const UNTEN = 60, OBEN = 160;
+
+// Und ein Deckel auf das WELLENFENSTER allein — den Teil vor dem Boss.
+//
+// Die 90 s sind nicht meine Zahl: „die Level sollten eher 60 bis 90
+// Sekunden gehen." Wenn schon der Wellenteil darueber liegt, ist der
+// Sektor an der Vorgabe vorbei, bevor der Boss ueberhaupt einfliegt — und
+// unter der Obergrenze von 160 s bleibt fuer ihn nur noch, was uebrig ist.
+// Genau daran sind in v39 die Bossstufen 4 und 5 gescheitert: 95,7 s
+// Fenster im letzten Sektor liessen 64 s fuer den Boss, also Stufe 3.
+const FENSTER_OBEN = 90;
 
 if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
@@ -141,6 +159,11 @@ for (const s of daten.sektoren) {
   zeilen.push({ ...s, boss, gesamt: s.fenster + boss });
 }
 
+if (JSON_AUS) {
+  AUSGABE(JSON.stringify({ dps, modell: daten.modell, zeilen: zeilen.map((z) => ({ nr: z.nr, stufe: z.stufe, wellen: z.wellen, fenster: z.fenster, bossHp: z.bossHp, boss: z.boss, gesamt: z.gesamt })) }));
+  process.exit(0);
+}
+
 const zeig = TAFEL ? zeilen : zeilen.filter((z) => [1, 2, 3, 5, 10, 15, 20, 30, 40, 60, 80, 100, 120].includes(z.nr));
 console.log('  Sektor  Ort                Wellen  Fenster   Boss-HP  Bosszeit   Sektor');
 for (const z of zeig)
@@ -156,6 +179,11 @@ console.log(`\n  Untergrenze gesamt: kuerzester ${g[0].toFixed(1)} s, Median ${g
 if (kurz.length)
   M.befund(`${kurz.length} Sektor(en) bleiben unter ${UNTEN} s, kuerzester ${kurz[0].label} mit ${kurz[0].gesamt.toFixed(1)} s `
     + `(Sektor ${kurz.map((z) => z.nr).slice(0, 12).join(', ')}${kurz.length > 12 ? ' …' : ''}).`);
+const weit = zeilen.filter((z) => z.fenster > FENSTER_OBEN);
+if (weit.length)
+  M.befund(`${weit.length} Sektor(en) haben ein Wellenfenster ueber ${FENSTER_OBEN} s, laengstes `
+    + `${weit[weit.length - 1].label} mit ${weit[weit.length - 1].fenster.toFixed(1)} s. `
+    + `Der Wellenteil allein liegt damit ueber der Vorgabe, und fuer den Boss bleibt zu wenig Platz unter ${OBEN} s.`);
 if (lang.length)
   M.befund(`${lang.length} Sektor(en) liegen ueber ${OBEN} s, laengster ${lang[lang.length - 1].label} mit ${lang[lang.length - 1].gesamt.toFixed(1)} s.`);
 

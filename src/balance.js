@@ -99,6 +99,18 @@ export const BALANCE = {
     spacingBase:  2650, // (orig 2150) Basis-Wellenabstand ms — größer = früh lockerer
     spacingSlope: 60,   // (orig 45)  Verdichtung pro Level — größer = spät hektischer
 
+    // Der BODEN unter dem Abstand — und die Zahl, die in 96 von 120
+    // Sektoren wirklich regiert. Der Abstand ist
+    // `max(spacingFloor, spacingBase - Sektor*spacingSlope - …)`; bei 2650
+    // und 60 ist die Klammer schon ab Sektor 25 kleiner als 1150. Ab dort
+    // hat spacingSlope keine Wirkung mehr, und das Wellenfenster wächst
+    // allein daran, dass mehr Wellen in denselben Abstand gehängt werden:
+    // 70,6 s im ersten Sektor, 95,7 s im hundertzwanzigsten.
+    //
+    // Bis v39 stand die Zahl als nacktes Literal in app.js und war von
+    // hier aus nicht erreichbar. Gemessen wird mit `npm run fenstereichen`.
+    spacingFloor: 850,  // (orig 1150) kleinster Wellenabstand ms — kleiner = spät dichter
+
     // Die Bosse. bossGrund ist das Leben des ERSTEN Bosses (Stufe 1,
     // Sektor 1, vor dem Schwierigkeitsgrad). bossZuwachs ist der Aufschlag
     // je Sektor: bei 0.0125 hat der Boss in Sektor 120 das 2,49-fache.

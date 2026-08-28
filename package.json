@@ -37,7 +37,8 @@
     "einbau": "node tools/einbau.mjs",
     "zeitachse": "node tools/zeitachse.mjs",
     "bossmuster": "node tools/bossmuster.mjs",
-    "steuerung": "node tools/steuerung.mjs"
+    "steuerung": "node tools/steuerung.mjs",
+    "fenstereichen": "node tools/fenstereichen.mjs"
   },
   "engines": {
     "node": ">=18"

@@ -211,6 +211,19 @@ const PROBEN = [
     'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 3,',
     'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 1,'],
     true, 'zeit', 'SCHWAECHERE Bosse'],
+  // Und die Gegenrichtung: mehr Wellen je Sektor, bis das Wellenfenster
+  // ueber die 90 s geht. Der Deckel darauf ist seit v40 da, weil an ihm
+  // die Bossstufen 4 und 5 haengen — ohne Probe bezeugte er nur den Wert,
+  // den der Eichlauf gerade eingestellt hat.
+  //
+  // Der Eingriff sitzt an der WELLENZAHL, nicht am Abstand: der Abstand
+  // steht in src/balance.js (`curve.spacingFloor`) und wird beim Bauen
+  // frisch eingespielt — eine Aenderung daran in app.js waere beim
+  // naechsten Build wieder weg, und die Probe waere am Bau gescheitert
+  // statt am Tor.
+  ['halb so viele Wellen mehr je Sektor', '\u2717',
+    ['E.length < I && a < 400', 'E.length < Math.round(I * 1.45) && a < 400'],
+    true, 'zeit', 'Wellenfenster ueber'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.

@@ -76,6 +76,10 @@ export function applyCurve(src, C, log = () => {}) {
   const subs = [
     { from: '34 + Math.floor(b * 1.1)', to: `${C.waveBase} + Math.floor(b * ${C.waveSlope})`, path: 'curve.wave' },
     { from: '2150 - T * 45', to: `${C.spacingBase} - T * ${C.spacingSlope}`, path: 'curve.spacing' },
+    // Der Boden unter dem Abstand. Die elf Profile kennen ihn nicht und
+    // sollen sich nicht aendern — deshalb faellt er auf 1150 zurueck, den
+    // Wert, der bis v39 als Literal in app.js stand.
+    { from: 'Math.max(1150,', to: `Math.max(${C.spacingFloor ?? 1150},`, path: 'curve.spacingFloor' },
     // Die Bosskurve steht in derselben Form: ein Literal in src/app.js, das
     // beim Bauen ersetzt wird. Gemessen wird sie mit npm run zeitachse.
     { from: '1450 * (1 + (sektor - 1) * .0125)', to: `${C.bossGrund} * (1 + (sektor - 1) * ${C.bossZuwachs})`, path: 'curve.boss' },
