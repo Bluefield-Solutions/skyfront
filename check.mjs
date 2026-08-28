@@ -124,12 +124,13 @@ const TORE = [
   // Boss drei Sekunden lebte, war das gleichgueltig. Seit v32 lebt er
   // zwanzig.
   { schluessel: 'bossmuster',  lauf: 'Bossmuster (5 Stufen x 3 Phasen)',     zeile: 'Bossmuster (15 Muster)',      datei: 'tools/bossmuster.mjs' },
-  // Legt alle Gegnergeschosse gross nebeneinander, auf dunklem UND
-  // hellem Grund, und misst dabei die Eckdeckung: ein Hof, der nicht ins
-  // Bild passt, steht als dunkles Rechteck um die Kugel. Auf dunklem
-  // Grund sieht man das nie — der Farbtor sah es auch nicht, er zaehlt
-  // Anteile und keine Kanten.
-  { schluessel: 'geschossbogen', lauf: 'Geschossbogen (alle eb_-Texturen)',      zeile: 'Geschossbogen (alle eb_-Texturen)', datei: 'tools/geschossbogen.mjs' },
+  // Legt Geschosse und Gegner gross nebeneinander, auf dunklem UND hellem
+  // Grund. Gemessen wird nur bei den Geschossen (Eckdeckung: ein Hof, der
+  // nicht ins Bild passt, steht als dunkles Rechteck um die Kugel — auf
+  // dunklem Grund sieht man das nie, und der Farbtor sah es auch nicht,
+  // er zaehlt Anteile und keine Kanten). Der Gegnerbogen bewertet nichts;
+  // er ist der Blick, den kein Tor ersetzt.
+  { schluessel: 'geschossbogen', lauf: 'Bildbogen (Geschosse und Gegner)',      zeile: 'Bildbogen (Geschosse und Gegner)', datei: 'tools/geschossbogen.mjs' },
   // Zieht die Maschine bei 30, 60 und 120 Hz gleich schnell nach? Bis v34
   // sprang sie jedes Bild auf den Finger — kein Glaetten, und die
   // Geschwindigkeit haette an der Bildrate gehangen.

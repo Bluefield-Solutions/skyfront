@@ -380,7 +380,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Geschossbogen' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
