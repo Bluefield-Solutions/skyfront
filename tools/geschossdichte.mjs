@@ -20,7 +20,7 @@
   dass ein Gegner seltener schiesst. Von 260 auf 340 sind es ein Viertel
   weniger, bei gleicher Feuerrate.
 
-  GEMESSEN WIRD JE GEGNERART, nicht je Sektor.
+  GEMESSEN WIRD JE GEGNERART UND JE BOSSSTUFE, nicht je Sektor.
 
   Der erste Entwurf rechnete den ganzen Sektor: wer laut Wellenplan wann
   kommt, mal seiner Durchflugzeit. Er kam auf 970 gleichzeitige Geschosse
@@ -47,6 +47,16 @@
   stehen — dafuer muesste man wissen, wieviele Gegner gleichzeitig leben.
   Es ist die Dichte, die EINER erzeugt: ein Vergleichsmass, mit dem sich
   Gegnerarten nebeneinanderlegen und Tempi durchprobieren lassen.
+
+  BEIM BOSS ist es keine Naeherung, sondern die Sache selbst: er ist EIN
+  Gegner, er steht allein im Bild, und er lebt die ganze Zeit. Was er
+  gleichzeitig in der Luft haelt, ist genau das, wogegen man ausweicht.
+
+  Seine Geschosse fliegen in alle Richtungen, nicht nur nach unten —
+  deshalb wird die Flugzeit je Geschoss aus seiner ECHTEN Geschwindigkeit
+  und Richtung gerechnet: wie lange braucht es, bis es den Schirm
+  verlaesst? Ein Ring nach oben ist nach einer halben Sekunde weg, einer
+  nach unten braucht drei.
 */
 import { existsSync } from 'node:fs';
 import { messstelle } from './messstelle.mjs';
@@ -106,9 +116,55 @@ const d = await seite.evaluate((tempi) => {
     spiel.spawnEB = echtEB; spiel.time.delayedCall = echtDelay;
     arten.push({ art, schuss: n, takt: cfg.fireEvery, muster: cfg.pattern || '—' });
   }
-  const HOEHE = 960;
+  // ---- und der Boss ---------------------------------------------------
+  //
+  // Dieselbe Frage, andere Quelle: fireBoss() feuert, spawnEB faengt mit —
+  // aber hier zaehlen wir nicht nur, WIE VIELE, sondern auch WOHIN und wie
+  // schnell. Aus Richtung und Tempo folgt, wie lange ein Geschoss im Bild
+  // bleibt, und erst daraus die Zahl, die gleichzeitig unterwegs ist.
+  const HOEHE = 960, BREITE = 540;
+  const bossZeilen = [];
+  if (typeof spiel.fireBoss === 'function') {
+    const eEB = spiel.spawnEB, eFlash = spiel.muzzleFlash, eBoss = spiel.boss, eDuese = spiel.bossMuzzle;
+    const mFeuer = spiel.fireRateMul, mExtra = spiel.bossExtraBullets, mKap = spiel.kap2Boss, mFin = spiel.finalBoss;
+    spiel.muzzleFlash = () => {};
+    spiel.bossMuzzle = () => ({ x: 270, y: 185 });
+    spiel.fireRateMul = 1; spiel.bossExtraBullets = 0; spiel.kap2Boss = false; spiel.finalBoss = false;
+    const AUFRUFE = 6;
+    for (const stufe of [1, 2, 3, 4, 5]) {
+      let summeLeben = 0, n = 0, takt = 0;
+      for (const phase of [1, 2, 3]) {
+        const leben = [];
+        const boss = { x: 270, y: 185, tier: stufe, phase: () => phase, nextFire: 0, nextAccent: 1e9, pattern: 0, enterDone: true };
+        spiel.boss = boss;
+        spiel.spawnEB = (x, y, vx, vy) => {
+          // Wie lange bleibt dieses Geschoss im Bild? Zeit bis zur naechsten
+          // Kante, laengstens vier Sekunden.
+          const tx = vx > 1 ? (BREITE - x) / vx : (vx < -1 ? -x / vx : 9),
+            ty = vy > 1 ? (HOEHE - y) / vy : (vy < -1 ? -y / vy : 9);
+          leben.push(Math.min(4, Math.max(0.05, Math.min(tx, ty))));
+        };
+        let t = 0;
+        for (let i = 0; i < AUFRUFE; i++) {
+          const jetzt = 1000 + i * 700;
+          try { spiel.fireBoss(jetzt); } catch (e) { break; }
+          t += boss.nextFire - jetzt;
+        }
+        summeLeben += leben.reduce((a, b) => a + b, 0);
+        n += leben.length; takt += t;
+      }
+      // Gleichzeitig im Bild = Summe der Lebensdauern geteilt durch die
+      // Zeit, in der sie entstanden sind.
+      bossZeilen.push({ stufe, proSek: n * 1000 / Math.max(1, takt),
+        mittleresLeben: n ? summeLeben / n : 0,
+        gleichzeitig: summeLeben * 1000 / Math.max(1, takt) });
+    }
+    spiel.spawnEB = eEB; spiel.muzzleFlash = eFlash; spiel.boss = eBoss; spiel.bossMuzzle = eDuese;
+    spiel.fireRateMul = mFeuer; spiel.bossExtraBullets = mExtra; spiel.kap2Boss = mKap; spiel.finalBoss = mFin;
+  }
+
   const tempoJetzt = (window.__SKF_GEGNERWERTE || {}).bulletSpeed || 0;
-  return { arten, HOEHE, tempoJetzt, tempi: tempi || [tempoJetzt] };
+  return { arten, HOEHE, tempoJetzt, tempi: tempi || [tempoJetzt], bossZeilen };
 }, TEMPI);
 await browser.close();
 if (d.fehler) M.abbruch(d.fehler);
@@ -125,6 +181,40 @@ for (const a of sortiert)
   console.log(`  ${a.art.padEnd(14)} ${String(a.muster).padEnd(11)} ${String(a.schuss).padStart(6)}   ${String(a.takt).padStart(5)} ms  `
     + d.tempi.map((t) => dichte(a, t).toFixed(1).padStart(6)).join(''));
 console.log(`\n  Band: hoechstens ${OBEN} aus einer Quelle.`);
+
+// ---- der Boss ------------------------------------------------------
+// Sein Band ist ein anderes: er steht ALLEIN im Bild und lebt die ganze
+// Zeit, waehrend Gegner zu mehreren kommen und schnell sterben. 26 ist
+// gesetzt, nicht gemessen — bei 26 Geschossen aus einer Quelle, verteilt
+// ueber einen Schirm von 540 Punkten, bleiben Luecken, durch die ein
+// Flugzeug von 60 Punkten passt.
+// 32, nicht 26 — und das ist eine Entscheidung, keine Messung.
+//
+// Der Boss ist der Hoehepunkt, und er soll hart sein; das war die
+// ausdrueckliche Vorgabe („mindestens 20 Sekunden", spaeter „30 Prozent
+// obendrauf"). Ihn auf das Band eines gewoehnlichen Gegners zu ziehen,
+// waere die falsche Antwort auf „zu viele Geschosse".
+//
+// Hergeleitet ist die Zahl aus dem Bossmuster-Tor: das verlangt in jeder
+// Phase eine Winkelluecke von mindestens 60 Grad, also ein Sechstel des
+// Kreises. Solange die Zahl der gleichzeitigen Geschosse etwa dem
+// Sechsfachen dessen entspricht, was in eine solche Luecke passt, bleibt
+// sie durchfliegbar; darueber wird auch die Luecke zeitlich zugestellt.
+//
+// Belegt ist das nicht. Es ist die beste Herleitung, die ohne Geraet zu
+// haben ist, und die naechste gespielte Runde entscheidet.
+const BOSS_OBEN = 32;
+if (d.bossZeilen && d.bossZeilen.length) {
+  console.log('\n  Bossstufe   Kugeln/s   mittlere Flugzeit   gleichzeitig im Bild');
+  for (const b of d.bossZeilen)
+    console.log(`  ${String(b.stufe).padStart(9)}   ${b.proSek.toFixed(1).padStart(8)}   ${b.mittleresLeben.toFixed(2).padStart(15)} s   ${b.gleichzeitig.toFixed(1).padStart(20)}`);
+  console.log(`  Band: hoechstens ${BOSS_OBEN}.`);
+  const heftig = d.bossZeilen.filter((b) => b.gleichzeitig > BOSS_OBEN).sort((x, y) => y.gleichzeitig - x.gleichzeitig);
+  if (heftig.length)
+    M.befund(`${heftig.length} Bossstufe(n) halten mehr als ${BOSS_OBEN} Geschosse gleichzeitig im Bild `
+      + `(${heftig.map((b) => `Stufe ${b.stufe}: ${b.gleichzeitig.toFixed(0)}`).join(', ')}). `
+      + `Er steht allein im Bild und lebt zwanzig Sekunden — da ist Ausweichen keine Frage des Koennens mehr.`);
+} else M.ungemessen('der Boss liess sich nicht zum Feuern bringen.');
 
 const zuViel = sortiert.filter((a) => dichte(a, d.tempoJetzt) > OBEN);
 if (zuViel.length)

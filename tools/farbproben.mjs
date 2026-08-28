@@ -281,6 +281,12 @@ const PROBEN = [
   ['kein Musikvorrat im Bau', '\u2717',
     ['window.__SKF_STUFEN = Ut,', 'window.__SKFM = void 0, window.__SKF_STUFEN = Ut,'],
     true, 'musik', 'kein Musikvorrat im Bau'],
+  // Den Bosstakt zurueck auf den Stand bis v50: dann haelt Stufe 5
+  // sechsundvierzig Geschosse gleichzeitig im Bild.
+  ['Bosstakt wieder ohne Streckung', '\u2717',
+    ['E.nextFire = R + (t === 3 ? 780 : 1e3) * 1.45 * this.fireRateMul',
+     'E.nextFire = R + (t === 3 ? 780 : 1e3) * this.fireRateMul'],
+    true, 'dichte', 'Bossstufe(n) halten mehr als'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.

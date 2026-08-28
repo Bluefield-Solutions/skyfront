@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v50",
+    SKF_VERSION = "v51",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -64066,6 +64066,31 @@ ${G}`, {
           R.fillStyle(x, 1).fillRoundedRect(G, v, Math.max(2, I * b), LEISTE_HOCH, 2)
         })
       }
+      // TAKT GESTRECKT in v51, mal 1,45, auf jede Stufe und jede Phase.
+      //
+      // Gemessen (npm run geschossdichte): der Boss hielt je nach Stufe 17
+      // bis 46 Geschosse gleichzeitig im Bild. Er steht allein da und lebt
+      // zwanzig Sekunden; bei 46 ist Ausweichen keine Frage des Koennens
+      // mehr, und das war der Befund aus der gespielten Runde.
+      //
+      // DREI ANLAEUFE DAVOR haben die STAFFELUNG zerstoert, jeder auf seine
+      // Art:
+      //   1. Ringe gestaffelt ausgeduennt (hohe Stufen staerker) — danach
+      //      feuerte Stufe 4 duenner als Stufe 3. Vier Befunde.
+      //   2. Ringe einheitlich, dafuer einzelne Faecher gekuerzt — danach
+      //      lag Stufe 5 unter Stufe 4.
+      //   3. Faecher nachgezogen — dieselbe Umkehrung, nur woanders. Ringe
+      //      und Faecher haben verschiedene Groessen, und die Rundung auf
+      //      ganze Kugeln trifft sie ungleich.
+      //
+      // Ein Eingriff an EINZELNEN Mustern trifft die Stufen ungleich und
+      // dreht damit ihre Reihenfolge um. Der Takt ist der einzige Hebel,
+      // der proportional auf die ganze Menge wirkt: die Verhaeltnisse
+      // zwischen den Stufen bleiben exakt, was sie waren.
+      //
+      // Der Preis ist, dass der Boss traeger feuert. Das ist hier kein
+      // Nachteil, sondern die Sache selbst — zwischen den Salven entsteht
+      // die Zeit zum Ausweichen, die gefehlt hat.
       fireBoss(R) {
         const E = this.boss,
           b = this.player.x,
@@ -64094,13 +64119,13 @@ ${G}`, {
           // Sturmkanzel: zwei Kettenkanonen an den Gondeln.
           if (t === 1) {
             for (const r of [-.22, 0, .22]) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
-            E.nextFire = R + 900 * this.fireRateMul
+            E.nextFire = R + 900 * 1.45 * this.fireRateMul
           } else if (t === 2) {
             // Abwechselnd links und rechts am Spieler VORBEI. Wer stehen
             // bleibt, wird abwechselnd von beiden Seiten eingerahmt.
             const a = takt % 2 ? [-.55, -.4, -.25, -.1] : [.1, .25, .4, .55];
             for (const r of a) this.spawnEB(v.x, v.y, Math.cos(x + r) * G, Math.sin(x + r) * G);
-            E.nextFire = R + 620 * this.fireRateMul
+            E.nextFire = R + 620 * 1.45 * this.fireRateMul
           } else {
             // Volle Breitseite: der gezielte Faecher bleibt, dazu kommt der
             // Doppelturm auf dem Ruecken als Ring. Erst dadurch aendert sich
@@ -64112,7 +64137,7 @@ ${G}`, {
               const e = w + n / 6 * p;
               this.spawnEB(v.x, v.y, Math.cos(e) * G * .62, Math.sin(e) * G * .62)
             }
-            E.nextFire = R + 700 * this.fireRateMul
+            E.nextFire = R + 700 * 1.45 * this.fireRateMul
           }
         } else if (E.tier === 2) {
           // Schwarmmutter: Abwurfschaechte. Zwei gegenlaeufige Ringe waren
@@ -64126,7 +64151,7 @@ ${G}`, {
           if (t === 2) {
             for (const n of [-.25, -.15, -.05, .05, .15, .25]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .95, Math.sin(x + n) * G * .95);
             for (const n of [-1, -.8, .8, 1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .7, Math.sin(x + n) * G * .7);
-            E.nextFire = R + 620 * this.fireRateMul
+            E.nextFire = R + 620 * 1.45 * this.fireRateMul
           } else {
             const a = t === 1 ? 10 : 16;
             for (let n = 0; n < a; n++) {
@@ -64135,7 +64160,7 @@ ${G}`, {
             }
             if (t === 3) for (const n of [-.3, -.15, 0, .15, .3]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
             else this.spawnEB(v.x, v.y, Math.cos(x) * G, Math.sin(x) * G);
-            E.nextFire = R + (t === 3 ? 780 : 1e3) * this.fireRateMul
+            E.nextFire = R + (t === 3 ? 780 : 1e3) * 1.45 * this.fireRateMul
           }
         } else if (E.tier === 3) {
           // Lanzentraeger: die Bahnkanone ist sein Kennzeichen. Schnelle,
@@ -64159,7 +64184,7 @@ ${G}`, {
           } else
             for (const n of (t === 3 ? [-.16, -.08, 0, .08, .16] : [-.1, 0, .1]))
               this.spawnEB(v.x, v.y, Math.cos(x + n) * G * 1.3, Math.sin(x + n) * G * 1.3);
-          E.nextFire = R + (t === 3 ? 620 : t === 2 ? 520 : 560) * this.fireRateMul
+          E.nextFire = R + (t === 3 ? 620 : t === 2 ? 520 : 560) * 1.45 * this.fireRateMul
         } else if (E.tier === 4) {
           // Ringfestung: acht Tuerme auf einem Ring, keine Nase. Ihr
           // Kennzeichen ist, dass sie in alle Richtungen zugleich kann —
@@ -64170,13 +64195,13 @@ ${G}`, {
           if (t === 2) {
             for (const n of [-.35, -.25, -.15, -.05, .05, .15, .25, .35]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
             for (const n of [-1.1, -.9, .9, 1.1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .7, Math.sin(x + n) * G * .7);
-            E.nextFire = R + 430 * this.fireRateMul
+            E.nextFire = R + 430 * 1.45 * this.fireRateMul
           } else if (t === 1) {
             for (let n = 0; n < 8; n++) {
               const e = r + n / 8 * p;
               this.spawnEB(v.x, v.y, Math.cos(e) * G * .78, Math.sin(e) * G * .78)
             }
-            E.nextFire = R + 450 * this.fireRateMul
+            E.nextFire = R + 450 * 1.45 * this.fireRateMul
           } else {
             for (let n = 0; n < 10; n++) {
               const e = r + n / 10 * p;
@@ -64187,7 +64212,7 @@ ${G}`, {
               this.spawnEB(v.x, v.y, Math.cos(e) * G * .6, Math.sin(e) * G * .6)
             }
             for (const n of [-.1, .1]) this.spawnEB(v.x, v.y, Math.cos(x + n) * G, Math.sin(x + n) * G);
-            E.nextFire = R + 600 * this.fireRateMul
+            E.nextFire = R + 600 * 1.45 * this.fireRateMul
           }
         } else {
           // Ambosskreuzer: zwei Hauptbatterien auf den Querarmen. Phase 1
@@ -64200,7 +64225,7 @@ ${G}`, {
           if (t === 2) {
             for (const n of [-1.2, -.95, -.7, -.45, -.2, -.08, .08, .2, .45, .7, .95, 1.2])
               this.spawnEB(v.x, v.y, Math.cos(x + n) * G * .9, Math.sin(x + n) * G * .9);
-            E.nextFire = R + 400 * this.fireRateMul
+            E.nextFire = R + 400 * 1.45 * this.fireRateMul
           } else {
             const a = t === 1 ? 6 : 12;
             for (let n = 0; n < a; n++) {
@@ -64209,7 +64234,7 @@ ${G}`, {
             }
             for (const n of (t === 3 ? [-.3, -.18, -.06, .06, .18, .3] : [-.18, -.06, .06, .18]))
               this.spawnEB(v.x, v.y, Math.cos(x + n) * G * 1.15, Math.sin(x + n) * G * 1.15);
-            E.nextFire = R + 500 * this.fireRateMul
+            E.nextFire = R + 500 * 1.45 * this.fireRateMul
           }
         }
         if (E.pattern === 1 && t >= 2 && R > E.nextAccent) {
