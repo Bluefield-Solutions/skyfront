@@ -283,9 +283,14 @@ const PROBEN = [
     true, 'musik', 'kein Musikvorrat im Bau'],
   // Den Bosstakt zurueck auf den Stand bis v50: dann haelt Stufe 5
   // sechsundvierzig Geschosse gleichzeitig im Bild.
-  ['Bosstakt wieder ohne Streckung', '\u2717',
-    ['E.nextFire = R + (t === 3 ? 780 : 1e3) * 1.45 * this.fireRateMul',
-     'E.nextFire = R + (t === 3 ? 780 : 1e3) * this.fireRateMul'],
+  // Der Eingriff sitzt bei STUFE 5, nicht bei Stufe 2. Der erste Anlauf
+  // nahm die Streckung dort weg, wo sie am wenigsten wiegt: Stufe 2 liegt
+  // auch ungestreckt bei 28,7 und damit unter dem Band von 32. Das Tor
+  // blieb gruen, und die Probe belegte nichts. Eine Gegenprobe muss die
+  // Stelle treffen, an der die Pruefung ueberhaupt greifen kann.
+  ['Bosstakt der hoechsten Stufe wieder ohne Streckung', '\u2717',
+    ['E.nextFire = R + 400 * 1.45 * this.fireRateMul',
+     'E.nextFire = R + 400 * this.fireRateMul'],
     true, 'dichte', 'Bossstufe(n) halten mehr als'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
