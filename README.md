@@ -30,9 +30,10 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Verteilbares Paket** | `node build-all.mjs --zip` → `Skyfront-dist.zip` (Launcher + alle Varianten) |
 | **Nur Master (klein)** | `node build-all.mjs --zip=master` → `Skyfront-master.zip` (~15 MB, eine Datei) |
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
-| **Web-App bauen** | `npm run pages` → `dist/pages/` (Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
+| **Web-App bauen** | `npm run pages` → `dist/pages/` (Bilder und Musik als Dateien, Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
+| **Web-App nachweisen** | `npm run auslieferung` — baut `dist/pages/`, prüft es und startet es über http. **18,7 s gemessen**, läuft in der Torkette mit |
 | **Stufe 1 — bei jeder Änderung** | `npm run schnell` — Bau, Version, Boot aller elf Varianten, dann Farbtor, Formentor, Untergrund und Rhythmus **parallel**. **48 s gemessen** |
-| **Stufe 2 — vor dem Push** | `npm run check` — alle Tore **ohne** das Bildtor, `dist/check-report.md`. **127 s gemessen** |
+| **Stufe 2 — vor dem Push** | `npm run check` — alle Tore **ohne** das Bildtor, `dist/check-report.md`. **127 s gemessen** (v52: + 18,7 s für die Auslieferung) |
 | **Stufe 3 — CI / vor der Lieferung** | `npm run torkette` — alles, inklusive Bildtor, und **streng**: „nicht gemessen" zählt als Fehlschlag. **291–293 s** über drei Läufe |
 | **Gelieferte Bilder prüfen** | `npm run bildpruefung` — Größe, Seitenverhältnis, Rand und ob wirklich Detail drinsteckt (nicht bloß hochgerechnet) |
 | **Bildaufträge** | `docs/BILDAUFTRAEGE-BOSSE.md` — fünf Bosse mit gemessenen Maßen, Prompts und Geschossen |
@@ -179,12 +180,18 @@ Zwei Workflows:
 - **`check.yml`** läuft bei jedem Push/PR: Node + Playwright, `node check.mjs`,
   Markdown-Bericht in die Job-Zusammenfassung. Der Prüfschritt braucht rund
   vier Minuten — Master und elf Varianten bauen und starten, dazu das Bildtor.
-- **`pages.yml`** läuft bei Push auf `main`: `npm run pages`, danach eine
-  Reihe Nachweise (Manifest da, genau EIN `apple-touch-icon` und zwar auf eine
-  Datei, elf Startbilder mit elf Dateien, `index.html` unter 5 MB, der
-  Dienst-Arbeiter kennt genau so viele Bilder wie danebenliegen), dann
-  Veröffentlichung. **Einmalig von Hand nötig:** Settings → Pages → Source auf
-  „GitHub Actions".
+- **`pages.yml`** läuft bei Push auf `main`: **ein** Aufruf,
+  `node tools/auslieferung.mjs` — er baut `dist/pages/`, weist nach, dass es
+  lieferbar ist, und startet die Seite dabei über http. Dann Veröffentlichung.
+  **Einmalig von Hand nötig:** Settings → Pages → Source auf „GitHub Actions".
+
+  Bis v51 stand hier ein Shell-Block mit denselben Nachweisen — an einer
+  Stelle, die beim Arbeiten niemand ausführt. Ergebnis: v49, v50 und v51
+  gingen grün durch `npm run check`, landeten auf `main` und scheiterten dort
+  an der Lieferung (die Musik hob `index.html` von 3,0 auf 7,2 MB, die
+  Schranke liegt bei 5). **Drei Fassungen, vier Fehler-E-Mails, kein rotes
+  Tor.** Jetzt steht die Regel in `tools/auslieferung.mjs`, und die Torkette
+  läuft sie mit: ein grüner Lauf schließt eine rote Lieferung wieder aus.
 
 Voraussetzung: die Projektdateien liegen im Repo-Wurzelverzeichnis (sonst
 `working-directory` in der YAML anpassen).
@@ -255,13 +262,17 @@ im jeweiligen Profil (fehlt es, wird der Dateiname genommen).
 Einzeldatei-Bau wird dabei nicht angefasst — sein Ergebnis wird auseinander-
 genommen:
 
-- **68 der 71 Bilder** werden zu echten Dateien in `bilder/`. Drei bleiben
+- **69 der 72 Bilder** werden zu echten Dateien in `bilder/`. Drei bleiben
   drin: `__SKFA[0]` und `[2]` sind **Bruchstücke**, die Phaser im Code per `+`
   aneinanderhängt — als Datei wären sie Unsinn; `[1]` ist Phasers weißes
   Ersatzbild, gebraucht beim Hochfahren, bevor ein Lader läuft. Erkannt wird
   das am Bild selbst (PNG endet auf `IEND`, JPEG auf `FFD9`, WebP beginnt mit
   `RIFF`/`WEBP`), nicht am Präfix: ein abgeschnittenes Bild als Datei fiele
   sonst erst auf dem Telefon auf.
+- **Die drei Musikstücke** werden zu Dateien in `musik/` (3,9 MB Base64 →
+  2,9 MB als MP3). Nicht nur wegen der Größe: **eine `data:`-Adresse lässt
+  sich nicht streamen** — der Browser hält sie ganz im Speicher, bevor der
+  erste Ton fällt. Als Datei lädt `<audio>` fortlaufend.
 - **Manifest**, `standalone`, hochkant verriegelt.
 - **Genau ein `apple-touch-icon`**, und zwar auf eine Datei. Den
   `data:`-Verweis ignoriert iOS beim Ablegen auf dem Startbildschirm — es nimmt
@@ -274,9 +285,20 @@ genommen:
   Startbildschirm gestartet wurde** (`display-mode: standalone` bzw.
   `navigator.standalone`). Wer nur im Browser vorbeischaut, zieht nicht
   ungefragt 9 MB über Mobilfunk.
-- **Speichermarke** aus Inhalts- UND Bilder-Prüfsumme. Ohne den zweiten Teil
+- **Bereichsabrufe** beantwortet der Arbeiter selbst mit `206`. Muss sein,
+  seit die Musik als Datei kommt: Safari fragt jedes `<audio>` mit
+  `Range: bytes=0-` an und spielt nichts, wenn eine `200` mit dem ganzen
+  Stück zurückkommt. Aus dem Netz käme die `206` vom Server — aus dem
+  Speicher nur, wenn der Arbeiter sie baut.
+- **Speichermarke** aus Inhalts-, Bilder- UND Musik-Prüfsumme. Ohne den zweiten Teil
   blieb sie unverändert, als die Bilder von 15,75 auf 9,13 MB schrumpften — auf
   dem Telefon wären für immer die alten Bilder geblieben.
+
+`npm run auslieferung` misst all das an dem, was wirklich hochgeladen wird:
+Größe, Auslagerung, jeder Verweis mit seiner Datei, der Arbeiter mit genau
+diesen Dateien, die Hülle — und danach ein Hochlauf **über http** (unter
+`file://` gibt es keinen Dienst-Arbeiter), bei dem die drei Stücke tatsächlich
+abgespielt und ein Bereichsabruf aus dem Speicher geprüft werden.
 
 Das App-Symbol kommt aus **einer** Quelle: `web/icon.svg`, gegliedert in
 `#grund` / `#maschine` / `#schleier`. `npm run symbol` backt daraus die vier

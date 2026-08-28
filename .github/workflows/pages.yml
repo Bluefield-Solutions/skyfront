@@ -35,51 +35,24 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Web-App bauen
-        run: npm run pages
-
-      - name: Nachweisen, dass die Huelle wirklich drin ist
-        # Der Einschub landete schon einmal im falschen </body> — mitten in
-        # Phasers JavaScript. Das Ergebnis sah gebaut aus und war kaputt.
+      # Playwright, gepinnt wie im Check. Ja, das kostet eine Minute — und
+      # es ist die Minute, die v49 bis v51 gefehlt hat. Was ausgeliefert
+      # wird, wird vorher einmal gestartet, ueber http und mit
+      # Dienst-Arbeiter. Unter file:// gibt es den naemlich nicht, und genau
+      # daran haengt die Musik.
+      - name: Playwright installieren (für den Hochlauf der Web-App)
         run: |
-          set -e
-          test -f dist/pages/index.html
-          test -f dist/pages/manifest.webmanifest
-          test -f dist/pages/sw.js
-          for g in 180 192 512; do test -f "dist/pages/icon-$g.png"; done
-          grep -q 'rel="manifest"' dist/pages/index.html
-          grep -q 'icon-512.png' dist/pages/manifest.webmanifest
-          # Genau EIN apple-touch-icon, und zwar auf eine Datei. Stuenden der
-          # data:-Verweis und der Dateiverweis nebeneinander, waere es Zufall,
-          # welchen iOS nimmt — und den data:-Verweis ignoriert es.
-          test "$(grep -o 'rel="apple-touch-icon"' dist/pages/index.html | wc -l)" = "1"
-          test "$(grep -o 'rel="apple-touch-icon" href="data:' dist/pages/index.html | wc -l)" = "0"
-          grep -q 'href="./icon-180.png"' dist/pages/index.html
-          # Startbilder: jeder Verweis braucht eine Datei. Fehlt sie, zeigt iOS
-          # beim Start stumm weiss — kein Fehler, den irgendwer meldet.
-          test "$(grep -o 'apple-touch-startup-image' dist/pages/index.html | wc -l)" = "11"
-          test "$(ls dist/pages/start | wc -l)" = "11"
-          for f in $(grep -o 'href="\./start/[^"]*"' dist/pages/index.html | sed 's|href="\./||;s|"||'); do
-            test -f "dist/pages/$f" || { echo "fehlt: $f"; exit 1; }
-          done
-          echo "✓ 11 Startbilder, jeder Verweis hat seine Datei."
-          # Der Bildvorrat muss ausgelagert sein. Schlaegt die Auslagerung
-          # still fehl, ist die Seite wieder 24 MB gross und niemand merkt es —
-          # sie funktioniert ja, nur eben langsam.
-          groesse=$(stat -c%s dist/pages/index.html)
-          test "$groesse" -lt 5000000 || { echo "index.html ist $groesse Bytes — Auslagerung hat nicht gegriffen"; exit 1; }
-          anzahl=$(ls dist/pages/bilder | wc -l)
-          test "$anzahl" -ge 60 || { echo "nur $anzahl ausgelagerte Bilder"; exit 1; }
-          grep -q './bilder/' dist/pages/index.html
-          # Der Dienst-Arbeiter muss genau diese Bilder kennen, sonst fehlen
-          # sie ohne Netz. Gemessen: ohne die Liste lagen 27 von 68 im
-          # Speicher und die Texturen fielen von 127 auf 83.
-          imArbeiter=$(grep -o 'bilder/[^"]*' dist/pages/sw.js | wc -l)
-          test "$imArbeiter" = "$anzahl" || { echo "Arbeiter kennt $imArbeiter von $anzahl Bildern"; exit 1; }
-          echo "✓ index.html $((groesse/1024)) KB · $anzahl Bilder ausgelagert, alle im Dienst-Arbeiter."
-          grep -q 'serviceWorker.register' dist/pages/index.html
-          grep -q "^const MARKE = 'skyfront-[0-9a-f]\{8\}';" dist/pages/sw.js
-          echo "✓ Manifest, Anmeldung und Speichermarke sitzen."
+          npm install playwright@1.56.0
+          npx playwright install --with-deps chromium
+
+      # EIN Aufruf, und er baut selbst. Vorher stand hier ein Shell-Block mit
+      # zwanzig Vergleichen — dieselben Regeln wie in der Torkette, nur an
+      # einer Stelle, die beim Arbeiten niemand laeuft. Zwei Kopien derselben
+      # Regel driften auseinander, und die ungelaufene ist immer die richtige.
+      # Jetzt steht sie in tools/auslieferung.mjs, und `npm run check` laeuft
+      # sie mit: ein gruener Lauf schliesst eine rote Lieferung wieder aus.
+      - name: Web-App bauen und nachweisen, dass sie lieferbar ist
+        run: node tools/auslieferung.mjs
 
       - name: Pages vorbereiten
         uses: actions/configure-pages@v5

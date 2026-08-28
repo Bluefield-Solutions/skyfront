@@ -75,6 +75,53 @@ const neuerVorrat = vorrat.map((eintrag, n) => {
 
 html = html.slice(0, klammerAuf) + JSON.stringify(neuerVorrat) + html.slice(klammerZu + 1);
 
+// --- Musik auslagern ---------------------------------------------------------
+// Drei Stuecke, als Base64 knapp 4 MB. In der Einzeldatei muessen sie drin
+// bleiben — autark heisst autark. Fuer die Web-App nicht, und zwar aus einem
+// Grund mehr als bei den Bildern: eine data:-Adresse laesst sich NICHT
+// streamen. Der Browser haelt sie vollstaendig im Speicher, bevor der erste
+// Ton faellt. Als Datei laedt <audio> fortlaufend und beginnt frueher.
+//
+// Und es ist genau der Fehler, an dem die Auslieferung seit v49 haengt: die
+// HTML wuchs von 3,4 auf 7,2 MB, das Tor in pages.yml verlangt unter 5 MB,
+// drei Fassungen in Folge sind nie auf der Seite angekommen.
+const MUSIK_MARKE = 'var __SKFM={';
+const mAnfang = html.indexOf(MUSIK_MARKE);
+const musikAbdruck = createHash('sha1');
+let musikRaus = 0, musikBytes = 0;
+if (mAnfang < 0) {
+  console.error('✗ __SKFM nicht gefunden — ohne Musik gibt es nichts auszulagern.');
+  process.exit(1);
+}
+const mEnde = html.indexOf('};', mAnfang);
+if (mEnde < 0) { console.error('✗ Ende von __SKFM nicht gefunden.'); process.exit(1); }
+mkdirSync(`${AUS}/musik`, { recursive: true });
+// Der Hebel fuer die Gegenprobe: die Auslagerung abschalten und nachsehen,
+// ob das Auslieferungstor darueber wirklich rot wird. Eine Pruefung, die nie
+// etwas meldet, ist kein Beweis — und diese hier soll genau den Fehler
+// fangen, der v49 bis v51 nie auf die Seite kommen liess.
+const PROBE_OHNE_MUSIK = process.env.SKF_PROBE_OHNE_MUSIK === '1';
+if (PROBE_OHNE_MUSIK) console.log('  (Gegenprobe: Musik bleibt als data: in der Seite.)');
+const stuecke = [...html.slice(mAnfang + MUSIK_MARKE.length, mEnde)
+  .matchAll(/([A-Za-z_$][\w$]*):"([^"]*)"/g)];
+if (!stuecke.length) { console.error('✗ __SKFM ist leer.'); process.exit(1); }
+const neueStuecke = stuecke.map(([, modus, wert]) => {
+  const komma = wert.indexOf(',');
+  if (PROBE_OHNE_MUSIK) return `${modus}:${JSON.stringify(wert)}`;
+  if (!wert.startsWith('data:audio/mpeg;base64,') || komma < 0) return `${modus}:${JSON.stringify(wert)}`;
+  const roh = Buffer.from(wert.slice(komma + 1), 'base64');
+  // Am Ton selbst pruefen, nicht am Praefix glauben — wie bei den Bildern.
+  // Ein MP3 beginnt mit einem ID3-Kopf oder gleich mit einer Bildsynchro.
+  const ganz = roh.length > 10240
+    && (roh.slice(0, 3).toString() === 'ID3' || (roh[0] === 0xFF && (roh[1] & 0xE0) === 0xE0));
+  if (!ganz) { console.error(`✗ ${modus}: kein brauchbares MP3 (${roh.length} Bytes).`); process.exit(1); }
+  writeFileSync(`${AUS}/musik/${modus}.mp3`, roh);
+  musikAbdruck.update(`${modus}.mp3`).update(roh);
+  musikRaus++; musikBytes += wert.length;
+  return `${modus}:"./musik/${modus}.mp3"`;
+});
+html = html.slice(0, mAnfang + MUSIK_MARKE.length) + neueStuecke.join(',') + html.slice(mEnde);
+
 // --- Symbole ----------------------------------------------------------------
 // Als echte Dateien, nicht als data:-Adresse. Genau die ignoriert iOS beim
 // Ablegen auf dem Startbildschirm — es nimmt dann einen Bildschirmausschnitt
@@ -127,6 +174,7 @@ writeFileSync(`${AUS}/manifest.webmanifest`, JSON.stringify(manifest, null, 2));
 const marke = createHash('sha1')
   .update(html)
   .update(bilderAbdruck.digest())
+  .update(musikAbdruck.digest())
   .digest('hex').slice(0, 8);
 
 // Die data:-Verweise ERSETZEN, nicht ergaenzen. Stuenden beide da, haette iOS
@@ -246,10 +294,17 @@ html = ersetzeLetztes(html, '</body>', anmeldung);
 
 writeFileSync(`${AUS}/index.html`, html);
 const bilderListe = readdirSync(`${AUS}/bilder`).sort().map(f => `./bilder/${f}`);
+// Die Musik steht in einer EIGENEN Liste, nicht bei den Bildern. Nicht aus
+// Ordnungsliebe: das Torgeruest zaehlt die Verweise auf `bilder/` im
+// Dienst-Arbeiter gegen die Dateien in `bilder/`. Ein MP3 in derselben Liste
+// haette diesen Vergleich um eins verschoben und das Tor rot gefaerbt, ohne
+// dass etwas fehlte.
+const musikListe = readdirSync(`${AUS}/musik`).sort().map(f => `./musik/${f}`);
 writeFileSync(`${AUS}/sw.js`, readFileSync('web/sw.js', 'utf8')
   .replaceAll('__MARKE__', marke)
-  .replace('__BILDER__', JSON.stringify(bilderListe)));
+  .replace('__BILDER__', JSON.stringify(bilderListe))
+  .replace('__MUSIK__', JSON.stringify(musikListe)));
 writeFileSync(`${AUS}/.nojekyll`, '');
 
 const mb = (Buffer.byteLength(html) / 1048576).toFixed(2);
-console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB (${raus} Bilder ausgelagert, ${(rausBytes/1048576).toFixed(2)} MB · ${drin} blieben drin) · ${startZahl} Startbilder · Marke ${marke}`);
+console.log(`✓ ${AUS}/ gebaut — index.html ${mb} MB (${raus} Bilder ausgelagert, ${(rausBytes/1048576).toFixed(2)} MB · ${drin} blieben drin · ${musikRaus} Stuecke Musik, ${(musikBytes/1048576).toFixed(2)} MB) · ${startZahl} Startbilder · Marke ${marke}`);

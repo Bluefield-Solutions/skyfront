@@ -159,6 +159,14 @@ const TORE = [
   // prueft, dass man ins Spiel KOMMT — hinaus hat nie jemand geprueft.
   { schluessel: 'niederlage', lauf: 'Niederlage (Weg aus dem Ergebnis)',    zeile: 'Niederlage (zwei Knoepfe)', datei: 'tools/niederlage.mjs' },
   { schluessel: 'steuerung',   lauf: 'Steuerung (30, 60, 120 Hz)',          zeile: 'Steuerung (3 Bildraten)',    datei: 'tools/steuerung.mjs' },
+  // Und zuletzt das, was ausgeliefert wird. Bis v51 hat die Torkette den
+  // Pages-Bau NIE gebaut: v49, v50 und v51 gingen hier gruen durch, landeten
+  // auf main und scheiterten dort an der Auslieferung — die Musik hob die
+  // Seite von 3,4 auf 7,2 MB, die Lieferkette verlangt unter 5 MB. Drei
+  // Fassungen, drei Fehlermeldungen per E-Mail, kein rotes Tor.
+  //
+  // Ein gruener Lauf, der eine rote Lieferung nicht ausschliesst, ist keiner.
+  { schluessel: 'auslieferung', lauf: 'Auslieferung (Pages-Bau, im Browser)', zeile: 'Auslieferung (Web-App)', datei: 'tools/auslieferung.mjs' },
 ];
 
 const torZeilen = [];

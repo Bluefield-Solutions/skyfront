@@ -21,6 +21,10 @@ const VORRAT = ['./', './manifest.webmanifest', './icon-180.png'];
 // Wird beim Bau eingesetzt: die Liste der ausgelagerten Bilder.
 const BILDER = __BILDER__;
 
+// Und die drei Musikstuecke — getrennt gefuehrt, weil sie anders abgerufen
+// werden: ein <audio>-Element fragt in Bereichen (Range), ein <img> nicht.
+const MUSIK = __MUSIK__;
+
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(MARKE).then(c => c.addAll(VORRAT)).then(() => self.skipWaiting()));
 });
@@ -33,10 +37,43 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Ein Bereichsabruf, aus dem Speicher beantwortet.
+//
+// MUSS sein, sobald die Musik als Datei ausgeliefert wird: Safari auf iOS
+// fragt jedes <audio> mit "Range: bytes=0-" an und verweigert den Dienst,
+// wenn eine 200 mit dem ganzen Stueck zurueckkommt statt einer 206 mit dem
+// verlangten Ausschnitt. Aus dem Netz kaeme die 206 vom Server — aus dem
+// Speicher kommt sie nur, wenn sie hier gebaut wird.
+async function ausBereich(anfrage, bereich) {
+  const c = await caches.open(MARKE);
+  const voll = await c.match(anfrage.url, { ignoreSearch: true });
+  if (!voll) return fetch(anfrage);
+  const puffer = await voll.arrayBuffer();
+  const m = /bytes=(\d*)-(\d*)/.exec(bereich);
+  const von = m && m[1] ? parseInt(m[1], 10) : 0;
+  const bis = m && m[2] ? Math.min(parseInt(m[2], 10), puffer.byteLength - 1) : puffer.byteLength - 1;
+  if (!(von >= 0 && von <= bis)) {
+    return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${puffer.byteLength}` } });
+  }
+  return new Response(puffer.slice(von, bis + 1), {
+    status: 206,
+    statusText: 'Partial Content',
+    headers: {
+      'Content-Type': voll.headers.get('Content-Type') || 'audio/mpeg',
+      'Content-Length': String(bis - von + 1),
+      'Content-Range': `bytes ${von}-${bis}/${puffer.byteLength}`,
+      'Accept-Ranges': 'bytes'
+    }
+  });
+}
+
 self.addEventListener('fetch', e => {
   const anfrage = e.request;
   if (anfrage.method !== 'GET') return;
   if (new URL(anfrage.url).origin !== self.location.origin) return;
+
+  const bereich = anfrage.headers.get('range');
+  if (bereich) { e.respondWith(ausBereich(anfrage, bereich)); return; }
 
   // Jeder Seitenaufruf bekommt das eine abgelegte Spiel — sonst laege die
   // Seite doppelt im Speicher (einmal als './', einmal als './index.html').
@@ -51,7 +88,10 @@ self.addEventListener('fetch', e => {
       return fetch(anfrage).then(antwort => {
         // Nur ablegen, was auch angekommen ist. Eine 404 im Speicher waere
         // schlimmer als gar nichts: sie ueberlebt den naechsten Versuch.
-        if (antwort && antwort.ok && antwort.type === 'basic') {
+        // Genau 200, nicht "ok": eine 206 ist ok, und cache.put wirft
+        // bei einer 206. Bis hierher kommt zwar keine mehr (Bereiche
+        // gehen oben ab), aber die Regel gehoert an die Stelle, die legt.
+        if (antwort && antwort.status === 200 && antwort.type === 'basic') {
           const kopie = antwort.clone();
           caches.open(MARKE).then(c => c.put(anfrage, kopie)).catch(function () {});
         }
@@ -67,7 +107,9 @@ self.addEventListener('fetch', e => {
 async function vorladen() {
   const c = await caches.open(MARKE);
   const offen = [];
-  for (const pfad of BILDER) if (!(await c.match(pfad))) offen.push(pfad);
+  // Musik zuerst: sie ist das, was ohne Netz am ehesten auffaellt — ein
+  // fehlendes Hintergrundbild sieht man nicht, eine stumme Partie hoert man.
+  for (const pfad of MUSIK.concat(BILDER)) if (!(await c.match(pfad))) offen.push(pfad);
   let i = 0, fertig = 0;
   await melde(0, offen.length);
   async function arbeiter() {

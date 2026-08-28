@@ -14,6 +14,11 @@ Kurzüberblick der Werkzeuge. Details im `README.md` des Projekts.
 - `node build-variants.mjs` → alle `profiles/*.js` → `dist/Skyfront-<Name>.html` + `dist/index.html`
 - `node build-all.mjs` → beides;  `--zip` / `--zip=master` / `--boot` siehe README
 - `node check.mjs` → CI-Check (baut + bootet + `dist/check-report.md`)
+- `node pages.mjs` → `dist/pages/` (Web-App: Bilder und Musik als Dateien,
+  Manifest, Symbol, Startbilder, Dienst-Arbeiter)
+- `node tools/auslieferung.mjs` → weist nach, dass `dist/pages/` lieferbar ist
+  (läuft in der Torkette UND in `.github/workflows/pages.yml` — eine Regel,
+  eine Stelle)
 - Oder per npm: `npm run build | variants | all | package | check`
 
 ## Balance ändern (zwei Wege)

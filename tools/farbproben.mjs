@@ -491,6 +491,39 @@ const MODUSPROBEN = [{
   mussEnthalten: ['Das ist kein Menue, das ist ein Bild', 'Nicht gemessen'],
   darfNichtEnthalten: ['Median Streuung'],
   beweist: 'lauter gleiche Schirme werden als „ein Bild" erkannt, nicht als Messung',
+}, {
+  // DIE PROBE ZUM AUSLIEFERUNGSTOR.
+  //
+  // Sie stellt den Zustand her, an dem v49, v50 und v51 gescheitert sind:
+  // die Musik bleibt als data:-Adresse in der Seite, die Seite waechst von
+  // 3,0 auf 7,2 MB, die Schranke liegt bei 5. Verlangt wird genau dieser
+  // Befund — nicht irgendein roter Lauf.
+  //
+  // Warum das noetig ist: das Tor hat es damals nicht gegeben, und die
+  // Regel stand nur als Shell-Block in der Lieferkette, wo sie beim
+  // Arbeiten niemand laufen liess. Eine Pruefung, die nie etwas meldet,
+  // ist kein Beweis — und diese hier soll den einen Fehler fangen, der
+  // dreimal hintereinander durchgekommen ist.
+  //
+  // Sie laesst dist/pages/ ohne Musik zurueck; das naechste `npm run pages`
+  // baut es richtig.
+  name: 'Auslieferung ohne ausgelagerte Musik (--probe-ohne-musik)',
+  cmd: ['tools/auslieferung.mjs', '--probe-ohne-musik', '--ohne-browser'],
+  rotErwartet: true,
+  exitErwartet: 1,
+  mussEnthalten: ['Auslagerung hat nicht gegriffen', 'data:audio'],
+  darfNichtEnthalten: [],
+  beweist: 'das Auslieferungstor faengt genau den Fehler, der v49 bis v51 nicht auf die Seite kommen liess',
+}, {
+  // Und der dritte Ausgang: ohne gebauten Pages-Stand gibt es nichts zu
+  // messen — und dann darf das Tor weder gruen noch rot sagen.
+  name: 'Auslieferung ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/auslieferung.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'ohne gebauten Pages-Stand'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne gebauten Pages-Stand sagt das Tor "nicht gemessen", Rückgabe 2',
 },
 
 // ---- Der dritte Ausgang: 2 = "nicht gemessen" -------------------------
