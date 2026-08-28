@@ -145,6 +145,10 @@ const TORE = [
   // Telefon sieht, "wenn die Gegner kommen".
   // Wieviele Geschosse haelt EIN Gegner gleichzeitig im Bild? Der Elite
   // hielt 45 — mit Abstand die dichteste Quelle, alle anderen unter zehn.
+  // Stapeln sich die Treffertoene, und klingt ein Abschuss nach seiner
+  // Groesse? Bis v46 lief hit() ohne Sperre auf einer festen Tonhoehe,
+  // und jeder Gegner starb mit demselben grossen Klang.
+  { schluessel: 'klang',      lauf: 'Klang (Treffer und Abschuss)',        zeile: 'Klang (Treffer, 4 Klassen)', datei: 'tools/klang.mjs' },
   { schluessel: 'geschossdichte', lauf: 'Geschossdichte (je Gegnerart)',    zeile: 'Geschossdichte (12 Arten)', datei: 'tools/geschossdichte.mjs' },
   { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
   // Kommt man aus dem Ergebnisbildschirm wieder heraus? Der Rauchtest

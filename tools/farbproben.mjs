@@ -265,6 +265,15 @@ const PROBEN = [
     ['for (let G = 0; G < 7; G++) {\n            const v = G / 7 * Math.PI * 2;',
      'for (let G = 0; G < 14; G++) {\n            const v = G / 14 * Math.PI * 2;'],
     true, 'dichte', 'halten allein mehr als'],
+  // Die Sperre aus dem Trefferton nehmen — der Zustand bis v46. Dann
+  // laufen bei Autofeuer zwanzig Toene je Sekunde uebereinander.
+  ['Trefferton wieder ohne Sperre', '\u2717',
+    ['if (R && R < this.hitSperre) return;', 'if (!1) return;'],
+    true, 'klang', 'kommen'],
+  // Und die Abstufung: dann klingt der Spaeher wie der Traeger.
+  ['Abschuss wieder fuer alle gleich gross', '\u2717',
+    ['if (K === "L") {', 'if (K === "L" || 1) {'],
+    true, 'klang', 'wie ein Traeger'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.
@@ -352,6 +361,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'waerme' ? ['tools/vorwaermen.mjs']
     : tor === 'ende' ? ['tools/niederlage.mjs']
     : tor === 'dichte' ? ['tools/geschossdichte.mjs']
+    : tor === 'klang' ? ['tools/klang.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -402,7 +412,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem

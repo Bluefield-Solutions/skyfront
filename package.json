@@ -43,7 +43,8 @@
     "bestellung": "node tools/bestellung.mjs",
     "vorwaermen": "node tools/vorwaermen.mjs",
     "niederlage": "node tools/niederlage.mjs",
-    "geschossdichte": "node tools/geschossdichte.mjs"
+    "geschossdichte": "node tools/geschossdichte.mjs",
+    "klang": "node tools/klang.mjs"
   },
   "engines": {
     "node": ">=18"

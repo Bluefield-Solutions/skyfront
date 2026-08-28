@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v46",
+    SKF_VERSION = "v47",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -58586,7 +58586,7 @@ return new ` + this.key + `();
     };
   class an {
     constructor() {
-      this.ctx = null, this.enabled = !0, this.uiOn = Bt("ui_off") !== "1", this.timer = null, this.step = 0, this.mode = "off", this.enabled = Bt("snd_off") !== "1"
+      this.ctx = null, this.enabled = !0, this.uiOn = Bt("ui_off") !== "1", this.timer = null, this.step = 0, this.mode = "off", this.hitSperre = 0, this.enabled = Bt("snd_off") !== "1"
     }
     ensure() {
       if (this.ctx) return !0;
@@ -58696,14 +58696,50 @@ return new ` + this.key + `();
       }
     }
     hit() {
-      this.tone(640, .045, "square", .038, 240), this.click(.035)
+      // Sperre und Streuung (v47).
+      //
+      // Bis v46 stand hier ein einziger Ton auf 640 Hz, ohne Sperre. Bei
+      // Autofeuer alle 100 ms und mehreren Gegnern zugleich liefen davon
+      // zehn bis zwanzig je Sekunde — alle auf derselben Tonhoehe, alle
+      // 45 ms lang. Was man dann hoert, ist kein Treffer mehr, sondern ein
+      // Dauerton, und er legt sich ueber alles andere.
+      //
+      // 55 ms Sperre: schneller kann ein Ohr zwei Treffer ohnehin nicht
+      // trennen. Die Streuung von plus/minus einer kleinen Terz nimmt dem
+      // Rest das Maschinelle — dieselbe Tonhoehe zwanzig Mal ist ein
+      // Signalton, zwanzig verschiedene sind ein Gefecht.
+      const R = this.ctx ? this.ctx.currentTime : 0;
+      if (R && R < this.hitSperre) return;
+      this.hitSperre = R + .055;
+      this.tone(590 + Math.random() * 150, .035, "square", .034, 260), this.click(.03)
     }
     laser() {
       this.tone(1400, .06, "sawtooth", .02, 1100), this.noise(.03, .02, 4e3, 2e3)
     }
-    explosion() {
+    // Ein Abschuss klingt jetzt nach der GROESSE dessen, was abgeschossen
+    // wurde (v47).
+    //
+    // Bis v46 bekam jeder Gegner denselben Klang: 0,3 s Rauschen bei
+    // halber Lautstaerke, ein Ton auf 150 Hz und ein Sub-Bass — fuer den
+    // Spaeher mit drei Trefferpunkten genauso wie fuer das Kanonenboot mit
+    // achtunddreissig. Bei vier Abschuessen je Sekunde ueberlagern sich
+    // vier solche Fahnen samt Baessen, und heraus kommt Matsch, in dem
+    // auch der Boss nicht mehr auffaellt.
+    //
+    // Klein ist jetzt kurz und trocken (0,12 s, kein Sub), gross bleibt
+    // gross. Der Unterschied ist der Punkt: wer etwas Schweres trifft,
+    // soll es hoeren.
+    explosion(K) {
       const R = .9 + Math.random() * .25;
-      this.click(.5), this.noise(.3, .5, 2800 * R, 220), this.tone(150 * R, .3, "sine", .42, 42), this.sub(72, .34, .42)
+      if (K === "L") {
+        this.click(.4), this.noise(.2, .38, 2600 * R, 240), this.tone(130 * R, .2, "sine", .3, 44), this.sub(66, .22, .26);
+        return
+      }
+      if (K === "XL") {
+        this.click(.5), this.noise(.3, .5, 2800 * R, 220), this.tone(150 * R, .3, "sine", .42, 42), this.sub(72, .34, .42);
+        return
+      }
+      this.click(.3), this.noise(.12, .3, 3200 * R, 420), this.tone(210 * R, .11, "sine", .24, 90)
     }
     bigExplosion() {
       this.click(.75), this.noise(.6, .6, 3400, 180), this.tone(110, .55, "sine", .55, 32), this.sub(52, .75, .6), this.duck()
@@ -64329,7 +64365,10 @@ ${G}`, {
         }
       }
       killEnemy(R) {
-        this.audio.explosion(), this.boom(R.x, R.y, !1);
+        // Die Klasse geht mit: ein Spaeher darf nicht klingen wie ein
+        // Traeger. XL bekommt NUR die grosse Explosion — bis v46 lief sie
+        // zusaetzlich zur normalen, also zwei Fahnen uebereinander.
+        R.cfg.cls !== "XL" && this.audio.explosion(R.cfg.cls), this.boom(R.x, R.y, !1);
         const E = this.enemyColor(R),
           b = R.cfg.cls === "XL" || R.cfg.cls === "L";
         this.deathBurst(R.x, R.y, E, b), this.shards(R.x, R.y, E, R.cfg.cls === "XL" ? 10 : R.cfg.cls === "L" ? 7 : 4), R.cfg.cls === "XL" ? (this.audio.bigExplosion(), this.bigKillPunch()) : R.cfg.cls === "L" && this.hitStop(45), this.maybeDrop(R.x, R.y, R.cfg.drop, R.kind, R.cfg.cls), this.combo++, this.comboExpire = this.time.now + 2600;
