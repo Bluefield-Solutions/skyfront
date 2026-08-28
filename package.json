@@ -44,7 +44,8 @@
     "vorwaermen": "node tools/vorwaermen.mjs",
     "niederlage": "node tools/niederlage.mjs",
     "geschossdichte": "node tools/geschossdichte.mjs",
-    "klang": "node tools/klang.mjs"
+    "klang": "node tools/klang.mjs",
+    "musik": "node tools/musik.mjs"
   },
   "engines": {
     "node": ">=18"
