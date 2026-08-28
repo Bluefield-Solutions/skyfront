@@ -102,11 +102,14 @@ for (const sek of SEKTOREN) {
     spiel.stage = sek;
     try { spiel.startStage(); } catch (e) { return { fehler: 'Sektor ' + sek + ': ' + e.message }; }
     const nachStart = window.__SKF_BACKZAEHLER;
-    const vorgewaermt = spiel.vorgewaermt;
+    const vorgewaermt = spiel.vorgewaermt || 0;
 
   // Jede Art aus dem WELLENPLAN dieses Sektors einmal setzen — dasselbe,
   // was das Gefecht gleich tun wird, nur sofort.
-    const arten = spiel.vorgewaermteArten || [];
+    // Die Arten kommen aus dem WELLENPLAN, nicht aus dem, was vorgewaermt
+    // wurde. Sonst misst das Werkzeug nichts mehr, sobald das Vorwaermen
+    // fehlt — und die Gegenprobe belegt dann nur ihre eigene Wirkung.
+    const arten = [...new Set((spiel.wellenplan || []).map((w) => w.kind).filter(Boolean))];
     for (const k of arten) { try { spiel.spawnAt(k, 270, 0); } catch (e) {} }
     const nachSpawn = window.__SKF_BACKZAEHLER;
 

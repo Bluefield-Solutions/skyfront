@@ -62869,7 +62869,12 @@ dann ausweichen!`, {
         const E = this.runDiff || q.difficulty(),
           b = Xe[E] || Xe.normal,
           I = Si(R.waves, b, R.intensity);
-        this.vorwaermen(I), this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
+        // Der Wellenplan wird VOR dem Vorwaermen gemerkt und nicht von ihm.
+        // Sonst haengt die Naht, mit der gemessen wird, an der Sache, die
+        // gemessen werden soll: nimmt man das Vorwaermen heraus, weiss das
+        // Werkzeug nicht mehr, welche Arten in diesem Sektor vorkommen —
+        // und kann genau die Frage nicht mehr stellen, um die es geht.
+        this.wellenplan = I, this.vorwaermen(I), this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
         const G = this.add.text(J / 2, rt * .4, `LEVEL ${this.levelNum()}
 ${R.label}`, {
           fontFamily: "sans-serif",
