@@ -246,6 +246,18 @@ const PROBEN = [
   ['Hof der Geschosse laeuft ueber den Bildrand', '\u2717',
     ['b = Math.min(b, T.canvas.width / 2, T.canvas.height / 2);', 'b = b;'],
     true, 'bogen', 'abgeschnittenen Hof'],
+  // Das Vorwaermen wieder herausnehmen: dann backt jede Gegnerart beim
+  // ersten Spawn selbst, mitten im Einflug der Welle. Das war der Zustand
+  // bis v44 und der Grund fuer "es wirkt etwas abgehakt, wenn die Gegner
+  // kommen".
+  ['Gegnerbilder werden nicht mehr vorgewaermt', '\u2717',
+    ['this.vorwaermen(I), this.levelEndAt', 'this.levelEndAt'],
+    true, 'waerme', 'werden erst beim Spawnen gebacken'],
+  // Und die zwei Knoepfe aus dem Ergebnisbildschirm nehmen: dann fuehrt
+  // aus ihm kein Weg mehr heraus, den man sehen kann.
+  ['Ergebnisbildschirm ohne Knoepfe', '\u2717',
+    ['this.endeKnoepfe = [', 'this.endeKnoepfe = null && ['],
+    true, 'ende', 'statt zwei'],
   // Der Ring von Stufe 3 zurueck auf t+1 Kugeln — der Zustand bis v32.
   // Dann feuert der haerteste Boss duenner als der mittlere, und genau das
   // hat bis zur ersten Messung niemand gesehen.
@@ -330,6 +342,8 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'muster' ? ['tools/bossmuster.mjs']
     : tor === 'steuer' ? ['tools/steuerung.mjs']
     : tor === 'bogen' ? ['tools/geschossbogen.mjs']
+    : tor === 'waerme' ? ['tools/vorwaermen.mjs']
+    : tor === 'ende' ? ['tools/niederlage.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -380,7 +394,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem

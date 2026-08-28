@@ -40,7 +40,9 @@
     "steuerung": "node tools/steuerung.mjs",
     "fenstereichen": "node tools/fenstereichen.mjs",
     "bildbogen": "node tools/geschossbogen.mjs",
-    "bestellung": "node tools/bestellung.mjs"
+    "bestellung": "node tools/bestellung.mjs",
+    "vorwaermen": "node tools/vorwaermen.mjs",
+    "niederlage": "node tools/niederlage.mjs"
   },
   "engines": {
     "node": ">=18"

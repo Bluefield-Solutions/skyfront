@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v44",
+    SKF_VERSION = "v45",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -56067,6 +56067,10 @@ return new ` + this.key + `();
     if (!b.exists(R)) return !1;
     const I = b.get(R);
     if (I.__gebacken) return !0;
+    // Mitzaehlen, WANN gebacken wird. Nach dem Vorwaermen muss die
+    // Zahl waehrend des Gefechts bei null bleiben; jeder Zuwachs ist
+    // ein Bildschlag mitten in einer Welle.
+    typeof window < "u" && (window.__SKF_BACKZAEHLER = (window.__SKF_BACKZAEHLER || 0) + 1);
     try {
       const G = I.getSourceImage();
       if (!G || !G.width) return !1;
@@ -62238,7 +62242,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       create() {
         var d, u, c, g;
-        this.over = !1, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
+        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
         const R = 96;
         this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.spielfeld = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(1.6).setVisible(!1), this.bullets = this.physics.add.group({
           defaultKey: "bullet_p",
@@ -62378,8 +62382,13 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const r = A => tt.Math.Distance.Between(A.worldX, A.worldY, this.bomb.x, this.bomb.y) <= this.bomb.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad.x, this.gad.y) <= this.gad.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad2.x, this.gad2.y) <= this.gad2.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.ultPos.x, this.ultPos.y) <= this.ultPos.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.mute.x, this.mute.y) <= this.mute.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.pauseBtn.x, this.pauseBtn.y) <= this.pauseBtn.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.messBtn.x, this.messBtn.y) <= this.messBtn.r + 6,
           n = Ft.zugFaktor;
         this.input.on("pointerdown", A => {
+          // Bis v44 sprang der erste Tipp nach dem Abschuss sofort zurueck
+          // zur Weltkarte. Das war die einzige Art, den Ergebnisbildschirm
+          // zu verlassen — und wer beim Sterben noch den Finger auf dem
+          // Schirm hatte, sah ihn nie. Jetzt tragen ihn zwei Knoepfe.
           if (this.audio.resume(), this.over) {
-            this.scene.start(this.endless ? "Menu" : "Levels");
+            for (const k of this.endeKnoepfe || [])
+              if (Math.abs(A.worldX - k.x) <= k.w / 2 + 6 && Math.abs(A.worldY - k.y) <= k.h / 2 + 6) { k.tu(); return }
             return
           }
           r(A) || (this.dragging = !0, this.dragPX = A.worldX, this.dragPY = A.worldY, this.dragTX = this.player.x, this.dragTY = this.player.y)
@@ -62828,13 +62837,39 @@ dann ausweichen!`, {
           })
         }
       }
+      // Alle Gegnerbilder dieses Sektors backen, BEVOR das Gefecht
+      // anfaengt.
+      //
+      // gegnerBacken() legte bis v44 beim ERSTEN Spawn jeder Art ein neues
+      // Canvas an, zeichnete acht versetzte Kopien fuer den Saum darauf und
+      // schob die fertige Textur zur Grafikkarte. Das kostet einen ganzen
+      // Bildschlag — und zwar genau in dem Augenblick, in dem die Welle
+      // einfliegt. Auf dem Telefon war das der Ruckler, den man sieht,
+      // "wenn die Gegner kommen": bis zu zehn Stueck pro Sektor, jeder an
+      // der unguenstigsten Stelle.
+      //
+      // Vorgebacken wird aus dem WELLENPLAN, nicht aus einer Liste: was
+      // nicht vorkommt, wird auch nicht gebacken, und eine neue Gegnerart
+      // ist automatisch dabei. Der Boss bleibt draussen — er kommt einzeln
+      // und mit Einflugtween, dort faellt ein Bildschlag nicht auf.
+      vorwaermen(R) {
+        const E = new Set();
+        for (const b of R) if (b.kind) E.add(b.kind);
+        this.vorgewaermt = 0, this.vorgewaermteArten = [...E];
+        for (const b of E) {
+          const I = Ke[b];
+          if (!I) continue;
+          gegnerBacken(this, I.tex || "e_" + b, I) && this.vorgewaermt++
+        }
+        return this.vorgewaermt
+      }
       startStage() {
         const R = Ut[this.stage - 1];
         this.stageDef = R, this.stageStart = this.time.now, this.stageCleared = !1, this.bossWarned = !1, q.reachStage(this.stage), this.applyBiome(R), this.stageText.setText(`LEVEL ${this.levelNum()}`), this.stageText.setVisible(!0), this.stageBacking.setVisible(!0);
         const E = this.runDiff || q.difficulty(),
           b = Xe[E] || Xe.normal,
           I = Si(R.waves, b, R.intensity);
-        this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
+        this.vorwaermen(I), this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
         const G = this.add.text(J / 2, rt * .4, `LEVEL ${this.levelNum()}
 ${R.label}`, {
           fontFamily: "sans-serif",
@@ -64917,7 +64952,11 @@ ${G}`, {
         this.add.rectangle(0, 0, J, rt, 264208, .62).setOrigin(0, 0).setScrollFactor(0).setDepth(100);
         const v = J / 2,
           x = rt * .42;
-        this.panelRounded(v, x, 404, 348, 4160168);
+        // 470 statt 348: die zwei Knoepfe brauchen Platz IM Panel. Beim
+        // ersten Anlauf lag der obere ueber der Bestenlisten-Zeile und der
+        // untere unter der Panelkante — auf dem Bildschirmfoto sofort zu
+        // sehen, in keiner Zahl.
+        this.panelRounded(v, x, 404, 470, 4160168);
         const t = this.add.text(v, x - 132, R, {
           fontFamily: "sans-serif",
           fontSize: "30px",
@@ -64969,19 +65008,37 @@ ${n}` : "", {
             lineSpacing: 8
           }).setOrigin(.5).setScrollFactor(0).setDepth(102)
         }
-        const a = this.add.text(v, x + 128, this.endless ? "Tippen  →  Menü" : "Tippen  →  Weltkarte", {
-          fontFamily: "sans-serif",
-          fontSize: "17px",
-          color: "#7fe0b0",
-          fontStyle: "bold"
-        }).setOrigin(.5).setScrollFactor(0).setDepth(102);
-        this.tweens.add({
-          targets: a,
-          alpha: .35,
-          duration: 700,
-          yoyo: !0,
-          repeat: -1
-        })
+        // Zwei Knoepfe statt eines Hinweises.
+        //
+        // "Tippen → Weltkarte" stand hier klein und blass, und der einzige
+        // Weg hinaus war ein Tipp irgendwohin. Beim Spielen fuehlte sich
+        // das an, als haenge man fest: der Bildschirm sagt, dass etwas
+        // passiert ist, aber nicht, was man jetzt tun kann.
+        //
+        // Nochmal steht oben, weil man nach einem verlorenen Bosskampf
+        // meistens genau das will — und weil der Weg ueber die Weltkarte
+        // drei Tipps braucht statt einem.
+        const R2 = this.endless ? { mode: "endless" } : { stage: this.stage, difficulty: this.runDiff || void 0 };
+        Tt(this, v, x + 148, 268, 58, "↻  Nochmal versuchen", {
+          fontSize: 20, fill: 3103354, radius: 16, glow: 9371584, depth: 103,
+        });
+        Tt(this, v, x + 214, 268, 52, this.endless ? "⌂  Zum Menü" : "⌂  Zum Hangar", {
+          fontSize: 19, fill: 2373708, radius: 15, depth: 103,
+        });
+        // Getroffen wird ueber RECHTECKE, nicht ueber die Zone, die Tt()
+        // selbst anlegt.
+        //
+        // Tt() setzt eine interaktive Zone mit Tiefe 105 — im Menue traegt
+        // die zuverlaessig, im Gefecht kam kein einziger Tipp an. Warum,
+        // ist nicht geklaert; die Szene haelt einen eigenen
+        // pointerdown-Handler und zwei zusaetzliche Zeiger. Statt das zu
+        // erraten, entscheidet derselbe Handler, der im Gefecht schon die
+        // Bombe und die Pause trifft: an ihm ist bewiesen, dass er den
+        // Finger sieht.
+        this.endeKnoepfe = [
+          { x: v, y: x + 148, w: 268, h: 58, tu: () => { this.scene.stop(), this.scene.start("Game", R2) } },
+          { x: v, y: x + 214, w: 268, h: 52, tu: () => { this.scene.start(this.endless ? "Menu" : "Levels") } },
+        ]
       }
       showLevelResult(R, E, b, I = 0, G = 0) {
         var i;

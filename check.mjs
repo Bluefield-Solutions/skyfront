@@ -139,6 +139,14 @@ const TORE = [
   // Zieht die Maschine bei 30, 60 und 120 Hz gleich schnell nach? Bis v34
   // sprang sie jedes Bild auf den Finger — kein Glaetten, und die
   // Geschwindigkeit haette an der Bildrate gehangen.
+  // Wird waehrend des Gefechts noch eine Gegnertextur gebacken? Bis v44
+  // beim ersten Spawn jeder Art — bis zu acht Bildschlaege je Sektor,
+  // jeder genau im Einflug der Welle. Das war der Ruckler, den man auf dem
+  // Telefon sieht, "wenn die Gegner kommen".
+  { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
+  // Kommt man aus dem Ergebnisbildschirm wieder heraus? Der Rauchtest
+  // prueft, dass man ins Spiel KOMMT — hinaus hat nie jemand geprueft.
+  { schluessel: 'niederlage', lauf: 'Niederlage (Weg aus dem Ergebnis)',    zeile: 'Niederlage (zwei Knoepfe)', datei: 'tools/niederlage.mjs' },
   { schluessel: 'steuerung',   lauf: 'Steuerung (30, 60, 120 Hz)',          zeile: 'Steuerung (3 Bildraten)',    datei: 'tools/steuerung.mjs' },
 ];
 
