@@ -157,7 +157,7 @@ const TORE = [
   { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
   // Kommt man aus dem Ergebnisbildschirm wieder heraus? Der Rauchtest
   // prueft, dass man ins Spiel KOMMT — hinaus hat nie jemand geprueft.
-  { schluessel: 'niederlage', lauf: 'Niederlage (Weg aus dem Ergebnis)',    zeile: 'Niederlage (zwei Knoepfe)', datei: 'tools/niederlage.mjs' },
+  { schluessel: 'niederlage', lauf: 'Ergebnis (Weg heraus, Sieg und Niederlage)', zeile: 'Ergebnis (Sieg + Niederlage)', datei: 'tools/niederlage.mjs' },
   { schluessel: 'steuerung',   lauf: 'Steuerung (30, 60, 120 Hz)',          zeile: 'Steuerung (3 Bildraten)',    datei: 'tools/steuerung.mjs' },
   // Und zuletzt das, was ausgeliefert wird. Bis v51 hat die Torkette den
   // Pages-Bau NIE gebaut: v49, v50 und v51 gingen hier gruen durch, landeten

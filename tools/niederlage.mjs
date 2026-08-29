@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
-  Niederlage — kommt man aus dem Ergebnisbildschirm wieder heraus?
+  Ergebnis — kommt man aus BEIDEN Ergebnisbildschirmen wieder heraus?
 
     node tools/niederlage.mjs
 
@@ -24,11 +24,27 @@
   nichts tut, ist schlimmer als keiner — und genau das war der erste
   Entwurf: Tt() legt eine interaktive Zone an, und im Gefecht kam an ihr
   kein einziger Tipp an.
+
+  UND SEIT v56 DERSELBE WEG NACH EINEM SIEG.
+  Das ist nachgetragen, weil dieses Tor eine halbe Tuer geprueft hat und
+  die andere Haelfte sieben Fassungen lang offenstand:
+
+  In v49 bekam der NIEDERLAGEN-Schirm zwei Knoepfe, und der
+  pointerdown-Handler der Szene wurde darauf umgestellt — er prueft
+  seither `endeKnoepfe` und verwirft jeden Tipp, der keinen davon trifft.
+  Der SIEGES-Schirm setzte keine. Er sagt "Tippen → Weltkarte", und ab v49
+  verwarf der Handler genau diesen Tipp: nach JEDEM gewonnenen Level kam
+  man nicht mehr zurueck zur Karte.
+
+  Gefunden hat es der Nutzer nach Level 20, nicht dieses Tor — es hiess
+  "Niederlage" und hat gemessen, was sein Name sagt. Ein Tor, das eine von
+  zwei Tueren prueft, meldet gruen ueber ein Haus, aus dem man nicht
+  herauskommt.
 */
 import { existsSync } from 'node:fs';
 import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-const M = messstelle('Niederlage', 'aus dem Ergebnisbildschirm fuehren zwei Knoepfe heraus.');
+const M = messstelle('Ergebnis', 'aus BEIDEN Ergebnisbildschirmen fuehrt ein Weg heraus.');
 // 44 Anzeigepunkte sind das Daumenmass, mit dem auch npm run browser rechnet.
 const DAUMEN = 44;
 
@@ -110,6 +126,55 @@ if (schirm.knoepfe.length >= 2) {
   console.log(`  nach dem Tipp auf den unteren Knopf: ${raus.join(', ')}`);
   if (raus.includes('Game'))
     M.befund('der Tipp auf den unteren Knopf fuehrt nicht aus dem Gefecht heraus — der Knopf ist zu sehen und tut nichts.');
+}
+
+// ---- UND DER SIEG ----------------------------------------------------------
+//
+// Frischer Sektor, gewonnen, und dieselbe Frage: fuehrt ein Tipp hinaus?
+// Gemessen wird in der KAMPAGNE, nicht im Endlosmodus — dort gibt es keine
+// Weltkarte, auf die man zurueckkehren koennte.
+console.log('\nSieg — der Weg aus dem Ergebnisbildschirm\n');
+const sieg = await seite.evaluate(async () => {
+  const g = window.__game;
+  for (let i = 0; i < 120; i++) {
+    const m = g.scene.getScene('Menu');
+    if (m && m.scene.isActive()) break;
+    await new Promise((f) => setTimeout(f, 250));
+  }
+  g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
+  g.scene.start('Game', { stage: 5, difficulty: 'easy' });
+  await new Promise((f) => setTimeout(f, 1500));
+  const spiel = g.scene.getScene('Game');
+  for (let i = 0; i < 90 && !spiel.wellenplan; i++) {
+    try { spiel.input.emit('pointerdown'); } catch (e) {}
+    await new Promise((f) => setTimeout(f, 500));
+  }
+  if (!spiel.wellenplan) return { fehler: 'Sektor startet nicht' };
+  try { spiel.completeLevel(); } catch (e) { return { fehler: 'completeLevel() wirft: ' + e.message }; }
+  await new Promise((f) => setTimeout(f, 4000));
+  return {
+    over: spiel.over,
+    knoepfe: (spiel.endeKnoepfe || []).map((k) => ({ x: k.x, y: k.y, w: k.w, h: k.h })),
+    hinweis: spiel.children.list.some((o) => o.type === 'Text' && o.visible && /Tippen/.test(String(o.text || ''))),
+  };
+});
+if (sieg.fehler) M.ungemessen(`der Sieg ist nicht messbar: ${sieg.fehler}`);
+else {
+  if (OHNE_NAHT) sieg.knoepfe = [];
+  console.log(`  over: ${sieg.over} · Tippflaechen: ${sieg.knoepfe.length} · Hinweis "Tippen": ${sieg.hinweis ? 'ja' : 'nein'}`);
+  if (!sieg.over) M.befund('nach dem gewonnenen Level steht das Spiel nicht auf "over".');
+  if (!sieg.knoepfe.length)
+    M.befund('der Siegesbildschirm hat KEINE Tippflaeche. Der Handler der Szene verwirft bei "over" '
+      + 'jeden Tipp, der keinen Knopf trifft — man kommt nach einem gewonnenen Level nicht mehr zur Weltkarte.');
+  else {
+    const k = sieg.knoepfe[0];
+    await seite.touchscreen.tap(r.x + r.w * (k.x / schirm.breite), r.y + r.h * (k.y / schirm.hoehe));
+    await seite.waitForTimeout(2500);
+    const raus = await seite.evaluate(() => window.__game.scene.scenes.filter((s) => s.scene.isActive()).map((s) => s.scene.key));
+    console.log(`  nach dem Tipp: ${raus.join(', ')}`);
+    if (raus.includes('Game'))
+      M.befund('der Tipp auf dem Siegesbildschirm fuehrt nicht aus dem Gefecht heraus.');
+  }
 }
 
 await browser.close();

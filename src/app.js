@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v55",
+    SKF_VERSION = "v56",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -65565,7 +65565,24 @@ ${n}` : "", {
           duration: 700,
           yoyo: !0,
           repeat: -1
-        })
+        });
+        // DER WEG HINAUS. Ohne ihn steht der Spieler fest.
+        //
+        // Der Schirm sagt "Tippen → Weltkarte", und bis v48 stimmte das:
+        // der erste Tipp nach dem Ende sprang zurueck. In v49 bekam der
+        // NIEDERLAGEN-Schirm zwei Knoepfe, und der Handler der Szene wurde
+        // darauf umgestellt — er prueft seither `endeKnoepfe` und
+        // verwirft jeden Tipp, der keinen davon trifft. Der SIEGES-Schirm
+        // setzt keine, also verwarf er ab da jeden Tipp: kein Weg zur
+        // Weltkarte, nach JEDEM gewonnenen Level, sieben Fassungen lang.
+        //
+        // Gefunden hat es der Nutzer nach Level 20, nicht ein Tor: die
+        // Pruefung "Weg aus dem Ergebnis" gab es nur fuer die Niederlage.
+        // Eine halbe Tuer ist keine gepruefte Tuer.
+        this.endeKnoepfe = [{
+          x: J / 2, y: rt / 2, w: J, h: rt,
+          tu: () => { this.scene.start(this.endless ? "Menu" : "Levels") }
+        }]
       }
       onContextRestored() {
         try {

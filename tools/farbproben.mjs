@@ -61,6 +61,14 @@ const PROBEN = [
   // Das Nachtragen abschalten: dann zeichnet die Vorschau nur, was beim
   // Betreten schon geladen war — die Lotterie von v52. Verlangt wird, dass
   // das Tor die Unvollstaendigkeit BENENNT, nicht bloss rot wird.
+  // Dem Siegesbildschirm die Tippflaeche wegnehmen — der Zustand, in dem
+  // v49 bis v55 waren. Der Schirm sagt "Tippen → Weltkarte", der Handler
+  // verwirft den Tipp, und man kommt nach einem gewonnenen Level nicht
+  // mehr zurueck. Verlangt wird, dass das Tor GENAU DAS sagt.
+  ['Siegesbildschirm ohne Tippflaeche', '✗',
+    ['this.endeKnoepfe = [{\n          x: J / 2, y: rt / 2, w: J, h: rt,',
+     'this.endeKnoepfeAus = [{\n          x: J / 2, y: rt / 2, w: J, h: rt,'], true, 'ende',
+    'KEINE Tippflaeche'],
   // Das sektorweise Halten der Bosstextur wegnehmen: dann liegen wieder
   // alle vier gleichzeitig im Speicher. Verlangt wird, dass die
   // Speicher-Tafel das SAGT — sie ist der einzige Ort, an dem so etwas
@@ -455,7 +463,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
