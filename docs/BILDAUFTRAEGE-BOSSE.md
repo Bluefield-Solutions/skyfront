@@ -49,6 +49,12 @@ Einzelheiten und Zahlen: `art/roh/boss/README.md`.
 Jeder Block ist für sich vollständig: Formateinstellung, Prompt,
 Negativprompt, Dateiname. Nichts davon muss zusammengesetzt werden.
 
+> **Einen Block einzeln herausholen**, ohne durch 900 Zeilen zu blättern:
+> `npm run bestellung -- --block=boss4` (oder `boss5`, `e_elite`,
+> `e_carrier`, `e_rotor`; `--block=alle` für alle offenen). Der Text wird zur
+> Laufzeit aus **diesem** Bogen geschnitten, nicht abgeschrieben — ein
+> zweiter Abzug wäre in einer Woche die veraltete Fassung.
+
 **Drei Regeln, jede aus dem gescheiterten ersten Anlauf:**
 
 1. **Zuerst das Format im Werkzeug einstellen, dann den Prompt einsetzen.**

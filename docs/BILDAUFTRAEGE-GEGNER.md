@@ -6,6 +6,10 @@ Anzeigepunkt.
 
 ---
 
+> **Einen Block einzeln herausholen**, ohne zu blättern:
+> `npm run bestellung -- --block=e_elite` (oder `e_carrier`, `e_rotor`). Der
+> Text wird zur Laufzeit aus diesem Bogen geschnitten, nicht abgeschrieben.
+
 ## 1. Warum diese drei
 
 Von vierzehn Gegnerarten werden drei auf dem Gerät **hochgerechnet** — und
