@@ -64,8 +64,15 @@ if (!OHNE_NAHT) {
 // benannt gestartet. Danach steht die Einweisung davor; sie geht auf einen
 // Tipp weg und nach sieben Sekunden von selbst.
 let drin = OHNE_NAHT;
+// `stand` gehoert NACH DRAUSSEN, nicht in den if-Block: der Fehlerzweig
+// unten liest ihn. Beim ersten Anlauf stand er drin, der Zweig lief lokal
+// nie (weil der Sektor immer startete) und warf auf dem Laeufer prompt
+// "ReferenceError: stand is not defined" — statt zu sagen, was los war.
+// Eine Zeile, die nur im Fehlerfall laeuft, ist ungeprueft, bis der Fehler
+// eintritt. Diese hier ist jetzt von Hand herbeigefuehrt worden.
+let stand = null;
 if (!OHNE_NAHT) {
-  const stand = await seite.evaluate(async () => {
+  stand = await seite.evaluate(async () => {
     const g = window.__game;
     // ERST WARTEN, BIS DER STARTVORGANG WIRKLICH FERTIG IST.
     //
@@ -120,7 +127,7 @@ if (!OHNE_NAHT) {
 // "gruen, aber man kommt nicht ins Spiel" darf nie leise durchgehen.
 if (!drin) {
   console.error('✗ Speicher-Tafel: kommt nicht in einen laufenden Sektor.');
-  if (!OHNE_NAHT) console.error(`  Zustand: Boot ${stand.boot} · aktive Szenen ${stand.szenen}`
+  if (stand) console.error(`  Zustand: Boot ${stand.boot} · aktive Szenen ${stand.szenen}`
     + ` · stageDef ${stand.stageDef} · Einweisung sichtbar ${stand.einweisung}`);
   await browser.close(); process.exit(1);
 }
