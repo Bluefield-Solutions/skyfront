@@ -67,12 +67,28 @@ let drin = OHNE_NAHT;
 if (!OHNE_NAHT) {
   const stand = await seite.evaluate(async () => {
     const g = window.__game;
+    // ERST WARTEN, BIS DER STARTVORGANG FERTIG IST.
+    //
+    // Boot laedt zuerst das Noetige, startet dann das Hauptmenue und
+    // schiebt den Rest nach. Wer die Spielszene startet, WAEHREND Boot
+    // noch laeuft, bekommt sie kurz darauf vom nachgereichten Menue
+    // ueberlagert — und der Sektor beginnt nie. Auf dem schnellen Rechner
+    // war Boot vorher fertig und es fiel nicht auf; auf dem Laeufer von
+    // GitHub schlug es fehl: "kommt nicht in einen laufenden Sektor".
+    for (let i = 0; i < 120; i++) {
+      const m = g.scene.getScene('Menu');
+      if (m && m.scene.isActive()) break;
+      await new Promise((f) => setTimeout(f, 250));
+    }
     g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
     g.scene.start('Game', { stage: 1, difficulty: 'easy' });
     await new Promise((f) => setTimeout(f, 1500));
     const spiel = g.scene.getScene('Game');
     const laeuft = () => !!(spiel && spiel.wellenplan);
-    for (let i = 0; i < 60 && !laeuft(); i++) {
+    // Die Einweisung geht auf einen Tipp weg — und nach sieben Sekunden von
+    // selbst. Beides wird genommen, und 45 s gewartet: der Laeufer von
+    // GitHub rechnet unter SwiftShader mit rund zwei Bildern je Sekunde.
+    for (let i = 0; i < 90 && !laeuft(); i++) {
       try { spiel.input.emit('pointerdown'); } catch (e) {}
       await new Promise((f) => setTimeout(f, 500));
     }
