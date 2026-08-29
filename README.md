@@ -181,10 +181,19 @@ Zwei Workflows:
 - **`check.yml`** läuft bei jedem Push/PR: Node + Playwright, `node check.mjs`,
   Markdown-Bericht in die Job-Zusammenfassung. Der Prüfschritt braucht rund
   vier Minuten — Master und elf Varianten bauen und starten, dazu das Bildtor.
-- **`pages.yml`** läuft bei Push auf `main`: **ein** Aufruf,
+- **`pages.yml`** läuft, **wenn `Skyfront Check` auf `main` grün
+  durchgelaufen ist** (`workflow_run`), nicht beim Push: **ein** Aufruf,
   `node tools/auslieferung.mjs` — er baut `dist/pages/`, weist nach, dass es
   lieferbar ist, und startet die Seite dabei über http. Dann Veröffentlichung.
   **Einmalig von Hand nötig:** Settings → Pages → Source auf „GitHub Actions".
+
+  Bis v53 hing der Lauf am Push und startete damit **gleichzeitig** mit dem
+  Check: Pages war nach vier Minuten fertig, der strenge Check nach neun.
+  Fünf Minuten lang lag eine Fassung auf der Seite, von der noch niemand
+  wusste, ob sie durch die Tore geht. Zwei Fallen dabei: `types:
+  [completed]` heißt „fertig", nicht „bestanden" (daher die
+  `conclusion == 'success'`-Bedingung), und `checkout` nähme sonst den Kopf
+  des Standardzweigs statt des geprüften Stands (daher `ref: …head_sha`).
 
   Bis v51 stand hier ein Shell-Block mit denselben Nachweisen — an einer
   Stelle, die beim Arbeiten niemand ausführt. Ergebnis: v49, v50 und v51
@@ -224,6 +233,13 @@ Gemessen wird über **http**, nicht `file://` — dort wirft `localStorage`,
 und dann lässt sich keine Ersteinweisung als gesehen merken: der Dialog
 kommt nach jedem Tipp zurück, und gemessen würde ein Schirm, den so niemand
 sieht.
+
+Und eine dritte Frage, die dieselbe Sitzung schon beantworten kann: **ist
+das Gegnerband der Level-Vorschau vollständig?** Der Startvorgang schiebt
+die Gegnerbilder in Sechserpäckchen nach; bis v53 zeichnete die Vorschau
+nur, was beim Betreten schon da war — mal fünf Bilder, mal eines. Gemessen
+wird **gleich nach dem Hochlauf**, nicht am Ende: am Ende sind alle Bilder
+längst da, und dann meldet auch die kaputte Fassung „vollständig".
 
 ### Was die Torkette NICHT prüft
 

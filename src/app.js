@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v53",
+    SKF_VERSION = "v54",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -60678,7 +60678,10 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       const o = s.slice(0, 6),
         i = Math.min(88, (J - 60) / o.length),
         h = J / 2 - (o.length - 1) * i / 2;
-      o.forEach((y, S) => this.enemyIcon(h + S * i, 362, y, i - 6)), this.add.text(J / 2, 428, "— PRÄMIEN —", {
+      (typeof window < "u" && (window.__SKF_GEGNERBAND = {
+        arten: o.slice(),
+        gezeichnet: 0
+      })), o.forEach((y, S) => this.enemyIcon(h + S * i, 362, y, i - 6)), this.add.text(J / 2, 428, "— PRÄMIEN —", {
         fontFamily: "sans-serif",
         fontSize: "13px",
         color: "#e8b45a",
@@ -60787,13 +60790,26 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     // Damit stimmen die Groessenverhaeltnisse untereinander, und kein
     // kuenftiges Bild kann den Kasten sprengen, wie gross seine Quelle
     // auch sei.
+    // Das Gegnerband war eine LOTTERIE.
+    //
+    // Der Startvorgang laedt zuerst, was das Menue braucht, und schiebt den
+    // Rest — darunter alle Gegnerbilder — in Sechserpaeckchen hinterher.
+    // Wer die Level-Vorschau frueh oeffnet, trifft die Bilder mitten im
+    // Laden an: gemessen einmal 8 von 14, einmal 13 von 14, und in zwei
+    // Laeufen hintereinander verschiedene. Gezeichnet wurde nur, was gerade
+    // da war — das Band sah jedes Mal anders aus, mal mit fuenf Bildern,
+    // mal mit einem.
+    //
+    // Jetzt wird der Platz IMMER reserviert und das Bild nachgetragen,
+    // sobald seine Textur eintrifft. Der Kasten steht schon, das Bild faellt
+    // hinein; ueberlappen kann es deshalb auch nachtraeglich nicht.
     enemyIcon(R, E, b, kastenB) {
       const I = Ke[b],
-        G = I.tex || "e_" + b;
-      if (this.textures.exists(G)) {
-        const O = this.textures.get(G),
-          w = O.getSourceImage ? O.getSourceImage() : null;
-        if (w && w.width) {
+        G = I.tex || "e_" + b,
+        zeichne = () => {
+          const O = this.textures.get(G),
+            w = O && O.getSourceImage ? O.getSourceImage() : null;
+          if (!w || !w.width) return !1;
           const kb = kastenB || 82,
             kh = 52,
             an = (I.scale || .5) * .722,
@@ -60807,8 +60823,18 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           // in der Vorschau kein Bild mehr, sondern ein Fleck. Angehoben
           // wird bis 34 Punkte — aber nie ueber den Kasten hinaus.
           if (Math.max(qw, qh) * pa < 34) pa = Math.min(kb / qw, kh / qh, 34 / Math.max(qw, qh));
-          this.add.image(R, E - 4, G).setScale(an * pa).setTint(I.tint)
-        }
+          this.add.image(R, E - 4, G).setScale(an * pa).setTint(I.tint);
+          try {
+            typeof window < "u" && window.__SKF_GEGNERBAND && window.__SKF_GEGNERBAND.gezeichnet++
+          } catch (O2) {}
+          return !0
+        };
+      if (!(this.textures.exists(G) && zeichne())) {
+        const nach = (O) => {
+          O === G && (this.textures.off("addtexture", nach), this.scene.isActive() && zeichne())
+        };
+        this.textures.on("addtexture", nach);
+        this.events.once("shutdown", () => this.textures.off("addtexture", nach))
       }
       this.add.text(R, E + 22, I.role, {
         fontFamily: "sans-serif",

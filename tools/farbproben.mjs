@@ -58,6 +58,12 @@ const PROBEN = [
   // Weltpunkte gross und legt sich ueber das Missionsziel — genau das, was
   // der Nutzer fotografiert hat. Verlangt wird, dass das Ueberlappungstor
   // es sagt, nicht nur dass es rot wird.
+  // Das Nachtragen abschalten: dann zeichnet die Vorschau nur, was beim
+  // Betreten schon geladen war — die Lotterie von v52. Verlangt wird, dass
+  // das Tor die Unvollstaendigkeit BENENNT, nicht bloss rot wird.
+  ['Gegnerbilder nicht nachtragen (nur zeichnen, was schon da ist)', '✗',
+    ['this.textures.on("addtexture", nach);', 'void nach;'], true, 'lage',
+    'Gegnerband zeigt'],
   ['Gegnerbilder wieder nach Klasse skalieren (statt in den Kasten)', '✗',
     ['let pa = Math.min(kb / qw, kh / qh, 1);', 'let pa = ({S:.42,M:.56,L:.68,XL:.9}[I.cls] || .55) / an;'], true, 'lage',
     'verdeckt'],

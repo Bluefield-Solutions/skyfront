@@ -28,6 +28,10 @@
     Ueber der Leinwand die festen DOM-Knoepfe (Modifikator) gegen die
                        Knoepfe im Spiel — sie liegen ausserhalb von Phaser
                        und wuerden einer Messung auf der Leinwand entgehen
+    Gegnerband         zeigt die Level-Vorschau am Ende ALLE Gegner des
+                       Sektors, oder haengt es davon ab, was gerade geladen
+                       war? (Eine andere Frage, aber dieselbe Sitzung — ein
+                       zweiter Browserstart kostet neunzig Sekunden.)
 
   DIE REGEL — und sie kommt aus der ZEICHENREIHENFOLGE, nicht aus einer
   Liste von Ausnahmen. Ein erster Entwurf zaehlte einfach jedes Paar, das
@@ -113,6 +117,51 @@ if (OHNE_NAHT) await seite.evaluate(() => { window.__game.scene.getScene = () =>
 
 console.log('Überlappung\n');
 console.log('  gemessen bei 390 x 844 (iPhone hochkant), Welt 540 x 960\n');
+
+// ---- Ist das Gegnerband vollstaendig? ----
+//
+// Gemessen HIER und nicht in einem eigenen Werkzeug, weil dieselbe Sitzung
+// die Zahl schon hat: ein zweiter Browserstart kostet neunzig Sekunden fuer
+// eine Zahl, die neben der Ueberlappung liegt. Die Frage ist eine andere —
+// nicht wo etwas liegt, sondern ob es ueberhaupt da ist —, und sie steht
+// deshalb unter eigener Ueberschrift.
+//
+// Der Anlass: das Band zeigte in zwei Laeufen hintereinander verschieden
+// viele Bilder (8 von 14, dann 13 von 14). Der Startvorgang schiebt die
+// Gegnerbilder in Sechserpaeckchen nach; wer die Vorschau frueh oeffnet,
+// trifft sie mitten im Laden an.
+// GEMESSEN GLEICH NACH DEM HOCHLAUF, nicht am Ende. Am Ende sind alle
+// Bilder laengst da, und dann meldet auch die alte Fassung 'vollstaendig'
+// — die Messung haette die Sache bezeugt, ohne sie je geprueft zu haben.
+// Die Frage ist ja gerade, was passiert, wenn man die Vorschau OEFFNET,
+// waehrend noch geladen wird.
+console.log('  Gegnerband (Level-Vorschau, gleich nach dem Hochlauf)');
+{
+  const band = await seite.evaluate(async () => {
+    const g = window.__game;
+    g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
+    g.scene.start('Briefing', { stage: 6, sel: 'easy' });
+    // Bis zu 25 s warten: gemessen wird, ob es VOLLSTAENDIG WIRD, nicht ob
+    // es sofort vollstaendig ist. Ein Bild, das nach zwei Sekunden kommt,
+    // ist in Ordnung — eines, das nie kommt, nicht.
+    for (let i = 0; i < 100; i++) {
+      const b2 = window.__SKF_GEGNERBAND;
+      if (b2 && b2.arten && b2.gezeichnet >= b2.arten.length) break;
+      await new Promise((f) => setTimeout(f, 250));
+    }
+    const b3 = window.__SKF_GEGNERBAND;
+    return b3 ? { arten: b3.arten, gezeichnet: b3.gezeichnet } : null;
+  });
+  if (!band) M.ungemessen('__SKF_GEGNERBAND fehlt — das Gegnerband ist nicht gemessen.');
+  else {
+    console.log(`    ${band.gezeichnet} von ${band.arten.length} Bildern   (${band.arten.join(', ')})`);
+    if (band.gezeichnet < band.arten.length) {
+      M.befund(`das Gegnerband zeigt ${band.gezeichnet} von ${band.arten.length} Bildern — `
+        + `${band.arten.join(', ')}. Wer die Vorschau oeffnet, sieht je nach Ladestand ein anderes Band.`);
+    }
+  }
+}
+
 
 // Wieviele Gegnerbilder haben ueberhaupt einen Rahmen? Ohne das misst man
 // ein halbleeres Band.

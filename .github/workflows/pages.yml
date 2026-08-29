@@ -8,8 +8,23 @@
 # "GitHub Actions" stellen. Ohne das schlaegt configure-pages fehl.
 name: Pages
 
+# AUSGELIEFERT WIRD NUR, WAS DIE TORKETTE BESTANDEN HAT.
+#
+# Bis v53 hing dieser Lauf am Push und startete damit GLEICHZEITIG mit
+# "Skyfront Check". Gemessen an Lauf 93 und 94: Pages war nach vier Minuten
+# fertig, der strenge Check nach neun. Fuenf Minuten lang lag also eine
+# Fassung auf der Seite, von der noch niemand wusste, ob sie durch die Tore
+# geht — und waere der Check danach rot geworden, waere sie liegen
+# geblieben. Ein Tor, das nach der Lieferung anschlaegt, ist kein Tor.
+#
+# `workflow_run` kehrt die Reihenfolge um: dieser Lauf startet, wenn der
+# Check FERTIG ist, und baut nur weiter, wenn er gruen war. Der Preis sind
+# rund neun Minuten mehr bis zur Seite. Das ist der Preis dafuer, dass auf
+# der Seite nichts Ungeprueftes liegt.
 on:
-  push:
+  workflow_run:
+    workflows: ["Skyfront Check"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -25,10 +40,19 @@ concurrency:
 
 jobs:
   bauen:
+    # Von Hand angestossen: immer. Vom Check angestossen: nur wenn er gruen
+    # war. Ohne diese Zeile liefe die Lieferung auch nach einem roten Check
+    # — `types: [completed]` heisst "fertig", nicht "bestanden".
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Code auschecken
         uses: actions/checkout@v4
+        with:
+          # GENAU den Stand holen, den der Check geprueft hat. Ohne `ref`
+          # nimmt checkout bei `workflow_run` den Kopf des Standardzweigs —
+          # und das kann ein spaeterer, ungepruefter Commit sein.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Node einrichten
         uses: actions/setup-node@v4
