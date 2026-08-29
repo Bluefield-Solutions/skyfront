@@ -353,6 +353,34 @@ Jede hat mindestens eine Runde gekostet.
    Und der Vorgaenger dieser Pruefung war noch schlimmer — eine Grenze
    `< 100 Texturen`, wo der kleinste je beobachtete Wert 119 war (Regel 2).
 
+46. **Eine Regel, die nur in EINER Datei steht, gilt nur in dieser Datei.**
+   In `tools/vorwaermen.mjs` steht seit v45: die Einweisung laesst sich
+   nicht wegtippen („drei Anlaeufe gekostet und nie funktioniert"), also
+   wird `startStage()` gerufen. In v56 habe ich in der Speicher-Tafel
+   dasselbe Problem drei Mal neu geloest — auf das aktive Menue gewartet,
+   auf `__bootStats.totalMs` gewartet, dazwischen getippt. Lokal jedes Mal
+   gruen, auf dem Laeufer jedes Mal rot. **Vier rote Laeufe, um eine
+   Antwort wiederzufinden, die schon aufgeschrieben war.**
+
+   Wer ein Werkzeug baut, das ins Gefecht muss, sieht zuerst nach, wie die
+   anderen es tun. Der Weg heisst: Szene benannt starten, kurz warten, und
+   wenn der Sektor nicht von selbst anlaeuft, `startStage()` rufen. Nicht
+   tippen.
+
+47. **Ein Tor, das eine von zwei Tueren prueft, meldet gruen ueber ein Haus,
+   aus dem man nicht herauskommt.** Das Tor hiess „Niederlage" und hat
+   gemessen, was sein Name sagt: den Weg aus dem Niederlagenbildschirm.
+   Der SIEGES-Bildschirm hatte seit v49 keinen Weg hinaus — nach jedem
+   gewonnenen Level, sieben Fassungen lang. Gefunden hat es der Nutzer.
+   Wer einen Zustand prueft, zaehlt vorher auf, wieviele es davon gibt.
+
+48. **Eine Zeile, die nur im Fehlerfall laeuft, ist ungeprueft, bis der
+   Fehler eintritt.** Die Diagnosezeile, die den roten Lauf erklaeren
+   sollte, warf selbst `ReferenceError: stand is not defined` — sie las
+   eine Variable ausserhalb ihres Gueltigkeitsbereichs. Lokal lief der
+   Zweig nie, weil der Sektor immer startete. Fehlerzweige werden von Hand
+   herbeigefuehrt, sonst sind sie Dekoration.
+
 ---
 
 ## Aufbau
