@@ -155,5 +155,39 @@ if (SELBST) {
   console.log(`\n  Bildvorrat: ${(vorher / 1024).toFixed(0)} KB → ${(nachher / 1024).toFixed(0)} KB`);
   console.log('  Im Spiel gehoert dazu setScale(.5) — die Textur ist doppelt so breit wie das Schiff.');
 
+  // --- Ist das Gebackene im Spiel auch ANGEMELDET? --------------------------
+  //
+  // Backen ist die eine Haelfte, anmelden die andere: src/assets.js traegt
+  // das Bild, aber erst ein Eintrag `schluessel: __SKFA[platz]` in app.js
+  // macht daraus eine Textur. Fehlt er, ist das Bild da und im Spiel
+  // unsichtbar — und beim Boss heisst das mehr als ein fehlendes Bild:
+  // `bossStufeGedeckelt` deckelt auf die hoechste Stufe, fuer die eine
+  // Textur EXISTIERT.
+  //
+  // Genau das ist bei der Ringfestung passiert. Das Bild war gebacken, der
+  // Kommentar im Quelltext behauptete, die Stufe hebe sich nun von selbst
+  // ("ohne dass eine Zahl geaendert wird"), und 29 Sektoren blieben still
+  // auf Stufe 3 statt 4. Keine Meldung, kein rotes Tor — die Behauptung
+  // stimmte einfach nicht, weil es die zweite Stelle gibt.
+  //
+  // Geprueft wird nur, was auch geliefert ist: ein Platz ohne Bild braucht
+  // keine Anmeldung, und haette er eine, waere die Textur leer und der
+  // Deckel stiege zu frueh.
+  const app = existsSync('src/app.js') ? readFileSync('src/app.js', 'utf8') : '';
+  if (!app) M.ungemessen('src/app.js nicht lesbar — die Anmeldung ist nicht geprueft.');
+  else {
+    const fehlt = [];
+    for (const e of EINBAU) {
+      if (!existsSync(e.datei)) continue;
+      const marke = new RegExp(`\\b${e.schluessel}\\s*:\\s*__SKFA\\[${e.platz}\\]`);
+      if (!marke.test(app)) fehlt.push(e);
+    }
+    console.log(`\n  Angemeldet im Bildvorrat: ${EINBAU.filter((e) => existsSync(e.datei)).length - fehlt.length}`
+      + ` von ${EINBAU.filter((e) => existsSync(e.datei)).length} gelieferten.`);
+    for (const e of fehlt)
+      M.befund(`${e.schluessel} ist gebacken, aber in src/app.js nicht angemeldet — `
+        + `es fehlt "${e.schluessel}: __SKFA[${e.platz}]". Das Bild ist da und im Spiel unsichtbar.`);
+  }
+
   M.urteil();
 }

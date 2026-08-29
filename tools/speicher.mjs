@@ -46,17 +46,46 @@ if (!OHNE_NAHT) {
   await seite.waitForTimeout(3000);
 }
 
-// Ins Gefecht — im Menue liegt ein anderer Bestand.
-const r = OHNE_NAHT ? { x: 0, y: 0, w: 0, h: 0 } : await seite.evaluate(() => { const c = document.querySelector('canvas').getBoundingClientRect(); return { x: c.x, y: c.y, w: c.width, h: c.height }; });
-if (!OHNE_NAHT) await seite.touchscreen.tap(r.x + 0.5 * r.w, r.y + 0.711 * r.h);
+// INS GEFECHT — und zwar in einen KAMPAGNENSEKTOR, nicht blind getippt.
+//
+// Bis v55 tippte diese Tafel auf 0,711 der Leinwandhoehe. Dort liegt im
+// Hauptmenue aber nicht "▶ SPIELEN" (Zone y 567..641), sondern
+// "♾ ENDLOS-MODUS" (y 658..714). Gemessen wurde also seit jeher der
+// Endlosmodus — und der ruft `startStage()` gar nicht auf: kein
+// Wellenplan, kein Vorwaermen, und damit fehlten im Bestand genau die
+// Gegnertexturen, die ein Sektor beim Start backt.
+//
+// Aufgefallen ist es, als eine neue Bosstextur den Deckel riss und das
+// Aufraeumen dagegen keine Wirkung zeigte: der Sektor hatte nie begonnen.
+// Eine Tafel, die "im Gefecht" ueber ihrer Tabelle stehen hat und einen
+// anderen Zustand misst, bezeugt etwas, das sie nie geprueft hat.
+//
+// Statt eines Tippens auf eine Bildschirmstelle wird die Szene jetzt
+// benannt gestartet. Danach steht die Einweisung davor; sie geht auf einen
+// Tipp weg und nach sieben Sekunden von selbst.
 let drin = OHNE_NAHT;
-for (let i = 0; !drin && i < 60; i++) {
-  if (await seite.evaluate(() => (window.__game.scene.scenes || []).some((s) => s.scene.key === 'Game' && s.scene.isActive()))) { drin = true; break; }
-  await seite.waitForTimeout(250);
+if (!OHNE_NAHT) {
+  const stand = await seite.evaluate(async () => {
+    const g = window.__game;
+    g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
+    g.scene.start('Game', { stage: 1, difficulty: 'easy' });
+    await new Promise((f) => setTimeout(f, 1500));
+    const spiel = g.scene.getScene('Game');
+    const laeuft = () => !!(spiel && spiel.wellenplan);
+    for (let i = 0; i < 60 && !laeuft(); i++) {
+      try { spiel.input.emit('pointerdown'); } catch (e) {}
+      await new Promise((f) => setTimeout(f, 500));
+    }
+    return laeuft()
+      ? { ok: true, biom: spiel.stageDef && spiel.stageDef.bg, wellen: spiel.wellenplan.length, vorgewaermt: spiel.vorgewaermt }
+      : { ok: false };
+  });
+  drin = stand.ok;
+  if (drin) console.log(`  Sektor laeuft: ${stand.wellen} Wellen · ${stand.vorgewaermt} Gegnerart(en) vorgewaermt · Biom ${stand.biom}`);
 }
 // Bleibt ein Befund, aus demselben Grund wie in der Feuerkraft-Tafel:
 // "gruen, aber man kommt nicht ins Spiel" darf nie leise durchgehen.
-if (!drin) { console.error('✗ Speicher-Tafel: kommt nicht ins Gefecht.'); await browser.close(); process.exit(1); }
+if (!drin) { console.error('✗ Speicher-Tafel: kommt nicht in einen laufenden Sektor.'); await browser.close(); process.exit(1); }
 if (!OHNE_NAHT) await seite.waitForTimeout(3500);
 
 // Ist der Bestand ueberhaupt zur Ruhe gekommen?

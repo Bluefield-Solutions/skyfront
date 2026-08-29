@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v54",
+    SKF_VERSION = "v55",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -56611,6 +56611,9 @@ return new ` + this.key + `();
       boss1: __SKFA[16],
       boss2: __SKFA[17],
       boss3: __SKFA[18],
+      // Platz 72, angehaengt statt eingeschoben — eiserne Regel 9: die
+      // Nummern sind Positionen, die app.js anspringt.
+      boss4: __SKFA[72],
       e_arcer: __SKFA[19],
       e_bomber: __SKFA[20],
       e_carrier: __SKFA[21],
@@ -58125,12 +58128,116 @@ return new ` + this.key + `();
   // Gedeckelt wird die STUFE, nicht nur die Textur: sonst haette man einen
   // Boss, der aussieht wie Stufe 3 und schiesst wie Stufe 5. Genau davor
   // hat die Zeitachse seit v38 gewarnt.
+  // GEFRAGT WIRD DER BILDVORRAT, NICHT DER TEXTURSPEICHER.
+  //
+  // Bis v55 stand hier `textures.exists("boss" + s)`. Dieselbe Frage,
+  // solange ALLE Bosstexturen dauernd im Speicher liegen — und genau das
+  // kostete zu viel: vier Bosstexturen sind 5,9 MB, obwohl je Sektor
+  // hoechstens EINE vorkommen kann. Mit der Ringfestung riss der
+  // Speicherdeckel (41,2 MB bei 40 erlaubt).
+  //
+  // Seit die Textur nur noch sektorweise gehalten wird, sind die beiden
+  // Fragen verschieden: "gibt es ein Bild dafuer" (Vorrat) und "liegt es
+  // gerade im Speicher" (Textur). Die STUFE haengt am Vorrat — sonst waere
+  // ein Boss schwaecher, blos weil seine Textur gerade nicht geladen ist,
+  // und das waere ein Spielwert, der am Speicher haengt.
+  function bossBildDa(stufe) {
+    const d = qs["boss" + stufe];
+    return typeof d === "string" && d.length > 64
+  }
+
   function bossStufeGedeckelt(szene, stufe) {
-    const t = szene && szene.textures;
-    if (!t) return stufe;
     for (let s = Math.min(5, Math.max(1, stufe | 0)); s > 1; s--)
-      if (t.exists("boss" + s)) return s;
+      if (bossBildDa(s)) return s;
     return 1
+  }
+
+  // Nur die Bosstextur halten, die dieser Sektor braucht.
+  //
+  // Drei Regeln, jede aus einem eigenen Fehlversuch:
+  //
+  // 1. ERST LADEN, DANN AUFRAEUMEN. Umgekehrt lag zwischendurch gar keine
+  //    Bosstextur im Speicher, und der Boss stand auf `__MISSING`.
+  // 2. WAS DER BOSS TRAEGT, WIRD NIE WEGGENOMMEN — sonst dasselbe Bild,
+  //    nur eine Zehntelsekunde spaeter.
+  // 3. AUFGERAEUMT WIRD IM NAECHSTEN MIKROSCHRITT, nicht mitten im
+  //    `addtexture`-Ereignis. Wer waehrend des Hinzufuegens entfernt,
+  //    greift Phaser in die Speichen.
+  //
+  // Und ein Waechter, weil der Startvorgang die uebrigen Bilder in
+  // Sechserpaeckchen NACHSCHIEBT — auch Bosstexturen, und zwar nach dem
+  // Aufraeumen. Ohne ihn lag der Bestand eine Sekunde spaeter wieder
+  // vollstaendig da: gemessen 41,2 MB, unveraendert, obwohl aufgeraeumt
+  // worden war. Ein Aufraeumen, das ein Nachlader rueckgaengig macht,
+  // sieht aus wie keines.
+  function bossVorratHalten(szene, stufe) {
+    const t = szene && szene.textures;
+    if (!t) return null;
+    // "alle" ist die Naht fuer die MESSUNG, nicht fuer das Spiel.
+    //
+    // Zwei Werkzeuge fahren alle fuenf Stufen hintereinander an: die
+    // Zeitachse prueft, dass jede Stufe ihr eigenes Bild traegt, und der
+    // Bildbogen legt sie nebeneinander. Beide brauchen dafuer alle Bilder
+    // gleichzeitig — und beide messen etwas anderes als den Speicher.
+    // Ohne diese Naht kaempfen sie gegen die Sparsamkeit des Sektors an,
+    // und man endet damit, ein Tor an eine Optimierung anzupassen, bis es
+    // nichts mehr sagt.
+    if (stufe === "alle") {
+      szene.__bossAlle = !0;
+      for (let a = 1; a <= 5; a++)
+        !t.exists("boss" + a) && bossBildDa(a) && t.addBase64("boss" + a, qs["boss" + a]);
+      return "alle"
+    }
+    // Einmal gesetzt, bleibt "alle" gesetzt. Sonst nimmt der naechste
+    // spawnBoss den Vorrat gleich wieder weg — und genau das tat er: im
+    // Bildbogen stand danach fuenfmal dasselbe Bild.
+    if (szene.__bossAlle) return null;
+    const s = Math.max(1, Math.min(5, stufe | 0)),
+      noetig = "boss" + s;
+    szene.__bossNoetig = noetig;
+    const inGebrauch = () => szene.boss && szene.boss.texture && szene.boss.texture.key,
+      raeumen = () => {
+        if (szene.__bossAlle || !t.exists(noetig)) return;
+        const b = inGebrauch();
+        for (let a = 1; a <= 5; a++) {
+          const k = "boss" + a;
+          k !== noetig && k !== b && t.exists(k) && t.remove(k)
+        }
+      },
+      spaeter = () => Promise.resolve().then(raeumen);
+    if (!szene.__bossWaechter) {
+      szene.__bossWaechter = (k) => {
+        if (szene.__bossAlle || !/^boss[1-5]$/.test(k)) return;
+        if (k === szene.__bossNoetig) { spaeter(); return }
+        k !== inGebrauch() && t.exists(szene.__bossNoetig) && Promise.resolve().then(() => t.exists(k) && t.remove(k))
+      };
+      t.on("addtexture", szene.__bossWaechter);
+      szene.events.once("shutdown", () => {
+        t.off("addtexture", szene.__bossWaechter), szene.__bossWaechter = null
+      })
+    }
+    if (!t.exists(noetig) && bossBildDa(s)) t.addBase64(noetig, qs[noetig]);
+    raeumen();
+    return noetig
+  }
+
+  // Der Boss traegt das Bild SEINER Stufe. Ist es noch im Zulauf (der
+  // Endlosmodus fordert eine andere Stufe erst beim Spawn an), traegt er
+  // solange das naechstbeste und haengt um, sobald seines eintrifft —
+  // dieselbe Loesung wie beim Gegnerband in v54.
+  function bossTexturSetzen(szene, figur, stufe) {
+    const t = szene.textures,
+      noetig = "boss" + stufe;
+    if (t.exists(noetig)) { figur.setTexture(noetig); return }
+    const ersatz = ["boss5", "boss4", "boss3", "boss2", "boss1"]
+      .slice(Math.max(0, 5 - stufe)).find((k) => t.exists(k))
+      || ["boss1", "boss2", "boss3", "boss4", "boss5"].find((k) => t.exists(k));
+    if (ersatz) figur.setTexture(ersatz);
+    const nach = (k) => {
+      k === noetig && (t.off("addtexture", nach), figur.active && figur.setTexture(noetig))
+    };
+    t.on("addtexture", nach);
+    szene.events.once("shutdown", () => t.off("addtexture", nach))
   }
 
   function bossLeben(stufe, sektor, hpMul, endlos, endlosRunde) {
@@ -62028,7 +62135,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   let oi = Ae;
   class zn extends tt.Physics.Arcade.Image {
     constructor(R, E = 1) {
-      super(R, J / 2, -150, "boss1"), E = bossStufeGedeckelt(R, E), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), this.setTexture(["boss5", "boss4", "boss3", "boss2", "boss1"].slice(Math.max(0, 5 - E)).find((I) => R.textures.exists(I)) || "boss1"), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
+      super(R, J / 2, -150, "boss1"), E = bossStufeGedeckelt(R, E), this.maxHp = 260, this.hp = 260, this.nextFire = 0, this.nextAccent = 0, this.pattern = 0, this.enterDone = !1, this.tier = 1, this.baseTint = 16777215, R.add.existing(this), R.physics.add.existing(this), bossTexturSetzen(R, this, E), this.tier = E, this.maxHp = E >= 3 ? 620 : E >= 2 ? 400 : 160, this.hp = this.maxHp,
       // setScale(.5), weil die Texturen seit v30 in PUFFERgroesse gebacken
       // werden: die Kamera zoomt zweifach, eine 680 Punkte breite Textur
       // steht also 340 Weltpunkte breit im Bild. Vorher trug die Skalierung
@@ -63032,7 +63139,7 @@ dann ausweichen!`, {
         // gemessen werden soll: nimmt man das Vorwaermen heraus, weiss das
         // Werkzeug nicht mehr, welche Arten in diesem Sektor vorkommen —
         // und kann genau die Frage nicht mehr stellen, um die es geht.
-        this.wellenplan = I, this.vorwaermen(I), this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
+        this.wellenplan = I, bossVorratHalten(this, bossStufeGedeckelt(this, R.boss || 1)), this.vorwaermen(I), this.levelEndAt = $s(I), this.pwrEichen(I), this.bossBeamOn = b.bossBeam, this.bossExtraBullets = b.bossExtraBullets, this.bossBeamGap = b.bossBeamGap || 5200, this.stageKills = 0, this.stageHit = !1, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.ult = 0, this.ultReadyShown = !1, this.ultStage = 0, this.killGoal = I.reduce((x, t) => x + (t.kind === "bomber" || t.kind === "elite" ? 1 : t.count), 0), this.killGoal = Math.round(this.killGoal * .7);
         const G = this.add.text(J / 2, rt * .4, `LEVEL ${this.levelNum()}
 ${R.label}`, {
           fontFamily: "sans-serif",
@@ -63982,6 +64089,7 @@ ${R.label}`, {
 
       spawnBoss(R) {
         if (this.boss) return;
+        bossVorratHalten(this, bossStufeGedeckelt(this, R));
         this.stageCleared = !0, this.bossPhase = 1, this.nextBeam = 0, this.decor.getChildren().forEach(l => {
           l.active && l.body.setVelocity(0, 300)
         }), this.ground.getChildren().forEach(l => {
@@ -66461,7 +66569,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_GEGNERBACKEN = gegnerBacken;
     window.__SKF_BOSSLEBEN = bossLeben;
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
-    window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_GEGNERWERTE = _t;
+    window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_BOSSVORRAT = bossVorratHalten, window.__SKF_GEGNERWERTE = _t;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,

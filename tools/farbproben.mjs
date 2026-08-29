@@ -61,6 +61,15 @@ const PROBEN = [
   // Das Nachtragen abschalten: dann zeichnet die Vorschau nur, was beim
   // Betreten schon geladen war — die Lotterie von v52. Verlangt wird, dass
   // das Tor die Unvollstaendigkeit BENENNT, nicht bloss rot wird.
+  // Das sektorweise Halten der Bosstextur wegnehmen: dann liegen wieder
+  // alle vier gleichzeitig im Speicher. Verlangt wird, dass die
+  // Speicher-Tafel das SAGT — sie ist der einzige Ort, an dem so etwas
+  // auffaellt, denn ein Spiel mit zuviel Grafikspeicher laeuft, bis Safari
+  // es ohne Vorwarnung beendet.
+  ['Bosstexturen nicht mehr sektorweise halten', '✗',
+    ['this.wellenplan = I, bossVorratHalten(this, bossStufeGedeckelt(this, R.boss || 1)), this.vorwaermen(I),',
+     'this.wellenplan = I, this.vorwaermen(I),'], true, 'speicher',
+    'ueber der Grenze'],
   ['Gegnerbilder nicht nachtragen (nur zeichnen, was schon da ist)', '✗',
     ['this.textures.on("addtexture", nach);', 'void nach;'], true, 'lage',
     'Gegnerband zeigt'],

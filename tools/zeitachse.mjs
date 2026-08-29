@@ -109,12 +109,36 @@ await seite.waitForTimeout(1200);
 // Deckel aus dem Konstruktor nimmt, liess das Tor gruen: die Funktion war
 // ja noch heil, nur benutzte sie niemand mehr. Eine Pruefung, die den
 // Helfer misst statt den Weg, bezeugt nichts (eiserne Regel 13).
-const echteStufen = await seite.evaluate(() => {
+const echteStufen = await seite.evaluate(async () => {
   const spiel = window.__game.scene.getScene('Game');
   const aus = [];
+  // Fuer den Stufendurchlauf ALLE Bosstexturen halten. Im Spiel haelt
+  // der Sektor nur seine eigene (5,9 MB gespart); hier werden alle
+  // gebraucht, und der Speicher ist nicht das, was hier gemessen wird.
+  try { window.__SKF_BOSSVORRAT && window.__SKF_BOSSVORRAT(spiel, 'alle'); } catch (e) {}
+  for (let i = 0; i < 40; i++) {
+    const t = window.__game.textures;
+    if ([1, 2, 3, 4].every((a) => t.exists('boss' + a))) break;
+    await new Promise((f) => setTimeout(f, 150));
+  }
   for (const st of [1, 2, 3, 4, 5]) {
     if (spiel.boss) { spiel.boss.destroy(); spiel.boss = null; }
     try { spiel.spawnBoss(st); } catch (e) { aus.push({ vorgesehen: st, fehler: e.message }); continue; }
+    // Seit v55 haelt das Spiel nur die Bosstextur des laufenden Sektors im
+    // Speicher (vier gleichzeitig waren 4,0 MB, und je Sektor kommt
+    // hoechstens eine vor). Wer eine andere Stufe anfordert, bekommt sie
+    // nachgeladen — nebenlaeufig, wie jedes Bild. Bis dahin traegt der Boss
+    // das naechstbeste.
+    //
+    // Gewartet wird deshalb, bis er das Bild SEINER Stufe traegt: hoechstens
+    // sechs Sekunden. Das schwaecht die Pruefung nicht — kommt das Bild nie,
+    // steht am Ende dieselbe Ungleichheit da wie vorher, und die Gegenprobe
+    // (Deckel heraus) faellt weiter durch, weil es fuer Stufe 5 gar kein
+    // Bild gibt.
+    for (let i = 0; i < 40 && spiel.boss; i++) {
+      if (spiel.boss.texture.key === 'boss' + spiel.boss.tier) break;
+      await new Promise((f) => setTimeout(f, 150));
+    }
     aus.push({ vorgesehen: st, wirksam: spiel.boss ? spiel.boss.tier : 0, textur: spiel.boss ? spiel.boss.texture.key : '' });
   }
   if (spiel.boss) { spiel.boss.destroy(); spiel.boss = null; }

@@ -91,7 +91,7 @@ await seite.waitForTimeout(1200);
 // Textur mal Ke-Skala waere eine zweite Rechnung — und eine falsche: im
 // Gefecht wird in Anzeigeaufloesung neu gebacken, die Skala steht danach
 // nicht mehr auf dem Wert aus der Tabelle (eiserne Regel 4).
-const ANZEIGE = await seite.evaluate(() => {
+const ANZEIGE = await seite.evaluate(async () => {
   const spiel = window.__game.scene.getScene('Game');
   const aus = {};
   for (const art of Object.keys(window.__SKF_GEGNER || {})) {
@@ -101,10 +101,28 @@ const ANZEIGE = await seite.evaluate(() => {
       if (g) { aus[g.texture.key] = { w: g.displayWidth, h: g.displayHeight }; g.deactivate ? g.deactivate() : g.destroy(); }
     } catch (e) {}
   }
+  // Fuer den Stufendurchlauf ALLE Bosstexturen halten. Im Spiel haelt
+  // der Sektor nur seine eigene (5,9 MB gespart); hier werden alle
+  // gebraucht, und der Speicher ist nicht das, was hier gemessen wird.
+  try { window.__SKF_BOSSVORRAT && window.__SKF_BOSSVORRAT(spiel, 'alle'); } catch (e) {}
+  for (let i = 0; i < 40; i++) {
+    const t = window.__game.textures;
+    if ([1, 2, 3, 4].every((a) => t.exists('boss' + a))) break;
+    await new Promise((f) => setTimeout(f, 150));
+  }
   for (const st of [1, 2, 3, 4, 5]) {
     if (spiel.boss) { spiel.boss.destroy(); spiel.boss = null; }
     try {
       spiel.spawnBoss(st);
+      // Seit v55 haelt das Spiel nur die Bosstextur des laufenden Sektors.
+      // Eine andere Stufe wird nachgeladen — nebenlaeufig, wie jedes Bild;
+      // bis dahin traegt der Boss das naechstbeste. Ohne dieses Warten
+      // standen im Bogen fuenf Mal dasselbe Bild und das Tor meldete
+      // "nur 15 Gegner- und Bosstexturen gefunden".
+      for (let i = 0; i < 40 && spiel.boss; i++) {
+        if (spiel.boss.texture.key === 'boss' + spiel.boss.tier) break;
+        await new Promise((f) => setTimeout(f, 150));
+      }
       if (spiel.boss) aus[spiel.boss.texture.key] = { w: spiel.boss.displayWidth, h: spiel.boss.displayHeight };
     } catch (e) {}
   }
