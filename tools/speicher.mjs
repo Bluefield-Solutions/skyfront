@@ -99,12 +99,22 @@ if (!OHNE_NAHT) {
     await new Promise((f) => setTimeout(f, 1500));
     const spiel = g.scene.getScene('Game');
     const laeuft = () => !!(spiel && spiel.wellenplan);
-    // Die Einweisung geht auf einen Tipp weg — und nach sieben Sekunden von
-    // selbst. Beides wird genommen, und 45 s gewartet: der Laeufer von
-    // GitHub rechnet unter SwiftShader mit rund zwei Bildern je Sekunde.
-    for (let i = 0; i < 90 && !laeuft(); i++) {
-      try { spiel.input.emit('pointerdown'); } catch (e) {}
-      await new Promise((f) => setTimeout(f, 500));
+    // DIE EINWEISUNG WIRD NICHT WEGGETIPPT, SONDERN UEBERGANGEN.
+    //
+    // Das steht seit v45 in tools/vorwaermen.mjs, und ich habe es hier drei
+    // Anlaeufe lang wiederholt statt gelesen: "Sie per Tippen wegzuraeumen
+    // hat drei Anlaeufe gekostet und nie funktioniert — zu frueh getippt
+    // landet der Finger noch im Menue, spaeter erreicht er ihren Handler
+    // nicht." Genau das ergaben hier drei rote Laeufe auf GitHub.
+    //
+    // Also derselbe Weg wie dort: kurz warten, ob der Sektor von selbst
+    // anlaeuft, und sonst startStage() rufen. Das ist derselbe Aufruf, den
+    // die Einweisung am Ende macht — und der Messgegenstand (was liegt im
+    // Speicher?) haengt nicht daran, wer den Sektor gestartet hat.
+    for (let i = 0; i < 20 && !laeuft(); i++) await new Promise((f) => setTimeout(f, 500));
+    if (!laeuft()) {
+      try { spiel.startStage(); } catch (e) { return { ok: false, fehler: 'startStage(): ' + e.message }; }
+      await new Promise((f) => setTimeout(f, 2500));
     }
     if (laeuft())
       return { ok: true, biom: spiel.stageDef && spiel.stageDef.bg, wellen: spiel.wellenplan.length, vorgewaermt: spiel.vorgewaermt };

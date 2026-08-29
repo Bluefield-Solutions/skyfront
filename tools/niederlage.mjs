@@ -145,9 +145,13 @@ const sieg = await seite.evaluate(async () => {
   g.scene.start('Game', { stage: 5, difficulty: 'easy' });
   await new Promise((f) => setTimeout(f, 1500));
   const spiel = g.scene.getScene('Game');
-  for (let i = 0; i < 90 && !spiel.wellenplan; i++) {
-    try { spiel.input.emit('pointerdown'); } catch (e) {}
-    await new Promise((f) => setTimeout(f, 500));
+  // Die Einweisung wird nicht weggetippt, sondern uebergangen — dieselbe
+  // Lehre wie in vorwaermen.mjs und speicher.mjs: getippt hat es nie
+  // funktioniert, gerufen immer.
+  for (let i = 0; i < 20 && !spiel.wellenplan; i++) await new Promise((f) => setTimeout(f, 500));
+  if (!spiel.wellenplan) {
+    try { spiel.startStage(); } catch (e) { return { fehler: 'startStage(): ' + e.message }; }
+    await new Promise((f) => setTimeout(f, 2500));
   }
   if (!spiel.wellenplan) return { fehler: 'Sektor startet nicht' };
   try { spiel.completeLevel(); } catch (e) { return { fehler: 'completeLevel() wirft: ' + e.message }; }
