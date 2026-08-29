@@ -67,17 +67,24 @@ let drin = OHNE_NAHT;
 if (!OHNE_NAHT) {
   const stand = await seite.evaluate(async () => {
     const g = window.__game;
-    // ERST WARTEN, BIS DER STARTVORGANG FERTIG IST.
+    // ERST WARTEN, BIS DER STARTVORGANG WIRKLICH FERTIG IST.
     //
     // Boot laedt zuerst das Noetige, startet dann das Hauptmenue und
-    // schiebt den Rest nach. Wer die Spielszene startet, WAEHREND Boot
-    // noch laeuft, bekommt sie kurz darauf vom nachgereichten Menue
-    // ueberlagert — und der Sektor beginnt nie. Auf dem schnellen Rechner
-    // war Boot vorher fertig und es fiel nicht auf; auf dem Laeufer von
-    // GitHub schlug es fehl: "kommt nicht in einen laufenden Sektor".
-    for (let i = 0; i < 120; i++) {
-      const m = g.scene.getScene('Menu');
-      if (m && m.scene.isActive()) break;
+    // schiebt den Rest in Sechserpaeckchen nach. Wer die Spielszene
+    // startet, WAEHREND Boot noch laeuft, bekommt sie kurz darauf vom
+    // nachgereichten Menue ueberlagert — und der Sektor beginnt nie.
+    //
+    // Erster Anlauf wartete auf das aktive Menue. Das ist zu frueh: das
+    // Menue startet, waehrend der Nachschub noch laeuft. Auf dem schnellen
+    // Rechner reichte es trotzdem, auf dem Laeufer von GitHub nicht — zwei
+    // rote Laeufe mit "kommt nicht in einen laufenden Sektor".
+    //
+    // Gewartet wird jetzt auf `__bootStats.totalMs`. Die Zahl setzt Boot
+    // selbst, wenn das LETZTE Paeckchen durch ist: das einzige ehrliche
+    // Fertig-Signal, das es gibt.
+    for (let i = 0; i < 360; i++) {
+      const b2 = window.__bootStats;
+      if (b2 && b2.totalMs) break;
       await new Promise((f) => setTimeout(f, 250));
     }
     g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
@@ -92,16 +99,31 @@ if (!OHNE_NAHT) {
       try { spiel.input.emit('pointerdown'); } catch (e) {}
       await new Promise((f) => setTimeout(f, 500));
     }
-    return laeuft()
-      ? { ok: true, biom: spiel.stageDef && spiel.stageDef.bg, wellen: spiel.wellenplan.length, vorgewaermt: spiel.vorgewaermt }
-      : { ok: false };
+    if (laeuft())
+      return { ok: true, biom: spiel.stageDef && spiel.stageDef.bg, wellen: spiel.wellenplan.length, vorgewaermt: spiel.vorgewaermt };
+    // Fehlschlag AUSSAGEFAEHIG machen. Zwei rote Laeufe auf GitHub sagten
+    // nur "kommt nicht" — daran laesst sich nichts reparieren, was man
+    // nicht raten muesste. Wer nicht reproduzieren kann, braucht wenigstens
+    // den Zustand.
+    return {
+      ok: false,
+      boot: window.__bootStats ? JSON.stringify(window.__bootStats) : 'keine',
+      szenen: g.scene.scenes.filter((z) => z.scene.isActive()).map((z) => z.scene.key).join(','),
+      stageDef: !!(spiel && spiel.stageDef),
+      einweisung: !!(spiel && spiel.children.list.some((o) => o.type === 'Text' && /SO SPIELST DU|ANTIPPEN/.test(String(o.text || '')))),
+    };
   });
   drin = stand.ok;
   if (drin) console.log(`  Sektor laeuft: ${stand.wellen} Wellen · ${stand.vorgewaermt} Gegnerart(en) vorgewaermt · Biom ${stand.biom}`);
 }
 // Bleibt ein Befund, aus demselben Grund wie in der Feuerkraft-Tafel:
 // "gruen, aber man kommt nicht ins Spiel" darf nie leise durchgehen.
-if (!drin) { console.error('✗ Speicher-Tafel: kommt nicht in einen laufenden Sektor.'); await browser.close(); process.exit(1); }
+if (!drin) {
+  console.error('✗ Speicher-Tafel: kommt nicht in einen laufenden Sektor.');
+  if (!OHNE_NAHT) console.error(`  Zustand: Boot ${stand.boot} · aktive Szenen ${stand.szenen}`
+    + ` · stageDef ${stand.stageDef} · Einweisung sichtbar ${stand.einweisung}`);
+  await browser.close(); process.exit(1);
+}
 if (!OHNE_NAHT) await seite.waitForTimeout(3500);
 
 // Ist der Bestand ueberhaupt zur Ruhe gekommen?
