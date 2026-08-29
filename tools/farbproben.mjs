@@ -53,6 +53,14 @@ const SICHER = 'src/app.js.probe';
 // Fuer die Farbtor-Proben leistet das die Pruefungskennung (A, B, H, …);
 // die Tafeln mit '✗' brauchen dieses Feld.
 const PROBEN = [
+  // Der Massstab der Gegnerbilder zurueck auf die Klassentabelle, an der
+  // v52 gescheitert ist. Die Lanzenwache wird damit wieder 162 x 401
+  // Weltpunkte gross und legt sich ueber das Missionsziel — genau das, was
+  // der Nutzer fotografiert hat. Verlangt wird, dass das Ueberlappungstor
+  // es sagt, nicht nur dass es rot wird.
+  ['Gegnerbilder wieder nach Klasse skalieren (statt in den Kasten)', '✗',
+    ['let pa = Math.min(kb / qw, kh / qh, 1);', 'let pa = ({S:.42,M:.56,L:.68,XL:.9}[I.cls] || .55) / an;'], true, 'lage',
+    'verdeckt'],
   ['alte Gegnerfarbe zurueck (eb_bolt cyan)', 'B',
     ['zs(R, E, b, GEFAHR)', 'zs(R, E, b, "#37e0ff")'], false],
   ['Aufsammler ins Gefahrenband', 'B',
@@ -381,6 +389,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'dichte' ? ['tools/geschossdichte.mjs']
     : tor === 'klang' ? ['tools/klang.mjs']
     : tor === 'musik' ? ['tools/musik.mjs']
+    : tor === 'lage' ? ['tools/ueberlappung.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -431,7 +440,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Niederlage', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -491,6 +500,16 @@ const MODUSPROBEN = [{
   mussEnthalten: ['Das ist kein Menue, das ist ein Bild', 'Nicht gemessen'],
   darfNichtEnthalten: ['Median Streuung'],
   beweist: 'lauter gleiche Schirme werden als „ein Bild" erkannt, nicht als Messung',
+}, {
+  // Ohne Anzeigeliste gibt es keine Rechtecke — und dann darf das
+  // Ueberlappungstor weder gruen noch rot sagen.
+  name: 'Überlappung ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/ueberlappung.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'Szene nicht erreichbar'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {
   // DIE PROBE ZUM AUSLIEFERUNGSTOR.
   //

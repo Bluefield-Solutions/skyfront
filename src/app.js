@@ -54412,7 +54412,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v52",
+    SKF_VERSION = "v53",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -59629,9 +59629,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           color: x ? "#bfefff" : G ? "#9fe8c6" : "#cfe3ff",
           fontStyle: "bold"
         }).setOrigin(.5), G) {
-        const p = he(this, E + 34, b - 30, "ico_star", 16, 4);
+        // E + 40 statt E + 34: bei 34 ragte der Stern drei Punkte in das
+        // Flugzeugbild (das bis E + 29 reicht). Drei Punkte sind wenig —
+        // und genau deshalb sieht man sie erst auf dem Telefon.
+        const p = he(this, E + 40, b - 30, "ico_star", 16, 4);
         p && p.setTint(3791242)
-      } else v || this.add.text(E + 34, b - 30, "🔒", {
+      } else v || this.add.text(E + 40, b - 30, "🔒", {
         fontSize: "13px"
       }).setOrigin(.5);
       l.on("pointerdown", () => {
@@ -59763,7 +59766,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontSize: "13px",
         color: "#9fe0c2",
         fontStyle: "bold"
-      }), this.add.text(112, E + 31, x, {
+      }), this.add.text(112, E + 38, x, {
         fontFamily: "sans-serif",
         fontSize: b.max > 6 ? "13px" : "16px",
         color: "#9fe0c2"
@@ -60293,13 +60296,18 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
             width: 216
           }
         });
+        // Der Stand steht RECHTS NEBEN dem Namen, nicht unter der
+        // Beschreibung. Die Karte ist 74 Punkte hoch; eine zweizeilige
+        // Beschreibung reicht bis E+28, und die Zeile darunter begann bei
+        // E+22 — sechs Punkte uebereinander. Nach unten ist kein Platz
+        // mehr, nach rechts schon.
         const l = I ? "✓ Aktiv" : v ? "wählen" : `🔒 ${G.unlockCost} G`;
-        this.add.text(R - 108, E + 22, l, {
+        this.add.text(R + 108, E - 24, l, {
           fontFamily: "sans-serif",
           fontSize: "13px",
           color: I ? "#9fe0c2" : v ? "#cfe3ff" : "#e8c07a",
           fontStyle: "bold"
-        }), t.on("pointerdown", () => {
+        }).setOrigin(1, 0), t.on("pointerdown", () => {
           v ? (q.setWeapon(b), this.scene.restart()) : q.spendGold(G.unlockCost) && (q.unlockWeapon(b), q.setWeapon(b), this.scene.restart())
         })
       }
@@ -60521,12 +60529,12 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         r = v ? p ? 1854004 : 1325402 : 1581614;
       p && this.add.circle(R, E, 30).setStrokeStyle(9, 16765498, .14);
       const n = this.add.circle(R, E, 30, r).setStrokeStyle(3, a);
-      if (this.add.text(R, E - 4, v ? String(I) : "🔒", {
+      if (this.add.text(R, E + 1, v ? String(I) : "🔒", {
           fontFamily: "sans-serif",
           fontSize: v ? "22px" : "18px",
           color: v ? "#ffffff" : "#6f8296",
           fontStyle: "bold"
-        }).setOrigin(.5), v && this.add.text(R, E - 20, `${"★".repeat(t)}${"☆".repeat(3-t)}`, {
+        }).setOrigin(.5), v && this.add.text(R, E - 22, `${"★".repeat(t)}${"☆".repeat(3-t)}`, {
           fontFamily: "sans-serif",
           fontSize: "13px",
           color: "#ffd23a"
@@ -60670,7 +60678,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       const o = s.slice(0, 6),
         i = Math.min(88, (J - 60) / o.length),
         h = J / 2 - (o.length - 1) * i / 2;
-      o.forEach((y, S) => this.enemyIcon(h + S * i, 368, y)), this.add.text(J / 2, 428, "— PRÄMIEN —", {
+      o.forEach((y, S) => this.enemyIcon(h + S * i, 362, y, i - 6)), this.add.text(J / 2, 428, "— PRÄMIEN —", {
         fontFamily: "sans-serif",
         fontSize: "13px",
         color: "#e8b45a",
@@ -60702,7 +60710,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         fontFamily: "sans-serif",
         fontSize: "13px",
         color: "#cfe3ff"
-      }), this.miniButton(J / 2 - 96, 628, 176, 36, "✈ Flugzeug", 2775686, () => this.scene.start("Hangar")), this.miniButton(J / 2 + 96, 628, 176, 36, "⚙ Ausrüstung", 6961798, () => this.scene.start("Loadout")), Tt(this, J / 2, rt - 106, 320, 68, "▶  SPIELEN", {
+      }), this.miniButton(J / 2 - 96, 664, 176, 36, "✈ Flugzeug", 2775686, () => this.scene.start("Hangar")), this.miniButton(J / 2 + 96, 664, 176, 36, "⚙ Ausrüstung", 6961798, () => this.scene.start("Loadout")), Tt(this, J / 2, rt - 106, 320, 68, "▶  SPIELEN", {
         fontSize: 22,
         fill: 3046706,
         radius: 16,
@@ -60762,17 +60770,47 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         })
       })
     }
-    enemyIcon(R, E, b) {
-      var x;
+    // Ein Gegnerbild in seinen KASTEN rechnen, nicht nach Klasse skalieren.
+    //
+    // Bis v52 stand hier eine Tabelle S .42 / M .56 / L .68 / XL .9 — ein
+    // Faktor auf das QUELLBILD. Das geht so lange gut, wie alle Quellbilder
+    // aehnlich gross sind. Die Lanzenwache ist 180 x 446 Punkte gross und
+    // wurde damit 162 x 401 Weltpunkte breit gezeichnet, in einer Spalte,
+    // die 88 breit ist: sie lag ueber dem Missionsziel, ueber der
+    // Ueberschrift, ueber zwei Nachbarn und ueber den Praemien. Genau das
+    // hat der Nutzer fotografiert.
+    //
+    // Jetzt kommt der Massstab aus zwei Zahlen, die das Bild selbst
+    // mitbringt: seiner Quellgroesse und seinem Anzeigemassstab im Gefecht
+    // (scale * .722). Gezeigt wird der Gegner so gross, wie er im Gefecht
+    // erscheint — hoechstens aber so gross, dass er in den Kasten passt.
+    // Damit stimmen die Groessenverhaeltnisse untereinander, und kein
+    // kuenftiges Bild kann den Kasten sprengen, wie gross seine Quelle
+    // auch sei.
+    enemyIcon(R, E, b, kastenB) {
       const I = Ke[b],
-        G = I.tex || "e_" + b,
-        v = {
-          S: .42,
-          M: .56,
-          L: .68,
-          XL: .9
-        };
-      this.textures.exists(G) && this.add.image(R, E - 6, G).setScale((x = v[I.cls]) != null ? x : .55).setTint(I.tint), this.add.text(R, E + 22, I.role, {
+        G = I.tex || "e_" + b;
+      if (this.textures.exists(G)) {
+        const O = this.textures.get(G),
+          w = O.getSourceImage ? O.getSourceImage() : null;
+        if (w && w.width) {
+          const kb = kastenB || 82,
+            kh = 52,
+            an = (I.scale || .5) * .722,
+            qw = w.width * an,
+            qh = w.height * an;
+          // p ist der Faktor auf die GEFECHTSGROESSE, nicht auf die Quelle.
+          // Erster Entwurf mischte beides und machte aus dem Spaeher einen
+          // Riesen: eine Zahl ohne ihre Bezugsgroesse ist keine Zahl.
+          let pa = Math.min(kb / qw, kh / qh, 1);
+          // Ein Spaeher ist im Gefecht 14 Punkte breit. So klein waere er
+          // in der Vorschau kein Bild mehr, sondern ein Fleck. Angehoben
+          // wird bis 34 Punkte — aber nie ueber den Kasten hinaus.
+          if (Math.max(qw, qh) * pa < 34) pa = Math.min(kb / qw, kh / qh, 34 / Math.max(qw, qh));
+          this.add.image(R, E - 4, G).setScale(an * pa).setTint(I.tint)
+        }
+      }
+      this.add.text(R, E + 22, I.role, {
         fontFamily: "sans-serif",
         fontSize: "13px",
         color: "#cfe3ff",
@@ -60836,21 +60874,29 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         E = J / 2,
         b = 428,
         I = this.add.graphics().setDepth(1);
-      I.lineStyle(2, 2772074, .6).strokeCircle(E, b, 150), I.lineStyle(1, 1848400, .5).strokeCircle(E, b, 118), I.fillStyle(661542, .5).fillCircle(E, b, 148);
+      // Der Schauraum war zu gross fuer den Platz, den er hat.
+      //
+      // Bei Massstab 2,4 reichte das Flugzeug von y 241 bis 615. Der Name
+      // stand bei 550 und der Knopf "Werte ansehen" bei 578 — beide MITTEN
+      // AUF dem Bild, und die vier Panzerungskarten schnitten unten neun
+      // Punkte ab. Zwischen der oberen Kartenreihe (bis 305) und der
+      // Panzerung (ab 606) sind 301 Punkte; davon gehen Name und Knopf ab.
+      // Bei 1,45 bleibt das Bild 226 Punkte hoch, und darunter ist Platz.
+      I.lineStyle(2, 2772074, .6).strokeCircle(E, b, 120), I.lineStyle(1, 1848400, .5).strokeCircle(E, b, 95), I.fillStyle(661542, .5).fillCircle(E, b, 118);
       for (let i = 0; i < 12; i++) {
         const h = i / 12 * Math.PI * 2;
-        I.lineStyle(1, 1848400, .4).lineBetween(E + Math.cos(h) * 120, b + Math.sin(h) * 120, E + Math.cos(h) * 150, b + Math.sin(h) * 150)
+        I.lineStyle(1, 1848400, .4).lineBetween(E + Math.cos(h) * 96, b + Math.sin(h) * 96, E + Math.cos(h) * 120, b + Math.sin(h) * 120)
       }
-      this.add.image(E, b, kt(q.plane())).setScale(2.4).setTint(R.tint).setDepth(2).setInteractive({
+      this.add.image(E, b, kt(q.plane())).setScale(1.45).setTint(R.tint).setDepth(2).setInteractive({
         useHandCursor: !0
       }).on("pointerdown", () => {
         gt().resume(), this.showStats()
-      }), this.add.text(E, b + 122, R.name, {
+      }), this.add.text(E, b + 126, R.name, {
         fontFamily: "sans-serif",
         fontSize: "17px",
         color: "#eaf6ff",
         fontStyle: "bold"
-      }).setOrigin(.5).setDepth(3), Tt(this, E, b + 150, 190, 34, "ℹ  Werte ansehen", {
+      }).setOrigin(.5).setDepth(3), Tt(this, E, b + 154, 190, 34, "ℹ  Werte ansehen", {
         fontSize: 14,
         fill: 2375772,
         radius: 12,

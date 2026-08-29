@@ -32,6 +32,7 @@ Voraussetzung: Node.js (v18+). Keine npm-Installation nötig.
 | **Paket mit Qualitäts-Gate** | `node build-all.mjs --zip --boot` → Zip nur, wenn jede Variante fehlerfrei startet (braucht Playwright) |
 | **Web-App bauen** | `npm run pages` → `dist/pages/` (Bilder und Musik als Dateien, Manifest, Symbol, Startbilder, Dienst-Arbeiter) |
 | **Web-App nachweisen** | `npm run auslieferung` — baut `dist/pages/`, prüft es und startet es über http. **18,7 s gemessen**, läuft in der Torkette mit |
+| **Deckt etwas etwas zu?** | `npm run ueberlappung` — acht Menüschirme bei 390 × 844, alle Rechtecke paarweise geschnitten. Mit `--bild` zusätzlich Aufnahmen |
 | **Stufe 1 — bei jeder Änderung** | `npm run schnell` — Bau, Version, Boot aller elf Varianten, dann Farbtor, Formentor, Untergrund und Rhythmus **parallel**. **48 s gemessen** |
 | **Stufe 2 — vor dem Push** | `npm run check` — alle Tore **ohne** das Bildtor, `dist/check-report.md`. **127 s gemessen** (v52: + 18,7 s für die Auslieferung) |
 | **Stufe 3 — CI / vor der Lieferung** | `npm run torkette` — alles, inklusive Bildtor, und **streng**: „nicht gemessen" zählt als Fehlschlag. **291–293 s** über drei Läufe |
@@ -195,6 +196,34 @@ Zwei Workflows:
 
 Voraussetzung: die Projektdateien liegen im Repo-Wurzelverzeichnis (sonst
 `working-directory` in der YAML anpassen).
+
+### Wo etwas liegt (`npm run ueberlappung`)
+
+Vierzehn Tore messen **Farbe**, **Silhouette** und **Kanten** — alles an
+einzelnen Bildern. **Wo etwas liegt, hat bis v52 niemand gemessen**, und
+gefunden hat es der Nutzer: ein Gegnerbild von 162 × 401 Weltpunkten quer
+über der Level-Vorschau, in einer Spalte, die 88 breit ist.
+
+Das Tor schneidet die Rechtecke aller Texte, Bilder und Schaltflächen von
+acht Menüschirmen. Seine Regel kommt aus der **Zeichenreihenfolge**, nicht
+aus einer Ausnahmeliste: ein Wort, das absichtlich auf ein Bild gesetzt
+wird, wird nach dem Bild gezeichnet — ein Bild, das ein Wort zudeckt,
+danach.
+
+- **A** Ein Bild darf nichts verdecken, was vor ihm gezeichnet wurde.
+- **B** Zwei Schaltflächen dürfen sich nicht überlappen, und eine
+  Schaltfläche darf nicht auf einem Bild liegen.
+- **C** Zwei Beschriftungen dürfen sich nicht schneiden.
+
+Dazu ein zweiter Durchgang für die **DOM-Knöpfe** (Modifikator), die
+außerhalb von Phaser liegen und einer Messung auf der Leinwand entgingen:
+bei vier Bildschirmgrößen darf keiner auf der Leinwand landen, solange einer
+der beiden schwarzen Balken 36 Punkte hergibt.
+
+Gemessen wird über **http**, nicht `file://` — dort wirft `localStorage`,
+und dann lässt sich keine Ersteinweisung als gesehen merken: der Dialog
+kommt nach jedem Tipp zurück, und gemessen würde ein Schirm, den so niemand
+sieht.
 
 ### Was die Torkette NICHT prüft
 

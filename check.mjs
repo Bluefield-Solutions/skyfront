@@ -166,6 +166,12 @@ const TORE = [
   // Fassungen, drei Fehlermeldungen per E-Mail, kein rotes Tor.
   //
   // Ein gruener Lauf, der eine rote Lieferung nicht ausschliesst, ist keiner.
+  // Deckt im Menue etwas etwas anderes zu? Vierzehn Tore haben Farbe,
+  // Silhouette und Kanten gemessen — wo etwas LIEGT, hat nie jemand
+  // gefragt. Gefunden hat es der Nutzer, mit einem Bildschirmfoto: ein
+  // Gegnerbild von 162 x 401 Weltpunkten quer ueber der Level-Vorschau,
+  // in einer Spalte, die 88 breit ist.
+  { schluessel: 'ueberlappung', lauf: 'Überlappung (8 Menüschirme)', zeile: 'Überlappung (8 Menüs)', datei: 'tools/ueberlappung.mjs' },
   { schluessel: 'auslieferung', lauf: 'Auslieferung (Pages-Bau, im Browser)', zeile: 'Auslieferung (Web-App)', datei: 'tools/auslieferung.mjs' },
 ];
 

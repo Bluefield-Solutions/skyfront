@@ -67,8 +67,19 @@
       + 'opacity:0;transition:opacity .25s;pointer-events:none';
     document.body.appendChild(toast);
     setzeLage();
-    addEventListener('resize', setzeLage);
-    addEventListener('orientationchange', function () { setTimeout(setzeLage, 300); });
+    // Beim Drehen und beim Groessenwechsel rechnet Phaser die Leinwand erst
+    // NACH unserem Zuhoerer neu. Wer nur einmal misst, misst die alte Lage:
+    // gemessen bei 390x800 legte der Knopf sich danach auf die Leinwand,
+    // obwohl der Balken 80 Punkte hatte. Deshalb dreimal — und zusaetzlich
+    // ein Beobachter, der genau dann meldet, wenn die Leinwand sich wirklich
+    // geaendert hat.
+    var nachtragen = function () { setzeLage(); setTimeout(setzeLage, 80); setTimeout(setzeLage, 320); };
+    addEventListener('resize', nachtragen);
+    addEventListener('orientationchange', function () { setTimeout(nachtragen, 300); });
+    try {
+      var lw0 = document.querySelector('canvas');
+      if (lw0 && window.ResizeObserver) new ResizeObserver(setzeLage).observe(lw0);
+    } catch (e) {}
     updateBtn();
   }
 
@@ -77,26 +88,60 @@
   // "Dunkelheit: Normal" belegte y 768..796, "EMP" und "STURM" standen bei
   // y 767..779. Genau uebereinander.
   //
-  // Das Spiel ist 16:9 hoch, das Telefon ist schmaler. Die Leinwand wird
-  // deshalb auf die Breite eingepasst, und oben bleibt ein schwarzer Balken
-  // ungenutzt: bei 390x844 sind das 113 Bildpunkte. Dort ist Platz fuer
-  // beide Knoepfe, ohne irgendetwas zu verdecken.
+  // Der zweite Anlauf schob sie in den schwarzen Balken UEBER der Leinwand
+  // und fragte dafuer eine einzige Zahl ab: ist dort mindestens 72 Punkte
+  // Platz? Auf dem Telefon des Nutzers war er es nicht — dort liegt die
+  // Statusleiste im oberen Balken, und uebrig bleiben vier Punkte. Also
+  // fiel es auf den alten Platz zurueck, und der Modus-Knopf lag wieder
+  // ueber "‹ Weltkarte". Genau das steht auf dem Bildschirmfoto.
   //
-  // Bleibt der Balken zu schmal — bei einem 16:9-Geraet gibt es keinen —,
-  // gehen sie zurueck nach unten. Dort verdecken sie zwar wieder etwas,
-  // aber ein Knopf ausserhalb des Bildschirms waere schlimmer.
+  // Der Fehler war nicht die Zahl 72, sondern dass nur EIN Balken gefragt
+  // wurde. Es gibt zwei: ueber und unter der Leinwand. Und beide sind um
+  // ihre Systemraender (Statusleiste, Home-Anzeige) kleiner, als sie
+  // aussehen — deshalb werden die auch gemessen und nicht geraten.
+  //
+  // Genommen wird der GROESSERE nutzbare Balken. Bleibt keiner gross genug
+  // — ein Geraet mit fast genau 9:16 —, gehen sie zurueck ueber die
+  // Leinwand: ein Knopf ausserhalb des Bildschirms waere schlimmer.
+  function raender() {
+    var p = document.createElement('div');
+    p.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;'
+      + 'padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+    document.body.appendChild(p);
+    var cs = getComputedStyle(p);
+    var o = parseFloat(cs.paddingTop) || 0, u = parseFloat(cs.paddingBottom) || 0;
+    p.remove();
+    return { oben: o, unten: u };
+  }
+
+  var H1 = 36, H2 = 32;   // Hoehe der beiden Knoepfe samt Luft
   function setzeLage() {
     if (!btn || !btn2) return;
     var lw = document.querySelector('canvas');
-    var platz = lw ? lw.getBoundingClientRect().top : 0;
-    var obenGenug = platz >= 72;
-    if (obenGenug) {
-      btn.style.bottom = 'auto';  btn.style.top = (platz - 36) + 'px';
-      btn2.style.bottom = 'auto'; btn2.style.top = (platz - 68) + 'px';
-    } else {
+    if (!lw) return;
+    var k = lw.getBoundingClientRect();
+    var sicht = window.innerHeight || document.documentElement.clientHeight;
+    var s = raender();
+    var oben = Math.max(0, k.top - s.oben);
+    var unten = Math.max(0, sicht - k.bottom - s.unten);
+    var untenBesser = unten >= oben;
+    var platz = untenBesser ? unten : oben;
+    if (platz < H1) {
       btn.style.top = 'auto';  btn.style.bottom = 'calc(10px + env(safe-area-inset-bottom))';
       btn2.style.top = 'auto'; btn2.style.bottom = 'calc(48px + env(safe-area-inset-bottom))';
+      return;
     }
+    if (untenBesser) {
+      btn.style.top = 'auto';  btn.style.bottom = 'calc(2px + env(safe-area-inset-bottom))';
+      btn2.style.top = 'auto'; btn2.style.bottom = 'calc(' + (2 + H1) + 'px + env(safe-area-inset-bottom))';
+    } else {
+      btn.style.bottom = 'auto';  btn.style.top = (s.oben + oben - H1) + 'px';
+      btn2.style.bottom = 'auto'; btn2.style.top = (s.oben + oben - H1 - H2) + 'px';
+    }
+    // Passt nur EINER in den Balken, bleibt der zweite weg. Er traegt eine
+    // Feineinstellung, die es auch auf der Taste M gibt — der Modus-Knopf
+    // ist der, ohne den man nicht auskommt.
+    btn2.dataset.balken = platz >= H1 + H2 ? 'passt' : 'eng';
   }
   function updateBtn() { if (btn) btn.textContent = 'Modus: ' + MODES[mode]; }
   function updateBtn2(eff) { if (btn2 && SEC[eff]) btn2.textContent = SEC[eff].lab + ': ' + SEC[eff].nm[lvl[eff]]; }
@@ -331,7 +376,9 @@
       }
       activeEff = curEff;
       if (btn2) {
-        if (SEC[curEff]) { btn2.style.display = 'block'; updateBtn2(curEff); }
+        // Nur zeigen, wenn er auch in den Balken passt — sonst laege er
+        // wieder auf der Leinwand, und genau davon kommen wir gerade weg.
+        if (SEC[curEff] && btn2.dataset.balken !== 'eng') { btn2.style.display = 'block'; updateBtn2(curEff); }
         else btn2.style.display = 'none';
       }
     } catch (e) { /* nie das Spiel stoeren */ }

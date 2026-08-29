@@ -49,7 +49,8 @@
     "musikeinbau": "node tools/musikeinbau.mjs",
     "musikbacken": "python3 tools/musikbacken.py",
     "musikschau": "sh tools/musikschau.sh",
-    "auslieferung": "node tools/auslieferung.mjs"
+    "auslieferung": "node tools/auslieferung.mjs",
+    "ueberlappung": "node tools/ueberlappung.mjs"
   },
   "engines": {
     "node": ">=18"
