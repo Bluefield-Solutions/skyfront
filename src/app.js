@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v59",
+    SKF_VERSION = "v60",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -61460,12 +61460,28 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       x = 0,
       t = !1;
     for (const s of R) E += $t(s, "dmg"), b += $t(s, "crit"), I += $t(s, "critMult"), G += $t(s, "pierce");
+    // DER TIER-BONUS ZAEHLT DEN GANZEN BESTAND, nicht nur die angelegten
+    // Stuecke: er zuendet ueber die Seltenheiten der ANGELEGTEN (`p`),
+    // rechnet dann aber jedes besessene Stueck dieser Seltenheit mit
+    // (`T`). Das ist gewollt — eine Sammlungsmechanik —, und bis v59 stand
+    // es nirgends auf dem Schirm. Gemessen mit gleichen epischen Modulen
+    // (Krit 20): 1 angelegt → 21 %, 1 angelegt und 4 im Lager → 25 %,
+    // 0 angelegt und 5 im Lager → 0 %.
+    // `tierStueck` traegt die Zahl mit, damit der Modul-Schirm sie NENNEN
+    // kann, ohne sie ein zweites Mal auszurechnen (Regel 17).
     const l = [],
+      tierStueck = [],
       p = new Set(R.map(s => s.rarity));
     for (const s of p) {
       l.push(s);
-      const o = Mn[s];
-      for (const i of T.filter(h => h.rarity === s)) E += $t(i, "dmg") * o, b += $t(i, "crit") * o, I += $t(i, "critMult") * o, G += $t(i, "pierce") * o
+      const o = Mn[s],
+        alle = T.filter(h => h.rarity === s);
+      tierStueck.push({
+        rarity: s,
+        besessen: alle.length,
+        angelegt: R.filter(h => h.rarity === s).length
+      });
+      for (const i of alle) E += $t(i, "dmg") * o, b += $t(i, "crit") * o, I += $t(i, "critMult") * o, G += $t(i, "pierce") * o
     }
     const a = {
       brand: 0,
@@ -61493,6 +61509,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       startShield: t,
       fullSet: e,
       tiers: yn.filter(s => l.includes(s)),
+      tierStueck,
       sets: r
     }
   }
@@ -61652,7 +61669,10 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           }).setOrigin(.5)
         }
         if (R.fullSet || R.tiers.length) {
-          const E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set offen"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>qt[l].name).join(", "):"noch kein Tier-Bonus"}`;
+          // Die Stueckzahl gehoert dazu: sie ist der Hebel des Bonus, und
+          // dass auch das Lager mitzaehlt, war bisher nirgends zu sehen.
+          const v = new Map((R.tierStueck || []).map(l => [l.rarity, l.besessen])),
+            E = `${R.fullSet?"★ Komplett-Set aktiv":"Komplett-Set offen"}  ·  ${R.tiers.length?"Tier-Bonus: "+R.tiers.map(l=>`${qt[l].name} ×${v.get(l)||0}`).join(", "):"noch kein Tier-Bonus"}`;
           this.add.text(J / 2, 131, E, {
             fontFamily: "sans-serif",
             fontSize: "13px",
@@ -61826,7 +61846,11 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         }), f(G + 92, v + 86, 168, 44, "Zerlegen", 8010298, () => {
           const u = Wt.dismantle(R.id);
           q.addGold(u), this.scene.restart()
-        }), I(this.add.text(G, v + 150, "✕  Schließen", {
+        }), I(this.add.text(G, v + 122, "Tier-Bonus: auch Stücke im Lager zählen mit.", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#9fd0ee"
+        }).setOrigin(.5).setDepth(52)), I(this.add.text(G, v + 150, "✕  Schließen", {
           fontFamily: "sans-serif",
           fontSize: "14px",
           color: "#9fd0ee",

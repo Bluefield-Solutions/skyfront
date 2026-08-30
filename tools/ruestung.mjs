@@ -429,11 +429,56 @@ console.log('\n  H  Module');
     if (!(eins.crit > ohne.crit)) M.befund(`Modul: angelegt ${(eins.crit*100).toFixed(1)} %, ohne Modul ${(ohne.crit*100).toFixed(1)} % Kritchance. Das angelegte Modul wirkt nicht.`);
     // Und der, der es auch ist: was nur herumliegt, ist nicht angelegt.
     if (nur.crit > ohne.crit) M.befund(`Modul: fuenf NICHT angelegte Module heben die Kritchance auf ${(nur.crit*100).toFixed(1)} %. Was im Sack liegt, darf nicht wirken.`);
-    // Der Sack-Zuschlag ist KEIN Befund, sondern eine Frage an den Bau:
-    // er steht nirgends auf dem Schirm. Gemeldet wird die Zahl.
-    if (sack.crit !== eins.crit)
-      console.log(`     (i) vier NICHT angelegte Module heben die Kritchance von ${(eins.crit*100).toFixed(1)} auf ${(sack.crit*100).toFixed(1)} %.`
-        + ` Das ist der Tier-Bonus, und er zaehlt den ganzen Besitz. Auf dem Modul-Schirm steht davon nichts.`);
+    // DER TIER-BONUS ZAEHLT DEN GANZEN BESTAND — vom Nutzer bestaetigt
+    // („zählt mit"), also eine Zusicherung und keine Beobachtung mehr.
+    // Wer sie entfernt, faellt hier auf. Bis v59 stand sie hier nur als
+    // Hinweis; ein Hinweis schuetzt nichts.
+    console.log(`     Tier-Bonus: vier Stuecke im Lager heben die Kritchance von ${(eins.crit*100).toFixed(1)} auf ${(sack.crit*100).toFixed(1)} %.`);
+    if (!(sack.crit > eins.crit))
+      M.befund(`Tier-Bonus: vier Module im Lager aendern die Kritchance nicht (${(eins.crit*100).toFixed(1)} % gegen ${(sack.crit*100).toFixed(1)} %). Der Bestand soll mitzaehlen.`);
+  }
+}
+
+// ---- I  Steht die Sammelregel auf dem Modul-Schirm? -------------------
+//
+// Der Tier-Bonus zaehlt den ganzen Bestand. Das ist gewollt — aber bis v59
+// stand es nirgends, und damit war das Zerlegen eine Falle: es bringt
+// Gold und nimmt still Kraft. Ein Bonus, den niemand kennt, ist keiner.
+console.log('\n  I  Steht die Sammelregel auf dem Modul-Schirm?');
+{
+  const r = await seite.evaluate(async () => {
+    const g = window.__game;
+    if (!g) return { fehler: 'window.__game fehlt' };
+    try {
+      localStorage.setItem('gear_inv', JSON.stringify([
+        { id: 1, eq: 0, rarity: 'epic', type: 'weapon', set: 'brand', lvl: 0, stats: { crit: 20 } },
+        { id: 2, eq: -1, rarity: 'epic', type: 'hull', set: 'brand', lvl: 0, stats: { crit: 20 } },
+        { id: 3, eq: -1, rarity: 'epic', type: 'core', set: 'brand', lvl: 0, stats: { crit: 20 } },
+      ]));
+    } catch (e) { return { fehler: 'localStorage nicht schreibbar' } }
+    (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+    g.scene.start('Gear');
+    for (let i = 0; i < 40; i++) {
+      await new Promise((f) => setTimeout(f, 250));
+      const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Gear' && s.scene.isActive());
+      if (!sz) continue;
+      const flach = [];
+      const geh = (arr) => { for (const o of arr) { flach.push(o); if (o.list) geh(o.list) } };
+      geh(sz.children.list);
+      const texte = flach.filter((o) => o.type === 'Text').map((o) => String(o.text || ''));
+      if (!texte.some((t) => /Tier-Bonus/.test(t))) continue;
+      return { texte: texte.filter((t) => /Tier-Bonus|Komplett-Set/.test(t)) };
+    }
+    return { fehler: 'Modul-Schirm nicht erreichbar' };
+  });
+  if (r.fehler) M.ungemessen(`Modul-Schirm: ${r.fehler}`);
+  else {
+    gemessen++;
+    for (const t of r.texte) console.log(`     ${JSON.stringify(t)}`);
+    const alles = r.texte.join(' ');
+    // Drei epische Stuecke besessen, eines angelegt — der Schirm muss die
+    // DREI nennen, nicht die eine. Sonst sagt er nicht, was zaehlt.
+    if (!/×3/.test(alles)) M.befund(`Modul-Schirm: der Tier-Bonus nennt die Stueckzahl im Bestand nicht (drei epische besessen, eines angelegt): ${JSON.stringify(alles)}`);
   }
 }
 

@@ -113,6 +113,14 @@ const PROBEN = [
   ['Kauf der Hauptwaffe merkt sich die Wahl nicht', '✗',
     ['      setWeapon(T) {\n        vt("weapon", T)\n      },',
      '      setWeapon(T) {\n        void T\n      },'], true, 'ruestung', 'im Spielstand'],
+  // Der Tier-Bonus zaehlt nur noch die ANGELEGTEN Stuecke. Das ist die
+  // naheliegendste „Aufraeumung" an dieser Stelle — und sie wuerde eine
+  // vom Nutzer bestaetigte Sammlungsmechanik still abschaffen. Verlangt
+  // wird, dass das Tor genau das sagt.
+  ['Tier-Bonus zaehlt den Bestand nicht mehr', '✗',
+    ['      for (const i of alle) E += $t(i, "dmg") * o, b += $t(i, "crit") * o, I += $t(i, "critMult") * o, G += $t(i, "pierce") * o',
+     '      for (const i of R.filter(h => h.rarity === s)) E += $t(i, "dmg") * o, b += $t(i, "crit") * o, I += $t(i, "critMult") * o, G += $t(i, "pierce") * o'],
+    true, 'ruestung', 'Bestand soll mitzaehlen'],
   // Angelegte Module wirken nicht mehr: die haeufigste Art, eine
   // Ausruestung still zu verlieren — sie ist da, sie steht auf dem
   // Schirm, und sie tut nichts.

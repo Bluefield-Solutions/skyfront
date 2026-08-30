@@ -477,14 +477,15 @@ Sterne, ueber alle Flugzeuge) und Flugzeug (Gruen, Erfahrung, je Flugzeug)
 in zwei gleich gebaute Bloecke; die Feuerkraft ist eine Leiter aus zehn
 Kammern mit der Wirkung daneben (`5 BAHNEN`, `STRAHL 32`).
 
-**Offen — eine Frage an den Bau, nicht ein Befund (v59):** der
-Tier-Bonus der Module zaehlt den GANZEN BESITZ, nicht die angelegten
-Stuecke. Gemessen mit gleichen epischen Modulen (Krit 20): 1 angelegt →
-21 %, 1 angelegt und 4 im Sack → 25 %, 0 angelegt und 5 im Sack → 0 %.
-Vier Stuecke, die nur herumliegen, bringen vier Punkte. Das kann eine
-gewollte Sammlungsmechanik sein; dagegen spricht, dass es das Zerlegen
-strikt schaedlich macht und auf dem Modul-Schirm nichts davon steht.
-Geaendert wurde nichts — das Tor meldet die Zahl als Hinweis.
+**Der Tier-Bonus zaehlt den BESTAND — bestaetigt, nicht vermutet (v60).**
+Er zuendet ueber die Seltenheiten der ANGELEGTEN Module und rechnet dann
+jedes BESESSENE Stueck dieser Seltenheit mit. Gemessen mit gleichen
+epischen Modulen (Krit 20): 1 angelegt → 21 %, 1 angelegt und 4 im Lager
+→ 25 %, 0 angelegt und 5 im Lager → 0 %. Der Nutzer hat das bestaetigt
+(„zaehlt mit"), also ist es eine Zusicherung: `npm run ruestung` faellt
+um, wenn jemand es auf die angelegten Stuecke zurueckschneidet. Auf dem
+Schirm steht es jetzt auch — `Tier-Bonus: Episch ×3` in der Kopfzeile und
+eine Zeile neben „Zerlegen".
 
 **Offen — aus der Rueckmeldung des Nutzers zu v56, noch einer von fuenf:**
 - Die Bilddauer beim Ausloesen einer Spezialwaffe ist HIER NICHT MESSBAR
