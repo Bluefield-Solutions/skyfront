@@ -120,10 +120,17 @@ const PROBEN = [
   ['Messtafel misst nur, solange sie offen ist', '✗',
     ['        if (!an) { vorher = t; return; }', '        if (!an || !offen) { vorher = t; return; }'],
     true, 'messtafel', 'steigt die Bilderzahl nicht', HUELLE],
-  // Und der Takt wieder aus dem Median: dann geht die Tafel beim Einbruch
-  // mit und faerbt ein p95 von 350 ms gruen.
-  ['Bildschirmtakt wieder aus dem Median schaetzen', '✗',
-    ['        var schnellMs = p(proben, 0.05) || med;', '        var schnellMs = med;'],
+  // Und der Takt wieder aus der GEMESSENEN Rate: dann geht die Tafel beim
+  // Einbruch mit und faerbt ein p95 von 350 ms gruen.
+  //
+  // Ein erster Anlauf tauschte nur `schnellMs` zurueck auf den Median —
+  // und das Tor blieb gruen. Zu Recht: der Rueckfall auf `Math.round(hz)`
+  // war der Fehler, nicht die Wahl der Probe. Ohne ihn sagt die Tafel
+  // auch aus dem Median „unbekannt", und das ist richtig. Eine Probe, die
+  // die falsche Haelfte zurueckdreht, beweist nichts.
+  ['Bildschirmtakt wieder aus der gemessenen Rate', '✗',
+    ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
+     'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
