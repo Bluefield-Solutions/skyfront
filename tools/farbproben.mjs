@@ -78,6 +78,20 @@ const PROBEN = [
     ['this.wellenplan = I, bossVorratHalten(this, bossStufeGedeckelt(this, R.boss || 1)), this.vorwaermen(I),',
      'this.wellenplan = I, this.vorwaermen(I),'], true, 'speicher',
     'ueber der Grenze'],
+  // Die Bossleiste zurueck an ihren alten Platz: ueber die ganze Breite,
+  // bei y = 118. Genau so lief sie neun Fassungen lang quer ueber die
+  // Kopfzeilentafel, und der Erfahrungsbalken des Flugzeugs lag in jedem
+  // Bosskampf darunter. Verlangt wird, dass das Tor die beiden Flaechen
+  // BENENNT — nicht, dass es irgendwie rot wird.
+  ['Bossleiste wieder ueber die ganze Breite (der alte Platz)', '✗',
+    ['              r = J - 216,\n              n = 200,', '              r = J - 32,\n              n = 16,'],
+    true, 'kopf', 'Bossleiste'],
+  // Der Rangname wieder starr bei 15 Punkten: dann ragt „OBERLEUTNANT"
+  // ueber den Rand der Tafel. Ein Fehler, der nur bei EINEM von sieben
+  // Raengen auftritt — deshalb misst das Tor mit genau diesem.
+  ['Rangname wieder starr bei 15 Punkten', '✗',
+    ['rangName.width > 112 && rangName.setFontSize(13);', 'void rangName;'],
+    true, 'kopf', 'OBERLEUTNANT'],
   ['Gegnerbilder nicht nachtragen (nur zeichnen, was schon da ist)', '✗',
     ['this.textures.on("addtexture", nach);', 'void nach;'], true, 'lage',
     'Gegnerband zeigt'],
@@ -413,6 +427,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'klang' ? ['tools/klang.mjs']
     : tor === 'musik' ? ['tools/musik.mjs']
     : tor === 'lage' ? ['tools/ueberlappung.mjs']
+    : tor === 'kopf' ? ['tools/kopfzeile.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -533,6 +548,18 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', 'Szene nicht erreichbar'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // Ohne die Naht kennt das Kopfzeilentor die Rechtecke nicht, die die
+  // Kopfzeile zeichnet — Tafel, Kraftleiter, Lebensgurt und Bossleiste
+  // sind Graphics und haben keine getBounds(). Dann darf es weder gruen
+  // noch rot sagen.
+  name: 'Kopfzeile ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/kopfzeile.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', '__SKF_KOPFZEILE fehlt'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {
   // DIE PROBE ZUM AUSLIEFERUNGSTOR.
   //

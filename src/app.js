@@ -54348,6 +54348,15 @@ return new ` + this.key + `();
     // Jetzt: Aufsammler +1, Treffer -1, und die Meta-Stufe ist der BODEN.
     // Wer sich schont, wird staerker; wer getroffen wird, zahlt sofort —
     // aber nie unter das, was er sich erspielt hat.
+    // Die Naht fuer tools/kopfzeile.mjs. Tafel, Kraftleiter, Lebensgurt
+    // und Bossleiste sind GRAPHICS — sie haben keine getBounds(), an denen
+    // ein Werkzeug sie fassen koennte, und genau deshalb hat neun Fassungen
+    // lang niemand gemerkt, dass die Bossleiste bei y = 118 quer ueber die
+    // Tafel lief, die bis y = 126 reicht. Der Erfahrungsbalken des
+    // Flugzeugs lag in JEDEM Bosskampf darunter.
+    // Eingetragen wird beim ZEICHNEN, nicht nachgerechnet (Regel 17), und
+    // in feste Felder, damit kein Bild Muell erzeugt.
+    KOPFZEILE = { tafel: [0, 0, 0, 0], leiter: [0, 0, 0, 0], gurt: [0, 0, 0, 0], boss: [0, 0, 0, 0] },
     PWR_JE_TREFFER = 1,
     // Eine feste Fallwahrscheinlichkeit kann Sektor 1 und Sektor 120 nicht
     // zugleich bedienen: der erste faehrt 163 Gegner auf, der letzte weit
@@ -54412,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v56",
+    SKF_VERSION = "v57",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62221,6 +62230,10 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     }
   }
 
+  function kopfFlaeche(T, R, E, b, I) {
+    T[0] = R, T[1] = E, T[2] = b, T[3] = I
+  }
+
   function Bn(T) {
     const R = tt.Math.Clamp(T, 1, 10),
       E = [{
@@ -62467,7 +62480,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     },
     yt = class yt extends tt.Scene {
       constructor() {
-        super("Game"), this.sunGlintTarget = 0, this.rainTarget = 0, this.fogTarget = 0, this.lightningOn = !1, this.nextLightning = 0, this.corridorOn = !1, this.score = 0, this.best = 0, this.over = !1, this.endless = !1, this.endlessRound = 0, this.endlessNextAt = 0, this.dragging = !1, this.dragPX = 0, this.dragPY = 0, this.dragTX = 0, this.dragTY = 0, this.levelEndAt = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 5200, this.kap2Boss = !1, this.finalBoss = !1, this.stageStart = 0, this.stage = 1, this.stageCleared = !1, this.boss = null, this.lastCritText = 0, this.bossPhase = 1, this.nextBeam = 0, this.stageHit = !1, this.stageKills = 0, this.killGoal = 0, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.xpBaseStored = 0, this.combo = 0, this.comboExpire = 0, this.bossWarned = !1, this.waveHigh = 0, this.lastBreather = 0, this.wingmen = [], this.fireDelay = Ft.fireEveryMs, this.playerBulletDamage = 1, this.gearCrit = 0, this.gearCritMult = 1.5, this.gearPierceMul = 1, this.explosionMul = 1, this.weapon = "spread", this.bulletTint = 8378623, this.bulletTex = "bullet_spread", this.secondary = "none", this.secLevel = 0, this.secNext = 0, this.laserNextDmg = 0, this.enemyDmgMul = 1, this.enemyHpMul = 1, this.armFront = 0, this.armRear = 0, this.armCore = 0, this.fireRateMul = 1, this.bomb = {
+        super("Game"), this.sunGlintTarget = 0, this.rainTarget = 0, this.fogTarget = 0, this.lightningOn = !1, this.nextLightning = 0, this.corridorOn = !1, this.score = 0, this.best = 0, this.over = !1, this.endless = !1, this.endlessRound = 0, this.endlessNextAt = 0, this.dragging = !1, this.dragPX = 0, this.dragPY = 0, this.dragTX = 0, this.dragTY = 0, this.levelEndAt = 0, this.bossBeamOn = !0, this.bossExtraBullets = 0, this.bossBeamGap = 5200, this.kap2Boss = !1, this.finalBoss = !1, this.stageStart = 0, this.stage = 1, this.stageCleared = !1, this.boss = null, this.lastCritText = 0, this.bossPhase = 1, this.nextBeam = 0, this.stageHit = !1, this.stageKills = 0, this.killGoal = 0, this.runParts = 0, this.runCores = 0, this.runXp = 0, this.runGold = 0, this.xpBaseStored = 0, this.combo = 0, this.comboExpire = 0, this.bossWarned = !1, this.waveHigh = 0, this.lastBreather = 0, this.wingmen = [], this.bahnen = 0, this.strahlBreite = 0, this.fireDelay = Ft.fireEveryMs, this.playerBulletDamage = 1, this.gearCrit = 0, this.gearCritMult = 1.5, this.gearPierceMul = 1, this.explosionMul = 1, this.weapon = "spread", this.bulletTint = 8378623, this.bulletTex = "bullet_spread", this.secondary = "none", this.secLevel = 0, this.secNext = 0, this.laserNextDmg = 0, this.enemyDmgMul = 1, this.enemyHpMul = 1, this.armFront = 0, this.armRear = 0, this.armCore = 0, this.fireRateMul = 1, this.bomb = {
           x: J - 58,
           y: rt - 72,
           r: 44
@@ -62725,67 +62738,147 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           color: "#dff0ff",
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101), h.on("pointerdown", () => this.pauseGame()), this.groundMarks = this.add.graphics().setDepth(13), this.laserGfx = this.add.graphics().setDepth(11).setBlendMode(tt.BlendModes.ADD), this.hud = this.add.graphics().setScrollFactor(0).setDepth(100);
+        // ------------------------------------------------------------------
+        // Die Kopfzeile: PILOT und FLUGZEUG sind zwei verschiedene Dinge.
+        //
+        // Bis v56 stand die FLUGZEUGSTUFE als Zahl auf dem PILOTENBILD, und
+        // gleich daneben der Pilotenrang. Beides ohne Beschriftung, beides
+        // mit gleichem Gewicht — gemessen am gebauten Spiel las die
+        // Kopfzeile sich als ["GENERAL", "0", "PWR 1/10", "STUFE 7",
+        // "819/1389 XP"], und welche der beiden Stufen zu wem gehoert,
+        // stand nirgends. Rueckmeldung des Nutzers, woertlich: „das Level
+        // des Piloten muss besser eingearbeitet werden, sodass man
+        // versteht, welches Level der Pilot ist. Der Pilot ist ja immer
+        // unabhaengig vom Flugzeug."
+        //
+        // Jetzt zwei Bloecke mit DEMSELBEN Bau — Beschriftung links, Stand
+        // rechts, Balken darunter — und je einer Farbe: GOLD ist der Pilot
+        // (Sterne, ueber alle Flugzeuge hinweg), GRUEN die Maschine
+        // (Erfahrung, je Flugzeug). Der gleiche Bau ist es, der den
+        // Unterschied traegt: zwei Leitern nebeneinander, die verschieden
+        // weit stehen, erklaeren sich selbst.
+        //
+        // Der Punktestand ist aus der Tafel heraus nach rechts oben
+        // gewandert. Er gehoert weder zum Piloten noch zum Flugzeug, und
+        // mitten in der Tafel las er sich als eines von beiden.
+        // ------------------------------------------------------------------
         const f = this.rankInfo();
-        if (this.add.image(38, 38, "pilot").setScrollFactor(0).setDepth(101), this.add.circle(55, 55, 11, 1385526, .96).setStrokeStyle(2, this.planeLvl >= 6 ? 16765498 : 8376575).setScrollFactor(0).setDepth(102), this.add.text(55, 55, String(this.planeLvl), {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#eaf6ff",
-            fontStyle: "bold"
-          }).setOrigin(.5).setScrollFactor(0).setDepth(103), this.add.text(77, 16, f.name.toUpperCase(), {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#ffd85a",
-            fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.scoreText = this.add.text(77, 35, "", {
-            fontFamily: "sans-serif",
-            fontSize: "17px",
-            color: "#dff0ff",
-            fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.pwrText = this.add.text(77, 58, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#9fe0c2"
-          }).setScrollFactor(0).setDepth(101), this.xpBaseStored = q.planeXp(q.plane()), this.xpLabelText = this.add.text(16, 93, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#9fe0c2",
-            fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.xpNeedText = this.add.text(214, 93, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#8fb8dc",
-            fontStyle: "bold"
-          }).setOrigin(1, 0).setScrollFactor(0).setDepth(101), this.add.rectangle(16, 117, 198, 8, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101), this.xpBarFill = this.add.rectangle(17, 117, 196, 6, 3791242, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102), this.comboText = this.add.text(16, 134, "", {
-            fontFamily: "sans-serif",
-            fontSize: "15px",
-            color: "#ffcf5a",
-            fontStyle: "bold"
-          }).setScrollFactor(0).setDepth(101), this.comboBar = this.add.graphics().setScrollFactor(0).setDepth(101), this.resText = this.add.text(J - 68, 58, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#cfe3ff",
-            fontStyle: "bold",
-            align: "right"
-          }).setOrigin(1, 0).setScrollFactor(0).setDepth(100), this.stageBacking = this.add.rectangle(J / 2, 20, 128, 24, 528409, .42).setScrollFactor(0).setDepth(99), this.stageText = this.add.text(J / 2, 12, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#bcd6ee"
-          }).setOrigin(.5, 0).setScrollFactor(0).setDepth(100), this.objText = this.add.text(J / 2, 40, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#eaf6ff",
-            fontStyle: "bold"
-          }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101), this.cdText = this.add.text(J / 2, 61, "", {
-            fontFamily: "sans-serif",
-            fontSize: "13px",
-            color: "#ffd98a",
-            fontStyle: "bold"
-          }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101).setStroke("#2a1c08", 3), this.bombText = this.add.text(this.bomb.x + 26, this.bomb.y + 16, "", {
-            fontFamily: "sans-serif",
-            fontSize: "14px",
-            color: "#ffd0a0",
-            fontStyle: "bold"
-          }).setOrigin(.5).setScrollFactor(0).setDepth(101), this.updateHud(), Bt("seen_tut") !== "1" && !this.endless) vt("seen_tut", "1"), this.showTutorial(() => this.startStage());
+        // --- Pilot: Bild, Rangabzeichen, Name, Sternbalken -----------------
+        this.add.image(34, 34, "pilot").setScale(.92).setScrollFactor(0).setDepth(101);
+        this.add.circle(52, 52, 10, 1385526, .96).setStrokeStyle(2, f.max ? 16765498 : 16766042).setScrollFactor(0).setDepth(102);
+        this.add.text(52, 52, String(f.stufe), {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#ffe9a8",
+          fontStyle: "bold"
+        }).setOrigin(.5).setScrollFactor(0).setDepth(103);
+        this.add.text(68, 10, "PILOT", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#82a9cc",
+          fontStyle: "bold"
+        }).setScrollFactor(0).setDepth(101);
+        this.add.text(180, 10, `RANG ${f.stufe}/${f.stufen}`, {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#e8c86a",
+          fontStyle: "bold"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+        const rangName = this.add.text(68, 27, f.name.toUpperCase(), {
+          fontFamily: "sans-serif",
+          fontSize: "15px",
+          color: "#ffd85a",
+          fontStyle: "bold"
+        }).setScrollFactor(0).setDepth(101);
+        rangName.width > 112 && rangName.setFontSize(13);
+        this.add.rectangle(68, 50, 112, 6, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101);
+        this.add.rectangle(69, 50, Math.max(1, 110 * f.anteil), 4, f.max ? 16765498 : 16761927, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102);
+        // --- Flugzeug: Beschriftung, Name und Stufe, Erfahrungsbalken ------
+        this.add.text(16, 63, "✈ FLUGZEUG", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#82a9cc",
+          fontStyle: "bold"
+        }).setScrollFactor(0).setDepth(101);
+        this.maschineText = this.add.text(180, 63, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#9fe0c2",
+          fontStyle: "bold"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+        this.xpBaseStored = q.planeXp(q.plane());
+        this.add.rectangle(16, 86, 164, 8, 2109503, 1).setOrigin(0, .5).setStrokeStyle(1, 2772074).setScrollFactor(0).setDepth(101);
+        this.xpBarFill = this.add.rectangle(17, 86, 162, 6, 3791242, 1).setOrigin(0, .5).setScrollFactor(0).setDepth(102);
+        // --- Feuerkraft: Leiter und WIRKUNG -------------------------------
+        // „PWR 1/10" war eine nackte Zahl: sie sagte nicht, woher sie kommt
+        // und was sie tut. Rechts steht jetzt, was die Stufe BEWIRKT — die
+        // Zahl der Bahnen wird in fire() GEZAEHLT, nicht hier nachgerechnet
+        // (Regel 17: wer die Formel wiederholt, bezeugt sie, statt sie zu
+        // pruefen — und laeuft ihr nach dem naechsten Waffenumbau nach).
+        // Die Leiter unterscheidet zwei Sorten Kraft: was in der Werkstatt
+        // GEKAUFT wurde (gold, der Boden — geht bei einem Treffer nie
+        // verloren) und was in diesem Sektor AUFGESAMMELT wurde (blau, geht
+        // bei jedem Treffer um eine Stufe zurueck).
+        this.pwrLabel = this.add.text(16, 98, "FEUERKRAFT", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#82a9cc",
+          fontStyle: "bold"
+        }).setScrollFactor(0).setDepth(101);
+        this.pwrText = this.add.text(180, 98, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#bfefff",
+          fontStyle: "bold"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+        this.comboText = this.add.text(J - 16, 100, "", {
+          fontFamily: "sans-serif",
+          fontSize: "15px",
+          color: "#ffcf5a",
+          fontStyle: "bold"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+        this.comboBar = this.add.graphics().setScrollFactor(0).setDepth(101);
+        // Der Punktestand steht jetzt rechts oben — eigenes Ding, eigener
+        // Platz, und gross genug, um ihn im Vorbeifliegen zu lesen.
+        this.scoreText = this.add.text(J - 16, 74, "", {
+          fontFamily: "sans-serif",
+          fontSize: "20px",
+          color: "#dff0ff",
+          fontStyle: "bold"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(101).setStroke("#0a1622", 4);
+        this.resText = this.add.text(J - 68, 58, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#cfe3ff",
+          fontStyle: "bold",
+          align: "right"
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(100);
+        this.stageBacking = this.add.rectangle(J / 2, 20, 128, 24, 528409, .42).setScrollFactor(0).setDepth(99);
+        this.stageText = this.add.text(J / 2, 12, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#bcd6ee"
+        }).setOrigin(.5, 0).setScrollFactor(0).setDepth(100);
+        this.objText = this.add.text(J / 2, 40, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#eaf6ff",
+          fontStyle: "bold"
+        }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101);
+        this.cdText = this.add.text(J / 2, 61, "", {
+          fontFamily: "sans-serif",
+          fontSize: "13px",
+          color: "#ffd98a",
+          fontStyle: "bold"
+        }).setOrigin(.5, 0).setScrollFactor(0).setDepth(101).setStroke("#2a1c08", 3);
+        this.bombText = this.add.text(this.bomb.x + 26, this.bomb.y + 16, "", {
+          fontFamily: "sans-serif",
+          fontSize: "14px",
+          color: "#ffd0a0",
+          fontStyle: "bold"
+        }).setOrigin(.5).setScrollFactor(0).setDepth(101);
+        this.updateHud();
+        if (Bt("seen_tut") !== "1" && !this.endless) vt("seen_tut", "1"), this.showTutorial(() => this.startStage());
         else {
           this.endless ? this.startEndless() : this.startStage();
           const A = this.add.text(J / 2, rt * .62, "Ziehen zum Fliegen · Auto-Feuer · 💣 Bombe", {
@@ -62863,8 +62956,14 @@ dann ausweichen!`, {
         if (this.over) return;
         const R = this.player.y - 34,
           E = this.player.powerLevel;
+        // `bahn` zaehlt, was die HAUPTWAFFE in diesem Zug losschickt —
+        // Beiflug, Drohnen und Sekundaerwaffe zaehlen nicht mit, die haben
+        // ihre eigene Anzeige. Die Kopfzeile liest die Zahl; sie wird
+        // nirgends ein zweites Mal ausgerechnet.
+        let bahn = 0;
+        const schuss = (v, x, t, l, p) => { bahn++, this.shootBullet(v, x, t, l, p) };
         if (this.weapon === "laser") {
-          this.fireSecondary(R);
+          this.bahnen = 0, this.fireSecondary(R);
           for (const G of this.wingmen) G.fires && G.img.visible && this.shootBullet(G.img.x, G.img.y - 8, 0, .9, 0);
           for (const G of this.drones) this.shootBullet(G.img.x, G.img.y - 8, 0, .85, 0);
           return
@@ -62873,22 +62972,23 @@ dann ausweichen!`, {
           const G = Math.min(1 + E, 6);
           for (let v = 0; v < G; v++) {
             const x = (v - (G - 1) / 2) * 7;
-            this.shootBullet(this.player.x + x, R, 0, 1.05, 0)
+            schuss(this.player.x + x, R, 0, 1.05, 0)
           }
           if (E >= 4)
-            for (const v of [-.09, .09]) this.shootBullet(this.player.x, R, v, 1, 0)
+            for (const v of [-.09, .09]) schuss(this.player.x, R, v, 1, 0)
         } else if (this.weapon === "heavy") {
           const G = Math.min(1 + Math.floor(E / 2), 4);
           for (let v = 0; v < G; v++) {
             const x = (v - (G - 1) / 2) * 22;
-            this.shootBullet(this.player.x + x, R, 0, 1.28, 2)
+            schuss(this.player.x + x, R, 0, 1.28, 2)
           }
         } else
-          for (const G of Bn(E)) this.shootBullet(this.player.x + G.dx, R, G.ang, 1, 0);
+          for (const G of Bn(E)) schuss(this.player.x + G.dx, R, G.ang, 1, 0);
         for (let G = 0; G < this.planeExtraShots; G++) {
           const v = (G - (this.planeExtraShots - 1) / 2) * .16;
-          this.shootBullet(this.player.x, R, v, 1, 0)
+          schuss(this.player.x, R, v, 1, 0)
         }
+        this.bahnen = bahn;
         for (const G of this.wingmen) !G.fires || !G.img.visible || this.shootBullet(G.img.x, G.img.y - 8, 0, .9, 0);
         for (const G of this.drones) this.shootBullet(G.img.x, G.img.y - 8, 0, .85, 0);
         this.fireSecondary(R), this.audio.shoot();
@@ -64154,19 +64254,19 @@ ${R.label}`, {
         }), this.physics.add.overlap(this.bullets, this.boss, this.onBossHit, void 0, this), this.physics.add.overlap(this.player, this.boss, this.onPlayerBoss, void 0, this), this.stageText.setVisible(!1), this.stageBacking.setVisible(!1);
         const I = ne(this.stage),
           G = this.finalBoss ? ["TITAN DER STAFFEL", "HERR DES ROTEN HORIZONTS", "HERR DER GRÜNEN HÖLLE"][I] : I === 2 ? R >= 2 ? "SEUCHENSCHMIED" : "GIFTKORVETTE" : I === 1 ? R >= 2 ? "BLUTSCHMIED" : "ROTKORVETTE" : R >= 3 ? "TITAN DER STAFFEL" : R >= 2 ? "HÖLLENSCHMIED" : "STAHLKORVETTE";
-        this.bossName = this.add.text(J / 2, 98, `BOSS: ${G}`, {
+        this.bossName = this.add.text(200, 100, `BOSS: ${G}`, {
           fontFamily: "sans-serif",
           fontSize: "15px",
           color: "#ffd0d0",
           fontStyle: "bold"
-        }).setOrigin(.5).setScrollFactor(0).setDepth(104).setStroke("#2a0808", 4);
+        }).setOrigin(0, .5).setScrollFactor(0).setDepth(104).setStroke("#2a0808", 4);
         const v = R >= 3 ? 12607743 : 16722474;
-        this.bossGlow = this.add.image(this.boss.x, this.boss.y, "spark").setTint(v).setBlendMode(tt.BlendModes.ADD).setDepth(11), this.bossBar = this.add.graphics().setScrollFactor(0).setDepth(103), this.bossHpText = this.add.text(J - 18, 108, "", {
+        this.bossGlow = this.add.image(this.boss.x, this.boss.y, "spark").setTint(v).setBlendMode(tt.BlendModes.ADD).setDepth(11), this.bossBar = this.add.graphics().setScrollFactor(0).setDepth(103), this.bossHpText = this.add.text(362, 124, "", {
           fontFamily: "sans-serif",
           fontSize: "13px",
           color: "#ffd7d7",
           fontStyle: "bold"
-        }).setOrigin(1, .5).setScrollFactor(0).setDepth(104).setStroke("#2a0808", 3), this.bossWeak = this.add.graphics().setDepth(12);
+        }).setOrigin(.5, .5).setScrollFactor(0).setDepth(104).setStroke("#2a0808", 3), this.bossWeak = this.add.graphics().setDepth(12);
         const x = this.add.text(this.boss.x, this.boss.y - 4, "SCHWACHSTELLE", {
           fontFamily: "sans-serif",
           fontSize: "13px",
@@ -64735,7 +64835,7 @@ ${G}`, {
           duration: 110,
           yoyo: !0,
           ease: "Quad.Out",
-          onComplete: () => E.setColor("#9fd0ff").setScale(1)
+          onComplete: () => E.setColor("#bfefff").setScale(1)
         }), R || this.floatText(this.player.x, this.player.y - 58, "FEUERKRAFT -1", "#ff8a7a")
       }
       maybeDrop(R, E, b, I, G) {
@@ -66014,10 +66114,37 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       comboMult() {
         return 1 + Math.min(Math.floor(this.combo / 4) * .5, 3.5)
       }
+      // Der Rang des PILOTEN. Er haengt an den Sternen und damit an allem,
+      // was je geflogen wurde — nicht am Flugzeug. Bis v56 gab diese
+      // Funktion nur den Namen zurueck; die Kopfzeile konnte deshalb gar
+      // nicht zeigen, dass der Pilot eine LEITER hat. Jetzt kommt die Stufe
+      // mit, wieviele es davon gibt und wie weit die naechste weg ist.
       rankInfo() {
-        const R = q.totalStars();
+        const stufen = [
+            { ab: 0, name: "Rekrut" },
+            { ab: 3, name: "Leutnant" },
+            { ab: 8, name: "Oberleutnant" },
+            { ab: 14, name: "Hauptmann" },
+            { ab: 20, name: "Major" },
+            { ab: 26, name: "Oberst" },
+            { ab: 30, name: "General" }
+          ],
+          sterne = q.totalStars();
+        let i = 0;
+        for (let n = 0; n < stufen.length; n++)
+          if (sterne >= stufen[n].ab) i = n;
+        const max = i >= stufen.length - 1,
+          ab = stufen[i].ab,
+          bis = max ? ab : stufen[i + 1].ab;
         return {
-          name: R >= 30 ? "General" : R >= 26 ? "Oberst" : R >= 20 ? "Major" : R >= 14 ? "Hauptmann" : R >= 8 ? "Oberleutnant" : R >= 3 ? "Leutnant" : "Rekrut"
+          name: stufen[i].name,
+          stufe: i + 1,
+          stufen: stufen.length,
+          sterne,
+          max,
+          naechster: max ? "" : stufen[i + 1].name,
+          fehlt: max ? 0 : bis - sterne,
+          anteil: max ? 1 : tt.Math.Clamp((sterne - ab) / Math.max(1, bis - ab), 0, 1)
         }
       }
       drawAmmoBelt(R, E, b, I, G) {
@@ -66025,7 +66152,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
           x = 12,
           t = 3,
           l = (b - t * (x - 1)) / x;
-        v.fillStyle(2365970, .92).fillRoundedRect(R - 4, E - 3, b + 8, I + 6, 5), v.fillStyle(3811868, 1).fillRect(R - 1, E + I / 2 - 1, b + 2, 2);
+        kopfFlaeche(KOPFZEILE.gurt, R - 4, E - 3, b + 8, I + 6), v.fillStyle(2365970, .92).fillRoundedRect(R - 4, E - 3, b + 8, I + 6, 5), v.fillStyle(3811868, 1).fillRect(R - 1, E + I / 2 - 1, b + 2, 2);
         const p = G > .5 ? 15249978 : G > .25 ? 15104554 : 15484470,
           a = G > .5 ? 16178310 : G > .25 ? 16167008 : 16091754,
           r = G * x;
@@ -66047,24 +66174,66 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
           G = b ? 0 : ie[E] - I,
           v = R - I,
           x = b ? 1 : G > 0 ? tt.Math.Clamp(v / G, 0, 1) : 0;
-        this.xpLabelText.setText(b ? `✈ STUFE ${E} · MAX` : `✈ STUFE ${E}`), this.xpNeedText.setText(b ? "" : `${v}/${G} XP`), this.xpBarFill.scaleX = x, this.xpBarFill.setFillStyle(b ? 16765498 : 3791242)
+        this.maschineText && this.maschineText.setText(`STUFE ${E}`), this.xpBarFill.scaleX = x, this.xpBarFill.setFillStyle(b ? 16765498 : 3791242)
+      }
+      // Was die Feuerkraftstufe BEWIRKT — in Worten, die auf dem Schirm
+      // stehen koennen. Die Zahl der Bahnen wird nicht hier gerechnet,
+      // sondern in fire() gezaehlt: sonst laeuft diese Anzeige der Waffe
+      // nach dem naechsten Umbau hinterher und behauptet etwas Falsches,
+      // ohne dass ein Tor es merkt (Regel 17).
+      feuerkraftWirkung() {
+        if (this.weapon === "laser") return `STRAHL ${Math.round(this.strahlBreite||0)}`;
+        const R = this.bahnen | 0;
+        return R < 1 ? "—" : R === 1 ? "1 BAHN" : `${R} BAHNEN`
+      }
+      // Die Leiter zwischen Beschriftung und Wirkung. Sie sitzt in der
+      // Luecke, die die beiden Texte lassen — nicht auf festen Punkten:
+      // „STRAHL 32" ist laenger als „7 BAHNEN", und ein fester Platz
+      // haette sich an der laengsten Fassung ueberlappt.
+      // Zwei Sorten Kraft, zwei Farben: GOLD ist der Boden aus der
+      // Werkstatt (gekauft, geht bei einem Treffer nie verloren), BLAU ist
+      // in diesem Sektor aufgesammelt (geht bei jedem Treffer eine Stufe
+      // zurueck). Wer getroffen wird, sieht die blauen erloeschen und die
+      // goldenen stehenbleiben — das erklaert den Ausbau, ohne ein Wort.
+      zeichneKraftleiter() {
+        if (!this.pwrLabel || !this.pwrText) return;
+        const R = this.hud,
+          E = 16,
+          b = 180;
+        kopfFlaeche(KOPFZEILE.leiter, E, 116, b - E, 11);
+        const I = Ft.maxPower,
+          G = this.player ? this.player.powerLevel : 1,
+          v = this.player ? this.player.powerFloor : 1,
+          x = 2,
+          t = (b - E - x * (I - 1)) / I;
+        for (let l = 0; l < I; l++) {
+          const p = E + l * (t + x),
+            a = l < v,
+            r = l < G;
+          // Leer: dunkel, aber sichtbar — zehn Stufen muessen als LEITER zu
+          // lesen sein, auch die noch nicht erreichten. Voll: blau. Der
+          // gekaufte Boden traegt zusaetzlich einen goldenen Deckel; der
+          // Lebensgurt darunter ist messingfarben, und zwei gleichfarbige
+          // Kammernreihen uebereinander waeren nicht zu unterscheiden.
+          R.fillStyle(1782600, 1).fillRoundedRect(p, 116, t, 11, 2), r && (R.fillStyle(a ? 3843296 : 6281983, 1).fillRoundedRect(p, 117, t, 9, 2), R.fillStyle(16777215, .3).fillRect(p, 117, t, 3), a && R.fillStyle(16761927, 1).fillRect(p, 116, t, 2))
+        }
       }
       updateHud() {
-        this.scoreText.setText(`${this.score}`), this.pwrText.setText(`PWR ${this.player?this.player.powerLevel:1}/${Ft.maxPower}`);
+        this.scoreText.setText(`${this.score}`), this.pwrText.setText(this.feuerkraftWirkung());
         const R = !!(this.bossBar && this.boss && this.boss.active);
         if (this.comboText && this.comboText.setText(!R && this.combo >= 2 ? `COMBO ${this.combo}   ×${this.comboMult().toFixed(1)}` : ""), this.comboBar && (this.comboBar.clear(), !R && this.combo >= 2)) {
           const b = this.combo % 10 / 10,
             I = 132,
-            G = 16,
-            v = 144,
+            G = J - 16 - 132,
+            v = 122,
             x = Math.floor(this.combo / 10),
             t = [7319807, 12579071, 10420160, 16769658, 16751162, 16739024],
             l = t[Math.min(x, t.length - 1)];
           this.comboBar.fillStyle(1318956, .85).fillRoundedRect(G - 1, v - 1, I + 2, 7, 3), this.comboBar.fillStyle(l, 1).fillRoundedRect(G, v, Math.max(2, I * b), 5, 2.5)
         }
-        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .72).fillRoundedRect(8, 8, 224, 118, 9);
+        this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .72).fillRoundedRect(8, 8, 180, 144, 9), this.hud.fillStyle(2772074, .75).fillRect(14, 59, 168, 1).fillRect(14, 95, 168, 1), kopfFlaeche(KOPFZEILE.tafel, 8, 8, 180, 144), this.zeichneKraftleiter();
         const E = this.player ? this.player.hp / this.player.maxHp : 1;
-        if (this.drawAmmoBelt(16, 74, 198, 13, E), this.updateXpHud(), this.objText) {
+        if (this.drawAmmoBelt(16, 133, 164, 11, E), this.updateXpHud(), this.objText) {
           const I = J / 2 - 78,
             G = 38,
             v = 17;
@@ -66151,6 +66320,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             a = 0,
             r = 12 + this.player.powerLevel * 2 + this.laserWidthBonus,
             n = .75 + Math.sin(b * .05) * .2;
+          this.strahlBreite = r * 2;
           if (this.laserGfx.fillStyle(13215999, .28 * n).fillRect(p - r, a, r * 2, this.player.y - 34), this.laserGfx.fillStyle(EIGEN_N, .9 * n).fillRect(p - 3, a, 6, this.player.y - 34), b > this.laserNextDmg) {
             this.laserNextDmg = b + 70, this.audio.laser();
             const e = Math.max(1, Math.round(this.playerBulletDamage * this.laserDmgMul));
@@ -66221,11 +66391,18 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
           const p = this.boss.phase();
           if (this.bossGlow && this.bossGlow.setPosition(this.boss.x, this.boss.y).setScale(.9 + p * .12 + Math.sin(b * .014) * .12).setAlpha(.28 + Math.sin(b * .02) * .1), this.bossBar) {
             const a = tt.Math.Clamp(this.boss.hp / this.boss.maxHp, 0, 1),
-              r = J - 32,
-              n = 16,
+              // BEGINNT RECHTS NEBEN DER KOPFZEILENTAFEL. Bis v56 lief sie
+              // ueber die ganze Breite bei y = 118 — und die Tafel reicht
+              // bis y = 126. Der Erfahrungsbalken des Flugzeugs lag also in
+              // jedem Bosskampf UNTER der Bossleiste, seit es beide gibt.
+              // Kein Tor hat je gefragt, ob zwei Dinge uebereinanderliegen,
+              // und im Menue misst das die Ueberlappungstafel — im Gefecht
+              // hat sie nie gemessen. Jetzt tut sie es (tools/kopfzeile.mjs).
+              r = J - 216,
+              n = 200,
               e = 118,
               s = 13;
-            this.bossBar.clear(), this.bossBar.fillStyle(659224, .9).fillRoundedRect(n - 3, e - 3, r + 6, s + 6, 5), this.bossBar.fillStyle(4195850, 1).fillRoundedRect(n, e, r, s, 4);
+            kopfFlaeche(KOPFZEILE.boss, n - 3, e - 3, r + 6, s + 6), this.bossBar.clear(), this.bossBar.fillStyle(659224, .9).fillRoundedRect(n - 3, e - 3, r + 6, s + 6, 5), this.bossBar.fillStyle(4195850, 1).fillRoundedRect(n, e, r, s, 4);
             const o = a > .5 ? 16734794 : a > .25 ? 16751162 : 16765498;
             this.bossBar.fillStyle(o, 1).fillRoundedRect(n, e, Math.max(2, r * a), s, 4), this.bossBar.fillStyle(16777215, .18).fillRoundedRect(n, e, Math.max(2, r * a), s * .42, 4), this.bossBar.lineStyle(1, 659224, .9);
             for (let i = 1; i < 4; i++) {
@@ -66587,6 +66764,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_BOSSLEBEN = bossLeben;
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
     window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_BOSSVORRAT = bossVorratHalten, window.__SKF_GEGNERWERTE = _t;
+    window.__SKF_KOPFZEILE = KOPFZEILE;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,
       anteil: PWR_ANTEIL,

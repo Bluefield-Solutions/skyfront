@@ -172,6 +172,12 @@ const TORE = [
   // Gegnerbild von 162 x 401 Weltpunkten quer ueber der Level-Vorschau,
   // in einer Spalte, die 88 breit ist.
   { schluessel: 'ueberlappung', lauf: 'Überlappung (8 Menüschirme)', zeile: 'Überlappung (8 Menüs)', datei: 'tools/ueberlappung.mjs' },
+  // Dasselbe im GEFECHT — und dort gab es die zweite Tuer, nach der
+  // niemand gefragt hat: die Bossleiste lag seit ihrer Einfuehrung ueber
+  // der Kopfzeilentafel, der Erfahrungsbalken des Flugzeugs in jedem
+  // Bosskampf darunter. Das Ueberlappungstor misst acht Menues und haette
+  // darueber ewig gruen gemeldet (Regel 47).
+  { schluessel: 'kopfzeile', lauf: 'Kopfzeile (Gefecht, ohne und mit Boss)', zeile: 'Kopfzeile (Gefecht)', datei: 'tools/kopfzeile.mjs' },
   { schluessel: 'auslieferung', lauf: 'Auslieferung (Pages-Bau, im Browser)', zeile: 'Auslieferung (Web-App)', datei: 'tools/auslieferung.mjs' },
 ];
 

@@ -47,6 +47,8 @@ npm run feuerkraft die Leiter gegen den Wellenplan aller 120 Sektoren
 npm run speicher   was im Gefecht an Texturen im Speicher liegt
 npm run rhythmus   hat ein Sektor eine Form, oder ist er eine Rampe?
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
+npm run ueberlappung  acht MENUEschirme: deckt etwas etwas anderes zu?
+npm run kopfzeile  dasselbe im GEFECHT, ohne und mit Boss
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
 npm run variants   alle Profile + Launcher
@@ -55,7 +57,8 @@ npm run package    verteilbares Skyfront-dist.zip
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
 `farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` → `rhythmus`
-→ Boot-Test des Masters → `dist/check-report.md`.
+→ `ueberlappung` → `kopfzeile` → `auslieferung` → Boot-Test des Masters →
+`dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -381,6 +384,23 @@ Jede hat mindestens eine Runde gekostet.
    Zweig nie, weil der Sektor immer startete. Fehlerzweige werden von Hand
    herbeigefuehrt, sonst sind sie Dekoration.
 
+49. **Ein Layout wird mit dem LAENGSTEN Text gemessen, nicht mit dem
+   naechstbesten.** Die neue Kopfzeile war gruen — mit „General" (sieben
+   Zeichen) und „STUFE 7". Mit „Oberleutnant" (zwoelf) ragt der Rangname
+   aus der Tafel, mit „STUFE 10 MAX" liegt die Stufe auf ihrer eigenen
+   Beschriftung: 17 Layoutpunkte Deckung, gefunden im ERSTEN Lauf des
+   neuen Tors, nachdem sein Spielstand auf den schlimmsten Fall gestellt
+   war (neun Sterne, 999999 Erfahrung). Ein Werkzeug, das sich einen
+   bequemen Zustand herstellt, misst den bequemen Zustand.
+
+50. **Was gezeichnet, aber nicht als Objekt angelegt wird, ist fuer jedes
+   Werkzeug unsichtbar.** Tafel, Kraftleiter, Lebensgurt und Bossleiste
+   sind `Graphics` — kein `getBounds()`, keine Anzeigeliste, nichts zu
+   messen. Deshalb lief die Bossleiste neun Fassungen lang quer ueber die
+   Kopfzeilentafel und der Erfahrungsbalken des Flugzeugs lag in jedem
+   Bosskampf darunter. Wer eine Flaeche zeichnet, traegt ihr Rechteck in
+   `KOPFZEILE` ein — beim ZEICHNEN, nicht im Tor nachgerechnet (Regel 17).
+
 ---
 
 ## Aufbau
@@ -416,9 +436,24 @@ ablegbar, offline spielbar (68 von 68 Bildern im Speicher).
 
 Zehn Schirme nachgemessen: 0 ueber den Rand, 0 unter 9 Anzeigepunkten, 0
 Ueberlappungen. Bildtor prueft acht Menue-Schirme plus fuenf
-Modifikator-Modi im Gefecht.
+Modifikator-Modi im Gefecht. Die Kopfzeile im Gefecht trennt Pilot (Gold,
+Sterne, ueber alle Flugzeuge) und Flugzeug (Gruen, Erfahrung, je Flugzeug)
+in zwei gleich gebaute Bloecke; die Feuerkraft ist eine Leiter aus zehn
+Kammern mit der Wirkung daneben (`5 BAHNEN`, `STRAHL 32`).
 
-**Offen:**
+**Offen — aus der Rueckmeldung des Nutzers zu v56, drei von fuenf Punkten:**
+- Gekaufte Drohnen und Beiflugschiffe: die Mechanik STIMMT (nachgemessen:
+  „Beiflug 2 von 2 feuernd", drei Drohnen, Geschosse fliegen). Was fehlt,
+  ist das Zeichen, dass sie aktiv sind — beide Beiflugschiffe werden
+  IMMER gezeichnet, das ungekaufte nur mit `setScale(.24)` statt `.32`
+  und grauem Ton. Auf dem Telefon ist der Unterschied unsichtbar.
+- Neu gekaufte Spezialwaffen wirken (Waffe, Sekundaerwaffe und Gadget
+  werden gesetzt und feuern), zeigen es aber nicht an.
+- Die Bilddauer beim Ausloesen einer Spezialwaffe ist HIER NICHT MESSBAR
+  (SwiftShader, rund zwei Bilder je Sekunde). Sie gehoert auf das Geraet,
+  `#messung`. Was hier gemessen werden konnte, sind die Objektkosten je
+  Gadget: `emp +23 · shield +5 · napalm +1 · drones +24 · repair +28 ·
+  blitz +3` Anzeigeobjekte.
 - Der Modul-Schirm bleibt auch mit der neuen Tafel unter dem letzten Drittel
   leer, solange nichts erbeutet ist. Das ist ehrlich, aber nicht schoen.
 - Die Sprites sind nachgemessen und in Ordnung (33 Texturen, alle ≥ 0,92
