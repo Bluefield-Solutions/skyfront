@@ -107,6 +107,17 @@ const PROBEN = [
     ['this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),\n          dx: A,\n          fires: !0\n        }))',
      'this.wingmen = [-48, 48].map((A, m) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(m < q.upg("wingman") ? .32 : .24).setTint(m < q.upg("wingman") ? 10477823 : 9090252).setDepth(9),\n          dx: A,\n          fires: m < q.upg("wingman")\n        }))'],
     true, 'ruestung', 'gezeichnet'],
+  // Der Kauf der Hauptwaffe merkt sich nichts: dann steht nach dem
+  // Bezahlen immer noch die alte Waffe im Spielstand. Derselbe Fehlertyp
+  // wie bei der Sekundaerwaffe, nur an der anderen Stelle.
+  ['Kauf der Hauptwaffe merkt sich die Wahl nicht', '✗',
+    ['      setWeapon(T) {\n        vt("weapon", T)\n      },',
+     '      setWeapon(T) {\n        void T\n      },'], true, 'ruestung', 'im Spielstand'],
+  // Angelegte Module wirken nicht mehr: die haeufigste Art, eine
+  // Ausruestung still zu verlieren — sie ist da, sie steht auf dem
+  // Schirm, und sie tut nichts.
+  ['Angelegte Module wirken nicht mehr', '✗',
+    ['const I = Mi(Wt.all());', 'const I = Mi([]);'], true, 'ruestung', 'Modul wirkt nicht'],
   ['Gegnerbilder nicht nachtragen (nur zeichnen, was schon da ist)', '✗',
     ['this.textures.on("addtexture", nach);', 'void nach;'], true, 'lage',
     'Gegnerband zeigt'],

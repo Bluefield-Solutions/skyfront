@@ -49,7 +49,7 @@ npm run rhythmus   hat ein Sektor eine Form, oder ist er eine Rampe?
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run ueberlappung  acht MENUEschirme: deckt etwas etwas anderes zu?
 npm run kopfzeile  dasselbe im GEFECHT, ohne und mit Boss
-npm run ruestung   wirkt, was gekauft wurde? Und sieht man es?
+npm run ruestung   wirkt, was gekauft wurde? Und sieht man es? (acht Wege)
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
 npm run variants   alle Profile + Launcher
@@ -394,6 +394,23 @@ Jede hat mindestens eine Runde gekostet.
    war (neun Sterne, 999999 Erfahrung). Ein Werkzeug, das sich einen
    bequemen Zustand herstellt, misst den bequemen Zustand.
 
+52. **Eine Voraussetzung wird gesetzt UND nachgewiesen.** Das
+   Ruestungstor drueckte den Kaufknopf und las danach den Spielstand —
+   und meldete „Laser gekauft → weapon=''", einen Befund ueber das Spiel,
+   der in Wahrheit ueber das Werkzeug war: nach dem Hochlauf stand
+   `gold: 0`, ein `addInitScript` VOR dem Laden haelt nicht, und
+   `spendGold(1400)` scheiterte still. Jetzt setzt das Tor das Gold nach
+   dem Hochlauf, prueft, dass es angekommen ist, und VERLANGT, dass beim
+   Kauf Gold abgeht. Geht keines ab, ist nichts gemessen (Rueckgabe 2)
+   statt etwas behauptet.
+
+53. **Ein Spielraum, der groesser ist als der Abstand der Dinge, trifft
+   das Falsche.** Dieselbe Trefferwahl gab 40 Punkte Luft nach oben und
+   unten. Die Waffenkarten stehen 82 Punkte auseinander und sind 74 hoch —
+   die Karte darueber und die richtige lagen beide im Fenster, beide
+   gleich gross, gedrueckt wurde die erste in der Liste. Erst streng
+   pruefen, Luft nur, wenn streng nichts trifft.
+
 49b. **Ein Kaufweg wird GEGANGEN, nicht nachgebildet.** Das Ruestungstor
    betritt das Arsenal und drueckt die Schaltflaeche an „Suchraketen".
    Haette es stattdessen `secondary` und `up_sec` selbst gesetzt, waere
@@ -459,6 +476,15 @@ Modifikator-Modi im Gefecht. Die Kopfzeile im Gefecht trennt Pilot (Gold,
 Sterne, ueber alle Flugzeuge) und Flugzeug (Gruen, Erfahrung, je Flugzeug)
 in zwei gleich gebaute Bloecke; die Feuerkraft ist eine Leiter aus zehn
 Kammern mit der Wirkung daneben (`5 BAHNEN`, `STRAHL 32`).
+
+**Offen — eine Frage an den Bau, nicht ein Befund (v59):** der
+Tier-Bonus der Module zaehlt den GANZEN BESITZ, nicht die angelegten
+Stuecke. Gemessen mit gleichen epischen Modulen (Krit 20): 1 angelegt →
+21 %, 1 angelegt und 4 im Sack → 25 %, 0 angelegt und 5 im Sack → 0 %.
+Vier Stuecke, die nur herumliegen, bringen vier Punkte. Das kann eine
+gewollte Sammlungsmechanik sein; dagegen spricht, dass es das Zerlegen
+strikt schaedlich macht und auf dem Modul-Schirm nichts davon steht.
+Geaendert wurde nichts — das Tor meldet die Zahl als Hinweis.
 
 **Offen — aus der Rueckmeldung des Nutzers zu v56, noch einer von fuenf:**
 - Die Bilddauer beim Ausloesen einer Spezialwaffe ist HIER NICHT MESSBAR

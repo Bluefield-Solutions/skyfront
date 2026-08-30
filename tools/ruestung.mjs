@@ -109,6 +109,77 @@ const lesen = (fn) => seite.evaluate((quelle) => {
   catch (e) { return { fehler: String(e) } }
 }, fn);
 
+// Den Kaufweg GEHEN, nicht nachbilden (Regel 49b): das Arsenal betreten,
+// die Schaltflaeche am Namen der Ware suchen und druecken. Genau das hat
+// den Fehler von v58 sichtbar gemacht — haette das Tor `secondary` und
+// `up_sec` selbst gesetzt, waere er unsichtbar geblieben.
+const kaufen = (wort, schluessel, sperre) => seite.evaluate(async ([wort, schluessel, sperre]) => {
+  const g = window.__game;
+  // GOLD NACH DEM HOCHLAUF setzen, nicht davor. Ein addInitScript vor
+  // dem Laden haelt nicht: gemessen stand nach dem Hochlauf „gold: 0" da,
+  // und der Kauf scheiterte still an spendGold(). Das Tor meldete
+  // daraufhin „Laser gekauft → weapon=''" — ein Befund ueber das Spiel,
+  // der in Wahrheit ueber das Werkzeug war. Und die Sperre wird entfernt,
+  // damit wirklich der KAUFWEG gegangen wird und nicht der Waehlweg.
+  let goldVor = 0;
+  try {
+    localStorage.setItem('gold', '999999');
+    if (sperre) localStorage.removeItem(sperre);
+    goldVor = Number(localStorage.getItem('gold') || 0);
+  } catch (e) { return { fehler: 'localStorage nicht schreibbar' } }
+  if (goldVor < 2000) return { fehler: 'Gold laesst sich nicht setzen — der Kauf waere gar nicht bezahlbar' };
+  (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+  g.scene.start('Arsenal');
+  for (let i = 0; i < 40; i++) {
+    await new Promise((f) => setTimeout(f, 250));
+    const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Arsenal' && s.scene.isActive());
+    if (!sz) continue;
+    const flach = [];
+    const geh = (arr) => { for (const o of arr) { flach.push(o); if (o.list) geh(o.list) } };
+    geh(sz.children.list);
+    const t = flach.find((o) => o.type === 'Text' && String(o.text || '').trim() === wort);
+    if (!t) continue;
+    const m = t.getBounds(), mx = m.x + m.width / 2, my = m.y + m.height / 2;
+    // Die KLEINSTE Flaeche, die den Namen WIRKLICH ENTHAELT — nicht die
+    // erste, und nicht eine mit Spielraum. Der erste Anlauf gab 40 Punkte
+    // Spielraum nach oben und unten; die Waffenkarten stehen 82 Punkte
+    // auseinander und sind 74 hoch, also lagen die Karte darueber und die
+    // richtige beide im Fenster, beide gleich gross — gedrueckt wurde die
+    // erste in der Liste. Das Tor meldete daraufhin „Laser gekauft →
+    // weapon=focus" und haette einen Fehler behauptet, den es nicht gibt.
+    // Spielraum gibt es jetzt nur, wenn STRENG nichts trifft.
+    const kandidaten = flach.filter((o) => o.input && o.input.enabled);
+    const trifft = (o, luft) => {
+      const q = o.getBounds();
+      return mx >= q.x - luft && mx <= q.x + q.width + luft && my >= q.y - luft && my <= q.y + q.height + luft;
+    };
+    let treffend = kandidaten.filter((o) => trifft(o, 0));
+    if (!treffend.length) treffend = kandidaten.filter((o) => trifft(o, 40));
+    treffend.sort((u, v) => (u.getBounds().width * u.getBounds().height) - (v.getBounds().width * v.getBounds().height));
+    if (!treffend[0]) return { fehler: 'keine Schaltfläche an „' + wort + '"' };
+    treffend[0].emit('pointerdown');
+    await new Promise((f) => setTimeout(f, 1500));
+    const raus = {};
+    let goldNach = goldVor, frei = null;
+    try {
+      for (const k of schluessel) raus[k] = localStorage.getItem(k);
+      goldNach = Number(localStorage.getItem('gold') || 0);
+      frei = sperre ? localStorage.getItem(sperre) : null;
+    } catch (e) {}
+    return { stufe: Number(raus[schluessel[0]] || 0), gewaehlt: raus[schluessel[1]] || '', goldVor, goldNach, frei };
+  }
+  return { fehler: 'Arsenal nicht erreichbar' };
+}, [wort, schluessel, sperre]);
+
+// Hat der Kauf ueberhaupt stattgefunden? Wenn kein Gold abgeht, wurde
+// nichts gekauft — und alles, was danach gemessen wird, sagt nichts.
+// Drei von zehn Gegenproben sind in diesem Projekt schon daran
+// gescheitert, dass der Eingriff nicht ankam und wie ein Ergebnis aussah.
+const kaufAngekommen = (k, was) => {
+  if (!(k.goldNach < k.goldVor)) { M.ungemessen(`${was}: es ist kein Gold abgegangen (${k.goldVor} → ${k.goldNach}) — der Kauf hat nicht stattgefunden, gemessen ist nichts.`); return false }
+  return true;
+};
+
 console.log('Rüstung\n');
 console.log('  gemessen am gebauten Spiel, 390 x 844 (iPhone hochkant), Layoutraum 540 x 960\n');
 
@@ -137,44 +208,17 @@ console.log('\n  B  Sekundärwaffe (Kauf über den Weg des Ladens, ohne weiteren
 for (const art of ['side', 'seeker']) {
   // Frischer Stand, dann KAUFEN wie der Laden es tut. Nicht up_sec direkt
   // setzen — genau das haette den Fehler verdeckt, um den es geht.
-  const e = await betreten({ secondary: 'none', up_sec: 0, ['unlks_' + art]: 1, up_wingman: 0 });
+  const e = await betreten({ secondary: 'none', up_sec: 0, ['unlks_' + art]: null, up_wingman: 0 });
   if (e.fehler) { M.ungemessen(`Sekundär ${art}: ${e.fehler}`); continue }
   // Den Kaufweg des Ladens nachbilden ist NICHT dasselbe wie ihn gehen.
   // Deshalb wird der Arsenal-Schirm wirklich betreten und der Knopf
   // wirklich gedrueckt — von dort aus zaehlt nur noch, was im Gefecht
   // ankommt.
-  const gekauft = await seite.evaluate(async (art) => {
-    const g = window.__game;
-    (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
-    g.scene.start('Arsenal');
-    for (let i = 0; i < 40; i++) {
-      await new Promise((f) => setTimeout(f, 250));
-      const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Arsenal' && s.scene.isActive());
-      if (!sz) continue;
-      const flach = [];
-      const geh = (arr) => { for (const o of arr) { flach.push(o); if (o.list) geh(o.list) } };
-      geh(sz.children.list);
-      const wort = { side: 'Seitengeschütze', seeker: 'Suchraketen' }[art];
-      const t = flach.find((o) => o.type === 'Text' && String(o.text || '').trim() === wort);
-      if (!t) continue;
-      const m = t.getBounds(), mx = m.x + m.width / 2, my = m.y + m.height / 2;
-      const treffend = flach.filter((o) => o.input && o.input.enabled).filter((o) => {
-        const q = o.getBounds();
-        return mx >= q.x && mx <= q.x + q.width && my >= q.y - 40 && my <= q.y + q.height + 40;
-      });
-      treffend.sort((u, v) => (u.getBounds().width * u.getBounds().height) - (v.getBounds().width * v.getBounds().height));
-      if (!treffend[0]) return { fehler: 'keine Schaltfläche an „' + wort + '"' };
-      treffend[0].emit('pointerdown');
-      await new Promise((f) => setTimeout(f, 1500));
-      let stufe = 0, gewaehlt = '';
-      try { stufe = Number(localStorage.getItem('up_sec') || 0); gewaehlt = localStorage.getItem('secondary') || ''; } catch (e) {}
-      return { stufe, gewaehlt };
-    }
-    return { fehler: 'Arsenal nicht erreichbar' };
-  }, art);
+  const gekauft = await kaufen({ side: 'Seitengeschütze', seeker: 'Suchraketen' }[art], ['up_sec', 'secondary'], 'unlks_' + art);
   if (gekauft.fehler) { M.ungemessen(`Sekundär ${art}: ${gekauft.fehler}`); continue }
+  if (!kaufAngekommen(gekauft, `Sekundär ${art}`)) continue;
   gemessen++;
-  console.log(`     ${art} gekauft → secondary="${gekauft.gewaehlt}", Stufe ${gekauft.stufe}`);
+  console.log(`     ${art} gekauft für ${gekauft.goldVor - gekauft.goldNach} G → secondary="${gekauft.gewaehlt}", Stufe ${gekauft.stufe}`);
   if (gekauft.gewaehlt !== art) { M.befund(`Sekundär ${art}: nach dem Kauf steht "${gekauft.gewaehlt}" im Spielstand.`); continue }
   if (gekauft.stufe < 1) {
     M.befund(`Sekundär ${art}: nach dem Kauf steht Stufe ${gekauft.stufe}. Beide Feuerstellen verlangen Stufe > 0 — die gekaufte Waffe feuert nicht.`);
@@ -275,6 +319,121 @@ console.log('\n  D  Ausrüstungszeile');
       if (!/BEIFLUG/.test(t)) M.befund('die Ausruestungszeile nennt den Beiflug nicht — zwei gekaufte Begleiter, und nirgends steht es.');
       if (!/SUCHRAKETEN/.test(t)) M.befund('die Ausruestungszeile nennt die Sekundaerwaffe nicht — gekauft, wirkt, und kein Wort davon auf dem Schirm.');
     }
+  }
+}
+
+// ---- E  Hauptwaffe: der Kauf muss im Gefecht ankommen ------------------
+console.log('\n  E  Hauptwaffe');
+{
+  // Der Laser ist die einzige Hauptwaffe mit Freischaltpreis — also der
+  // einzige echte KAUF. Er geht ueber den Arsenal-Knopf.
+  const e = await betreten({ weapon: '', unlkw_laser: null, up_wingman: 0, secondary: 'none', up_sec: 0, gear_inv: null });
+  if (e.fehler) M.ungemessen(`Hauptwaffe: ${e.fehler}`);
+  else {
+    const k = await kaufen('Laser', ['weapon', 'weapon'], 'unlkw_laser');
+    if (k.fehler) M.ungemessen(`Hauptwaffe: ${k.fehler}`);
+    else if (kaufAngekommen(k, 'Hauptwaffe Laser')) {
+      gemessen++;
+      console.log(`     Laser gekauft für ${k.goldVor - k.goldNach} G → weapon="${k.gewaehlt}", freigeschaltet ${k.frei}`);
+      if (k.gewaehlt !== 'laser') M.befund(`Hauptwaffe: nach dem Kauf des Lasers steht "${k.gewaehlt}" im Spielstand.`);
+      if (k.frei !== '1') M.befund(`Hauptwaffe: der Laser ist nach dem Kauf nicht freigeschaltet (unlkw_laser=${k.frei}).`);
+    }
+  }
+  // Und alle vier im Gefecht: kommt die gewaehlte Waffe wirklich an?
+  for (const w of ['spread', 'focus', 'heavy', 'laser']) {
+    const e2 = await betreten({ weapon: w, ['unlkw_' + w]: 1 });
+    if (e2.fehler) { M.ungemessen(`Hauptwaffe ${w}: ${e2.fehler}`); continue }
+    const r = await lesen(`(sz) => {
+      const vor = sz.bullets.countActive(true);
+      for (let i = 0; i < 4; i++) sz.fire();
+      return { waffe: sz.weapon, textur: sz.bulletTex, bahnen: sz.bahnen, geschosse: sz.bullets.countActive(true) - vor, strahl: sz.strahlBreite };
+    }`);
+    if (r.fehler) { M.ungemessen(`Hauptwaffe ${w}: ${r.fehler}`); continue }
+    gemessen++;
+    const v = r.wert;
+    console.log(`     ${w} → Waffe "${v.waffe}", Textur ${v.textur}, ${v.bahnen} Bahnen, ${v.geschosse} Geschosse`);
+    if (v.waffe !== w) M.befund(`Hauptwaffe: "${w}" gewaehlt, im Gefecht laeuft "${v.waffe}".`);
+    // Der Laser feuert keine Geschosse — er ist ein Strahl. Alle anderen
+    // muessen etwas losschicken, sonst ist die gekaufte Waffe stumm.
+    else if (w !== 'laser' && v.geschosse <= 0) M.befund(`Hauptwaffe ${w}: vier Salven, ${v.geschosse} Geschosse. Die gekaufte Waffe feuert nicht.`);
+  }
+}
+
+// ---- F  Zweiter Spezial-Slot ------------------------------------------
+console.log('\n  F  Zweiter Spezial-Slot');
+for (const frei of [0, 1]) {
+  const e = await betreten({ slot2: frei, gadget: 'emp', gadget2: 'shield', unlkg_shield: 1, unlkg_emp: 1 });
+  if (e.fehler) { M.ungemessen(`Slot 2 (${frei}): ${e.fehler}`); continue }
+  const r = await lesen(`(sz) => sz.slots.map((s) => s.key)`);
+  if (r.fehler) { M.ungemessen(`Slot 2 (${frei}): ${r.fehler}`); continue }
+  gemessen++;
+  console.log(`     slot2=${frei} → Knoepfe ${JSON.stringify(r.wert)}`);
+  if (frei === 1 && r.wert.length !== 2) M.befund(`Zweiter Spezial-Slot: freigeschaltet und ein zweites Spezial gewaehlt, aber ${r.wert.length} Knopf/Knoepfe im Gefecht.`);
+  if (frei === 0 && r.wert.length !== 1) M.befund(`Zweiter Spezial-Slot: NICHT freigeschaltet, aber ${r.wert.length} Knoepfe im Gefecht.`);
+}
+
+// ---- G  Ein frisch gekauftes Spezial wirkt auf Grundstaerke -----------
+//
+// Derselbe Verdacht wie bei der Sekundaerwaffe: wirkt eine Sache auf
+// Stufe 0 ueberhaupt? Bei den Spezialen ja — Ii(0) = 1 und vi(0) = 1 —,
+// aber das ist eine Behauptung, bis es gemessen ist.
+console.log('\n  G  Spezial frisch gekauft (Stufe 0) gegen ausgebaut (Stufe 2)');
+{
+  const zahlen = [];
+  for (const stufe of [0, 2]) {
+    const e = await betreten({ gadget: 'shield', unlkg_shield: 1, gadlv_shield: stufe, slot2: 0, gear_inv: null });
+    if (e.fehler) { M.ungemessen(`Spezial Stufe ${stufe}: ${e.fehler}`); continue }
+    const r = await lesen(`(sz) => {
+      const s = sz.slots.find((s) => s.key === 'shield');
+      if (!s) return { fehler: 'kein Steckplatz' };
+      s.readyAt = 0; sz.useGadget(s);
+      return { stufe: s.level, staerke: s.power, abkling: s.cdMs, wirkt: sz.player.isShielded(sz.time.now), dauer: Math.round(s.wirktBis - sz.time.now) };
+    }`);
+    if (r.fehler || (r.wert && r.wert.fehler)) { M.ungemessen(`Spezial Stufe ${stufe}: ${r.fehler || r.wert.fehler}`); continue }
+    gemessen++;
+    zahlen.push(r.wert);
+    console.log(`     Stufe ${stufe} → wirkt ${r.wert.wirkt ? 'ja' : 'NEIN'}, ${r.wert.dauer} ms, Abklingzeit ${Math.round(r.wert.abkling/1e3)} s`);
+    if (!r.wert.wirkt) M.befund(`Spezial auf Stufe ${stufe}: nach dem Ausloesen wirkt nichts — frisch gekauft und stumm.`);
+  }
+  // Und die Gegenprobe zur Stufe selbst: der Ausbau MUSS etwas aendern,
+  // sonst misst die Pruefung die Stufe gar nicht (Regel 13).
+  if (zahlen.length === 2 && !(zahlen[1].dauer > zahlen[0].dauer))
+    M.befund(`Spezial: Stufe 2 wirkt ${zahlen[1].dauer} ms, Stufe 0 ${zahlen[0].dauer} ms. Der Ausbau aendert nichts.`);
+}
+
+// ---- H  Ein angelegtes Modul wirkt ------------------------------------
+//
+// Gemessen an der KRITCHANCE, nicht am Schaden: der Schaden wird gerundet
+// (Grundwert 2, mit +10 % immer noch 2), und eine gerundete Zahl kann
+// keine Wirkung bezeugen. Ein erster Anlauf hat genau das getan und fuer
+// alle drei Faelle „2" gemeldet.
+console.log('\n  H  Module');
+{
+  const modul = (id, eq, rar) => ({ id, eq, rarity: rar, type: 'weapon', set: 'brand', lvl: 0, stats: { crit: 20 } });
+  const messe = async (inv, was) => {
+    const e = await betreten({ gear_inv: JSON.stringify(inv), weapon: '', up_wingman: 0, secondary: 'none', up_sec: 0 });
+    if (e.fehler) return null;
+    const r = await lesen(`(sz) => ({ crit: sz.gearCrit, critMult: sz.gearCritMult })`);
+    if (r.fehler) return null;
+    console.log(`     ${was}: Kritchance ${(r.wert.crit * 100).toFixed(1)} %`);
+    return r.wert;
+  };
+  const ohne = await messe([], 'nichts besessen        ');
+  const eins = await messe([modul(1, 0, 'epic')], '1 angelegt, 0 im Sack  ');
+  const sack = await messe([modul(1, 0, 'epic'), modul(2, -1, 'epic'), modul(3, -1, 'epic'), modul(4, -1, 'epic'), modul(5, -1, 'epic')], '1 angelegt, 4 im Sack  ');
+  const nur = await messe([modul(1, -1, 'epic'), modul(2, -1, 'epic'), modul(3, -1, 'epic'), modul(4, -1, 'epic'), modul(5, -1, 'epic')], '0 angelegt, 5 im Sack  ');
+  if (!ohne || !eins || !sack || !nur) M.ungemessen('Module: nicht alle vier Faelle gemessen.');
+  else {
+    gemessen++;
+    // Der eine Satz, der unstrittig ist: ein ANGELEGTES Modul muss wirken.
+    if (!(eins.crit > ohne.crit)) M.befund(`Modul: angelegt ${(eins.crit*100).toFixed(1)} %, ohne Modul ${(ohne.crit*100).toFixed(1)} % Kritchance. Das angelegte Modul wirkt nicht.`);
+    // Und der, der es auch ist: was nur herumliegt, ist nicht angelegt.
+    if (nur.crit > ohne.crit) M.befund(`Modul: fuenf NICHT angelegte Module heben die Kritchance auf ${(nur.crit*100).toFixed(1)} %. Was im Sack liegt, darf nicht wirken.`);
+    // Der Sack-Zuschlag ist KEIN Befund, sondern eine Frage an den Bau:
+    // er steht nirgends auf dem Schirm. Gemeldet wird die Zahl.
+    if (sack.crit !== eins.crit)
+      console.log(`     (i) vier NICHT angelegte Module heben die Kritchance von ${(eins.crit*100).toFixed(1)} auf ${(sack.crit*100).toFixed(1)} %.`
+        + ` Das ist der Tier-Bonus, und er zaehlt den ganzen Besitz. Auf dem Modul-Schirm steht davon nichts.`);
   }
 }
 
