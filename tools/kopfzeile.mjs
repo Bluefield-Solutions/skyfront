@@ -38,15 +38,18 @@
   ein Tor, das die Formel wiederholt, bezeugt sie, statt sie zu pruefen
   (Regel 17). `--ohne-naht` nimmt die Naht weg und verlangt die Rueckgabe 2.
 
-  GEMESSEN WIRD ZWEIMAL — ohne Boss und mit. Wieviele Zustaende es gibt,
-  wird vorher aufgezaehlt, nicht unterwegs bemerkt (Regel 47).
+  GEMESSEN WIRD DREIMAL — ohne Boss, mit Boss, und im ENDLOSMODUS. Der
+  zaehlt als eigener Zustand, weil die Kopfzeile dort etwas anderes zeigt:
+  „WELLE 3" statt „ZIEL 0/109 · 0%", mit eigener Unterlage und eigener
+  Breite. Bis v60 waren es zwei — das Tor hat seine eigene Regel 47 auf
+  sich selbst nicht angewandt.
 */
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-const M = messstelle('Kopfzeile', 'im Gefecht deckt nichts etwas anderes zu, ohne und mit Boss.');
+const M = messstelle('Kopfzeile', 'im Gefecht deckt nichts etwas anderes zu — ohne Boss, mit Boss und im Endlosmodus.');
 const BILD = process.argv.includes('--bild');
 // Zwei Layoutpunkte Spiel, wie im Ueberlappungstor: Textrahmen tragen Luft,
 // und zwei Zeilen, die sich um einen Punkt beruehren, sind keine Deckung.
@@ -179,10 +182,28 @@ console.log('  gemessen am gebauten Spiel, 390 x 844 (iPhone hochkant), Layoutra
 const ZUSTAENDE = [
   { name: 'ohne Boss', boss: false },
   { name: 'mit Boss', boss: true },
+  { name: 'Endlos', boss: false, endlos: true },
 ];
 let gemessen = 0;
 
 for (const z of ZUSTAENDE) {
+  if (z.endlos) {
+    // Der Endlosmodus ist ein eigener Sektor, kein Zustand des laufenden —
+    // er wird betreten, nicht herbeigeschaltet.
+    const drin2 = await seite.evaluate(async () => {
+      const g = window.__game;
+      (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+      g.scene.start('Game', { mode: 'endless' });
+      for (let i = 0; i < 40; i++) {
+        await new Promise((f) => setTimeout(f, 250));
+        const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
+        if (sz && sz.player) return !!sz.endless;
+      }
+      return false;
+    });
+    if (!drin2) { M.ungemessen('Endlos: der Modus ist nicht hergestellt — der Zustand „Endlos" ist nicht gemessen.'); continue }
+    await seite.waitForTimeout(3500);
+  }
   if (z.boss) {
     const kam = await seite.evaluate(async () => {
       const g = window.__game;

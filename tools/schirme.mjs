@@ -16,8 +16,18 @@
 // Schriftgrenze meldet dann jede zweite Zeile als unlesbar (300 Phantome),
 // und die Randpruefung findet nie etwas, weil in den doppelt so grossen Raum
 // alles hineinpasst. Beides ist genau so passiert.
-import { mkdirSync, writeFileSync } from 'fs';
+//
+// SEIT v61 HAENGT DIESES TOR IN DER TORKETTE. Bis dahin war es ein
+// Handbefehl — und damit das einzige Tor, das die Pause misst, ohne je von
+// selbst zu laufen. Ein Tor, das niemand aufruft, schuetzt nichts; es ist
+// eine Behauptung mit Ablaufdatum. Dafuer musste es zuerst die drei
+// Ausgaenge lernen (Regel 40/42): 0 gemessen und ohne Befund, 1 Befund,
+// 2 NICHT gemessen. Vorher sagte es bei fehlendem Playwright „0" — also
+// „bestanden" ueber etwas, das nie angesehen wurde.
+import { mkdirSync, writeFileSync, existsSync } from 'fs';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
+const M = messstelle('Schirme', 'auf elf Schirmen ragt nichts heraus, ist nichts zu klein und liegt nichts uebereinander.');
 const BILDER = process.argv.includes('--bilder');
 const ANZEIGE = 390;                 // Breite auf dem Zielgeraet
 const SCHRIFT_MIN = 9;               // Anzeigepunkte, darunter unlesbar
@@ -25,18 +35,31 @@ const RAND = 6;                      // so weit darf etwas ueber den Rand ragen
 const WINZIG = 4;                    // kleiner als das ist kein Layout, sondern ein Punkt
 const UEBER_Y = 6;                   // so viel Hoehe braucht eine echte Zeilenkollision
 
-// Reihenfolge wie im Spiel durchlaufen. Boot ist nur der Vorlader, Pause
-// braucht ein laufendes Gefecht.
+// ZWOELF SZENEN HAT DAS SPIEL: Boot · Menu · Options · Hangar · Workshop ·
+// Arsenal · Levels · Briefing · Loadout · Gear · Game · Pause. Boot ist der
+// Vorlader und hat keinen Schirm; die uebrigen elf werden hier gemessen.
+//
+// Bis v60 waren es NEUN. Im Kommentar stand „Pause braucht ein laufendes
+// Gefecht" — als Begruendung fuer eine Ausnahme, und dann kam niemand
+// zurueck. Genau das meint Regel 47: ein Tor, das eine von zwei Tueren
+// prueft, meldet gruen ueber ein Haus, aus dem man nicht herauskommt. Der
+// Pausenschirm hat drei Knoepfe (Fortsetzen, Level neu starten, Zum
+// Hangar) und wurde von KEINEM Tor je angesehen.
+//
+// Das Gefecht laeuft hier ohnehin — von dort ist die Pause einen Tipp weit
+// entfernt. Die Ausrede war also nie eine.
 const SZENEN = ['Menu', 'Options', 'Hangar', 'Workshop', 'Arsenal', 'Levels', 'Briefing', 'Loadout', 'Gear'];
+const SZENEN_GESAMT = SZENEN.length + 2;   // + Gefecht + Pause
 // Das Gefecht laesst sich nicht einfach starten wie ein Menue — es muss
 // gespielt werden. Und darin zaehlt nur der HUD: Schadenszahlen und
 // Aufsammel-Texte fliegen durchs Bild und duerfen sich ueberlappen, das ist
 // ihre Art. Der HUD liegt auf Tiefe 95 und darueber, gemessen.
 const HUD_TIEFE = 90;
 
+if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
 try { ({ chromium } = await import('playwright')); }
-catch { console.log('  (—) Schirme: Playwright nicht gefunden — uebersprungen.'); process.exit(0); }
+catch { M.abbruch('Playwright nicht gefunden.'); }
 if (BILDER) mkdirSync('dist/schirme', { recursive: true });
 
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
@@ -47,7 +70,6 @@ seite.on('pageerror', e => laufFehler.push(String(e)));
 await seite.goto('file://' + process.cwd() + '/dist/Skyfront.html');
 for (let i = 0; i < 100; i++) { if (await seite.evaluate(() => !!(window.__game && window.__game.scene))) break; await seite.waitForTimeout(250); }
 await seite.waitForTimeout(2500);
-
 const r = await seite.evaluate(() => { const b = window.__game.canvas.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; });
 // Layoutbreite = Pufferbreite geteilt durch den Kamerazoom.
 const layout = await seite.evaluate(() => {
@@ -57,9 +79,22 @@ const layout = await seite.evaluate(() => {
 const massstab = ANZEIGE / layout.W;
 console.log(`  Layoutraum ${layout.W} x ${layout.H} (Kamerazoom ${layout.zoom}) → ${massstab.toFixed(3)} Anzeigepunkte je Layoutpunkt\n`);
 
+// DIE NAHT, und sie wird erst JETZT gesetzt: `getScene` haengt auch der
+// Szenenverwaltung von Phaser an. Vor dem Hochlauf entfernt, kommt gar
+// keine Szene hoch und das Werkzeug stuerzt beim Ausmessen des
+// Layoutraums ab — ein Absturz ist keine Rueckgabe 2, sondern ein Tor,
+// das nichts sagt und dabei laut ist.
+if (OHNE_NAHT) await seite.evaluate(() => {
+  const echt = window.__game.scene.getScene.bind(window.__game.scene);
+  window.__game.scene.getScene = (k) => (typeof k === 'string' ? null : echt(k));
+});
+
 // Beurteilt eine aufgenommene Szene. Drei Fragen, in dieser Reihenfolge:
 // was ragt aus dem Bild, was ist zu klein, was liegt uebereinander.
+let gemessen = 0;
+
 function pruefe(key, z, neueFehler) {
+  gemessen++;
   if (neueFehler.length) befunde.push(`${key}: ${neueFehler.length} Laufzeitfehler — ${neueFehler[0].slice(0, 100)}`);
 
   // 1. Was ragt aus dem Bild? Ein Stueck von 1 x 1 Punkt ist kein Layout —
@@ -144,7 +179,18 @@ for (const key of SZENEN) {
   const z = await seite.evaluate((key) => {
     const g = window.__game;
     const s = g.scene.getScene(key);
-    if (!s || !s.scene.isActive()) return { fehlt: true };
+    // ZWEI VERSCHIEDENE DINGE, und bis v61 hiessen sie beide „Szene laesst
+    // sich nicht starten": die Szene LAEUFT NICHT (dann sagt das Spiel
+    // etwas Falsches — Befund), oder sie ist fuer das Werkzeug NICHT
+    // LESBAR (dann hat der Apparat keine Zahl geliefert — Rueckgabe 2).
+    // Die Gegenprobe --ohne-naht hat genau diesen Unterschied aufgedeckt:
+    // sie nimmt die Lesbarkeit weg, und das Tor meldete neun Befunde
+    // ueber ein voellig gesundes Spiel (Regel 42).
+    // Wenn die Szene gar nicht zu HOLEN ist, kann das Werkzeug auch nicht
+    // sagen, ob sie laeuft — `isActive` geht durch dieselbe Verwaltung.
+    // Also: nicht holbar = nicht gemessen, ohne Umweg ueber eine Vermutung.
+    if (!s) return { unlesbar: true };
+    if (!s.scene.isActive()) return { fehlt: true };
     const stuecke = [];
     const geh = (liste, tiefe) => {
       for (const o of liste) {
@@ -166,6 +212,7 @@ for (const key of SZENEN) {
     return { W: g.renderer.width / (c.zoom || 1), H: g.renderer.height / (c.zoom || 1), stuecke };
   }, key);
 
+  if (z.unlesbar) { M.ungemessen(`${key}: die Szene ist nicht auslesbar — nicht gemessen.`); continue; }
   if (z.fehlt) { befunde.push(`${key}: Szene laesst sich nicht starten`); continue; }
   pruefe(key, z, laufFehler.slice(vorher));
   if (BILDER) writeFileSync(`dist/schirme/${key}.png`, await seite.screenshot({ clip: r }));
@@ -186,13 +233,15 @@ for (const key of SZENEN) {
     if (await seite.evaluate(() => window.__game.scene.scenes.some(s => s.scene.key === 'Game' && s.scene.isActive()))) { drin = true; break; }
     await seite.waitForTimeout(250);
   }
-  if (!drin) befunde.push('Gefecht: kommt nicht ins Spiel');
+  if (!drin) OHNE_NAHT ? M.ungemessen('Gefecht: ohne Messstelle nicht erreichbar — nicht gemessen.') : befunde.push('Gefecht: kommt nicht ins Spiel');
   else {
     // Die Einblendung "ENDLOS-MODUS" steht die ersten Sekunden ueber allem.
     // Sie ist Absicht und ginge sonst als Ueberlappung durch.
     await seite.waitForTimeout(6000);
     const z = await seite.evaluate((tiefe) => {
-      const g = window.__game, s = g.scene.getScene('Game'), c = s.cameras.main;
+      const g = window.__game, s = g.scene.getScene('Game');
+      if (!s) return null;
+      const c = s.cameras.main;
       const stuecke = [];
       const geh = (liste) => {
         for (const o of liste) {
@@ -213,8 +262,49 @@ for (const key of SZENEN) {
       geh(s.children.list);
       return { W: g.renderer.width / (c.zoom || 1), H: g.renderer.height / (c.zoom || 1), stuecke };
     }, HUD_TIEFE);
-    pruefe('Gefecht', z, laufFehler.slice(vorher));
-    if (BILDER) writeFileSync('dist/schirme/Gefecht.png', await seite.screenshot({ clip: r }));
+    if (!z) M.ungemessen('Gefecht: die Szene ist nicht auslesbar — nicht gemessen.');
+    else {
+      pruefe('Gefecht', z, laufFehler.slice(vorher));
+      if (BILDER) writeFileSync('dist/schirme/Gefecht.png', await seite.screenshot({ clip: r }));
+    }
+
+    // Und aus dem laufenden Gefecht heraus die PAUSE. Sie liegt UEBER dem
+    // Gefecht: gemessen wird nur, was zu ihr gehoert — sonst zaehlte der
+    // ganze Schirm darunter als Ueberlappung.
+    const vorherP = laufFehler.length;
+    await seite.evaluate(() => {
+      const g = window.__game, s = g.scene.getScene('Game');
+      s && typeof s.pauseGame === 'function' && s.pauseGame();
+    });
+    await seite.waitForTimeout(1800);
+    const zp = await seite.evaluate(() => {
+      const g = window.__game, s = g.scene.getScene('Pause'), spiel = g.scene.getScene('Game');
+      if (!s || !spiel || !s.scene.isActive()) return null;
+      const c = spiel.cameras.main;
+      const stuecke = [];
+      const geh = (liste) => {
+        for (const o of liste) {
+          if (o.visible === false || (o.alpha !== undefined && o.alpha < 0.05)) continue;
+          if (o.list && o.type === 'Container') { geh(o.list); continue; }
+          let b = null;
+          try { b = o.getBounds ? o.getBounds() : null; } catch (e) {}
+          if (!b || !isFinite(b.x)) continue;
+          stuecke.push({
+            art: o.type,
+            text: (typeof o.text === 'string' ? o.text : '').slice(0, 40),
+            gr: o.style && o.style.fontSize ? parseFloat(o.style.fontSize) * (o.scaleY || 1) : 0,
+            x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height),
+          });
+        }
+      };
+      geh(s.children.list);
+      return { W: g.renderer.width / (c.zoom || 1), H: g.renderer.height / (c.zoom || 1), stuecke };
+    });
+    if (!zp) OHNE_NAHT ? M.ungemessen('Pause: ohne Messstelle nicht auslesbar — nicht gemessen.') : befunde.push('Pause: der Schirm kommt aus dem laufenden Gefecht nicht hoch');
+    else {
+      pruefe('Pause', zp, laufFehler.slice(vorherP));
+      if (BILDER) writeFileSync('dist/schirme/Pause.png', await seite.screenshot({ clip: r }));
+    }
   }
 }
 
@@ -224,9 +314,6 @@ if (hinweise.length) {
   console.log(`\n  ${hinweise.length} Zeile(n) unter dem Richtwert von ${SCHRIFT_MIN} Anzeigepunkten:`);
   hinweise.forEach(h => console.log('   – ' + h));
 }
-if (befunde.length) {
-  console.error(`\n✗ Schirme: ${befunde.length} Befund(e)`);
-  befunde.forEach(b => console.error('   · ' + b));
-  process.exit(1);
-}
-console.log('✓ Schirme: nichts ragt heraus, nichts liegt uebereinander.');
+for (const b of befunde) M.befund(b);
+if (gemessen < SZENEN_GESAMT) M.ungemessen(`nur ${gemessen} von ${SZENEN_GESAMT} Schirmen gemessen.`);
+M.urteil(`\n  ${gemessen} von ${SZENEN_GESAMT} Schirmen gemessen.`);

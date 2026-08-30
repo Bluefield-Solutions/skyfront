@@ -63,7 +63,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-const M = messstelle('Überlappung', 'kein Text und kein Bild liegt auf einem anderen.');
+const M = messstelle('Überlappung', 'auf neun Menueschirmen liegt kein Text und kein Bild auf einem anderen.');
 const BILD = process.argv.includes('--bild');
 // Zwei Weltpunkte Spiel: Textrahmen tragen etwas Luft, und zwei Zeilen, die
 // sich um einen Punkt beruehren, sind keine Ueberdeckung. Bei 390 px Breite
@@ -73,6 +73,13 @@ const SPIEL = 2;
 // Was so gross ist, ist Unterlage und nicht Inhalt.
 const GRUND_ANTEIL = .45;
 
+// NEUN MENUESCHIRME, vorher aufgezaehlt (Regel 47). Bis v60 waren es acht:
+// `Gear` fehlte, ohne dass es jemandem auffiel — er wird von
+// tools/schirme.mjs gemessen, und das sah nach Deckung aus. Nur misst
+// schirme.mjs Rand, Schriftgroesse und Ueberlappung OHNE die Regeln A/B/C
+// aus der Zeichenreihenfolge. Ein Bild, das dort ein Wort zudeckt, faellt
+// nur hier auf. Zwei Tore, die sich gegenseitig fuer zustaendig halten,
+// pruefen zusammen weniger als eines.
 const SCHIRME = [
   { key: 'Menu' },
   { key: 'Levels' },
@@ -81,6 +88,7 @@ const SCHIRME = [
   { key: 'Loadout' },
   { key: 'Arsenal' },
   { key: 'Workshop' },
+  { key: 'Gear' },
   { key: 'Options' },
 ];
 

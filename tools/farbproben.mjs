@@ -107,6 +107,13 @@ const PROBEN = [
     ['this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),\n          dx: A,\n          fires: !0\n        }))',
      'this.wingmen = [-48, 48].map((A, m) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(m < q.upg("wingman") ? .32 : .24).setTint(m < q.upg("wingman") ? 10477823 : 9090252).setDepth(9),\n          dx: A,\n          fires: m < q.upg("wingman")\n        }))'],
     true, 'ruestung', 'gezeichnet'],
+  // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
+  // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
+  // gesehen — die Pause war der einzige Schirm, den keines betrat.
+  ['Pausenschirm: zwei Knoepfe uebereinander', '✗',
+    ['}), Tt(this, J / 2, rt * .535, 300, 56, "↻  Level neu starten"',
+     '}), Tt(this, J / 2, rt * .44, 300, 56, "↻  Level neu starten"'],
+    true, 'schirme', 'Pause'],
   // Der Kauf der Hauptwaffe merkt sich nichts: dann steht nach dem
   // Bezahlen immer noch die alte Waffe im Spielstand. Derselbe Fehlertyp
   // wie bei der Sekundaerwaffe, nur an der anderen Stelle.
@@ -463,6 +470,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'lage' ? ['tools/ueberlappung.mjs']
     : tor === 'kopf' ? ['tools/kopfzeile.mjs']
     : tor === 'ruestung' ? ['tools/ruestung.mjs']
+    : tor === 'schirme' ? ['tools/schirme.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -513,7 +521,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -605,6 +613,18 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', 'window.__game fehlt'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // Ohne die Anzeigeliste kann das Schirme-Tor keinen Schirm auslesen. Bis
+  // v60 meldete es dann NEUN BEFUNDE ueber ein voellig gesundes Spiel
+  // („Szene laesst sich nicht starten") — der Apparat war ausgefallen, die
+  // Schuld bekam das Spiel. Genau die Trennlinie aus Regel 42.
+  name: 'Schirme ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/schirme.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'nicht auslesbar', '0 von 11'],
+  darfNichtEnthalten: ['laesst sich nicht starten'],
+  beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen" statt Befunde ueber ein gesundes Spiel',
 }, {
   // DIE PROBE ZUM AUSLIEFERUNGSTOR.
   //

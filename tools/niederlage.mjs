@@ -40,11 +40,28 @@
   "Niederlage" und hat gemessen, was sein Name sagt. Ein Tor, das eine von
   zwei Tueren prueft, meldet gruen ueber ein Haus, aus dem man nicht
   herauskommt.
+
+  UND SEIT v61 DIE DRITTE TUER.
+  Regel 47 verlangt, VORHER aufzuzaehlen, wieviele Zustaende es gibt. Getan
+  hat das niemand — der Nachtrag aus v56 hat eine zweite Tuer angebaut und
+  wieder aufgehoert zu zaehlen. Es sind DREI:
+
+    1. Niederlage in der Kampagne      (seit v44)
+    2. Sieg in der Kampagne            (seit v56)
+    3. Niederlage im ENDLOSMODUS       (seit v61)
+
+  Der Endlosmodus hat einen eigenen Zweig in gameOver() — eigene
+  Ueberschrift ("ENDLOS BEENDET"), eigene Auswertung, eigene Knoepfe. Er
+  wurde von keinem Tor je betreten. Einen Sieg gibt es dort nicht, also
+  bleibt es bei drei.
 */
 import { existsSync } from 'node:fs';
 import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-const M = messstelle('Ergebnis', 'aus BEIDEN Ergebnisbildschirmen fuehrt ein Weg heraus.');
+const M = messstelle('Ergebnis', 'aus ALLEN DREI Ergebnisbildschirmen fuehrt ein Weg heraus.');
+// Vorher aufgezaehlt, nicht unterwegs bemerkt (Regel 47).
+const TUEREN = ['Niederlage (Kampagne)', 'Sieg (Kampagne)', 'Niederlage (Endlos)'];
+let tuerenGemessen = 0;
 // 44 Anzeigepunkte sind das Daumenmass, mit dem auch npm run browser rechnet.
 const DAUMEN = 44;
 
@@ -181,5 +198,51 @@ else {
   }
 }
 
+// ---- UND DIE DRITTE TUER: NIEDERLAGE IM ENDLOSMODUS ------------------------
+//
+// Eigener Zweig in gameOver(), eigene Ueberschrift, eigene Knoepfe — und
+// nie von einem Tor betreten. Einen Sieg gibt es im Endlosmodus nicht.
+console.log('\nEndlos — der Weg aus dem Ergebnisbildschirm\n');
+const endlos = await seite.evaluate(async () => {
+  const g = window.__game;
+  g.scene.getScenes(true).forEach((z) => z.scene.key !== 'Boot' && z.scene.stop());
+  g.scene.start('Game', { mode: 'endless' });
+  await new Promise((f) => setTimeout(f, 1500));
+  const spiel = g.scene.getScene('Game');
+  if (!spiel) return { fehler: 'Endlos-Gefecht nicht erreichbar' };
+  for (let i = 0; i < 20 && !spiel.player; i++) await new Promise((f) => setTimeout(f, 500));
+  if (!spiel.player) return { fehler: 'kein Spieler im Endlosmodus' };
+  if (!spiel.endless) return { fehler: 'die Szene laeuft NICHT im Endlosmodus — der Zustand ist nicht hergestellt' };
+  try { spiel.player.hp = 0; spiel.gameOver(); } catch (e) { return { fehler: 'gameOver(): ' + e.message }; }
+  await new Promise((f) => setTimeout(f, 3500));
+  return {
+    over: spiel.over,
+    endless: spiel.endless,
+    knoepfe: (spiel.endeKnoepfe || []).map((k) => ({ x: k.x, y: k.y, w: k.w, h: k.h })),
+    texte: spiel.children.list.filter((o) => o.type === 'Text' && o.visible).map((o) => String(o.text || '')).filter(Boolean),
+  };
+});
+if (endlos.fehler) M.ungemessen(`der Endlosmodus ist nicht messbar: ${endlos.fehler}`);
+else {
+  if (OHNE_NAHT) endlos.knoepfe = [];
+  tuerenGemessen++;
+  const ueberschrift = endlos.texte.find((t) => /ENDLOS|ABGESCHOSSEN/.test(t)) || '(keine)';
+  console.log(`  over: ${endlos.over} · Endlos: ${endlos.endless} · Tippflaechen: ${endlos.knoepfe.length} · Ueberschrift: ${JSON.stringify(ueberschrift)}`);
+  if (!endlos.over) M.befund('nach dem Abschuss im Endlosmodus steht das Spiel nicht auf "over".');
+  if (!endlos.knoepfe.length)
+    M.befund('der Endlos-Ergebnisbildschirm hat KEINE Tippflaeche. Der Handler der Szene verwirft bei "over" '
+      + 'jeden Tipp, der keinen Knopf trifft — man kommt aus dem Endlosmodus nicht mehr heraus.');
+  else {
+    const k = endlos.knoepfe[endlos.knoepfe.length - 1];
+    await seite.touchscreen.tap(r.x + r.w * (k.x / schirm.breite), r.y + r.h * (k.y / schirm.hoehe));
+    await seite.waitForTimeout(2500);
+    const raus = await seite.evaluate(() => window.__game.scene.scenes.filter((s) => s.scene.isActive()).map((s) => s.scene.key));
+    console.log(`  nach dem Tipp: ${raus.join(', ')}`);
+    if (raus.includes('Game'))
+      M.befund('der Tipp auf dem Endlos-Ergebnisbildschirm fuehrt nicht aus dem Gefecht heraus.');
+  }
+}
+
 await browser.close();
+console.log(`\n  ${TUEREN.length} Tueren aufgezaehlt: ${TUEREN.join(' · ')}`);
 M.urteil();

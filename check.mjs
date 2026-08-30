@@ -157,7 +157,7 @@ const TORE = [
   { schluessel: 'vorwaermen', lauf: 'Vorwaermen (Backvorgaenge im Gefecht)', zeile: 'Vorwaermen (3 Sektoren)', datei: 'tools/vorwaermen.mjs' },
   // Kommt man aus dem Ergebnisbildschirm wieder heraus? Der Rauchtest
   // prueft, dass man ins Spiel KOMMT — hinaus hat nie jemand geprueft.
-  { schluessel: 'niederlage', lauf: 'Ergebnis (Weg heraus, Sieg und Niederlage)', zeile: 'Ergebnis (Sieg + Niederlage)', datei: 'tools/niederlage.mjs' },
+  { schluessel: 'niederlage', lauf: 'Ergebnis (Weg heraus, Sieg und Niederlage)', zeile: 'Ergebnis (3 Türen)', datei: 'tools/niederlage.mjs' },
   { schluessel: 'steuerung',   lauf: 'Steuerung (30, 60, 120 Hz)',          zeile: 'Steuerung (3 Bildraten)',    datei: 'tools/steuerung.mjs' },
   // Und zuletzt das, was ausgeliefert wird. Bis v51 hat die Torkette den
   // Pages-Bau NIE gebaut: v49, v50 und v51 gingen hier gruen durch, landeten
@@ -171,13 +171,19 @@ const TORE = [
   // gefragt. Gefunden hat es der Nutzer, mit einem Bildschirmfoto: ein
   // Gegnerbild von 162 x 401 Weltpunkten quer ueber der Level-Vorschau,
   // in einer Spalte, die 88 breit ist.
-  { schluessel: 'ueberlappung', lauf: 'Überlappung (8 Menüschirme)', zeile: 'Überlappung (8 Menüs)', datei: 'tools/ueberlappung.mjs' },
+  { schluessel: 'ueberlappung', lauf: 'Überlappung (9 Menüschirme)', zeile: 'Überlappung (9 Menüs)', datei: 'tools/ueberlappung.mjs' },
+  // ELF SCHIRME: neun Menues, das Gefecht und die PAUSE. Dieses Tor gab es
+  // seit v40 — als Handbefehl, den niemand aufrief. Damit war es das
+  // einzige Tor, das die Pause misst, und zugleich das einzige, das nie
+  // lief. Regel 47 in ihrer stillsten Form: nicht eine halb gepruefte
+  // Tuer, sondern ein Waechter ohne Dienstplan.
+  { schluessel: 'schirme', lauf: 'Schirme (11 Schirme inkl. Pause)', zeile: 'Schirme (11 inkl. Pause)', datei: 'tools/schirme.mjs' },
   // Dasselbe im GEFECHT — und dort gab es die zweite Tuer, nach der
   // niemand gefragt hat: die Bossleiste lag seit ihrer Einfuehrung ueber
   // der Kopfzeilentafel, der Erfahrungsbalken des Flugzeugs in jedem
   // Bosskampf darunter. Das Ueberlappungstor misst acht Menues und haette
   // darueber ewig gruen gemeldet (Regel 47).
-  { schluessel: 'kopfzeile', lauf: 'Kopfzeile (Gefecht, ohne und mit Boss)', zeile: 'Kopfzeile (Gefecht)', datei: 'tools/kopfzeile.mjs' },
+  { schluessel: 'kopfzeile', lauf: 'Kopfzeile (Gefecht: ohne Boss, mit Boss, Endlos)', zeile: 'Kopfzeile (3 Zustände)', datei: 'tools/kopfzeile.mjs' },
   // Wirkt, was gekauft wurde? Die Rueckmeldung „gekaufte Drohnen und
   // Beiflugschiffe muessten auch sauber mitschiessen" hatte in beiden
   // Teilen recht — beim Beiflug an der Darstellung, bei der

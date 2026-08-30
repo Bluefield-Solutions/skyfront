@@ -46,7 +46,8 @@ npm run untergrund Kantenenergie der dreizehn Biome und die Beruhigung
 npm run feuerkraft die Leiter gegen den Wellenplan aller 120 Sektoren
 npm run speicher   was im Gefecht an Texturen im Speicher liegt
 npm run rhythmus   hat ein Sektor eine Form, oder ist er eine Rampe?
-npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
+npm run schirme    ELF Schirme nachmessen (inkl. Pause): Rand, Ueberlappung,
+                   Schriftgroesse — haengt seit v61 in der Torkette
 npm run ueberlappung  acht MENUEschirme: deckt etwas etwas anderes zu?
 npm run kopfzeile  dasselbe im GEFECHT, ohne und mit Boss
 npm run ruestung   wirkt, was gekauft wurde? Und sieht man es? (acht Wege)
@@ -58,8 +59,8 @@ npm run package    verteilbares Skyfront-dist.zip
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
 `farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` → `rhythmus`
-→ `ueberlappung` → `kopfzeile` → `ruestung` → `auslieferung` → Boot-Test des
-Masters → `dist/check-report.md`.
+→ `ueberlappung` → `schirme` → `kopfzeile` → `ruestung` → `auslieferung` →
+Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -372,7 +373,15 @@ Jede hat mindestens eine Runde gekostet.
    tippen.
 
 47. **Ein Tor, das eine von zwei Tueren prueft, meldet gruen ueber ein Haus,
-   aus dem man nicht herauskommt.** Das Tor hiess „Niederlage" und hat
+   aus dem man nicht herauskommt.** (v61: auf alle Tore angewandt —
+   `schirme` 10 → 11 Schirme (+ Pause), `ueberlappung` 8 → 9 Menues
+   (+ Gear), `kopfzeile` 2 → 3 Zustaende (+ Endlos), `Ergebnis` 2 → 3
+   Tueren (+ Niederlage im Endlos). Kein einziger Befund ueber das Spiel —
+   aber vier Tueren, die nie jemand geoeffnet hat. Und der eigentliche
+   Fund: `npm run schirme` hing GAR NICHT in der Torkette. Das einzige
+   Tor, das die Pause misst, war zugleich das einzige, das nie lief —
+   Regel 47 in ihrer stillsten Form: kein halb geprueftes Haus, sondern
+   ein Waechter ohne Dienstplan.) Das Tor hiess „Niederlage" und hat
    gemessen, was sein Name sagt: den Weg aus dem Niederlagenbildschirm.
    Der SIEGES-Bildschirm hatte seit v49 keinen Weg hinaus — nach jedem
    gewonnenen Level, sieben Fassungen lang. Gefunden hat es der Nutzer.
