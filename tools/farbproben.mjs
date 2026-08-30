@@ -92,6 +92,21 @@ const PROBEN = [
   ['Rangname wieder starr bei 15 Punkten', '✗',
     ['rangName.width > 112 && rangName.setFontSize(13);', 'void rangName;'],
     true, 'kopf', 'OBERLEUTNANT'],
+  // DER ECHTE FEHLER AUS v58: der Kauf einer Sekundaerwaffe setzte nur
+  // `secondary` und liess `up_sec` auf 0 — und beide Feuerstellen
+  // verlangen Stufe > 0. Wer 1000 Gold fuer die Suchraketen zahlte, sah
+  // „✓ Aktiv" und es passierte nichts. Verlangt wird, dass das Tor genau
+  // das SAGT, nicht dass es irgendwie rot wird.
+  ['Kauf einer Sekundaerwaffe laesst die Stufe wieder auf 0', '✗',
+    ['vt("secondary", T), T !== "none" && this.upg("sec") < 1 && this.setUpg("sec", 1)',
+     'vt("secondary", T)'], true, 'ruestung', 'Stufe 0'],
+  // Und der zweite Teil: wieder BEIDE Beiflugschiffe zeichnen, das
+  // ungekaufte nur kleiner und grauer. So stand es bis v57, und so
+  // entstand der Eindruck, der Kauf sei wirkungslos.
+  ['Beiflug wieder immer beide zeichnen (das ungekaufte nur kleiner)', '✗',
+    ['this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),\n          dx: A,\n          fires: !0\n        }))',
+     'this.wingmen = [-48, 48].map((A, m) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(m < q.upg("wingman") ? .32 : .24).setTint(m < q.upg("wingman") ? 10477823 : 9090252).setDepth(9),\n          dx: A,\n          fires: m < q.upg("wingman")\n        }))'],
+    true, 'ruestung', 'gezeichnet'],
   ['Gegnerbilder nicht nachtragen (nur zeichnen, was schon da ist)', '✗',
     ['this.textures.on("addtexture", nach);', 'void nach;'], true, 'lage',
     'Gegnerband zeigt'],
@@ -428,6 +443,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'musik' ? ['tools/musik.mjs']
     : tor === 'lage' ? ['tools/ueberlappung.mjs']
     : tor === 'kopf' ? ['tools/kopfzeile.mjs']
+    : tor === 'ruestung' ? ['tools/ruestung.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -478,7 +494,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -558,6 +574,16 @@ const MODUSPROBEN = [{
   rotErwartet: false,
   exitErwartet: 2,
   mussEnthalten: ['NICHT GEMESSEN', '__SKF_KOPFZEILE fehlt'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // Ohne `window.__game` kommt das Ruestungstor in keinen Sektor und kann
+  // keinen Spielstand wechseln. Dann darf es weder gruen noch rot sagen.
+  name: 'Rüstung ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/ruestung.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'window.__game fehlt'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {

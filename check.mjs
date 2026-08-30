@@ -178,6 +178,12 @@ const TORE = [
   // Bosskampf darunter. Das Ueberlappungstor misst acht Menues und haette
   // darueber ewig gruen gemeldet (Regel 47).
   { schluessel: 'kopfzeile', lauf: 'Kopfzeile (Gefecht, ohne und mit Boss)', zeile: 'Kopfzeile (Gefecht)', datei: 'tools/kopfzeile.mjs' },
+  // Wirkt, was gekauft wurde? Die Rueckmeldung „gekaufte Drohnen und
+  // Beiflugschiffe muessten auch sauber mitschiessen" hatte in beiden
+  // Teilen recht — beim Beiflug an der Darstellung, bei der
+  // Sekundaerwaffe an einem echten Fehler: der Kauf liess die Stufe auf 0,
+  // und beide Feuerstellen verlangen Stufe > 0.
+  { schluessel: 'ruestung', lauf: 'Rüstung (Kauf → Wirkung → Anzeige)', zeile: 'Rüstung (Kauf wirkt)', datei: 'tools/ruestung.mjs' },
   { schluessel: 'auslieferung', lauf: 'Auslieferung (Pages-Bau, im Browser)', zeile: 'Auslieferung (Web-App)', datei: 'tools/auslieferung.mjs' },
 ];
 

@@ -49,6 +49,7 @@ npm run rhythmus   hat ein Sektor eine Form, oder ist er eine Rampe?
 npm run schirme    zehn Schirme nachmessen: Rand, Ueberlappung, Schriftgroesse
 npm run ueberlappung  acht MENUEschirme: deckt etwas etwas anderes zu?
 npm run kopfzeile  dasselbe im GEFECHT, ohne und mit Boss
+npm run ruestung   wirkt, was gekauft wurde? Und sieht man es?
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
 npm run variants   alle Profile + Launcher
@@ -57,8 +58,8 @@ npm run package    verteilbares Skyfront-dist.zip
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
 `farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` → `rhythmus`
-→ `ueberlappung` → `kopfzeile` → `auslieferung` → Boot-Test des Masters →
-`dist/check-report.md`.
+→ `ueberlappung` → `kopfzeile` → `ruestung` → `auslieferung` → Boot-Test des
+Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -393,6 +394,24 @@ Jede hat mindestens eine Runde gekostet.
    war (neun Sterne, 999999 Erfahrung). Ein Werkzeug, das sich einen
    bequemen Zustand herstellt, misst den bequemen Zustand.
 
+49b. **Ein Kaufweg wird GEGANGEN, nicht nachgebildet.** Das Ruestungstor
+   betritt das Arsenal und drueckt die Schaltflaeche an „Suchraketen".
+   Haette es stattdessen `secondary` und `up_sec` selbst gesetzt, waere
+   genau der Fehler unsichtbar geblieben, um den es ging: der Kauf setzte
+   nur `secondary` und liess die Stufe auf 0 — und beide Feuerstellen
+   verlangen Stufe > 0. Wer 1000 Gold zahlte, sah „✓ Aktiv" und es
+   passierte nichts. Ein Tor, das den Weg abkuerzt, prueft die Abkuerzung.
+
+51. **Den Text zu LESEN ist nicht dasselbe, wie ihn zu SEHEN.** Das
+   Ruestungstor meldete „Knopf zeigt 2.2 s", auf dem Bildschirmfoto war
+   nichts. Ich habe daraufhin eine halbe Stunde in Phasers Texturen
+   gesucht und einen Befund erfunden („leer erzeugter Text bleibt 1x1") —
+   `texW` ist bei ALLEN Texten 1, auch bei den sichtbaren. Der Grund war
+   banal: zwischen Messung und Abzug war die Wirkung ABGELAUFEN.
+   Gemessen bei t₀, fotografiert bei t₁, Differenz groesser als die
+   Wirkdauer. Wer eine fluechtige Sache misst, misst und fotografiert im
+   selben Augenblick — oder nimmt eine, die lange genug steht.
+
 50. **Was gezeichnet, aber nicht als Objekt angelegt wird, ist fuer jedes
    Werkzeug unsichtbar.** Tafel, Kraftleiter, Lebensgurt und Bossleiste
    sind `Graphics` — kein `getBounds()`, keine Anzeigeliste, nichts zu
@@ -441,14 +460,7 @@ Sterne, ueber alle Flugzeuge) und Flugzeug (Gruen, Erfahrung, je Flugzeug)
 in zwei gleich gebaute Bloecke; die Feuerkraft ist eine Leiter aus zehn
 Kammern mit der Wirkung daneben (`5 BAHNEN`, `STRAHL 32`).
 
-**Offen — aus der Rueckmeldung des Nutzers zu v56, drei von fuenf Punkten:**
-- Gekaufte Drohnen und Beiflugschiffe: die Mechanik STIMMT (nachgemessen:
-  „Beiflug 2 von 2 feuernd", drei Drohnen, Geschosse fliegen). Was fehlt,
-  ist das Zeichen, dass sie aktiv sind — beide Beiflugschiffe werden
-  IMMER gezeichnet, das ungekaufte nur mit `setScale(.24)` statt `.32`
-  und grauem Ton. Auf dem Telefon ist der Unterschied unsichtbar.
-- Neu gekaufte Spezialwaffen wirken (Waffe, Sekundaerwaffe und Gadget
-  werden gesetzt und feuern), zeigen es aber nicht an.
+**Offen — aus der Rueckmeldung des Nutzers zu v56, noch einer von fuenf:**
 - Die Bilddauer beim Ausloesen einer Spezialwaffe ist HIER NICHT MESSBAR
   (SwiftShader, rund zwei Bilder je Sekunde). Sie gehoert auf das Geraet,
   `#messung`. Was hier gemessen werden konnte, sind die Objektkosten je

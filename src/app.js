@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v57",
+    SKF_VERSION = "v58",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -58471,8 +58471,16 @@ return new ` + this.key + `();
       secondary() {
         return Bt("secondary", "none")
       },
+      // Wer eine Sekundaerwaffe kauft, bekommt sie auf Stufe EINS. Bis v57
+      // setzte der Kauf nur `secondary` und liess `up_sec` auf 0 stehen —
+      // und beide Feuerstellen verlangen `secLevel > 0`. Man zahlte 1000
+      // Gold fuer die Suchraketen, bekam „✓ Aktiv" angezeigt und es
+      // passierte NICHTS, bis man ein zweites Mal fuer Stufe 1 zahlte.
+      // Genau davon sprach der Nutzer: „neue Spezialwaffen, damit man die
+      // dann auch nutzen kann nach dem Kauf. Das scheint alles noch nicht
+      // richtig gegeben zu sein." Es war nicht gegeben.
       setSecondary(T) {
-        vt("secondary", T)
+        vt("secondary", T), T !== "none" && this.upg("sec") < 1 && this.setUpg("sec", 1)
       },
       secondaryUnlocked(T) {
         return this.dev() || T === "none" || St("unlks_" + T, 0) === 1
@@ -62693,15 +62701,21 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         const l = this.runDiff || q.difficulty(),
           p = Qt[l] || Qt.normal;
         this.enemyDmgMul = p.enemyDmg, this.enemyHpMul = p.enemyHp, this.fireRateMul = p.fireRate, !this.endless && this.startStageNum <= 6 && (this.enemyDmgMul *= [.55, .66, .8, .9, .92, .85][this.startStageNum - 1]), !this.endless && this.startStageNum <= 4 && (this.enemyHpMul *= [.8, .9, .97, 1][this.startStageNum - 1]);
-        const a = q.upg("wingman");
-        this.wingmen = [-48, 48].map((A, m) => {
-          const y = m < a;
-          return {
-            img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(y ? .32 : .24).setTint(y ? 10477823 : 9090252).setAlpha(y ? 1 : .9).setDepth(9),
-            dx: A,
-            fires: y
-          }
-        }), this.escortDrone = this.add.image(this.player.x, this.player.y + 42, this.player.texture.key).setScale(.18).setTint(12576511).setAlpha(.85).setDepth(8), this.shieldSprite = this.add.image(this.player.x, this.player.y, "shieldRing").setDepth(11).setVisible(!1).setBlendMode(tt.BlendModes.ADD);
+        // NUR ZEICHNEN, WAS GEKAUFT IST. Bis v57 wurden IMMER beide
+        // Beiflugschiffe gezeichnet — das ungekaufte mit setScale(.24)
+        // statt .32, grauem Ton und Deckkraft .9. Auf 390 Bildpunkten
+        // Breite ist dieser Unterschied unsichtbar: man sieht zwei
+        // Begleiter, einer schiesst, und schliesst daraus, der Kauf sei
+        // wirkungslos. Gemessen mit frischem Spielstand:
+        // „Wingmen: 2 — davon feuernd: 0 — sichtbar: 2".
+        // Der Begleitflieger (escortDrone) ist mit ihnen weggefallen: eine
+        // schmuecklose Kopie der Maschine, die nie geschossen hat und
+        // genau deshalb wie eine kaputte Drohne aussah.
+        this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({
+          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),
+          dx: A,
+          fires: !0
+        })), this.shieldSprite = this.add.image(this.player.x, this.player.y, "shieldRing").setDepth(11).setVisible(!1).setBlendMode(tt.BlendModes.ADD);
         const r = A => tt.Math.Distance.Between(A.worldX, A.worldY, this.bomb.x, this.bomb.y) <= this.bomb.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad.x, this.gad.y) <= this.gad.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.gad2.x, this.gad2.y) <= this.gad2.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.ultPos.x, this.ultPos.y) <= this.ultPos.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.mute.x, this.mute.y) <= this.mute.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.pauseBtn.x, this.pauseBtn.y) <= this.pauseBtn.r + 6 || tt.Math.Distance.Between(A.worldX, A.worldY, this.messBtn.x, this.messBtn.y) <= this.messBtn.r + 6,
           n = Ft.zugFaktor;
         this.input.on("pointerdown", A => {
@@ -62756,6 +62770,29 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         this.slots.push(this.makeSlot(s, this.gad));
         const o = q.gadget2();
         q.slot2Unlocked() && o && o !== "none" && o !== s && this.slots.push(this.makeSlot(o, this.gad2));
+        // Was gekauft wurde, muss man SEHEN. Sekundaerwaffe und Beiflug
+        // haben keinen Knopf, keinen Balken und keine Beschriftung — sie
+        // wirken im Hintergrund, und nach dem Kauf aendert sich am Schirm
+        // nichts. Genau daher kam „neue Spezialwaffen, damit man die dann
+        // auch nutzen kann nach dem Kauf. Das scheint alles noch nicht
+        // richtig gegeben zu sein."
+        // Die Zeile steht zwischen dem letzten Spezialknopf (bis x = 268)
+        // und der Bombe (ab x = 438), im einzigen freien Feld der unteren
+        // Reihe.
+        {
+          const zeilen = [];
+          this.secondary !== "none" && this.secLevel > 0
+            && zeilen.push(`◈ ${((Fe[this.secondary] || {}).name || this.secondary).toUpperCase()}${this.secLevel > 1 ? "  L" + this.secLevel : ""}`);
+          this.wingmen.length && zeilen.push(`✈ BEIFLUG  ×${this.wingmen.length}`);
+          zeilen.length && this.add.text(353, rt - 100, zeilen.join("\n"), {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#9fd0ee",
+            fontStyle: "bold",
+            align: "center",
+            lineSpacing: 3
+          }).setOrigin(.5, 0).setScrollFactor(0).setDepth(100).setStroke("#0a1622", 3);
+        }
         const i = this.add.circle(this.mute.x, this.mute.y, this.mute.r, 1451834, .7).setStrokeStyle(2, 7327999).setScrollFactor(0).setDepth(100).setInteractive();
         this.muteText = this.add.text(this.mute.x, this.mute.y, this.audio.enabled ? "🔊" : "🔇", {
           fontSize: "18px"
@@ -64005,7 +64042,7 @@ ${R.label}`, {
           G = R * 6,
           v = this.runXp + G,
           x = q.planeXp(I);
-        q.addPlaneXp(I, v), this.slowActive = !1, this.physics.world.timeScale = 1, this.audio.victory(), this.player.setVisible(!1), this.shieldSprite.setVisible(!1), this.thruster.setVisible(!1), this.trail.stop(), this.wingmen.forEach(p => p.img.setVisible(!1)), (t = this.escortDrone) == null || t.setVisible(!1), (l = this.levelGlow) == null || l.setVisible(!1), this.showLevelResult(R, this.runGold, b, v, x)
+        q.addPlaneXp(I, v), this.slowActive = !1, this.physics.world.timeScale = 1, this.audio.victory(), this.player.setVisible(!1), this.shieldSprite.setVisible(!1), this.thruster.setVisible(!1), this.trail.stop(), this.wingmen.forEach(p => p.img.setVisible(!1)), (l = this.levelGlow) == null || l.setVisible(!1), this.showLevelResult(R, this.runGold, b, v, x)
       }
       spawnWave(R) {
         if (this.over) return;
@@ -65083,7 +65120,22 @@ ${G}`, {
           color: "#cfe3ff",
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101);
+        // Der Balken ueber dem Knopf zeigte bisher NUR die Abklingzeit.
+        // Ein Schild, das gerade laeuft, sah damit genauso aus wie ein
+        // Schild, das gerade nachlaedt — und ob die gekaufte Sache
+        // ueberhaupt etwas TUT, war nirgends abzulesen.
         const l = this.add.graphics().setScrollFactor(0).setDepth(101),
+          // Sichtbarkeit statt leerem Text: ein Feld, das nur manchmal
+          // etwas zu sagen hat, wird versteckt und nicht geleert. Das ist
+          // an der Stelle lesbarer — und es macht die Pruefung ehrlich,
+          // denn `visible` laesst sich messen, ein leerer Text nicht von
+          // einem fehlenden unterscheiden.
+          a = this.add.text(E.x, E.y - E.r - 30, "00.0 s", {
+            fontFamily: "sans-serif",
+            fontSize: "13px",
+            color: "#eaf6ff",
+            fontStyle: "bold"
+          }).setOrigin(.5).setScrollFactor(0).setDepth(102).setStroke("#0a1622", 3).setVisible(!1),
           p = {
             key: R,
             readyAt: this.time.now + Math.round(G * .4),
@@ -65093,6 +65145,8 @@ ${G}`, {
             color: v.color,
             icon: t,
             cd: l,
+            dauer: a,
+            wirktBis: 0,
             pos: E
           };
         return x.on("pointerdown", () => this.useGadget(p)), p
@@ -65104,7 +65158,12 @@ ${G}`, {
         R.readyAt = E + R.cdMs, this.audio.powerup();
         const b = It[R.key],
           I = R.level > 0 ? ` L${R.level}` : "";
-        this.floatText(this.player.x, this.player.y - 40, b.name + I, "#" + b.color.toString(16).padStart(6, "0")), this.fireGadget(R.key, R.level, R.power), this.updateHud()
+        this.floatText(this.player.x, this.player.y - 40, b.name + I, "#" + b.color.toString(16).padStart(6, "0")), this.fireGadget(R.key, R.level, R.power);
+        // Wie lange wirkt es noch? NICHT hier nachgerechnet, sondern von
+        // der Stelle abgelesen, die es gerade gesetzt hat (Regel 17) —
+        // sonst laeuft die Anzeige der Dauer hinterher, sobald jemand an
+        // der Formel dreht.
+        R.wirktBis = R.key === "shield" ? this.player.shieldUntil : R.key === "drones" ? this.dronesUntil : 0, this.updateHud()
       }
       fireGadget(R, E, b) {
         const I = this.time.now;
@@ -65387,7 +65446,7 @@ ${G}`, {
         var b, I, G;
         this.over = !0, q.bumpDeaths(), (b = this.laserGfx) == null || b.clear(), this.drones.forEach(v => v.img.destroy()), this.drones = [], this.slowActive = !1, this.physics.world.timeScale = 1, this.audio.stopMusic(), this.audio.gameover();
         const R = this.score > this.best;
-        if (this.best = Math.max(this.best, this.score), vt("hs_best", String(this.best)), this.runXp > 0 && q.addPlaneXp(q.plane(), this.runXp), this.player.setVisible(!1), this.shieldSprite.setVisible(!1), this.thruster.setVisible(!1), this.trail.stop(), this.wingmen.forEach(v => v.img.setVisible(!1)), (I = this.escortDrone) == null || I.setVisible(!1), (G = this.levelGlow) == null || G.setVisible(!1), this.boom(this.player.x, this.player.y, !0), this.endless) {
+        if (this.best = Math.max(this.best, this.score), vt("hs_best", String(this.best)), this.runXp > 0 && q.addPlaneXp(q.plane(), this.runXp), this.player.setVisible(!1), this.shieldSprite.setVisible(!1), this.thruster.setVisible(!1), this.trail.stop(), this.wingmen.forEach(v => v.img.setVisible(!1)), (G = this.levelGlow) == null || G.setVisible(!1), this.boom(this.player.x, this.player.y, !0), this.endless) {
           const v = q.addEndlessRun(this.endlessRound, this.score),
             x = Math.min(3, 1 + (this.endlessRound >= 6 ? 1 : 0) + (this.endlessRound >= 12 ? 1 : 0));
           this.showResult("ENDLOS BEENDET", 12607743, x, v.best, this.runGold);
@@ -66351,7 +66410,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         if (this.secondary === "seeker" && this.secLevel > 0 && !this.over && this.player.active && b > this.secNext && (this.secNext = b + Math.max(650, 1500 - this.secLevel * 260), this.firePlayerSeeker()), !this.stageDef) return;
         this.combo > 0 && b > this.comboExpire && (this.combo = 0, this.updateHud()), this.thruster.setPosition(this.player.x, this.player.y + 30).setScale(.55 + Math.sin(b * .03) * .12).setAlpha(.5 + Math.sin(b * .05) * .2);
         for (const p of this.wingmen) p.img.x += (this.player.x + p.dx - p.img.x) * .2, p.img.y = this.player.y + 26;
-        if (this.escortDrone && (this.escortDrone.x += (this.player.x - this.escortDrone.x) * .14, this.escortDrone.y = this.player.y + 44 + Math.sin(b * .006) * 3), this.levelGlow && this.levelGlow.setPosition(this.player.x, this.player.y).setScale((.52 + (this.planeLvl - 1) * .05) * (1 + Math.sin(b * .004) * .06)), this.drones.length)
+        if (this.levelGlow && this.levelGlow.setPosition(this.player.x, this.player.y).setScale((.52 + (this.planeLvl - 1) * .05) * (1 + Math.sin(b * .004) * .06)), this.drones.length)
           if (b > this.dronesUntil) this.drones.forEach(p => p.img.destroy()), this.drones = [];
           else
             for (const p of this.drones) p.img.x += (this.player.x + p.dx - p.img.x) * .18, p.img.y = this.player.y + 18, p.img.setAlpha(b > this.dronesUntil - 1200 ? .5 + Math.sin(b * .03) * .4 : 1);
@@ -66362,10 +66421,17 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             n = 82,
             e = 9,
             s = p.pos.x - n / 2,
-            o = p.pos.y - p.pos.r - 15;
+            o = p.pos.y - p.pos.r - 15,
+            // Laeuft die WIRKUNG gerade? Dann hat sie Vorrang vor der
+            // Abklingzeit: was jetzt passiert, ist wichtiger als das,
+            // was gleich wieder geht.
+            h = p.wirktBis - b;
           p.cd.fillStyle(398368, .85).fillRoundedRect(s, o, n, e, 4);
           const i = r >= 1 ? 3791242 : p.color;
-          r > 0 && p.cd.fillStyle(i, 1).fillRoundedRect(s + 1.5, o + 1.5, (n - 3) * r, e - 3, 3), p.cd.lineStyle(1, 661026, 1).strokeRoundedRect(s, o, n, e, 4), r >= 1 ? (p.cd.lineStyle(2, 16777215, .3 + Math.sin(b * .008) * .25).strokeRoundedRect(s - 1, o - 1, n + 2, e + 2, 5), p.icon.setAlpha(1)) : p.icon.setAlpha(.55)
+          if (r > 0 && p.cd.fillStyle(i, 1).fillRoundedRect(s + 1.5, o + 1.5, (n - 3) * r, e - 3, 3), p.cd.lineStyle(1, 661026, 1).strokeRoundedRect(s, o, n, e, 4), h > 0) {
+            p.dauer.setVisible(!0).setText(`${(h/1e3).toFixed(1)} s`).setColor("#bfefff");
+            p.cd.lineStyle(3, 16777215, .55 + Math.sin(b * .012) * .45).strokeRoundedRect(s - 2, o - 2, n + 4, e + 4, 6), p.icon.setAlpha(1)
+          } else p.dauer.setVisible(!1), r >= 1 ? (p.cd.lineStyle(2, 16777215, .3 + Math.sin(b * .008) * .25).strokeRoundedRect(s - 1, o - 1, n + 2, e + 2, 5), p.icon.setAlpha(1)) : p.icon.setAlpha(.55)
         }
         const t = this.player.isShielded(b);
         this.shieldSprite.setVisible(t), t && this.shieldSprite.setPosition(this.player.x, this.player.y).setScale(.9 + Math.sin(b * .01) * .06).setAlpha(.6 + Math.sin(b * .02) * .2), this.enemies.getChildren().forEach(p => {

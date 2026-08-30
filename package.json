@@ -51,7 +51,8 @@
     "musikschau": "sh tools/musikschau.sh",
     "auslieferung": "node tools/auslieferung.mjs",
     "ueberlappung": "node tools/ueberlappung.mjs",
-    "kopfzeile": "node tools/kopfzeile.mjs"
+    "kopfzeile": "node tools/kopfzeile.mjs",
+    "ruestung": "node tools/ruestung.mjs"
   },
   "engines": {
     "node": ">=18"
