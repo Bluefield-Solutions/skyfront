@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v61",
+    SKF_VERSION = "v62",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62831,11 +62831,20 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         // sitzt bei y = 96, die Flaeche endete bei 56. Getippt wurde richtig,
         // die Flaeche lag falsch. Ein Knopf, den man sieht, ist ohnehin
         // besser als ein Griff, den man kennen muss.
-        const mb = this.add.circle(this.messBtn.x, this.messBtn.y, this.messBtn.r, 1451834, .7).setStrokeStyle(2, 10473710).setScrollFactor(0).setDepth(100).setInteractive();
+        // Der Messknopf schaltet das MESSEN an und aus — nicht mehr nur die
+        // Tafel. Und er ZEIGT seinen Stand: ein Schalter, dem man nicht
+        // ansieht, ob er an ist, wird vergessen. Gruener Ring heisst: es
+        // wird gemessen, auch wenn die Tafel eingeklappt ist.
+        const messAn = () => {
+          try { return !!(typeof window < "u" && window.__SKF_MESSAN && window.__SKF_MESSAN()) } catch (A) { return !1 }
+        };
+        const mb = this.add.circle(this.messBtn.x, this.messBtn.y, this.messBtn.r, 1451834, .7).setStrokeStyle(2, messAn() ? 3856490 : 10473710).setScrollFactor(0).setDepth(100).setInteractive();
         this.add.text(this.messBtn.x, this.messBtn.y, "📊", {
           fontSize: "18px"
         }).setOrigin(.5).setScrollFactor(0).setDepth(101), mb.on("pointerdown", () => {
-          try { typeof window < "u" && window.__SKF_MESSTAFEL && window.__SKF_MESSTAFEL(); } catch (A) {}
+          let A = !1;
+          try { typeof window < "u" && window.__SKF_MESSTAFEL && (A = !!window.__SKF_MESSTAFEL()); } catch (m) {}
+          mb.setStrokeStyle(2, A ? 3856490 : 10473710)
         });
         const h = this.add.circle(this.pauseBtn.x, this.pauseBtn.y, this.pauseBtn.r, 1451834, .7).setStrokeStyle(2, 10473710).setScrollFactor(0).setDepth(100).setInteractive();
         this.add.text(this.pauseBtn.x, this.pauseBtn.y, "II", {

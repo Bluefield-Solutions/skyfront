@@ -9,3 +9,5 @@ _*.mjs
 # liegen als base64 in src/musik.js — zweimal im Verzeichnis waeren drei
 # Megabyte doppelt. Wer sie braucht: npm run musikbacken.
 art/musik/*.mp3
+src/app.js.probe
+index.head.html.probe

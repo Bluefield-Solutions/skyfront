@@ -38,6 +38,13 @@ const OHNE_BILD = process.argv.includes('--ohnebild');
 const NUR = (process.argv.find((a) => a.startsWith('--nur=')) || '').slice(6).toLowerCase();
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
+// Nicht jeder Eingriff sitzt in src/app.js. Die Messtafel haengt in der
+// HUELLE (index.head.html) — bewusst, damit sie einen Absturz des Spiels
+// ueberlebt. Eine Probe kann deshalb ihre Datei nennen; gesichert und
+// zurueckgeschrieben wird dann jene, nach derselben Regel: eine Kopie
+// vorher, und aus der Kopie zurueck, auch bei einem Abbruch (Regel 1).
+const HUELLE = 'index.head.html';
+const HUELLE_SICHER = 'index.head.html.probe';
 
 // [Name, zustaendige Pruefung, Ersetzung alt -> neu, braucht Neubau, Tor, erwartet]
 // Tor: 'farb' (Vorgabe) oder 'form'. Die Formproben brauchen immer einen
@@ -107,6 +114,17 @@ const PROBEN = [
     ['this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),\n          dx: A,\n          fires: !0\n        }))',
      'this.wingmen = [-48, 48].map((A, m) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(m < q.upg("wingman") ? .32 : .24).setTint(m < q.upg("wingman") ? 10477823 : 9090252).setDepth(9),\n          dx: A,\n          fires: m < q.upg("wingman")\n        }))'],
     true, 'ruestung', 'gezeichnet'],
+  // DER FEHLER, DEN DER NUTZER GEMELDET HAT: die Messschleife steigt bei
+  // eingeklappter Tafel wieder aus. Dann misst man nur, solange man
+  // hinsieht — und der Fall, in dem man misst, ist genau der andere.
+  ['Messtafel misst nur, solange sie offen ist', '✗',
+    ['        if (!an) { vorher = t; return; }', '        if (!an || !offen) { vorher = t; return; }'],
+    true, 'messtafel', 'steigt die Bilderzahl nicht', HUELLE],
+  // Und der Takt wieder aus dem Median: dann geht die Tafel beim Einbruch
+  // mit und faerbt ein p95 von 350 ms gruen.
+  ['Bildschirmtakt wieder aus dem Median schaetzen', '✗',
+    ['        var schnellMs = p(proben, 0.05) || med;', '        var schnellMs = med;'],
+    true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
   // gesehen — die Pause war der einzige Schirm, den keines betrat.
@@ -448,8 +466,12 @@ if (existsSync(SICHER)) {
   process.exit(1);
 }
 copyFileSync(APP, SICHER);
-const zurueck = () => copyFileSync(SICHER, APP);
-process.on('exit', () => { if (existsSync(SICHER)) { zurueck(); unlinkSync(SICHER); } });
+copyFileSync(HUELLE, HUELLE_SICHER);
+const zurueck = () => { copyFileSync(SICHER, APP); copyFileSync(HUELLE_SICHER, HUELLE); };
+process.on('exit', () => {
+  if (existsSync(SICHER)) { copyFileSync(SICHER, APP); unlinkSync(SICHER); }
+  if (existsSync(HUELLE_SICHER)) { copyFileSync(HUELLE_SICHER, HUELLE); unlinkSync(HUELLE_SICHER); }
+});
 
 const torLauf = (statisch, tor = 'farb') => {
   const cmd = tor === 'form' ? ['tools/formen.mjs']
@@ -471,6 +493,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'kopf' ? ['tools/kopfzeile.mjs']
     : tor === 'ruestung' ? ['tools/ruestung.mjs']
     : tor === 'schirme' ? ['tools/schirme.mjs']
+    : tor === 'messtafel' ? ['tools/messtafel.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -499,15 +522,16 @@ console.log('');
 }
 
 let fehler = 0, gelaufen = 0;
-for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_MODUS ? [] : PROBEN).filter(([n]) => !NUR || n.toLowerCase().includes(NUR))) {
+for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN).filter(([n]) => !NUR || n.toLowerCase().includes(NUR))) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
-  const roh = readFileSync(SICHER, 'utf8');
+  const quelle = datei === HUELLE ? HUELLE_SICHER : SICHER;
+  const roh = readFileSync(quelle, 'utf8');
   const n = roh.split(alt).length - 1;
   if (n !== 1) {
-    console.log(`✗ ${name}: Eingriff NICHT ANGEKOMMEN — Stelle ${n}x gefunden, 1x erwartet`);
+    console.log(`✗ ${name}: Eingriff NICHT ANGEKOMMEN — Stelle ${n}x in ${datei} gefunden, 1x erwartet`);
     fehler++; continue;
   }
-  writeFileSync(APP, roh.replace(alt, neu));
+  writeFileSync(datei, roh.replace(alt, neu));
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
   const r = torLauf(!neubau, tor);
   gelaufen++;
@@ -521,7 +545,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet] of (NUR_
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -625,6 +649,15 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', 'nicht auslesbar', '0 von 11'],
   darfNichtEnthalten: ['laesst sich nicht starten'],
   beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen" statt Befunde ueber ein gesundes Spiel',
+}, {
+  // Ohne die Kopierzeile kann das Messtafel-Tor sie nicht pruefen.
+  name: 'Messtafel ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/messtafel.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', '__SKF_MESSZEILE fehlt'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {
   // DIE PROBE ZUM AUSLIEFERUNGSTOR.
   //

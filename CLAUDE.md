@@ -51,6 +51,7 @@ npm run schirme    ELF Schirme nachmessen (inkl. Pause): Rand, Ueberlappung,
 npm run ueberlappung  acht MENUEschirme: deckt etwas etwas anderes zu?
 npm run kopfzeile  dasselbe im GEFECHT, ohne und mit Boss
 npm run ruestung   wirkt, was gekauft wurde? Und sieht man es? (acht Wege)
+npm run messtafel  misst die Messtafel auch EINGEKLAPPT weiter?
 npm run symbol     App-Symbol + 11 iOS-Startbilder aus web/icon.svg backen
 npm run bilder     WebP-Bahnen neu codieren (q78)
 npm run variants   alle Profile + Launcher
@@ -59,8 +60,8 @@ npm run package    verteilbares Skyfront-dist.zip
 
 Die Torkette: `build` → `build-variants --boot` (elf Dateien) → `bildtor` →
 `farbtor` → `formen` → `untergrund` → `feuerkraft` → `speicher` → `rhythmus`
-→ `ueberlappung` → `schirme` → `kopfzeile` → `ruestung` → `auslieferung` →
-Boot-Test des Masters → `dist/check-report.md`.
+→ `ueberlappung` → `schirme` → `messtafel` → `kopfzeile` → `ruestung` →
+`auslieferung` → Boot-Test des Masters → `dist/check-report.md`.
 
 Zwei Workflows: `check.yml` bei jedem Push, `pages.yml` bei Push auf `main`.
 
@@ -427,6 +428,22 @@ Jede hat mindestens eine Runde gekostet.
    nur `secondary` und liess die Stufe auf 0 — und beide Feuerstellen
    verlangen Stufe > 0. Wer 1000 Gold zahlte, sah „✓ Aktiv" und es
    passierte nichts. Ein Tor, das den Weg abkuerzt, prueft die Abkuerzung.
+
+54. **Eine Anzeige, die beim Einbruch mitgeht, bezeugt ihn, statt ihn zu
+   melden.** Die Messtafel schaetzte den Bildschirmtakt aus dem MEDIAN der
+   Bildzeiten — also aus dem, was das Spiel gerade schafft. Bei 3,2
+   Bildern je Sekunde kam „~3 Hz" heraus, das Budget wurde 533 ms, und
+   ein p95 von 350 ms stand GRUEN da. Ein Massstab, der sich der Leistung
+   anpasst, misst nichts mehr (verwandt mit Regel 30). Der Takt kommt
+   jetzt aus den SCHNELLSTEN Bildern; reicht das nicht fuer 45 Hz, sagt
+   sie „unbekannt" und misst gegen 60 Hz.
+
+55. **Was in der HUELLE steht, sichert die Gegenprobe nicht mit.**
+   `tools/farbproben.mjs` legte nur von `src/app.js` eine Kopie an. Die
+   Messtafel haengt in `index.head.html` — bewusst, damit sie einen
+   Absturz des Spiels ueberlebt. Ein Eingriff dort waere nie angekommen
+   und haette wie eine bestandene Probe ausgesehen. Eine Probe nennt
+   jetzt ihre Datei.
 
 51. **Den Text zu LESEN ist nicht dasselbe, wie ihn zu SEHEN.** Das
    Ruestungstor meldete „Knopf zeigt 2.2 s", auf dem Bildschirmfoto war

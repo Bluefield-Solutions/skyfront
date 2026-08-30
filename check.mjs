@@ -178,6 +178,10 @@ const TORE = [
   // lief. Regel 47 in ihrer stillsten Form: nicht eine halb gepruefte
   // Tuer, sondern ein Waechter ohne Dienstplan.
   { schluessel: 'schirme', lauf: 'Schirme (11 Schirme inkl. Pause)', zeile: 'Schirme (11 inkl. Pause)', datei: 'tools/schirme.mjs' },
+  // Die Messtafel ist das INSTRUMENT fuer die Gerätemessung — die einzige
+  // Zahl, die in dieser Umgebung nicht entstehen kann. Geht sie still
+  // kaputt, ist die Antwort auf „warum ruckelt es" wieder weg.
+  { schluessel: 'messtafel', lauf: 'Messtafel (misst sie auch eingeklappt?)', zeile: 'Messtafel (Hintergrund)', datei: 'tools/messtafel.mjs' },
   // Dasselbe im GEFECHT — und dort gab es die zweite Tuer, nach der
   // niemand gefragt hat: die Bossleiste lag seit ihrer Einfuehrung ueber
   // der Kopfzeilentafel, der Erfahrungsbalken des Flugzeugs in jedem

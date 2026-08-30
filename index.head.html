@@ -81,6 +81,12 @@
       color:#cfe6f5;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
       -webkit-overflow-scrolling:touch}
     #messwerte{margin:0;white-space:pre;overflow-x:auto;font:inherit;color:inherit}
+    /* Eingeklappt ist die Tafel EIN Streifen: die Messung laeuft weiter,
+       das Spiel bleibt frei. Aufgeklappt steht alles da. Der Streifen ist
+       selbst die Schaltflaeche — auf dem Telefon ist die ganze Zeile
+       leichter zu treffen als ein Woertchen darin. */
+    #messung.klein{padding:6px 12px}
+    #messung.klein #messwerte{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #messknoepfe{display:flex;flex-wrap:wrap;align-items:center}
     #messung.an{display:block}
     #messung b{color:#ffd23a;font-weight:600}
@@ -157,9 +163,37 @@
       var werte = document.getElementById('messwerte');
       var knoepfe = document.getElementById('messknoepfe');
       if (!tafel || !werte || !knoepfe) return;
-      knoepfe.innerHTML = '<span class="knopf haupt" data-tat="kopieren">Kopieren</span>' +
-                          '<span class="knopf" data-tat="reset">Zuruecksetzen</span>';
-      var an = false, tipps = 0, letzterTipp = 0;
+      // MESSEN und ANZEIGEN sind zwei verschiedene Dinge, und bis v61 waren
+      // sie eins: die Schleife stieg bei geschlossener Tafel sofort aus
+      // („if (!an) return"). Wer die Tafel zuklappte, um zu spielen, hat
+      // damit die Messung abgeschaltet — und genau das ist der Fall, in dem
+      // man messen will. Rueckmeldung des Nutzers, woertlich: „dann soll
+      // die Messung im Hintergrund laufen, oder ich mach es mit einem
+      // Aufklappmechanismus, um dann ablesen zu koennen."
+      //
+      //   messen  laeuft die Messung?     (der Knopf im Spiel)
+      //   offen   steht alles da, oder nur der Streifen?  (der Streifen)
+      //
+      // Beides ueberlebt einen Neustart: eine Messung, die beim Nachladen
+      // still ausgeht, ist keine.
+      var an = false, offen = false, tipps = 0, letzterTipp = 0;
+      function merken(k, w) { try { localStorage.setItem(k, w ? '1' : '0'); } catch (e) {} }
+      function gemerkt(k) { try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } }
+      var knopfStand = '';
+      function knoepfeSetzen() {
+        // NUR bei Zustandswechsel neu schreiben. Wer die Knopfreihe in
+        // jedem Bild neu aufbaut, reisst sie dem Daumen weg (Regel 19) —
+        // und genau das Ersatzfeld zum Markieren waere davon betroffen.
+        var neu = offen ? 'auf' : 'zu';
+        if (neu === knopfStand) return;
+        knopfStand = neu;
+        knoepfe.innerHTML = offen
+          ? '<span class="knopf haupt" data-tat="kopieren">Kopieren</span>'
+            + '<span class="knopf" data-tat="reset">Zuruecksetzen</span>'
+            + '<span class="knopf" data-tat="zu">▾ Einklappen</span>'
+            + '<span class="knopf" data-tat="aus">Messung aus</span>'
+          : '<span class="knopf haupt" data-tat="auf">▴ Aufklappen</span>';
+      }
       var proben = [], vorher = 0, start = 0;
       var laengste = 0, laengsteBei = 0, letzte5 = [];
       var bilder = 0;
@@ -214,11 +248,24 @@
       // Gefecht faengt die Messung deshalb von vorn an, genau einmal.
       var warImSpiel = false;
 
-      function anzeigen(zustand) {
-        an = zustand;
-        tafel.className = an ? 'an' : '';
-        if (an) { zuruecksetzen(); zeichnen(); }
+      // Der Streifen erscheint, sobald GEMESSEN wird — nicht erst, wenn man
+      // aufklappt. Er ist damit selbst die Anzeige dafuer, dass die Messung
+      // laeuft; ein Schalter, dessen Stand man nicht sieht, wird vergessen.
+      function malen() {
+        tafel.className = an ? (offen ? 'an' : 'an klein') : '';
+        knoepfeSetzen();
+        if (an) zeichnen();
       }
+      // Zurueckgesetzt wird beim EINSCHALTEN, nicht beim Aufklappen. Sonst
+      // wirft das Ablesen die Messung weg, die man ablesen wollte.
+      function messenSetzen(zustand) {
+        if (an === zustand) { malen(); return; }
+        an = zustand; merken('mess_an', an);
+        if (an) zuruecksetzen();
+        malen();
+      }
+      function offenSetzen(zustand) { offen = zustand; merken('mess_offen', offen); malen(); }
+      function anzeigen(zustand) { messenSetzen(zustand); if (zustand) offenSetzen(true); }
       function zuruecksetzen() {
         proben.length = 0; letzte5.length = 0;
         laengste = 0; laengsteBei = 0; bilder = 0;
@@ -234,7 +281,14 @@
       // Der Knopf im Gefecht ruft hier herein. Er ist der Weg, den man SIEHT;
       // die vier Tipps bleiben als zweiter Weg, falls die Spielszene gar
       // nicht hochkommt.
-      window.__SKF_MESSTAFEL = function () { anzeigen(!an); };
+      // Der Knopf im Gefecht schaltet das MESSEN. Aufgeklappt wird ueber
+      // den Streifen — zwei Knoepfe, zwei Aufgaben.
+      window.__SKF_MESSTAFEL = function () { messenSetzen(!an); return an; };
+      window.__SKF_MESSAN = function () { return an; };
+      // Wieviele Bilder sind eingegangen? Eingeklappt steht die Zahl
+      // nirgends auf dem Schirm — und genau eingeklappt muss ein Werkzeug
+      // nachweisen koennen, dass weitergemessen wird.
+      window.__SKF_MESSBILDER = function () { return bilder; };
 
       window.addEventListener('pointerdown', function (e) {
         // Gemessen an der LEINWAND, nicht am Fenster. Hochkant ist die
@@ -263,6 +317,9 @@
         e.preventDefault();
         if (k === 'reset') { zuruecksetzen(); return; }
         if (k === 'kopieren') kopieren();
+        if (k === 'auf') offenSetzen(true);
+        if (k === 'zu') offenSetzen(false);
+        if (k === 'aus') messenSetzen(false);
       }, { passive: false });
 
       // Eine Messung, die auf dem Telefon bleibt, ist keine Messung. Der
@@ -294,7 +351,11 @@
           } else ersatz();
         } catch (e) { ersatz(); }
       }
-      if ((location.hash || '').indexOf('messung') >= 0) anzeigen(true);
+      // Der Stand von vorhin. Ohne ihn faengt jede Messung nach einem
+      // Neuladen bei null an, ohne dass es jemandem auffaellt.
+      if (gemerkt('mess_an')) { an = true; offen = gemerkt('mess_offen'); zuruecksetzen(); }
+      if ((location.hash || '').indexOf('messung') >= 0) { an = true; offen = true; zuruecksetzen(); }
+      malen();
 
       function p(feld, anteil) {
         if (!feld.length) return 0;
@@ -332,7 +393,9 @@
           }
         }
         vorher = t;
-        if (bilder % 12 === 0) zeichnen();
+        // Gezeichnet wird nur, was zu sehen ist. Eingeklappt reicht jede
+        // halbe Sekunde — gemessen wird trotzdem jedes Bild.
+        if (bilder % (offen ? 12 : 30) === 0) zeichnen();
       }
       requestAnimationFrame(schleife);
 
@@ -352,7 +415,22 @@
         // Tafel, dass sie noch nichts hat, und der Knopf gibt nichts heraus.
         var GENUG = 60;
         var reif = proben.length >= GENUG && med > 0;
-        var takt = hz > 100 ? 120 : hz > 75 ? 90 : hz > 45 ? 60 : Math.round(hz);
+        // DER TAKT GEHOERT ZUM BILDSCHIRM, NICHT ZUR LEISTUNG.
+        //
+        // Bis v61 wurde er aus dem MEDIAN geschaetzt — also aus dem, was
+        // das Spiel gerade schafft. Bei 3 Bildern je Sekunde kam „~3 Hz"
+        // heraus, das Budget wurde 533 ms, und ein p95 von 350 ms stand
+        // GRUEN da. Eine Tafel, die bei einem Einbruch mitgeht, bezeugt
+        // ihn, statt ihn zu melden.
+        //
+        // Geschaetzt wird jetzt aus den SCHNELLSTEN Bildern (p05): die
+        // liegen am Aktualisierungsabstand des Bildschirms, egal wie zaeh
+        // der Rest laeuft. Reicht auch das nicht fuer 45 Hz, ist der Takt
+        // UNBEKANNT — dann wird gegen 60 Hz gemessen und das gesagt.
+        var schnellMs = p(proben, 0.05) || med;
+        var hzSchnell = schnellMs > 0 ? 1000 / schnellMs : 0;
+        var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;
+        var budget = 1000 / (takt || 60);
         var lauf = (performance.now() - start) / 1000;
         var g = window.__game, s = null;
         try { s = g && g.scene && g.scene.getScene && g.scene.getScene('Game'); } catch (e) {}
@@ -366,8 +444,8 @@
         var z = [];
         z.push('<b>MESSTAFEL</b>  <b>' + ver + '</b>   ' + zahl(lauf, 0) + ' s   ' + bilder + ' Bilder');
         if (!reif) z.push('<span class="warn">noch zu wenig gemessen — ' + proben.length + ' von ' + GENUG + ' Bildern.</span>');
-        z.push('Bildrate      <b>' + (reif ? zahl(1000 / med, 0) : '—') + '</b>/s   Anzeige ~' + (reif ? takt : '—') + ' Hz');
-        z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, 1000 / takt * 1.6) + '">' + zahl(p95) + '</span> ms');
+        z.push('Bildrate      <b>' + (reif ? zahl(1000 / med, 0) : '—') + '</b>/s   Anzeige ' + (reif ? (takt ? '~' + takt + ' Hz' : '<span class="warn">unbekannt — zu langsam für eine Schätzung, gemessen gegen 60 Hz</span>') : '—'));
+        z.push('Bildzeit      p50 ' + zahl(med) + ' ms   p95 <span class="' + kl(p95, budget * 1.6) + '">' + zahl(p95) + '</span> ms');
         z.push('Laengste      <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms bei ' + laengsteBei + ' s   ·   5 s: <span class="' + kl(l5, 50) + '">' + zahl(l5) + '</span> ms');
         // Pausen stehen DANEBEN, nicht in der laengsten Bildluecke. Sie sind
         // kein Ruckler — aber sie verschwinden auch nicht.
@@ -421,13 +499,14 @@
           var rate = med > 0 ? 1000 / med : 30;
           letzteZeile = 'SKYFRONT-MESSUNG ' + ver + ' | NOCH NICHTS GEMESSEN — bitte im Gefecht '
             + Math.max(1, Math.ceil((GENUG - proben.length) / rate)) + ' s laufen lassen und dann kopieren.';
-          werte.innerHTML = z.join('\n');
+          werte.innerHTML = offen ? z.join('\n')
+            : '<b>MESSUNG LÄUFT</b>   noch ' + Math.max(1, Math.ceil((GENUG - proben.length) / rate)) + ' s bis zur ersten Zahl';
           return;
         }
         var eine = ['SKYFRONT-MESSUNG ' + ver];
         eine.push(Math.round(innerWidth) + 'x' + Math.round(innerHeight) + '@' + (window.devicePixelRatio || 1) + 'x');
         if (c) eine.push('Puffer ' + c.width + 'x' + c.height);
-        eine.push(zahl(1000 / (med || 1), 0) + '/s (~' + takt + 'Hz)');
+        eine.push(zahl(1000 / (med || 1), 0) + '/s (' + (takt ? '~' + takt + 'Hz' : 'Takt unbekannt') + ')');
         eine.push('p50 ' + zahl(med) + ' p95 ' + zahl(p95) + ' ms');
         eine.push('laengste ' + zahl(laengste) + ' ms bei ' + laengsteBei + ' s');
         if (pausen) eine.push('Pausen ' + pausen + 'x/' + zahl(pausenMs / 1000) + ' s');
@@ -451,7 +530,13 @@
         eine.push(navigator.userAgent.replace(/[|]/g, '/'));
         letzteZeile = eine.join(' | ');
 
-        werte.innerHTML = z.join('\n');
+        // Eingeklappt steht die Kurzfassung da: die drei Zahlen, wegen
+        // derer man ueberhaupt misst. Zum Ablesen aufklappen, zum Spielen
+        // zuklappen — gemessen wird in beiden Faellen.
+        werte.innerHTML = offen ? z.join('\n')
+          : '<b>' + zahl(1000 / (med || 1), 0) + '/s</b>   p95 <span class="' + kl(p95, budget * 1.6) + '">'
+            + zahl(p95) + '</span> ms   längste <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms'
+            + (imSpiel ? '' : '   <span class="warn">(Menü)</span>');
       }
     })();
   </script>
