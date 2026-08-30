@@ -143,17 +143,43 @@ await seite.waitForTimeout(6000);
 }
 
 // ---- C  eingeklappt weitermessen — DER PUNKT --------------------------
-// 15 s statt 9: unter SwiftShader kommen rund drei Bilder je Sekunde
-// zusammen, und die Tafel gibt erst ab 60 Proben eine Zahl heraus. Mit
-// neun Sekunden blieben die Pruefungen E und F „nicht gemessen" — richtig
-// gemeldet, aber eben auch nichts bewiesen. Die Wartezeit ist an der
-// LANGSAMSTEN Umgebung bemessen, nicht an der schnellsten.
+// GEWARTET WIRD AUF DIE BEDINGUNG, NICHT AUF DIE UHR.
+//
+// Erst standen hier neun Sekunden, dann fuenfzehn — beide an DIESER
+// Umgebung geeicht. Auf dem Laeufer von GitHub reichten auch fuenfzehn
+// nicht: die Tafel gibt erst ab 60 Proben eine Zahl heraus, und dort
+// kommen noch weniger Bilder zusammen. Ergebnis: „nicht gemessen", und
+// im strengen Lauf ist das ein Fehlschlag. Eine feste Sekundenzahl ist
+// eine absolute Grenze in Verkleidung (Regel 2).
+//
+// Gefragt wird jetzt die TAFEL SELBST, ob sie reif ist — ihr eigenes
+// Kriterium, nicht ein hier nachgebautes (Regel 17). Die Obergrenze ist
+// nur eine Reissleine.
 const vorher = await bilder();
-await seite.waitForTimeout(15000);
+// Und ein zweites Abbruchkriterium: STEHT die Bilderzahl, ist die Messung
+// kaputt — dann muss das Tor das melden und nicht anderthalb Minuten
+// darauf warten, dass eine tote Messung reif wird. Genau diesen Fall
+// stellt die Gegenprobe „misst nur, solange sie offen ist" her.
+const reifWarten = async (grenzeMs) => {
+  const bis = Date.now() + grenzeMs;
+  let letzte = await bilder(), steht = 0;
+  while (Date.now() < bis) {
+    await seite.waitForTimeout(1000);
+    const z = await seite.evaluate(() => typeof window.__SKF_MESSZEILE === 'function' ? String(window.__SKF_MESSZEILE()) : null);
+    if (z === null) return false;                     // ohne Naht: nicht wartbar
+    if (!/NOCH NICHTS GEMESSEN/.test(z)) return true;
+    const jetzt = await bilder();
+    steht = (jetzt != null && letzte != null && jetzt > letzte) ? 0 : steht + 1;
+    letzte = jetzt;
+    if (steht >= 8) return false;                     // die Messung steht
+  }
+  return false;
+};
+const reif = await reifWarten(90000);
 const nachher = await bilder();
 {
   gemessen++;
-  console.log(`  C  eingeklappt    Bilder ${vorher} → ${nachher}`);
+  console.log(`  C  eingeklappt    Bilder ${vorher} → ${nachher}   (Tafel reif: ${reif ? 'ja' : 'nein'})`);
   if (vorher == null || nachher == null) M.ungemessen('die Bilderzahl steht nicht in der Tafel — nicht gemessen.');
   else if (!(nachher > vorher)) M.befund(`eingeklappt steigt die Bilderzahl nicht (${vorher} → ${nachher}). Die Messung laeuft nur, solange man hinsieht — und der Fall, in dem man misst, ist genau der andere.`);
 }
