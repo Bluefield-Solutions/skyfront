@@ -246,6 +246,10 @@ for (const z of ZUSTAENDE) {
 
 await browser.close();
 server.close();
-if (!gemessen) M.abbruch('kein Zustand gemessen.');
-if (gemessen < ZUSTAENDE.length) M.ungemessen(`nur ${gemessen} von ${ZUSTAENDE.length} Zustaenden gemessen.`);
+// KEIN abbruch() hier. Der frueher Abbruch haette verschluckt, was schon
+// gefunden wurde: die Gegenprobe --ohne-naht meldete „kein Zustand
+// gemessen" und liess den Grund („__SKF_KOPFZEILE fehlt") weg — genau der
+// Fall aus Regel 37. Aufgefallen ist es der Gegenprobe, nicht mir.
+if (!gemessen) M.ungemessen('kein Zustand gemessen — es steht keine Zahl zur Verfuegung.');
+else if (gemessen < ZUSTAENDE.length) M.ungemessen(`nur ${gemessen} von ${ZUSTAENDE.length} Zustaenden gemessen.`);
 M.urteil();

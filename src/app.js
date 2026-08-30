@@ -59698,12 +59698,22 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       const E = q.totalStars(),
         b = Ze.find(t => !q.starMilestoneClaimed(t.stars)),
         I = b ? `·  nächste Freischaltung bei ${b.stars} ★` : "·  alles freigeschaltet";
-      if (this.add.text(J / 2, 88, `★ ${E}   ${I}`, {
-          fontFamily: "sans-serif",
-          fontSize: "13px",
-          color: "#ffe27a"
-        }).setOrigin(.5).setDepth(78), R.length) {
-        const t = this.add.text(J / 2, 108, `🏅 ${R[R.length-1]}`, {
+      const rang = pilotenRang();
+      this.add.text(J / 2, 88, `★ ${E}   ${I}`, {
+        fontFamily: "sans-serif",
+        fontSize: "13px",
+        color: "#ffe27a"
+      }).setOrigin(.5).setDepth(78);
+      this.add.text(J / 2, 108, rang.max
+        ? `PILOT  ·  ${rang.name.toUpperCase()}  ·  RANG ${rang.stufe}/${rang.stufen}  ·  Höchstrang`
+        : `PILOT  ·  ${rang.name.toUpperCase()}  ·  RANG ${rang.stufe}/${rang.stufen}  ·  noch ${rang.fehlt} ★ bis ${rang.naechster}`, {
+        fontFamily: "sans-serif",
+        fontSize: "13px",
+        color: "#ffd85a",
+        fontStyle: "bold"
+      }).setOrigin(.5).setDepth(78);
+      if (R.length) {
+        const t = this.add.text(J / 2, 126, `🏅 ${R[R.length-1]}`, {
           fontFamily: "sans-serif",
           fontSize: "13px",
           color: "#8ff0ff",
@@ -62230,6 +62240,41 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     }
   }
 
+  // Der Rang des PILOTEN. Er haengt an den Sternen und damit an allem, was
+  // je geflogen wurde — nicht am Flugzeug. Bis v56 gab es dafuer nur einen
+  // Namen, und den nur mitten im Gefecht: dass der Pilot eine LEITER hat,
+  // war nirgends zu sehen. Jetzt kommen Stufe, Stufenzahl und der Abstand
+  // zur naechsten mit, und die Kopfzeile im Gefecht UND der Hangar zeigen
+  // dieselbe Auskunft — an einer Stelle gerechnet, an zwei gelesen.
+  function pilotenRang() {
+    const stufen = [
+        { ab: 0, name: "Rekrut" },
+        { ab: 3, name: "Leutnant" },
+        { ab: 8, name: "Oberleutnant" },
+        { ab: 14, name: "Hauptmann" },
+        { ab: 20, name: "Major" },
+        { ab: 26, name: "Oberst" },
+        { ab: 30, name: "General" }
+      ],
+      sterne = q.totalStars();
+    let i = 0;
+    for (let n = 0; n < stufen.length; n++)
+      if (sterne >= stufen[n].ab) i = n;
+    const max = i >= stufen.length - 1,
+      ab = stufen[i].ab,
+      bis = max ? ab : stufen[i + 1].ab;
+    return {
+      name: stufen[i].name,
+      stufe: i + 1,
+      stufen: stufen.length,
+      sterne,
+      max,
+      naechster: max ? "" : stufen[i + 1].name,
+      fehlt: max ? 0 : bis - sterne,
+      anteil: max ? 1 : tt.Math.Clamp((sterne - ab) / Math.max(1, bis - ab), 0, 1)
+    }
+  }
+
   function kopfFlaeche(T, R, E, b, I) {
     T[0] = R, T[1] = E, T[2] = b, T[3] = I
   }
@@ -62963,7 +63008,7 @@ dann ausweichen!`, {
         let bahn = 0;
         const schuss = (v, x, t, l, p) => { bahn++, this.shootBullet(v, x, t, l, p) };
         if (this.weapon === "laser") {
-          this.bahnen = 0, this.fireSecondary(R);
+          this.bahnen !== 0 && (this.bahnen = 0, this.updateHud()), this.fireSecondary(R);
           for (const G of this.wingmen) G.fires && G.img.visible && this.shootBullet(G.img.x, G.img.y - 8, 0, .9, 0);
           for (const G of this.drones) this.shootBullet(G.img.x, G.img.y - 8, 0, .85, 0);
           return
@@ -62988,7 +63033,7 @@ dann ausweichen!`, {
           const v = (G - (this.planeExtraShots - 1) / 2) * .16;
           schuss(this.player.x, R, v, 1, 0)
         }
-        this.bahnen = bahn;
+        bahn !== this.bahnen && (this.bahnen = bahn, this.updateHud());
         for (const G of this.wingmen) !G.fires || !G.img.visible || this.shootBullet(G.img.x, G.img.y - 8, 0, .9, 0);
         for (const G of this.drones) this.shootBullet(G.img.x, G.img.y - 8, 0, .85, 0);
         this.fireSecondary(R), this.audio.shoot();
@@ -66114,38 +66159,8 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       comboMult() {
         return 1 + Math.min(Math.floor(this.combo / 4) * .5, 3.5)
       }
-      // Der Rang des PILOTEN. Er haengt an den Sternen und damit an allem,
-      // was je geflogen wurde — nicht am Flugzeug. Bis v56 gab diese
-      // Funktion nur den Namen zurueck; die Kopfzeile konnte deshalb gar
-      // nicht zeigen, dass der Pilot eine LEITER hat. Jetzt kommt die Stufe
-      // mit, wieviele es davon gibt und wie weit die naechste weg ist.
       rankInfo() {
-        const stufen = [
-            { ab: 0, name: "Rekrut" },
-            { ab: 3, name: "Leutnant" },
-            { ab: 8, name: "Oberleutnant" },
-            { ab: 14, name: "Hauptmann" },
-            { ab: 20, name: "Major" },
-            { ab: 26, name: "Oberst" },
-            { ab: 30, name: "General" }
-          ],
-          sterne = q.totalStars();
-        let i = 0;
-        for (let n = 0; n < stufen.length; n++)
-          if (sterne >= stufen[n].ab) i = n;
-        const max = i >= stufen.length - 1,
-          ab = stufen[i].ab,
-          bis = max ? ab : stufen[i + 1].ab;
-        return {
-          name: stufen[i].name,
-          stufe: i + 1,
-          stufen: stufen.length,
-          sterne,
-          max,
-          naechster: max ? "" : stufen[i + 1].name,
-          fehlt: max ? 0 : bis - sterne,
-          anteil: max ? 1 : tt.Math.Clamp((sterne - ab) / Math.max(1, bis - ab), 0, 1)
-        }
+        return pilotenRang()
       }
       drawAmmoBelt(R, E, b, I, G) {
         const v = this.hud,
