@@ -447,6 +447,20 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+59. **Ein Instrument, das man BEDIENT, misst seine eigene Bedienung mit.**
+   Die dritte Geraetemessung meldete als laengste Bildluecke 115,0 ms bei
+   121,8 s — bei 122,5 s Gesamtlauf. Der Ausschlag lag im letzten Prozent
+   des Laufs, also genau dort, wo man aufklappt und kopiert, um ihn
+   abzulesen. Ob er vom Spiel kam oder vom Ablesen, war NICHT zu
+   entscheiden: hier unter SwiftShader dauert jedes Bild 350 ms, darin
+   ist ein Umbau von 30 ms unsichtbar (Regel 58). Also raet man nicht,
+   sondern bucht getrennt: das eine Bild nach einem Formwechsel oder
+   einem Kopieren zaehlt als „Umbau" und faellt aus den Bildzeiten, die
+   laufende Auffrischung bleibt drin (sie ist waehrend jeder Messung da)
+   und wird nebenher verglichen. Und weil eine Buchung, die zuviel
+   einsammelt, sich die Zahlen schoenrechnet, prueft das Tor BEIDE
+   Richtungen: ohne Umbau darf der Zaehler nicht steigen.
+
 56. **Ein festes Element ueber der Leinwand schluckt jeden Zug, der auf
    ihm beginnt.** Die Messtafel steht seit v62 eingeklappt WAEHREND des
    Spiels da — knapp ueber der Knopfreihe, also genau dort, wo der Daumen
@@ -567,6 +581,23 @@ nicht herstellen. Die Spur heisst `trimPools()`: aufgeraeumt wird nur bei
 hoechstens ZWEI Gegnern im Bild, was ein spaeter Sektor nie hat. Die
 Messtafel nennt seit v64 die Vorraete und zaehlt die Aufraeumvorgaenge —
 die naechste Messung vom Geraet beantwortet es.
+
+**Die dritte Geraetemessung (v64) beantwortet sie NICHT.** Sie traegt die
+Marke `(im Menue gemessen — bitte IM GEFECHT messen)`: `lage()` gibt
+ausserhalb der Spielszene nichts heraus, also fehlen Q, Lage und
+Vorraete. Was sie zeigt, ist das MENUE — und dort steht p50 17,0 / p95
+24,0 ms bei 15 % Bildern ueber 20 ms. Fuer einen Schirm ohne Gefecht ist
+das viel; nachgesehen ist es noch nicht.
+
+Ihr auffaelligster Wert taugte gar nicht: laengste Bildluecke 115,0 ms
+bei 121,8 s, bei 122,5 s Gesamtlauf — im letzten Prozent des Laufs, also
+genau dort, wo aufgeklappt und kopiert wird. Ob das Aufklappen ihn
+erzeugt hat, ist HIER nicht zu entscheiden (350 ms je Bild unter
+SwiftShader, gemessen: 350 ms ohne Umbau gegen 383 ms mit — im Rauschen).
+Seit v65 bucht die Tafel es deshalb selbst getrennt (Regel 59): die Zeile
+`Tafel selbst  Umbau Nx, laengster X ms` steht neben den Bildzeiten, und
+`laengste` enthaelt diese Bilder nicht mehr. Die naechste Messung sagt es
+ohne Vermutung.
 
 **Erledigt:** die Bilddauer war HIER NICHT MESSBAR
   (SwiftShader, rund zwei Bilder je Sekunde). Sie gehoert auf das Geraet,

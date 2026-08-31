@@ -241,6 +241,29 @@
       // hoeher. Die Grenzen sind Vielfache des 60-Hz-Budgets, nicht
       // gegriffene Zahlen: 16,7 · 20 · 25 · 33 (= 30 Bilder/s) · 50.
       var faecher = [0, 0, 0, 0, 0, 0];
+      // DIE TAFEL MISST SICH SELBST MIT.
+      //
+      // Regel 13: wer eine Wirkung misst, schaltet sie zuerst ab. Hier geht
+      // das nicht — die Tafel muss laufen, um zu messen. Also misst sie
+      // wenigstens, was sie selbst kostet.
+      //
+      // Der Anlass ist die dritte Geraetemessung: laengste Bildluecke
+      // 115,0 ms bei 121,8 s, bei 122,5 s Gesamtlauf. Der Ausschlag lag am
+      // ENDE — also genau dort, wo aufgeklappt und kopiert wird. Ob das
+      // Aufklappen ihn erzeugt hat, war nicht zu entscheiden: hier unter
+      // SwiftShader dauert jedes Bild 350 ms, darin ist ein Umbau von
+      // 30 ms nicht zu sehen. Statt zu raten, bucht die Tafel es getrennt.
+      //
+      // ZWEI verschiedene Kosten, und sie werden verschieden behandelt:
+      //   Umbau        einmalig, vom Nutzer ausgeloest (Auf-/Zuklappen,
+      //                Kopieren, Zuruecksetzen). Faellt aus der Statistik
+      //                heraus — sonst misst der laengste Wert die Messung.
+      //   Auffrischung laeuft die ganze Zeit mit, waehrend gespielt wird.
+      //                Bleibt DRIN, denn sie ist waehrend jeder Messung da.
+      //                Aber sie wird nebenher verglichen, damit man sieht,
+      //                wieviel die Tafel den Zahlen zuschlaegt.
+      var eigen = 0, eigenMs = 0, eigenMax = 0, eigenTat = '';
+      var zeitMitZeichnen = [], zeitOhne = [], gezeichnet = false;
       function fach(d) {
         return d <= 17 ? 0 : d <= 20 ? 1 : d <= 25 ? 2 : d <= 33 ? 3 : d <= 50 ? 4 : 5;
       }
@@ -275,7 +298,13 @@
       // aufklappt. Er ist damit selbst die Anzeige dafuer, dass die Messung
       // laeuft; ein Schalter, dessen Stand man nicht sieht, wird vergessen.
       function malen() {
+        var vorherKlasse = tafel.className;
         tafel.className = an ? (offen ? 'an' : 'an klein') : '';
+        // Nur ein echter Formwechsel ist ein Umbau. Ein malen() ohne
+        // Klassenwechsel zeichnet bloss neu und kostet nicht mehr als jede
+        // andere Auffrischung — das als Umbau zu buchen hiesse, sich die
+        // Zahlen schoen zu rechnen.
+        if (tafel.className !== vorherKlasse) eigenTat = 'Form';
         knoepfeSetzen();
         if (an) zeichnen();
       }
@@ -294,6 +323,8 @@
         laengste = 0; laengsteBei = 0; bilder = 0;
         pausen = 0; pausenMs = 0; versteckt = false;
         schlimmsteLage = null; faecher = [0, 0, 0, 0, 0, 0];
+        eigen = 0; eigenMs = 0; eigenMax = 0; eigenTat = '';
+        zeitMitZeichnen.length = 0; zeitOhne.length = 0;
         start = performance.now(); vorher = 0;
       }
       // Kein eigenes Element als Fangflaeche: auf einem 16:9-Geraet laege sie
@@ -312,6 +343,13 @@
       // nirgends auf dem Schirm — und genau eingeklappt muss ein Werkzeug
       // nachweisen koennen, dass weitergemessen wird.
       window.__SKF_MESSBILDER = function () { return bilder; };
+      // Was die Tafel sich selbst zuschreibt. Ohne diese Naht laesst sich
+      // von aussen nicht pruefen, dass ein Umbau auch wirklich als Umbau
+      // gebucht wird und nicht als Ruckler des Spiels.
+      window.__SKF_MESSEIGEN = function () {
+        return { umbauten: eigen, ms: eigenMs, max: eigenMax, laengste: laengste,
+                 mitZeichnen: zeitMitZeichnen.length, ohne: zeitOhne.length };
+      };
 
       window.addEventListener('pointerdown', function (e) {
         // Gemessen an der LEINWAND, nicht am Fenster. Hochkant ist die
@@ -338,8 +376,8 @@
         var k = e.target && e.target.getAttribute && e.target.getAttribute('data-tat');
         if (!k) return;
         e.preventDefault();
-        if (k === 'reset') { zuruecksetzen(); return; }
-        if (k === 'kopieren') kopieren();
+        if (k === 'reset') { zuruecksetzen(); eigenTat = 'Zuruecksetzen'; return; }
+        if (k === 'kopieren') { kopieren(); eigenTat = 'Kopieren'; }
         if (k === 'auf') offenSetzen(true);
         if (k === 'zu') offenSetzen(false);
         if (k === 'aus') messenSetzen(false);
@@ -403,22 +441,39 @@
           if (versteckt) {
             // Die App war weg. Als Pause buchen, nicht als Bildluecke.
             versteckt = false; pausen++; pausenMs += d;
+          } else if (eigenTat) {
+            // DIE TAFEL HAT SICH SELBST UMGEBAUT. Das ist kein Ruckler des
+            // Spiels, sondern der Preis des Hinsehens — genau EIN Bild, das
+            // Bild nach dem Tippen, in dem der Browser die Tafel neu setzt
+            // und zeichnet. Es wird gezaehlt und angezeigt, aber nicht in
+            // die Bildzeiten gerechnet: sonst misst „laengste" die Messung.
+            eigen++; eigenMs += d; if (d > eigenMax) eigenMax = d;
+            eigenTat = '';
           } else {
             bilder++;
             if (proben.push(d) > 400) proben.shift();
             letzte5.push([t, d]);
             while (letzte5.length && t - letzte5[0][0] > 5000) letzte5.shift();
             faecher[fach(d)]++;
+            // Auffrischungsbilder NEBENHER mitschreiben. Sie bleiben in den
+            // Bildzeiten — die Tafel laeuft ja waehrend der ganzen Messung
+            // mit. Der Vergleich sagt, wieviel sie den Zahlen zuschlaegt.
+            var feld = gezeichnet ? zeitMitZeichnen : zeitOhne;
+            if (feld.push(d) > 200) feld.shift();
             if (d > laengste) {
               laengste = d; laengsteBei = Math.round((t - start) / 100) / 10;
               schlimmsteLage = lage();
             }
           }
-        }
+        } else eigenTat = '';
         vorher = t;
         // Gezeichnet wird nur, was zu sehen ist. Eingeklappt reicht jede
         // halbe Sekunde — gemessen wird trotzdem jedes Bild.
-        if (bilder % (offen ? 12 : 30) === 0) zeichnen();
+        // Ob in DIESEM Bild gezeichnet wurde, entscheidet sich hier — die
+        // Kosten stehen aber erst in der NAECHSTEN Bildluecke, denn Setzen
+        // und Zeichnen macht der Browser nach diesem Aufruf.
+        gezeichnet = bilder % (offen ? 12 : 30) === 0;
+        if (gezeichnet) zeichnen();
       }
       requestAnimationFrame(schleife);
 
@@ -473,6 +528,15 @@
         // Pausen stehen DANEBEN, nicht in der laengsten Bildluecke. Sie sind
         // kein Ruckler — aber sie verschwinden auch nicht.
         if (pausen) z.push('Pausen        ' + pausen + 'x App im Hintergrund, zusammen ' + zahl(pausenMs / 1000) + ' s (nicht als Ruckler gezaehlt)');
+        // WAS DIE TAFEL SELBST KOSTET. Ohne diese Zeile ist nicht zu
+        // entscheiden, ob ein Ausschlag am Ende des Laufs vom Spiel kommt
+        // oder vom Aufklappen, mit dem man ihn ablesen wollte.
+        var mitZ = p(zeitMitZeichnen, 0.5), ohneZ = p(zeitOhne, 0.5);
+        z.push('Tafel selbst  Umbau ' + eigen + 'x, laengster <span class="' + kl(eigenMax, 50) + '">' + zahl(eigenMax) +
+               '</span> ms (nicht in den Bildzeiten)' +
+               (zeitMitZeichnen.length >= 5 && zeitOhne.length >= 5
+                 ? '   ·   Auffrischung ' + zahl(mitZ) + ' gegen ' + zahl(ohneZ) + ' ms sonst'
+                 : '   ·   Auffrischung noch nicht vergleichbar'));
         // Die Verteilung. Anteile, nicht Stueckzahlen: eine 90-Sekunden-Runde
         // und eine 10-Sekunden-Runde sollen vergleichbar bleiben.
         var summe = faecher.reduce(function (a, b) { return a + b; }, 0);
@@ -535,6 +599,9 @@
         eine.push('p50 ' + zahl(med) + ' p95 ' + zahl(p95) + ' ms');
         eine.push('laengste ' + zahl(laengste) + ' ms bei ' + laengsteBei + ' s');
         if (pausen) eine.push('Pausen ' + pausen + 'x/' + zahl(pausenMs / 1000) + ' s');
+        eine.push('Tafel Umbau ' + eigen + 'x/' + zahl(eigenMax) + ' ms' +
+                  (zeitMitZeichnen.length >= 5 && zeitOhne.length >= 5
+                    ? ' Auffr ' + zahl(mitZ) + '/' + zahl(ohneZ) : ''));
         var su = faecher.reduce(function (a, b) { return a + b; }, 0);
         if (su > 0) eine.push('Verteilung ' + faecher.map(function (n) { return Math.round(n / su * 100); }).join('/') + ' % (<=17/20/25/33/50/>50)');
         if (schlimmsteLage) {

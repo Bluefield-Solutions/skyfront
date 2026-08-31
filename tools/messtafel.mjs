@@ -40,6 +40,9 @@
   „unbekannt" und misst gegen 60 Hz. Genau das wird hier geprueft — und es
   ist die einzige Pruefung dieses Projekts, der die lahme Umgebung NUETZT.
 
+      J  Umbau    Auf-/Zuklappen und Kopieren kosten selbst ein Bild. Es
+              wird getrennt gebucht, sonst misst "laengste" die Messung.
+
   `--ohne-naht` nimmt `__SKF_MESSZEILE` weg und verlangt die Rueckgabe 2.
 */
 import { existsSync, readFileSync, statSync } from 'node:fs';
@@ -364,6 +367,52 @@ console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
         M.befund(`Effekt-Absenkung, „${f.name.trim()}": erwartet ${f.soll}, tatsaechlich ${f.tat} (${f.vor.toFixed(2)} → ${f.nach.toFixed(2)}).`
           + (f.soll === 'hoch' ? ' Ein Regler, der nur faellt, laesst den Rest des Sektors ohne Schmuck laufen.' : ''));
     }
+  }
+}
+
+// ---- J  Bucht die Tafel ihre eigene Arbeit getrennt? ------------------
+//
+// DER ANLASS: die dritte Geraetemessung meldete als laengste Bildluecke
+// 115,0 ms bei 121,8 s — bei 122,5 s Gesamtlauf. Der Ausschlag lag im
+// letzten Prozent des Laufs, also genau dort, wo aufgeklappt und kopiert
+// wird. Ob das Aufklappen ihn erzeugt hat, war NICHT zu entscheiden: hier
+// unter SwiftShader dauert jedes Bild 350 ms, darin ist ein Umbau von
+// 30 ms unsichtbar. Statt zu raten, bucht die Tafel es getrennt — und
+// die naechste Geraetemessung sagt es selbst.
+//
+// Geprueft wird nach Regel 13 in BEIDE Richtungen: ohne Umbau darf der
+// Zaehler nicht steigen, sonst zaehlt er etwas anderes mit.
+console.log('\n  J  Bucht die Tafel ihre eigene Arbeit getrennt?');
+{
+  const eigen = () => seite.evaluate(() => typeof window.__SKF_MESSEIGEN === 'function' ? window.__SKF_MESSEIGEN() : null);
+  const a = await eigen();
+  if (a === null) M.ungemessen('__SKF_MESSEIGEN fehlt — was die Tafel sich selbst zuschreibt, ist nicht abzufragen.');
+  else {
+    // Erst die Gegenprobe: NICHTS tun. Steigt der Zaehler auch dann, misst
+    // er nicht den Umbau, sondern irgendetwas.
+    await seite.waitForTimeout(3000);
+    const b = await eigen();
+    console.log(`     nichts getan      Umbauten ${a.umbauten} → ${b.umbauten}`);
+    if (b.umbauten !== a.umbauten)
+      M.befund(`der Umbau-Zaehler steigt, ohne dass etwas umgebaut wurde (${a.umbauten} → ${b.umbauten}). Dann bucht die Tafel gewoehnliche Bilder als eigene Arbeit und rechnet sich die Zahlen schoen.`);
+
+    // Und jetzt mit Umbau: aufklappen ist genau EIN Formwechsel.
+    await tippen('auf');
+    await seite.waitForTimeout(2000);
+    const c = await eigen();
+    console.log(`     aufgeklappt       Umbauten ${b.umbauten} → ${c.umbauten}   laengster ${c.max.toFixed(1)} ms`);
+    if (c.umbauten !== b.umbauten + 1)
+      M.befund(`das Aufklappen wird nicht als genau ein eigenes Bild gebucht (${b.umbauten} → ${c.umbauten}). Dann steht die Aufklapp-Bildluecke als Ruckler des Spiels in „laengste" — und die Messung misst die Messung.`);
+
+    await tippen('kopieren');
+    await seite.waitForTimeout(2000);
+    const d = await eigen();
+    console.log(`     kopiert           Umbauten ${c.umbauten} → ${d.umbauten}   Vergleichsbilder ${d.mitZeichnen}/${d.ohne}`);
+    if (!(d.umbauten > c.umbauten))
+      M.befund(`das Kopieren wird nicht als eigenes Bild gebucht (${c.umbauten} → ${d.umbauten}).`);
+    if (d.umbauten > 0 && !(d.max > 0))
+      M.befund('es sind eigene Bilder gebucht, aber keins hat eine Dauer — dann ist die Buchung eine Zaehlung ohne Messung.');
+    gemessen++;
   }
 }
 

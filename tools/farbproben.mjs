@@ -148,6 +148,20 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // DIE TAFEL SCHREIBT SICH IHRE EIGENE ARBEIT NICHT MEHR ZU: der
+  // Formwechsel wird nicht mehr gemeldet, also faellt die Bildluecke des
+  // Aufklappens wieder in „laengste". Genau so entstand die Frage, ob die
+  // 115 ms der dritten Geraetemessung vom Spiel kamen oder vom Ablesen.
+  ['Messtafel bucht das Aufklappen nicht mehr als eigene Arbeit', '✗',
+    ['        if (tafel.className !== vorherKlasse) eigenTat = \'Form\';\n', ''],
+    true, 'messtafel', 'nicht als genau ein eigenes Bild', HUELLE],
+  // Und die Gegenrichtung (Regel 13): jedes Auffrischungsbild als eigene
+  // Arbeit buchen. Dann faellt die halbe Messung aus der Statistik und die
+  // Tafel rechnet sich gruen — ohne dass ein Zaehler auffaellt, wenn das
+  // Tor nur die eine Richtung prueft.
+  ['Messtafel bucht auch gewoehnliche Auffrischungen als eigene Arbeit', '✗',
+    ['          } else if (eigenTat) {', '          } else if (eigenTat || gezeichnet) {'],
+    true, 'messtafel', 'ohne dass etwas umgebaut wurde', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
   // gesehen — die Pause war der einzige Schirm, den keines betrat.
