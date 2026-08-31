@@ -79,7 +79,21 @@
       background:rgba(6,12,20,.93);border-top:1px solid #2a4c6a;
       border-bottom:1px solid #2a4c6a;
       color:#cfe6f5;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
-      -webkit-overflow-scrolling:touch}
+      -webkit-overflow-scrolling:touch;
+      /* DIE TAFEL FAENGT KEINE FINGER.
+         Seit v62 steht sie eingeklappt WAEHREND DES SPIELS da — und ein
+         festes Element ueber der Leinwand schluckt jeden Zug, der auf ihm
+         beginnt. Rueckmeldung des Nutzers, woertlich: „der Aufklapper
+         stoert total das Fliegen, man kann das Flugzeug kaum sauber
+         steuern." Der Daumen liegt genau dort, knapp ueber der
+         Knopfreihe.
+         Also: die Flaeche ist durchlaessig, nur die KNOEPFE nehmen
+         Beruehrungen an — und die Werte, aber erst aufgeklappt, damit
+         man lange Zeilen noch schieben kann. */
+      pointer-events:none}
+    #messung .knopf{pointer-events:auto}
+    #messung .zeile{pointer-events:auto}
+    #messung:not(.klein) #messwerte{pointer-events:auto}
     #messwerte{margin:0;white-space:pre;overflow-x:auto;font:inherit;color:inherit}
     /* Eingeklappt ist die Tafel EIN Streifen: die Messung laeuft weiter,
        das Spiel bleibt frei. Aufgeklappt steht alles da. Der Streifen ist

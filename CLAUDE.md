@@ -429,6 +429,17 @@ Jede hat mindestens eine Runde gekostet.
    verlangen Stufe > 0. Wer 1000 Gold zahlte, sah „✓ Aktiv" und es
    passierte nichts. Ein Tor, das den Weg abkuerzt, prueft die Abkuerzung.
 
+56. **Ein festes Element ueber der Leinwand schluckt jeden Zug, der auf
+   ihm beginnt.** Die Messtafel steht seit v62 eingeklappt WAEHREND des
+   Spiels da — knapp ueber der Knopfreihe, also genau dort, wo der Daumen
+   liegt. Rueckmeldung des Nutzers: „der Aufklapper stoert total das
+   Fliegen, man kann das Flugzeug kaum sauber steuern." Wer etwas ueber
+   die Leinwand legt, macht es durchlaessig (`pointer-events: none`) und
+   nimmt nur die KNOEPFE aus. Und geprueft wird nicht, was dort LIEGT,
+   sondern ob ein Zug von dort im Spiel ANKOMMT — gegen eine freie
+   Flaeche gemessen, sonst hiesse „kommt nicht an" womoeglich nur, dass
+   Ziehen ueberhaupt nicht ankommt.
+
 54. **Eine Anzeige, die beim Einbruch mitgeht, bezeugt ihn, statt ihn zu
    melden.** Die Messtafel schaetzte den Bildschirmtakt aus dem MEDIAN der
    Bildzeiten — also aus dem, was das Spiel gerade schafft. Bei 3,2
@@ -513,8 +524,24 @@ um, wenn jemand es auf die angelegten Stuecke zurueckschneidet. Auf dem
 Schirm steht es jetzt auch — `Tier-Bonus: Episch ×3` in der Kopfzeile und
 eine Zeile neben „Zerlegen".
 
-**Offen — aus der Rueckmeldung des Nutzers zu v56, noch einer von fuenf:**
-- Die Bilddauer beim Ausloesen einer Spezialwaffe ist HIER NICHT MESSBAR
+**GEMESSEN AM GERAET (v63), die erste belastbare Leistungszahl des
+Projekts.** iPhone, iOS 18.7, 393 x 793 @3x:
+
+| | Sektor 2 | Sektor 106 |
+|---|---|---|
+| Bildrate | 58,8/s | 55,6/s |
+| p50 / p95 | 17,0 / 18,0 ms | **18,0 / 24,0 ms** |
+| Bilder unter 17 ms | 88 % | **39 %** |
+| Effektbudget Q | 1,00 | **0,35** |
+
+In spaeten Sektoren liegt der MEDIAN ueber dem 60-Hz-Budget. Und die
+Partikel sind es nicht: bei Q 0,35 ist `fxCap` 89, und im schlechtesten
+Bild standen genau 89 — die Effekte werden bereits weggelassen, es reicht
+trotzdem nicht. Was bleibt, sind 519 Anzeigeobjekte, 86 Geschosse und 15
+Gegner im selben Bild. Die Last liegt in der MENGE, nicht im Schmuck. Das
+ist eine Spur, keine Diagnose.
+
+**Erledigt:** die Bilddauer war HIER NICHT MESSBAR
   (SwiftShader, rund zwei Bilder je Sekunde). Sie gehoert auf das Geraet,
   `#messung`. Was hier gemessen werden konnte, sind die Objektkosten je
   Gadget: `emp +23 · shield +5 · napalm +1 · drones +24 · repair +28 ·

@@ -240,6 +240,87 @@ await seite.waitForTimeout(2500);
   else if (!s.an) M.befund('nach einem Neuladen ist die Messung aus. Eine Messung, die beim Nachladen still ausgeht, ist keine.');
 }
 
+// ---- H  Der Streifen darf keine Finger fangen -------------------------
+//
+// DER ANLASS, woertlich: „der Aufklapper stoert total das Fliegen, man
+// kann das Flugzeug kaum sauber steuern." Seit v62 steht die Tafel
+// eingeklappt WAEHREND DES SPIELS da, und ein festes Element ueber der
+// Leinwand schluckt jeden Zug, der auf ihm beginnt — genau dort, wo der
+// Daumen liegt.
+//
+// Gemessen wird BEIDES: was an der Stelle liegt (elementFromPoint) und
+// was passiert, wenn man dort zu ziehen anfaengt. Das erste ist die
+// Mechanik, das zweite die Wirkung — und nur das zweite ist die Frage
+// des Nutzers.
+console.log('\n  H  Faengt der Streifen Finger?');
+{
+  // Nach Pruefung G steht die Seite frisch geladen im Menue — dort gibt es
+  // kein Flugzeug zu steuern. Erst wieder ins Gefecht, sonst misst die
+  // Zugprobe nur, dass es keine Szene gibt (und meldet das als „null",
+  // was wie ein Befund aussieht und keiner ist).
+  await seite.evaluate(async () => {
+    const g = window.__game;
+    (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+    g.scene.start('Game', { stage: 3 });
+    for (let i = 0; i < 40; i++) {
+      await new Promise((f) => setTimeout(f, 250));
+      const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
+      if (!sz) continue;
+      if (!sz.stageStarted && typeof sz.startStage === 'function') sz.startStage();
+      if (sz.player) return;
+    }
+  });
+  await seite.waitForTimeout(2000);
+  // Zurueck in den eingeklappten Zustand: darum geht es.
+  await tippen('zu');
+  await seite.waitForTimeout(1200);
+  const punkte = await seite.evaluate(() => {
+    const t = document.getElementById('messung');
+    if (!t) return { fehler: 'keine Tafel' };
+    const r = t.getBoundingClientRect();
+    if (!(r.width > 0 && r.height > 0)) return { fehler: 'der Streifen hat keine Flaeche' };
+    const mitte = { x: Math.round(r.left + r.width * 0.5), y: Math.round(r.top + r.height * 0.5) };
+    const links = { x: Math.round(r.left + r.width * 0.85), y: Math.round(r.top + r.height * 0.35) };
+    const treffer = (p) => { const e = document.elementFromPoint(p.x, p.y); return e ? (e.id || e.tagName + (e.className ? '.' + e.className : '')) : null; };
+    return { rahmen: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
+             mitte, links, wasMitte: treffer(mitte), wasLinks: treffer(links) };
+  });
+  if (punkte.fehler) M.ungemessen(`Streifen: ${punkte.fehler}`);
+  else {
+    gemessen++;
+    console.log(`     Streifen ${punkte.rahmen.join(',')} — an (${punkte.mitte.x},${punkte.mitte.y}) liegt ${JSON.stringify(punkte.wasMitte)}`);
+    if (/messung|messwerte/.test(String(punkte.wasMitte)))
+      M.befund(`der eingeklappte Streifen faengt Beruehrungen ab: an (${punkte.mitte.x},${punkte.mitte.y}) liegt ${JSON.stringify(punkte.wasMitte)} statt der Leinwand. Wer dort zu ziehen anfaengt, steuert nicht das Flugzeug.`);
+
+    // Und die Wirkung: auf dem Streifen zu ziehen anfangen und nachsehen,
+    // ob das Spiel den Zug bekommt.
+    const zieht = async (x, y) => {
+      await seite.evaluate(() => {
+        const g = window.__game;
+        const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
+        if (sz) sz.dragging = false;
+      });
+      await seite.mouse.move(x, y);
+      await seite.mouse.down();
+      await seite.mouse.move(x, y - 60, { steps: 4 });
+      const d = await seite.evaluate(() => {
+        const g = window.__game;
+        const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
+        return sz ? !!sz.dragging : null;
+      });
+      await seite.mouse.up();
+      return d;
+    };
+    // Erst eine Stelle, an der sicher die Leinwand liegt — sonst misst die
+    // Probe nur, dass Ziehen ueberhaupt nicht ankommt (Regel 13).
+    const frei = await zieht(195, 500);
+    const drauf = await zieht(punkte.mitte.x, punkte.mitte.y);
+    console.log(`     Ziehen auf freier Fläche: ${frei}   ·   auf dem Streifen: ${drauf}`);
+    if (frei !== true) M.ungemessen('das Ziehen kommt selbst auf freier Flaeche nicht an — die Wirkung ist nicht gemessen.');
+    else if (drauf !== true) M.befund('ein Zug, der auf dem Streifen beginnt, erreicht das Spiel nicht — das Flugzeug laesst sich dort nicht steuern.');
+  }
+}
+
 await browser.close();
 server.close();
 console.log('');

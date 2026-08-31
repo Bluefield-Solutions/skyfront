@@ -120,6 +120,15 @@ const PROBEN = [
   ['Messtafel misst nur, solange sie offen ist', '✗',
     ['        if (!an) { vorher = t; return; }', '        if (!an || !offen) { vorher = t; return; }'],
     true, 'messtafel', 'steigt die Bilderzahl nicht', HUELLE],
+  // Der Tafel die Durchlaessigkeit nehmen: dann faengt der eingeklappte
+  // Streifen wieder jeden Zug ab, der auf ihm beginnt — genau der Fehler,
+  // den der Nutzer gemeldet hat („man kann das Flugzeug kaum sauber
+  // steuern"). Verlangt wird, dass das Tor die WIRKUNG benennt, nicht nur
+  // rot wird.
+  ['Messtafel faengt wieder Beruehrungen ab', '✗',
+    ['      pointer-events:none}\n    #messung .knopf{pointer-events:auto}',
+     '      pointer-events:auto}\n    #messung .knopf{pointer-events:auto}'],
+    true, 'messtafel', 'erreicht das Spiel nicht', HUELLE],
   // Und der Takt wieder aus der GEMESSENEN Rate: dann geht die Tafel beim
   // Einbruch mit und faerbt ein p95 von 350 ms gruen.
   //
