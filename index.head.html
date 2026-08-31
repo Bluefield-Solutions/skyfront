@@ -249,8 +249,17 @@
           var g = window.__game, sp = g && g.scene && g.scene.getScene ? g.scene.getScene('Game') : null;
           if (!sp || !sp.scene.isActive()) return null;
           var ak = function (gr) { return gr ? gr.countActive(true) : 0; };
+          // AUCH DIE VORRAETE, nicht nur was gerade aktiv ist. Die Frage
+          // „woraus bestehen die 519 Anzeigeobjekte" laesst sich nur so
+          // beantworten: Phaser laesst abgeschaltete Mitglieder in der
+          // Anzeigeliste stehen, und aufgeraeumt wird nur in einer
+          // Ruhepause, die ein spaeter Sektor nie hat.
+          var ln = function (gr) { return gr ? gr.getLength() : 0; };
           return { g: ak(sp.enemies), k: ak(sp.bullets), gk: ak(sp.enemyBullets),
                    fx: sp.fxActive || 0, obj: sp.children ? sp.children.list.length : 0,
+                   vk: ln(sp.bullets), vgk: ln(sp.enemyBullets), vg: ln(sp.enemies),
+                   vp: ln(sp.powerups), vfx: sp.fxPool ? sp.fxPool.length : 0,
+                   vtx: sp.txtPool ? sp.txtPool.length : 0, tr: sp.poolTrims || 0,
                    b: sp.bodenKey || '?', w: sp.waveIndex != null ? sp.waveIndex : -1 };
         } catch (e) { return null; }
       }
@@ -478,6 +487,8 @@
           var L = schlimmsteLage;
           z.push('dabei war       Gegner ' + L.g + '  Kugeln ' + L.k + '/' + L.gk +
                  '  fx ' + L.fx + '  Bild ' + L.obj + '  Biom ' + L.b);
+          z.push('Vorräte dabei   Kugeln ' + L.vk + '  Gegnerkugeln ' + L.vgk + '  Gegner ' + L.vg +
+                 '  Aufsammler ' + L.vp + '  fx ' + L.vfx + '  Texte ' + L.vtx + '   ·   aufgeräumt ' + L.tr + 'x');
         } else if (laengste > 0) {
           z.push('dabei war       (im Menue — dort gibt es keine Lage zu melden)');
         }
@@ -529,6 +540,10 @@
         if (schlimmsteLage) {
           var W = schlimmsteLage;
           eine.push('dabei G' + W.g + ' K' + W.k + '/' + W.gk + ' fx' + W.fx + ' Obj' + W.obj + ' ' + W.b);
+          // Die Vorraete gehoeren in die MITGENOMMENE Zeile: sie sind die
+          // Antwort auf „woraus besteht die Anzeigeliste", und ohne sie
+          // muesste man dafuer ein zweites Mal fahren.
+          eine.push('Vorrat K' + W.vk + ' GK' + W.vgk + ' G' + W.vg + ' PU' + W.vp + ' fx' + W.vfx + ' tx' + W.vtx + ' Trims' + W.tr);
         }
         eine.push('5s ' + zahl(l5) + ' ms');
         if (g && g.loop) eine.push('Phaser ' + zahl(g.loop.delta) + '/' + zahl(g.loop.rawDelta || 0));

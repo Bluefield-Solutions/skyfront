@@ -429,6 +429,24 @@ Jede hat mindestens eine Runde gekostet.
    verlangen Stufe > 0. Wer 1000 Gold zahlte, sah „✓ Aktiv" und es
    passierte nichts. Ein Tor, das den Weg abkuerzt, prueft die Abkuerzung.
 
+57. **Ein Regler mit festen Schwellen hat ein TOTES BAND, und darin lebt
+   das Geraet.** Die Effekt-Absenkung senkte unter 46 Bildern je Sekunde
+   und hob erst ueber 56. Gemessen auf dem iPhone, Sektor 106: 55,6
+   Bilder je Sekunde, Effektbudget 0,35 nach 88 Sekunden — der Regler
+   KONNTE nicht mehr hochkommen und lief den Rest des Sektors ohne
+   Schmuck. Die Schwellen sind jetzt Anteile des Bildschirmtakts (78 %
+   runter, 90 % hoch), und der Takt kommt aus dem SCHNELLSTEN gesehenen
+   Bild. Dieselbe Ueberlegung wie bei der Messtafel (Regel 54), nur im
+   Spiel: ein Massstab, der aus dem Gemessenen stammt, misst nichts mehr.
+
+58. **Was diese Umgebung nicht herstellen kann, misst das GERAET — dafuer
+   wird das Instrument erweitert, nicht die Vermutung.** Neun Sekunden
+   Sektor 106 ergeben hier 95 Objekte und keinen einzigen Gegner; das
+   Geraet sah 519. Statt zu raten, woraus sie bestehen, nennt die
+   Messtafel jetzt die VORRAETE (Kugeln, Gegnerkugeln, Gegner,
+   Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
+   naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
+
 56. **Ein festes Element ueber der Leinwand schluckt jeden Zug, der auf
    ihm beginnt.** Die Messtafel steht seit v62 eingeklappt WAEHREND des
    Spiels da — knapp ueber der Knopfreihe, also genau dort, wo der Daumen
@@ -537,9 +555,18 @@ Projekts.** iPhone, iOS 18.7, 393 x 793 @3x:
 In spaeten Sektoren liegt der MEDIAN ueber dem 60-Hz-Budget. Und die
 Partikel sind es nicht: bei Q 0,35 ist `fxCap` 89, und im schlechtesten
 Bild standen genau 89 — die Effekte werden bereits weggelassen, es reicht
-trotzdem nicht. Was bleibt, sind 519 Anzeigeobjekte, 86 Geschosse und 15
-Gegner im selben Bild. Die Last liegt in der MENGE, nicht im Schmuck. Das
-ist eine Spur, keine Diagnose.
+trotzdem nicht.
+
+Das `Q 0,35` selbst war ein eigener Befund und ist behoben (v64, Regel
+57): der Regler hob erst ueber 56 Bilder je Sekunde, das Geraet lieferte
+55,6 — er konnte nicht mehr hochkommen.
+
+**Offen und messbar offen:** woraus bestehen die 519 Anzeigeobjekte, wenn
+nur 15 Gegner und 86 Geschosse aktiv sind? Diese Umgebung kann die Last
+nicht herstellen. Die Spur heisst `trimPools()`: aufgeraeumt wird nur bei
+hoechstens ZWEI Gegnern im Bild, was ein spaeter Sektor nie hat. Die
+Messtafel nennt seit v64 die Vorraete und zaehlt die Aufraeumvorgaenge —
+die naechste Messung vom Geraet beantwortet es.
 
 **Erledigt:** die Bilddauer war HIER NICHT MESSBAR
   (SwiftShader, rund zwei Bilder je Sekunde). Sie gehoert auf das Geraet,

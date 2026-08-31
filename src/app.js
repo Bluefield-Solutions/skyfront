@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v63",
+    SKF_VERSION = "v64",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62307,6 +62307,29 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
     }
   }
 
+  // DIE EFFEKT-ABSENKUNG, in einer Funktion statt mitten in der Schleife.
+  //
+  // Bis v63 stand hier: runter unter 46 Bildern je Sekunde, hoch erst
+  // ueber 56. Dazwischen ein TOTES BAND von zehn Bildern — und genau
+  // darin lebt ein 60-Hz-Telefon in einem vollen Sektor. Gemessen auf dem
+  // Geraet des Nutzers, Sektor 106: 55,6 Bilder je Sekunde und
+  // Effektbudget 0,35 nach 88 Sekunden. Der Regler KONNTE nicht mehr
+  // hochkommen: 55,6 liegt unter 56. Er faellt einmal und bleibt unten,
+  // den Rest des Sektors — auch wenn es laengst wieder ruhig ist.
+  //
+  // Die Schwellen sind jetzt ANTEILE des Bildschirmtakts (Regel 2): unter
+  // 78 % faellt er, ueber 90 % steigt er. Auf 60 Hz sind das 46,8 und 54;
+  // die gemessenen 55,6 kommen damit zurueck. Auf 120 Hz waeren es 93,6
+  // und 108 — dieselbe Regel, ohne dass jemand eine zweite Zahl pflegt.
+  //
+  // Runter geht es weiter schneller als hoch (0,12 gegen 0,05): ein
+  // Einbruch muss sofort weichen, die Rueckkehr darf sich Zeit lassen.
+  function qRegel(T, R, E, b, I) {
+    const G = E * .78,
+      v = E * .9;
+    return R < G ? { q: Math.max(.15, T - .12), qUpAt: I } : R > v && b - I > 900 ? { q: Math.min(1, T + .05), qUpAt: b } : { q: T, qUpAt: I }
+  }
+
   function kopfFlaeche(T, R, E, b, I) {
     T[0] = R, T[1] = E, T[2] = b, T[3] = I
   }
@@ -62588,7 +62611,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
           x: J - 80,
           y: 32,
           r: 22
-        }, this.audio = gt(), this.startStageNum = 1, this.runDiff = null, this.ebStyle = "orb", this.fxPool = [], this.fxActive = 0, this.fxCap = 170, this.fxAuto = !0, this.fpsEma = 60, this.fpsFrame = 0, this.qBudget = 1, this.qUpAt = 0, this.txtCap = 80, this.lastPoolTrim = 0, this.hitGrid = new Map, this.hitCellPool = [], this.hitUsed = [], this.hitTests = 0, this.frameHits = 0, this.dbgOn = !1, this.frameMs = [], this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.fxAtlasReady = !1, this.txtPool = [], this.txtActive = 0, this.slowActive = !1
+        }, this.audio = gt(), this.startStageNum = 1, this.runDiff = null, this.ebStyle = "orb", this.fxPool = [], this.fxActive = 0, this.fxCap = 170, this.fxAuto = !0, this.fpsEma = 60, this.fpsFrame = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.txtCap = 80, this.lastPoolTrim = 0, this.hitGrid = new Map, this.hitCellPool = [], this.hitUsed = [], this.hitTests = 0, this.frameHits = 0, this.dbgOn = !1, this.frameMs = [], this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.fxAtlasReady = !1, this.txtPool = [], this.txtActive = 0, this.slowActive = !1
       }
       init(R) {
         this.endless = (R == null ? void 0 : R.mode) === "endless";
@@ -62597,7 +62620,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       create() {
         var d, u, c, g;
-        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
+        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.poolTrims = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
         const R = 96;
         this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.spielfeld = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(1.6).setVisible(!1), this.bullets = this.physics.add.group({
           defaultKey: "bullet_p",
@@ -65847,6 +65870,12 @@ ${n}` : "", {
         }
         this.applyBudget()
       }
+      // Der Bildschirmtakt, aus dem schnellsten gesehenen Bild. Gedeckelt
+      // auf 30 bis 144: darunter ist es kein Takt mehr, darueber kein
+      // Geraet, das wir bedienen.
+      taktHz() {
+        return tt.Math.Clamp(1e3 / Math.max(6, this.bildMin || 16.7), 30, 144)
+      }
       applyBudget() {
         const R = tt.Math.Clamp(this.qBudget, .15, 1);
         this.fxCap = Math.round(yt.FX_CAP_MIN + R * (yt.FX_CAP_AUTO - yt.FX_CAP_MIN)), this.txtCap = Math.round(28 + R * 52)
@@ -65867,8 +65896,16 @@ ${n}` : "", {
         const R = this.game.loop;
         return R.rawDelta != null && R.rawDelta > 0 ? R.rawDelta : R.delta;
       }
+      // AUFGERAEUMT WIRD NUR IN EINER RUHEPAUSE: hoechstens alle vier
+      // Sekunden, kein Boss, und HOECHSTENS ZWEI Gegner im Bild. In einem
+      // spaeten Sektor stehen staendig fuenfzehn — dort kommt das nie vor.
+      // Die Vorraete bleiben dann auf ihrem Hoechststand, den ganzen
+      // Sektor lang. Ob das die 519 Anzeigeobjekte des Geraets erklaert,
+      // ist noch nicht gemessen: diese Umgebung kann die Last nicht
+      // herstellen. `poolTrims` zaehlt mit, damit die naechste Messung vom
+      // Geraet die Frage beantwortet, statt sie zu vermuten.
       trimPools(R) {
-        R - this.lastPoolTrim < 4e3 || this.boss && this.boss.active || this.enemies.countActive(!0) > 2 || (this.lastPoolTrim = R, this.trimGroup(this.bullets, 48, 16), this.trimGroup(this.enemyBullets, 48, 16), this.trimGroup(this.enemies, 20, 6), this.trimGroup(this.powerups, 10, 4), this.trimArrayPool(this.fxPool, 120, 24), this.trimArrayPool(this.txtPool, 60, 12))
+        R - this.lastPoolTrim < 4e3 || this.boss && this.boss.active || this.enemies.countActive(!0) > 2 || (this.lastPoolTrim = R, this.poolTrims++, this.trimGroup(this.bullets, 48, 16), this.trimGroup(this.enemyBullets, 48, 16), this.trimGroup(this.enemies, 20, 6), this.trimGroup(this.powerups, 10, 4), this.trimArrayPool(this.fxPool, 120, 24), this.trimArrayPool(this.txtPool, 60, 12))
       }
       trimGroup(R, E, b) {
         let I = R.getLength() - R.countActive(!0);
@@ -66408,12 +66445,21 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             }
           }), this.over) return;
         const b = this.time.now;
+        // Das SCHNELLSTE Bild verraet den Bildschirmtakt: schneller als
+        // sein Aktualisierungsabstand kann kein Bild kommen. Der Wert
+        // driftet langsam nach oben, damit ein einzelner Ausreisser nicht
+        // fuer immer haengenbleibt.
+        {
+          const A = this.game.loop.rawDelta;
+          A > 3 && A < 60 && (this.bildMin = Math.min(this.bildMin + .01, Math.max(6, Math.min(this.bildMin, A))))
+        }
         if (this.fxAuto) {
           const p = this.game.loop.actualFps;
           if (p > 0 && isFinite(p) && (this.fpsEma += (p - this.fpsEma) * .1), ++this.fpsFrame >= 20) {
             this.fpsFrame = 0;
-            const a = this.qBudget;
-            this.fpsEma < 46 ? this.qBudget = Math.max(.15, this.qBudget - .12) : this.fpsEma > 56 && b - this.qUpAt > 900 && (this.qBudget = Math.min(1, this.qBudget + .05), this.qUpAt = b), this.qBudget !== a && this.applyBudget()
+            const a = this.qBudget,
+              m = qRegel(this.qBudget, this.fpsEma, this.taktHz(), b, this.qUpAt);
+            this.qBudget = m.q, this.qUpAt = m.qUpAt, this.qBudget !== a && this.applyBudget()
           }
         }
         this.trimPools(b), this.player.update(b, this.game.loop.delta), this.player.powerVerloren && (this.player.powerVerloren = !1, this.pwrPuls(!1)), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
@@ -66878,6 +66924,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_BOSSLEBEN = bossLeben;
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
     window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_BOSSVORRAT = bossVorratHalten, window.__SKF_GEGNERWERTE = _t;
+    window.__SKF_QREGEL = qRegel;
     window.__SKF_KOPFZEILE = KOPFZEILE;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,

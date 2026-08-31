@@ -321,6 +321,52 @@ console.log('\n  H  Faengt der Streifen Finger?');
   }
 }
 
+// ---- I  Kommt die Effekt-Absenkung je zurueck? ------------------------
+//
+// GEMESSEN AM GERAET, Sektor 106: 55,6 Bilder je Sekunde, Effektbudget
+// 0,35 nach 88 Sekunden. Der Regler senkte unter 46 und hob erst ueber
+// 56 — dazwischen ein totes Band von zehn Bildern, und genau darin lebt
+// ein 60-Hz-Telefon in einem vollen Sektor. Er konnte nicht mehr
+// hochkommen und blieb den ganzen Sektor unten, auch wenn es laengst
+// wieder ruhig war.
+//
+// Gefragt wird die REGEL, nicht die Umgebung: hier laeuft SwiftShader mit
+// drei Bildern je Sekunde, da kaeme jeder Regler an den Boden. Die Naht
+// __SKF_QREGEL gibt die Entscheidung heraus, ohne dass jemand achtzig
+// Sekunden spielen muss.
+console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
+{
+  const faelle = [
+    { name: 'tiefer Einbruch  30/s bei 60 Hz', q: 1, fps: 30, takt: 60, soll: 'runter' },
+    { name: 'knapp am Takt    55,6/s bei 60 Hz', q: .35, fps: 55.6, takt: 60, soll: 'hoch' },
+    { name: 'satt am Takt     59/s bei 60 Hz', q: .5, fps: 59, takt: 60, soll: 'hoch' },
+    { name: 'schon oben       59/s, q=1', q: 1, fps: 59, takt: 60, soll: 'bleibt' },
+    { name: 'Grauzone         50/s bei 60 Hz', q: .5, fps: 50, takt: 60, soll: 'bleibt' },
+    { name: '120 Hz, 111/s', q: .35, fps: 111, takt: 120, soll: 'hoch' },
+    { name: '120 Hz, 80/s', q: 1, fps: 80, takt: 120, soll: 'runter' },
+  ];
+  const r = await seite.evaluate((faelle) => {
+    if (typeof window.__SKF_QREGEL !== 'function') return { fehler: '__SKF_QREGEL fehlt' };
+    return {
+      raus: faelle.map((f) => {
+        const e = window.__SKF_QREGEL(f.q, f.fps, f.takt, 100000, 0);
+        return { name: f.name, soll: f.soll, vor: f.q, nach: e.q,
+                 tat: e.q > f.q ? 'hoch' : e.q < f.q ? 'runter' : 'bleibt' };
+      }),
+    };
+  }, faelle);
+  if (r.fehler) M.ungemessen(`Q-Regler: ${r.fehler}`);
+  else {
+    gemessen++;
+    for (const f of r.raus) {
+      console.log(`     ${f.name.padEnd(34)} ${f.vor.toFixed(2)} → ${f.nach.toFixed(2)}   ${f.tat}`);
+      if (f.tat !== f.soll)
+        M.befund(`Effekt-Absenkung, „${f.name.trim()}": erwartet ${f.soll}, tatsaechlich ${f.tat} (${f.vor.toFixed(2)} → ${f.nach.toFixed(2)}).`
+          + (f.soll === 'hoch' ? ' Ein Regler, der nur faellt, laesst den Rest des Sektors ohne Schmuck laufen.' : ''));
+    }
+  }
+}
+
 await browser.close();
 server.close();
 console.log('');

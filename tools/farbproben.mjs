@@ -120,6 +120,13 @@ const PROBEN = [
   ['Messtafel misst nur, solange sie offen ist', '✗',
     ['        if (!an) { vorher = t; return; }', '        if (!an || !offen) { vorher = t; return; }'],
     true, 'messtafel', 'steigt die Bilderzahl nicht', HUELLE],
+  // Die Schwellen der Effekt-Absenkung zurueck auf feste Zahlen: dann
+  // liegt zwischen 46 und 56 wieder ein totes Band, und genau darin lebt
+  // das Geraet des Nutzers (55,6 Bilder je Sekunde). Der Regler faellt
+  // einmal und kommt nie zurueck.
+  ['Effekt-Absenkung wieder mit festen Schwellen (46/56)', '✗',
+    ['    const G = E * .78,\n      v = E * .9;', '    const G = 46,\n      v = 56;'],
+    true, 'messtafel', 'knapp am Takt'],
   // Der Tafel die Durchlaessigkeit nehmen: dann faengt der eingeklappte
   // Streifen wieder jeden Zug ab, der auf ihm beginnt — genau der Fehler,
   // den der Nutzer gemeldet hat („man kann das Flugzeug kaum sauber
