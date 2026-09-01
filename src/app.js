@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v65",
+    SKF_VERSION = "v66",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -59045,6 +59045,60 @@ return new ` + this.key + `();
     scene: "Gear"
   }];
 
+  // GEBACKENES LEUCHTEN STATT EINES SHADERS JE BILD.
+  //
+  // `preFX.addGlow` ist bequem und teuer: Phaser rendert das Objekt dafuer
+  // in ein eigenes Ziel und wieder zurueck — GEMESSEN zwei Pufferwechsel je
+  // Bild und Objekt, und zwar solange der Schirm steht, nicht einmal beim
+  // Aufbauen. Das Menue kam damit auf FUENF Pufferwechsel je Bild, ein
+  // laufender Sektor braucht EINEN. Auf einer Kachel-Grafikeinheit, wie sie
+  // in jedem iPhone steckt, ist der Zielwechsel der teure Posten: die
+  // Kachel muss geschrieben und wieder geholt werden.
+  //
+  // Gebacken wird deshalb einmal: die Schrift wird als Kranz in eine
+  // Zeichenflaeche gestempelt, das Ergebnis liegt als gewoehnliches Bild
+  // hinter ihr. Danach kostet das Leuchten einen Zeichenaufruf und KEINEN
+  // Pufferwechsel — und sieht aus wie vorher, weil ein Leuchten nichts ist,
+  // was sich bewegt.
+  //
+  // Zurueckgegeben wird der Kranz, damit ein Puls ihn anfassen kann: das
+  // Pulsieren wandert von der Shader-Staerke auf die Deckkraft eines
+  // Bildes, und das kostet nichts.
+  function leuchtschrift(T, R, E, b = 14) {
+    try {
+      if (!T || !T.add || !R || !R.canvas || !R.width) return null;
+      // ZWEI ANLAEUFE HABEN NICHT GEREICHT, und beide sahen im Tor gruen aus:
+      //   1. Kranz in voller Groesse gestempelt → man sah zwoelf versetzte
+      //      Kopien der Schrift. Ein Kranz in voller Aufloesung IST ein
+      //      zweiter Umriss, kein Licht.
+      //   2. Klein gebacken, gross angezeigt → Kloetzchen. Die Zeichenflaeche
+      //      filtert beim Vergroessern nicht, `setFilter` greift dort nicht.
+      // Deshalb der Weg, der wirklich weichzeichnet: eine Leinwand mit
+      // `shadowBlur`. Der Schatten wird um die Blattbreite versetzt gezogen,
+      // die Schrift liegt dabei NEBEN dem Blatt — so kommt nur der weiche
+      // Schein an, nie eine scharfe Kopie.
+      const I = R.canvas,
+        G = R.width / I.width || 1,
+        v = Math.ceil((b + 10) / G),
+        x = I.width + v * 2,
+        t = I.height + v * 2,
+        l = "leucht_" + (R.text || "") + "_" + E + "_" + b + "_" + x + "x" + t;
+      if (!T.textures.exists(l)) {
+        const r = T.textures.createCanvas(l, x, t),
+          n = r.getContext();
+        n.shadowColor = "#" + E.toString(16).padStart(6, "0"), n.shadowBlur = b / G,
+          n.shadowOffsetX = x * 2;
+        // Dreimal: ein einzelner Schatten ist zu duenn, um als Licht zu lesen.
+        for (let e = 0; e < 3; e++) n.drawImage(I, v - x * 2, v);
+        r.refresh()
+      }
+      const p = T.add.image(R.x, R.y, l).setOrigin(.5).setDisplaySize(x * G, t * G)
+        .setDepth(R.depth || 0).setBlendMode(1);
+      return R.setDepth((R.depth || 0) + .001), p
+    } catch (I) {
+      return null
+    }
+  }
   function he(T, R, E, b, I = 20, G = 82) {
     if (!T.textures.exists(b)) return null;
     const v = T.add.image(R, E, b).setDepth(G).setScrollFactor(0);
@@ -59202,10 +59256,7 @@ return new ` + this.key + `();
       color: "#eaf6ff",
       fontStyle: "bold"
     }).setOrigin(.5).setDepth(78);
-    try {
-      const I = b.preFX;
-      I && I.addGlow && I.addGlow(7327999, 4, 0, !1, .08, 12)
-    } catch (I) {}
+    leuchtschrift(T, b, 7327999, 12);
     T.add.rectangle(J / 2, 53, 84, 3, 7327999, .9).setDepth(78).setScrollFactor(0), Ci(T, J / 2, 70)
   }
 
@@ -59334,26 +59385,25 @@ return new ` + this.key + `();
         letterSpacing: 2
       }).setOrigin(.5);
       E.setStroke("#12314f", 8), E.setShadow(0, 4, "#00000088", 6);
-      try {
-        const f = E.preFX;
-        if (f && f.addGlow) {
-          const d = f.addGlow(7327999, 4, 0, !1, .08, 18);
-          this.tweens.add({
-            targets: d,
-            outerStrength: 7,
-            duration: 2400,
-            yoyo: !0,
-            repeat: -1,
-            ease: "Sine.InOut"
-          })
-        }
-      } catch (f) {}
-      E.setAlpha(0).setY(106), this.tweens.add({
-        targets: E,
+      // Der Kranz wird gebacken, der Puls sitzt auf seiner Deckkraft.
+      // Vorher pulsierte die Shader-Staerke — dasselbe Bild, aber ein
+      // Zielwechsel je Bild, solange das Menue steht.
+      const k = leuchtschrift(this, E, 7327999, 18),
+        Kr = k ? [E, k] : [E];
+      Kr.forEach((f) => f.setAlpha(0).setY(106)), this.tweens.add({
+        targets: Kr,
         y: 128,
         alpha: 1,
         duration: 620,
         ease: "Back.Out"
+      }), k && this.tweens.add({
+        targets: k,
+        alpha: .62,
+        duration: 2400,
+        delay: 700,
+        yoyo: !0,
+        repeat: -1,
+        ease: "Sine.InOut"
       });
       const b = this.add.text(J / 2, 179, "1945 · AIRTRACE", {
         fontFamily: "sans-serif",
@@ -60516,10 +60566,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         color: "#eaf6ff",
         fontStyle: "bold"
       }).setOrigin(.5).setStroke("#0a2436", 4);
-      try {
-        const F = t.preFX;
-        F && F.addGlow && F.addGlow(this.acc, 4, 0, !1, .08, 14)
-      } catch (F) {}
+      leuchtschrift(this, t, this.acc, 14);
       this.add.rectangle(J / 2, 75, 150, 9, this.acc, .16), this.add.rectangle(J / 2, 75, 132, 3, this.acc, .95), this.sideArrow(30, rt / 2 - 30, "‹", I > 0, () => this.go(I - 1, b)), this.sideArrow(J - 30, rt / 2 - 30, "›", I < b, () => this.go(I + 1, b)), this.enableSwipe(I, b);
       let l = 0;
       for (let F = 0; F < G.count; F++) l += q.stars(G.start + F);
@@ -60765,10 +60812,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
         color: "#eaf6ff",
         fontStyle: "bold"
       }).setOrigin(.5);
-      try {
-        const y = l.preFX;
-        y && y.addGlow && y.addGlow(v, 4, 0, !1, .08, 14)
-      } catch (y) {}
+      leuchtschrift(this, l, v, 14);
       this.add.rectangle(J / 2, 66, 96, 3, v, .95), this.add.text(J / 2, 82, `Kap. ${G.roman} · ${R.label}${R.boss>0?"   ☠ BOSS":""}`, {
         fontFamily: "sans-serif",
         fontSize: "14px",
@@ -65532,10 +65576,7 @@ ${G}`, {
           color: "#" + E.toString(16).padStart(6, "0"),
           fontStyle: "bold"
         }).setOrigin(.5).setScrollFactor(0).setDepth(102);
-        try {
-          const r = t.preFX;
-          r && r.addGlow && r.addGlow(E, 4, 0, !1, .08, 14)
-        } catch (r) {}
+        leuchtschrift(this, t, E, 14);
         const l = "★★★".slice(0, b) + "☆☆☆".slice(0, 3 - b),
           p = this.add.text(v, x - 78, l, {
             fontFamily: "sans-serif",
@@ -65624,10 +65665,7 @@ ${n}` : "", {
             color: "#9fe0a0",
             fontStyle: "bold"
           }).setOrigin(.5).setScrollFactor(0).setDepth(102);
-        try {
-          const h = a.preFX;
-          h && h.addGlow && h.addGlow(3791242, 4, 0, !1, .08, 14)
-        } catch (h) {}
+        leuchtschrift(this, a, 3791242, 14);
         this.add.rectangle(v, x - 122, 120, 3, p, .9).setScrollFactor(0).setDepth(102), this.add.text(v, x - 108, this.stageDef.label, {
           fontFamily: "sans-serif",
           fontSize: "14px",
@@ -66819,10 +66857,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         color: "#eaf6ff",
         fontStyle: "bold"
       }).setOrigin(.5).setStroke("#12314f", 6);
-      try {
-        const E = R.preFX;
-        E && E.addGlow && E.addGlow(7327999, 4, 0, !1, .08, 16)
-      } catch (E) {}
+      leuchtschrift(this, R, 7327999, 16);
       this.add.rectangle(J / 2, rt * .32 + 34, 96, 3, 7327999, .9), Tt(this, J / 2, rt * .44, 300, 68, "▶  Fortsetzen", {
         fontSize: 24,
         fill: 3046706,

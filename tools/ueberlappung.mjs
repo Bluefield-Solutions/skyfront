@@ -260,6 +260,16 @@ for (const s of SCHIRME) {
       if (!istZone && !istBild && !istText) return;
       if (!o.visible) return;
       if (!istZone && (o.alpha ?? 1) < .5) return;
+      // GEBACKENES LEUCHTEN IST KEIN INHALT (seit v66, Regel 60). Der Kranz
+      // hinter einer Ueberschrift ist absichtlich groesser als die Schrift —
+      // sein Rahmen umfasst den ganzen Weichzeichner. Als Inhalt gezaehlt
+      // meldet er, ein Symbol „verdecke" ihn, und das ist keine Aussage:
+      // er liegt UNTER seiner Schrift (Tiefe + 0,001) und wird additiv
+      // gezeichnet, kann also nichts unlesbar machen, sondern nur aufhellen.
+      // Die Ausnahme ist eng gefasst — sie gilt genau fuer die Textur, die
+      // `leuchtschrift()` backt, nicht fuer eine Sorte oder einen Namen,
+      // den sich jemand anheften koennte.
+      if (istBild && o.texture && /^leucht_/.test(o.texture.key || '')) return;
       let b = null;
       try { b = o.getBounds(); } catch (e) { raus.push({ name: (o.texture && o.texture.key) || o.type, rahmenlos: true }); return; }
       if (!b || b.width < 8 || b.height < 8) return;

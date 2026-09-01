@@ -33,6 +33,7 @@ Autark heisst autark: in der Einzeldatei sind alle 71 Bilder weiterhin
 ## Befehle
 
 ```
+npm run zeichenwerk Pufferwechsel je Bild, acht Schirme gegen einen Sektor
 npm run check      die Torkette: bauen, alle zwoelf starten, Bildtor, Farbtor
                    ~2,5 min oertlich, ~4 min auf GitHub
 npm run build      Einzeldatei
@@ -447,6 +448,22 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+60. **Ein Vor-Effekt ist kein Zierrat, sondern ein Zielwechsel je Bild.**
+   `preFX.addGlow` auf einer Ueberschrift sieht aus wie eine Zeile Code und
+   kostet, GEMESSEN, zwei Pufferwechsel je Bild und Objekt — solange der
+   Schirm steht, nicht einmal beim Aufbauen. Das Menue kam so auf fuenf
+   Pufferwechsel je Bild, ein laufender Sektor braucht EINEN. Auf einer
+   Kachel-Grafikeinheit, wie sie in jedem iPhone steckt, ist der
+   Zielwechsel der teure Posten. Was nicht wackelt, wird gebacken.
+
+   Und der Ersatz ist erst fertig, wenn man ihn ANGESEHEN hat. Zwei
+   Anlaeufe waren in jedem Tor gruen und im Bild unbrauchbar: ein Kranz in
+   voller Aufloesung sieht aus wie zwoelf versetzte Kopien der Schrift, und
+   klein gebacken plus gross angezeigt wird zu Kloetzchen, weil die
+   Zeichenflaeche beim Vergroessern nicht filtert. Getragen hat erst der
+   dritte Weg — `shadowBlur` auf einer Leinwand, die Schrift dabei NEBEN
+   dem Blatt, damit nur der weiche Schein ankommt.
+
 59. **Ein Instrument, das man BEDIENT, misst seine eigene Bedienung mit.**
    Die dritte Geraetemessung meldete als laengste Bildluecke 115,0 ms bei
    121,8 s — bei 122,5 s Gesamtlauf. Der Ausschlag lag im letzten Prozent
@@ -588,6 +605,25 @@ ausserhalb der Spielszene nichts heraus, also fehlen Q, Lage und
 Vorraete. Was sie zeigt, ist das MENUE — und dort steht p50 17,0 / p95
 24,0 ms bei 15 % Bildern ueber 20 ms. Fuer einen Schirm ohne Gefecht ist
 das viel; nachgesehen ist es noch nicht.
+
+**Das Menue selbst ist nachgesehen (v66) — und es war etwas dran.**
+Gezaehlt wurden GL-Befehle statt Millisekunden: ihre Zahl ist auf dem
+Telefon dieselbe, nur ihr Preis ist ein anderer.
+
+| | Zeichenaufrufe | Pufferwechsel |
+|---|---|---|
+| Menue (v65) | 8 | **5** |
+| Sektor 3 (laufend) | 18 | **1** |
+| Menue (v66) | 6 | **1** |
+
+Ein Schirm, auf dem nichts fliegt, brauchte FUENFMAL soviel Zielwechsel wie
+ein laufendes Gefecht. Ursache: `preFX.addGlow` auf Ueberschriften, an
+sieben Stellen. Alle sieben backen das Leuchten jetzt einmal auf eine
+Leinwand (Regel 60). `npm run zeichenwerk` haelt es fest, anteilig gegen
+den Sektor gemessen.
+
+Ob damit auch p95 faellt, sagt erst das Geraet — hier sind Millisekunden
+nicht messbar.
 
 Ihr auffaelligster Wert taugte gar nicht: laengste Bildluecke 115,0 ms
 bei 121,8 s, bei 122,5 s Gesamtlauf — im letzten Prozent des Laufs, also

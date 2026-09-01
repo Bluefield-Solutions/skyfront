@@ -53,7 +53,8 @@
     "ueberlappung": "node tools/ueberlappung.mjs",
     "kopfzeile": "node tools/kopfzeile.mjs",
     "ruestung": "node tools/ruestung.mjs",
-    "messtafel": "node tools/messtafel.mjs"
+    "messtafel": "node tools/messtafel.mjs",
+    "zeichenwerk": "node tools/zeichenwerk.mjs"
   },
   "engines": {
     "node": ">=18"

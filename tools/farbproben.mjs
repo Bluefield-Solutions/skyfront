@@ -148,6 +148,14 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // DAS LEUCHTEN WIEDER ALS SHADER JE BILD statt gebacken. Genau so stand
+  // es bis v65 an sieben Stellen: zwei Pufferwechsel je Bild und Objekt,
+  // solange der Schirm steht — das Menue kam auf fuenf, ein laufender
+  // Sektor braucht einen.
+  ['Menuetitel-Leuchten wieder als Shader je Bild', '✗',
+    ['      const k = leuchtschrift(this, E, 7327999, 18),',
+     '      const k = (E.preFX && E.preFX.addGlow && E.preFX.addGlow(7327999, 4, 0, !1, .08, 18), null),'],
+    true, 'zeichenwerk', 'Pufferwechsel je Bild'],
   // DIE TAFEL SCHREIBT SICH IHRE EIGENE ARBEIT NICHT MEHR ZU: der
   // Formwechsel wird nicht mehr gemeldet, also faellt die Bildluecke des
   // Aufklappens wieder in „laengste". Genau so entstand die Frage, ob die
@@ -695,6 +703,15 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', '__SKF_MESSZEILE fehlt'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // Ohne GL-Zugang kann das Zeichenwerk keinen einzigen Befehl zaehlen.
+  name: 'Zeichenwerk ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/zeichenwerk.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'GL-Zugang'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne den GL-Zugang sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {
   // DIE PROBE ZUM AUSLIEFERUNGSTOR.
   //

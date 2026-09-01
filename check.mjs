@@ -182,6 +182,7 @@ const TORE = [
   // Zahl, die in dieser Umgebung nicht entstehen kann. Geht sie still
   // kaputt, ist die Antwort auf „warum ruckelt es" wieder weg.
   { schluessel: 'messtafel', lauf: 'Messtafel (misst sie auch eingeklappt?)', zeile: 'Messtafel (Hintergrund)', datei: 'tools/messtafel.mjs' },
+  { schluessel: 'zeichenwerk', lauf: 'Zeichenwerk (Pufferwechsel je Bild, 8 Schirme)', zeile: 'Zeichenwerk (8 Schirme)', datei: 'tools/zeichenwerk.mjs' },
   // Dasselbe im GEFECHT — und dort gab es die zweite Tuer, nach der
   // niemand gefragt hat: die Bossleiste lag seit ihrer Einfuehrung ueber
   // der Kopfzeilentafel, der Erfahrungsbalken des Flugzeugs in jedem
