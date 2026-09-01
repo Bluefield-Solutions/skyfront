@@ -863,6 +863,11 @@ ohne Vermutung.
   einer technisch und einer grafisch.** Grafik ist ihm wichtig.
 - Getestet wird auf dem **iPhone hochkant**, 390 px breit. Das ist das
   Zielgeraet, nicht der Schreibtisch.
+- **Der Nutzer sitzt in Cancun, UTC-5 ganzjaehrig (keine Sommerzeit).**
+  GitHub-Laeufe und Zeitstempel hier sind UTC. Wer ihm eine Uhrzeit
+  nennt, rechnet sie um oder schreibt die Zone dazu — sonst hoert sich
+  "um 21:29 fertig" nach heute Nacht an, obwohl es 16:29 bei ihm war.
+  Das ist Regel 12 fuer Uhrzeiten: die Zone IST die Messstelle.
 - Gepusht wird auf `main`. Die Web-App holt sich die neue Fassung dann in
   ZWEI Starts: der erste holt den neuen Dienst-Arbeiter, der zweite wird
   von ihm bedient. Das ist keine Behauptung mehr, sondern eine Zahl aus
