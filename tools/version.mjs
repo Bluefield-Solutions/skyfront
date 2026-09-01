@@ -63,6 +63,33 @@ if (!existsSync('dist/Skyfront.html')) {
   }
 }
 
+// UND DAS RUECKSTANDSVERZEICHNIS.
+//
+// `docs/RUECKSTAND.md` ist die einzige Stelle, an der der Stand steht —
+// und es stand vierzig Versionen lang auf „v28". Niemandem ist es
+// aufgefallen, weil kein Tor es ansah: der Rueckstand des
+// Rueckstandsverzeichnisses war selbst der laengste Rueckstand im
+// Projekt.
+//
+// Die Grenze ist LOCKERER als bei Quelle und Bericht: ein Backlog muss
+// nicht jede Version mitgehen, nur nicht davonlaufen. Sechs Versionen
+// sind rund eine Arbeitsrunde.
+{
+  const R = 'docs/RUECKSTAND.md';
+  if (!existsSync(R)) console.log('  (—) docs/RUECKSTAND.md fehlt — der Rueckstand wird nicht geprueft.');
+  else {
+    const mR = /^Stand:\s*v(\d+)\.?\s*$/m.exec(readFileSync(R, 'utf8'));
+    const nQ = Number(/^v(\d+)$/.exec(vQuelle)?.[1]);
+    if (!mR) befunde.push(`In ${R} steht keine Zeile der Form "Stand: vNN" — dann laesst sich sein Rueckstand nicht messen.`);
+    else {
+      const nR = Number(mR[1]);
+      console.log(`  Rueckstand ${R.padEnd(18)} v${nR}`);
+      if (Number.isFinite(nQ) && nQ - nR >= 6)
+        befunde.push(`${R} steht auf v${nR}, das Spiel bei ${vQuelle} — ${nQ - nR} Versionen Rueckstand. Wer wissen will, was als Naechstes kommt, liest dort etwas Falsches.`);
+    }
+  }
+}
+
 console.log('');
 if (befunde.length) {
   console.log('VERSION ROT:');

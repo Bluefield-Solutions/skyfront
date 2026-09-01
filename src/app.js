@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v70",
+    SKF_VERSION = "v71",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62699,7 +62699,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       create() {
         var d, u, c, g;
-        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.poolTrims = 0, this.lastPoolTrim = 0, this.laufNr = (this.laufNr || 0) + 1, this.laufStart = this.time.now, this.qAb = 0, this.qAuf = 0, this.qSeit = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
+        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.poolTrims = 0, this.lastPoolTrim = 0, this.laufNr = (this.laufNr || 0) + 1, this.laufStart = this.time.now, this.qAb = 0, this.qAuf = 0, this.qSeit = 0, this.vorrat = { k: { an: 0, leer: 0 }, gk: { an: 0, leer: 0 }, g: { an: 0, leer: 0 }, pu: { an: 0, leer: 0 }, fx: { an: 0, leer: 0 }, tx: { an: 0, leer: 0 } }, this.nachzuegler = [], this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
         const R = 96;
         this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.spielfeld = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(1.6).setVisible(!1), this.bullets = this.physics.add.group({
           defaultKey: "bullet_p",
@@ -63166,7 +63166,7 @@ dann ausweichen!`, {
         })
       }
       shootBullet(R, E, b, I, G) {
-        const v = this.bullets.get(R, E);
+        const v = this.vorratZaehlen("k", this.bullets.get(R, E));
         v && (v.enableBody(!0, R, E, !0, !0), v.setTexture(this.bulletTex).setAngle(0), v.setDepth(9).setBlendMode(tt.BlendModes.NORMAL).setScale(I * this.bulletScaleMul).setTint(EIGEN_N), v.pierce = G + this.bulletPierceBonus, v.seek = !1, v.col = this.bulletTint, v.lastTrail = 0, v.body.setVelocity(Math.sin(b) * Ft.bulletSpeed, -Math.cos(b) * Ft.bulletSpeed))
       }
       fire() {
@@ -63236,7 +63236,7 @@ dann ausweichen!`, {
         }
       }
       firePlayerSeeker() {
-        const R = this.bullets.get(this.player.x, this.player.y - 20);
+        const R = this.vorratZaehlen("k", this.bullets.get(this.player.x, this.player.y - 20));
         R && (R.enableBody(!0, this.player.x, this.player.y - 20, !0, !0), R.setTexture("missile_p").setDepth(9).setScale(1).setBlendMode(tt.BlendModes.NORMAL).clearTint(), R.pierce = 0, R.seek = !0, R.body.setVelocity(0, -780 * .5))
       }
       applyBiome(R) {
@@ -63275,7 +63275,56 @@ dann ausweichen!`, {
           this.textures.on("addtexture", s)
         }(t = this.stageOverlay) == null || t.setFillStyle(R.sky, R.skyAlpha * .45);
         const v = (p = (l = hi[R.bg]) != null ? l : hi[b]) != null ? p : hi.bg_ocean;
-        this.gradeTop.setTint(v.top).setAlpha(v.topA), this.gradeBot.setTint(v.bot).setAlpha(v.botA), this.swell.setTint(v.swellTint).setAlpha(v.swellA), this.clouds.setAlpha(R.cloud);
+        // DREI STEHENDE EBENEN WERDEN EINE (v71).
+        //
+        // `gradeTop`, `gradeBot` und `stageOverlay` sind bildfuellend,
+        // liegen uebereinander und aendern sich innerhalb eines Sektors
+        // NICHT — sie werden in `applyBiome` einmal gesetzt und danach von
+        // niemandem mehr angefasst. Auf dem Schirm kosten sie trotzdem
+        // drei volle Bildschirme Ueberblendung je Bild.
+        //
+        // GEMESSEN (npm run sektor): Sektor 3 bemalt 8,30 Bildschirme je
+        // Bild ueber sieben bildfuellende Ebenen; drei davon decken 4, 6
+        // und 4 Prozent. Eine ueberblendete Flaeche kostet die
+        // Grafikeinheit dasselbe, ob sie zu vier Prozent deckt oder zu
+        // hundert — jedes Bildpunktpaar wird gelesen, gemischt und
+        // geschrieben.
+        //
+        // Also einmal je Biom zusammenbacken statt je Bild uebereinander
+        // legen. Dieselbe Reihenfolge, dieselben Farben, ein Zug statt
+        // drei. Geht das Backen schief, bleibt es beim alten Weg — ein
+        // Schirm ohne Farbstich ist besser als gar keiner.
+        const bk = "grade_" + [v.top, v.topA, v.bot, v.botA, R.sky, R.skyAlpha].join("_");
+        let gebacken = !1;
+        try {
+          if (!this.textures.exists(bk)) {
+            const c = this.textures.createCanvas(bk, J, rt),
+              n = c.getContext(),
+              stempel = (schl, farbe, deck) => {
+                if (!(deck > 0) || !this.textures.exists(schl)) return;
+                const q = this.textures.get(schl).getSourceImage();
+                n.save(), n.globalAlpha = deck, n.drawImage(q, 0, 0, J, rt);
+                // Phasers Tint ist eine Multiplikation. Auf der Leinwand
+                // dasselbe: einfaerben, dann die Deckung des Bildes
+                // zurueckholen, damit der Verlauf ein Verlauf bleibt.
+                n.globalCompositeOperation = "multiply", n.globalAlpha = 1,
+                  n.fillStyle = "#" + farbe.toString(16).padStart(6, "0"), n.fillRect(0, 0, J, rt),
+                  n.globalCompositeOperation = "destination-in", n.globalAlpha = deck,
+                  n.drawImage(q, 0, 0, J, rt), n.restore()
+              };
+            stempel("gradeTop", v.top, v.topA), stempel("gradeBot", v.bot, v.botA);
+            R.skyAlpha * .45 > 0 && (n.save(), n.globalAlpha = R.skyAlpha * .45,
+              n.fillStyle = "#" + R.sky.toString(16).padStart(6, "0"), n.fillRect(0, 0, J, rt), n.restore());
+            c.refresh()
+          }
+          gebacken = this.textures.exists(bk)
+        } catch (c) {}
+        gebacken
+          ? (this.gradeTop.setTexture(bk).clearTint().setAlpha(1).setDisplaySize(J, rt),
+             this.gradeBot.setAlpha(0), this.stageOverlay && this.stageOverlay.setAlpha(0))
+          : (this.gradeTop.setTexture("gradeTop").setTint(v.top).setAlpha(v.topA).setDisplaySize(J, rt),
+             this.gradeBot.setTint(v.bot).setAlpha(v.botA), this.stageOverlay && this.stageOverlay.setAlpha(1));
+        this.swell.setTint(v.swellTint).setAlpha(v.swellA), this.clouds.setAlpha(R.cloud);
         if (this.spielfeld) {
           const w = this.untergrundRuhe(this.bodenKey || "sea");
           this.spielfeld.setFillStyle(w.farbe, w.alpha).setVisible(w.alpha > .01);
@@ -64245,18 +64294,56 @@ ${R.label}`, {
       }
       spawnSide(R, E, b) {
         if (this.over) return;
-        const I = this.enemies.get();
+        const I = this.vorratZaehlen("g", this.enemies.get());
         if (!I) return;
         const G = E ? -40 : J + 40;
         I.spawn(R, G, this.time.now), I.hp = Math.max(1, Math.round(I.hp * this.stageHpMul())), I.y = b, I.setDepth(10), I.body.setVelocity(E ? 135 : -135, I.cfg.speed * .55)
       }
       spawnAt(R, E, b) {
         if (this.over) return;
-        const I = this.enemies.get();
-        I && (I.spawn(R, E, this.time.now), I.hp = Math.max(1, Math.round(I.hp * this.stageHpMul())), I.maxHp = I.hp, I.y = -50 - b, I.setDepth(10))
+        const I = this.vorratZaehlen("g", this.enemies.get());
+        if (!I) { this.nachholen(R, E, b); return }
+        I.spawn(R, E, this.time.now), I.hp = Math.max(1, Math.round(I.hp * this.stageHpMul())), I.maxHp = I.hp, I.y = -50 - b, I.setDepth(10)
+      }
+      // EIN VOLLER VORRAT IST KEIN GRUND, EINE WELLE ZU VERLIEREN (B9).
+      //
+      // GEMESSEN in Sektor 106 (npm run sektor, 90 s Spielzeit): 197 von
+      // 1008 Gegner-Anfragen liefen leer — fast jeder fuenfte Gegner
+      // erschien nicht. Der Vorrat fasst 64, und wer langsam abraeumt,
+      // hat staendig fuenfzig davon im Bild.
+      //
+      // Das ist nicht nur still, es ist auch VERKEHRT HERUM: der Sektor
+      // wird genau dann duenner, wenn der Spieler schlecht dasteht. Eine
+      // Schwierigkeit, die sich unsichtbar nach unten anpasst, ist keine.
+      //
+      // Der Deckel bleibt (er kostet Flaeche und Rechenzeit). Statt den
+      // Gegner wegzuwerfen, wird er GEMERKT und nachgeholt, sobald Platz
+      // ist. Gedeckelt und befristet, damit sich nichts aufstaut und
+      // dreissig Sekunden spaeter alles auf einmal hereinfaellt — was
+      // dann noch verfaellt, ist ein echter Verlust und wird als solcher
+      // gezaehlt.
+      nachholen(R, E, b) {
+        const I = this.vorrat && this.vorrat.g;
+        if (this.nachzuegler.length >= 40) { I && (I.weg = (I.weg || 0) + 1); return }
+        I && (I.vsch = (I.vsch || 0) + 1), this.nachzuegler.push({ art: R, x: E, y: b, bis: this.time.now + 6e3 })
+      }
+      nachzueglerNachholen(R) {
+        if (!this.nachzuegler.length) return;
+        const E = this.vorrat && this.vorrat.g;
+        for (let b = this.nachzuegler.length - 1; b >= 0; b--)
+          if (R > this.nachzuegler[b].bis) this.nachzuegler.splice(b, 1), E && (E.weg = (E.weg || 0) + 1);
+        // Hoechstens drei je Bild: ein Schwall auf einmal waere derselbe
+        // Fehler noch einmal, nur andersherum.
+        for (let b = 0; b < 3 && this.nachzuegler.length; b++) {
+          if (this.enemies.countActive(!0) >= this.enemies.maxSize) return;
+          const I = this.nachzuegler.shift(),
+            G = this.enemies.get();
+          if (!G) { this.nachzuegler.unshift(I); return }
+          G.spawn(I.art, I.x, this.time.now), G.hp = Math.max(1, Math.round(G.hp * this.stageHpMul())), G.maxHp = G.hp, G.y = -50 - I.y, G.setDepth(10)
+        }
       }
       spawnEB(R, E, b, I) {
-        const G = this.enemyBullets.get(R, E);
+        const G = this.vorratZaehlen("gk", this.enemyBullets.get(R, E));
         if (!G) return;
         const v = yt.EB_STYLE[this.ebStyle] || yt.EB_STYLE.orb;
         G.enableBody(!0, R, E, !0, !0), G.setTexture(v.tex), G.setDepth(20), G.setScale(1), G.homing = !1;
@@ -64374,7 +64461,7 @@ ${R.label}`, {
         }
       }
       spawnHoming(R, E) {
-        const b = this.enemyBullets.get(R, E);
+        const b = this.vorratZaehlen("gk", this.enemyBullets.get(R, E));
         if (!b) return;
         b.enableBody(!0, R, E, !0, !0), b.setTexture("missile").setDepth(20).setScale(1);
         const I = _t.bulletSpeed * .74;
@@ -65096,11 +65183,11 @@ ${G}`, {
         return b < .62 ? 1 : b < .87 ? 5 : b < .975 ? 10 : 25
       }
       dropCoin(R, E, b) {
-        const I = this.powerups.get();
+        const I = this.vorratZaehlen("pu", this.powerups.get());
         I && (I.spawn("coin", R, E, b), I.setScale(b >= 25 ? 1.5 : b >= 10 ? 1.28 : b >= 5 ? 1.1 : .92), I.setDepth(12))
       }
       dropPU(R, E, b) {
-        const I = this.powerups.get();
+        const I = this.vorratZaehlen("pu", this.powerups.get());
         I && (I.spawn(R, E, b), I.setScale(1), I.setDepth(12))
       }
       pauseGame() {
@@ -65998,6 +66085,26 @@ ${n}` : "", {
       // Liste laeuft nach acht Sekunden in eine Ebene und waechst nicht
       // weiter; abgeschaltete Objekte kosten kein Zeichnen. Das hier ist
       // Ordnung, keine Leistung.
+      // STILLE FEHLERZUSTAENDE GIBT ES NICHT MEHR (B9).
+      //
+      // Ein erschoepfter Vorrat gab `null` zurueck, und jede Aufrufstelle
+      // liess es fallen: `v && (...)` oder `if (!G) return;`. Ein Schuss,
+      // der nicht kommt, ein Gegner, der nicht erscheint, ein Aufsammler,
+      // der nicht faellt — nichts davon war irgendwo zu sehen. Im Feld
+      // sieht das aus wie „das Spiel reagiert manchmal nicht".
+      //
+      // Gezaehlt wird BEIDES: die Anfragen und die Fehlgriffe. Nur der
+      // ANTEIL ist eine Aussage (Regel 2) — zehn Fehlgriffe bei zehn
+      // Anfragen sind ein Befund, zehn bei zwanzigtausend sind ein
+      // Achselzucken.
+      //
+      // fx und Texte sind ABSICHTLICH gedeckelt; sie stehen mit in der
+      // Liste, damit man sie unterscheiden kann, nicht damit man sie
+      // beklagt.
+      vorratZaehlen(R, E) {
+        const b = this.vorrat && this.vorrat[R];
+        return b && (b.an++, E || b.leer++), E
+      }
       trimPools(R) {
         if (R - this.lastPoolTrim < 4e3) return;
         const E = 48,
@@ -66206,7 +66313,8 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         }
       }
       fxGet(R) {
-        if (this.fxActive >= this.fxCap) return null;
+        if (this.fxActive >= this.fxCap) return this.vorratZaehlen("fx", null);
+        this.vorratZaehlen("fx", 1);
         const E = this.fxAtlasReady && yt.FX_ATLAS_SET.has(R);
         let b = this.fxPool.pop();
         return b ? (E ? b.setTexture("fxAtlas", R) : b.setTexture(R), b.setActive(!0).setVisible(!0)) : b = E ? this.add.image(0, 0, "fxAtlas", R) : this.add.image(0, 0, R), this.fxActive++, b
@@ -66227,7 +66335,8 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         })))
       }
       txtGet() {
-        if (this.txtActive >= this.txtCap) return null;
+        if (this.txtActive >= this.txtCap) return this.vorratZaehlen("tx", null);
+        this.vorratZaehlen("tx", 1);
         let R = this.txtPool.pop();
         return R ? R.setActive(!0).setVisible(!0) : R = this.add.text(0, 0, "", {
           fontFamily: "sans-serif",
@@ -66572,7 +66681,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             this.qBudget = m.q, this.qUpAt = m.qUpAt, this.qBudget !== a && (m.q < a ? this.qAb++ : this.qAuf++, this.qSeit = b, this.applyBudget())
           }
         }
-        this.trimPools(b), this.player.update(b, this.game.loop.delta), this.player.powerVerloren && (this.player.powerVerloren = !1, this.pwrPuls(!1)), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
+        this.nachzueglerNachholen(b), this.trimPools(b), this.player.update(b, this.game.loop.delta), this.player.powerVerloren && (this.player.powerVerloren = !1, this.pwrPuls(!1)), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();
         const I = this.echteBildzeit();
         I > this.worstMs && (this.worstMs = I, this.worstMsAt = Math.round((b - this.stageStart) / 100) / 10), I > 33 && this.slowFrames++;
         const G = this.bullets.countActive(!0),

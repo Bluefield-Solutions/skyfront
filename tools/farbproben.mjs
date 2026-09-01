@@ -148,6 +148,14 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // GEGNER BEI VOLLEM VORRAT WIEDER WEGWERFEN statt nachholen. Genau so
+  // stand es bis v70: in Sektor 106 liefen 197 von 1008 Anfragen leer —
+  // fast jeder fuenfte Gegner erschien nicht, still, und der Sektor wurde
+  // duenner, gerade wenn der Spieler schlecht dastand.
+  ['Gegner bei vollem Vorrat wieder wegwerfen', '✗',
+    ['        if (!I) { this.nachholen(R, E, b); return }',
+     '        if (!I) { this.vorrat && (this.vorrat.g.weg = (this.vorrat.g.weg || 0) + 1); return }'],
+    true, 'sektor', 'gingen VERLOREN'],
   // DIE MESSUNG WIEDER AN `isActive` HAENGEN. Dann wirft jede Pause sie
   // weg — und genau daran war die v69-Zeile vom Geraet nicht zu lesen:
   // `Q 0.15` bei angeblich 2,4 Sekunden Laufzeit.
@@ -178,10 +186,18 @@ const PROBEN = [
   // bemalte Flaeche traegt: in Sektor 3 bemalen sieben Rechtecke 1,86
   // Bildschirme — mehr als alles andere zusammen. Wer noch drei dazulegt,
   // muss auffallen.
-  ['Drei bildfuellende Ebenen ins Gefecht legen', '✗',
+  ['Fuenf bildfuellende Ebenen ins Gefecht legen', '✗',
     ['}), this.ground = this.physics.add.group(), this.decor = this.physics.add.group()',
-     '}), this.ground = this.physics.add.group(), this.decor = this.physics.add.group(), [0, 1, 2].forEach(() => this.add.rectangle(J / 2, rt / 2, J, rt, 2237106, .9).setDepth(60))'],
-    true, 'sektor', 'Bildschirme je Bild'],
+     '}), this.ground = this.physics.add.group(), this.decor = this.physics.add.group(), [0, 1, 2, 3, 4].forEach(() => this.add.rectangle(J / 2, rt / 2, J, rt, 2237106, .9).setDepth(60))'],
+    true, 'sektor', 'bildfuellende Ebenen'],
+  // DIE DREI STEHENDEN EBENEN WIEDER EINZELN. Genau so stand es bis v71:
+  // gradeTop, gradeBot und stageOverlay lagen uebereinander, aenderten
+  // sich innerhalb eines Sektors nie und kosteten drei volle Bildschirme
+  // Ueberblendung je Bild.
+  ['Farbebenen wieder einzeln statt gebacken', '✗',
+    ['          gebacken = this.textures.exists(bk)',
+     '          gebacken = !1'],
+    true, 'sektor', 'bildfuellende Ebenen'],
   // AUFRAEUMEN WIEDER AN DIE GEGNERZAHL HAENGEN. Genau so stand es bis
   // v66: in Sektor 106 traf „hoechstens zwei Gegner" auf 0,7 % der Bilder
   // zu, und in 90 Sekunden wurde genau EINMAL aufgeraeumt.

@@ -39,7 +39,10 @@
        0,7 % der Bilder zu, und es wurde in 90 Sekunden genau einmal
        aufgeraeumt.
     D  Der Anteil abgeschalteter Objekte in der Liste bleibt in Grenzen.
-    E  Die BEMALTE FLAECHE je Bild bleibt unter acht Bildschirmen.
+    E  Die BEMALTE FLAECHE je Bild und die Zahl der bildfuellenden
+       Ebenen bleiben in ihrem Budget.
+    F  Kein Vorrat VERLIERT mehr als 2 % der Anfragen (B9). Ein voller
+       Vorrat verschiebt, er wirft nicht weg.
 
   ZU E, weil die Zahl eine Geschichte hat: Nach v67 lag der Verdacht auf
   dem fx-Deckel — 170 aktive Effekte sind der groesste Block der
@@ -138,20 +141,45 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
   // BEMALTE FLAECHE je Bild, in Bildschirmen. Reine Geometrie — sie
   // uebertraegt sich eins zu eins aufs Telefon, anders als jede
   // Millisekunde aus dieser Umgebung (Regel 12).
+  //
+  // NICHT MIT DER DECKKRAFT GEWICHTET, und das ist der Punkt: eine
+  // ueberblendete Flaeche kostet die Grafikeinheit dasselbe, ob sie zu
+  // vier Prozent oder zu hundert deckt. Jedes Bildpunktpaar wird gelesen,
+  // gemischt und geschrieben. Wer mit Alpha gewichtet, misst die WIRKUNG
+  // und nennt sie Kosten.
+  //
+  // Der erste Anlauf (v68) tat genau das — und zusaetzlich mit dem
+  // falschen Feld: bei einer Phaser-FORM ist `alpha` nicht die Deckkraft
+  // der Fuellung, das ist `fillAlpha`. Die bildfuellende Lasur in Sektor 3
+  // deckt zu 0,04 und stand mit `alpha` 1 in der Liste. Beide Fehler
+  // zusammen ergaben „sieben Rechtecke bemalen 1,86 Bildschirme" — eine
+  // Zahl, die in beide Richtungen falsch war.
   const kam = sp.cameras.main, BREITE = kam.width / (kam.zoom || 1), HOEHE = kam.height / (kam.zoom || 1);
   const SCHIRM = BREITE * HOEHE;
   const posten = {};
+  const ebenen = [];
   let flaeche = 0;
+  const deck = (o) => o.fillAlpha != null ? o.fillAlpha * (o.alpha == null ? 1 : o.alpha)
+    : (o.alpha == null ? 1 : o.alpha);
   const malt = (arr) => { for (const o of arr) {
     if (o.list) { malt(o.list); continue; }
     if (o.visible === false || o.active === false) continue;
+    // ALPHA NULL KOSTET NICHTS. Phaser loescht bei `setAlpha(0)` das
+    // Alpha-Bit in `renderFlags`, und `willRender` gibt dann false zurueck
+    // — das Objekt wird gar nicht erst eingereicht. Wer es mitzaehlt,
+    // erfindet Kosten. (Der erste Anlauf tat genau das und meldete zehn
+    // bildfuellende Ebenen, von denen drei zu null Prozent deckten.)
+    if (o.alpha === 0) continue;
     const w = Math.abs(o.displayWidth || 0), h = Math.abs(o.displayHeight || 0);
     if (!w || !h) continue;
-    const a = Math.min(w, BREITE * 2) * Math.min(h, HOEHE * 2) * (o.alpha == null ? 1 : o.alpha);
+    const a = Math.min(w, BREITE * 2) * Math.min(h, HOEHE * 2);
     flaeche += a;
     const k = o.texture && o.texture.key ? o.texture.key : o.type;
-    if (!posten[k]) posten[k] = [0, 0];
-    posten[k][0] += a; posten[k][1]++;
+    if (!posten[k]) posten[k] = [0, 0, 0];
+    posten[k][0] += a; posten[k][1]++; posten[k][2] = Math.max(posten[k][2], a / SCHIRM > .5 ? deck(o) : 0);
+    // BILDFUELLENDE EBENEN einzeln zaehlen. Sie sind der Posten, den man
+    // abstellen kann — ein Sprite mehr oder weniger ist Rauschen dagegen.
+    if (a / SCHIRM >= .9) ebenen.push({ was: k, deckt: Math.round(deck(o) * 100), tiefe: o.depth });
   } };
   malt(sp.children.list);
 
@@ -180,12 +208,20 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
   return {
     schritte, sekunden: schritte * SCHRITT / 1000, dauer: Math.round(dauer),
     offen, trims: sp.poolTrims || 0, verlauf,
+    vorrat: sp.vorrat ? Object.entries(sp.vorrat).filter(([, v]) => v.an)
+      .map(([k, v]) => ({ k, an: v.an, leer: v.leer, vsch: v.vsch || 0, weg: v.weg || 0,
+                          anteil: v.leer / v.an, verloren: (v.weg || 0) / v.an })) : [],
+    warteschlange: sp.nachzuegler ? sp.nachzuegler.length : -1,
     liste: flach.length, aus, fxAktiv: sp.fxActive || 0, fxCap: sp.fxCap || 0,
     flaeche: flaeche / SCHIRM,
+    ebenen: ebenen.sort((a, b) => (a.tiefe || 0) - (b.tiefe || 0))
+      .map((e) => `${/^[0-9a-f-]{30,}$/.test(e.was) ? '<erzeugt>' : e.was}(${e.deckt}%)`),
     posten: Object.entries(posten).sort((a, b) => b[1][0] - a[1][0]).slice(0, 6)
       // Erzeugte Texturen tragen einen Zufallsnamen und waeren im Bericht
       // von Lauf zu Lauf verschieden — sie werden benannt, nicht gezeigt.
-      .map(([k, v]) => `${/^[0-9a-f-]{30,}$/.test(k) ? '<erzeugte Ebene>' : k} ${(v[0] / SCHIRM).toFixed(2)} (${v[1]}x)`),
+      // Die Deckkraft steht dabei, wo eine bildfuellende Ebene beteiligt
+      // ist: sie kostet immer voll, sie WIRKT aber vielleicht kaum.
+      .map(([k, v]) => `${/^[0-9a-f-]{30,}$/.test(k) ? '<erzeugte Ebene>' : k} ${(v[0] / SCHIRM).toFixed(2)} (${v[1]}x${v[2] ? `, deckt ${Math.round(v[2] * 100)} %` : ''})`),
     zaehl: Object.entries(zaehl).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`),
   };
 }, { stage, sekunden });
@@ -206,6 +242,7 @@ for (const stage of [3, 106]) {
   console.log(`             aufgeraeumt ${r.trims}x   ·   hoechstens zwei Gegner: ${anteilOffen.toFixed(1)} % der Bilder`);
   console.log(`             ${r.zaehl.join(' · ')}`);
   console.log(`             bemalt ${r.flaeche.toFixed(2)} Bildschirme je Bild:  ${r.posten.join(' · ')}`);
+  console.log(`             bildfuellende Ebenen ${r.ebenen.length}:  ${r.ebenen.join(' → ')}`);
   const p = r.verlauf.map((v) => v[1]);
   const d = Math.floor(p.length / 3);
   const mitte = p.slice(d, d * 2), ende = p.slice(d * 2);
@@ -233,10 +270,52 @@ for (const stage of [3, 106]) {
   // D — wieviel Totes traegt die Liste mit?
   if (r.aus / r.liste > .45)
     M.befund(`Sektor ${stage}: ${(r.aus / r.liste * 100).toFixed(0)} % der Anzeigeliste sind abgeschaltete Objekte (${r.aus} von ${r.liste}). Sie kosten kein Zeichnen, aber jede Liste, die zur Haelfte aus Leichen besteht, wird bei jedem Durchgang mitgetragen.`);
-  // E — bemalte Flaeche. In BILDSCHIRMEN gemessen, also schon anteilig:
-  // die Grenze bleibt gueltig, wenn sich die Aufloesung aendert (Regel 2).
-  if (r.flaeche > 8)
-    M.befund(`Sektor ${stage}: es werden ${r.flaeche.toFixed(2)} Bildschirme je Bild bemalt (Grenze 8). Groesste Posten: ${r.posten.slice(0, 4).join(' · ')}. Auf einem Telefon ist die bemalte Flaeche der teure Posten, nicht die Zahl der Objekte.`);
+  // F — WIRD ETWAS STILL VERSCHLUCKT? (B9)
+  //
+  // Ein erschoepfter Vorrat gab bis v70 `null` zurueck, und jede
+  // Aufrufstelle liess es fallen: ein Schuss, der nicht kommt, ein
+  // Gegner, der nicht erscheint. Nichts davon war irgendwo zu sehen.
+  //
+  // Die Grenze ist ein ANTEIL, nicht eine Stueckzahl (Regel 2): zehn
+  // Fehlgriffe bei zehn Anfragen sind ein Befund, zehn bei
+  // zwanzigtausend sind keiner. fx und Texte sind ABSICHTLICH gedeckelt
+  // und bleiben deshalb aussen vor — sie werden nur mitgeschrieben.
+  const NAME = { k: 'Kugeln', gk: 'Gegnerkugeln', g: 'Gegner', pu: 'Aufsammler', fx: 'fx', tx: 'Texte' };
+  if (!r.vorrat.length) M.ungemessen(`Sektor ${stage}: es ist keine einzige Vorratsanfrage gezaehlt — der Zaehler laeuft nicht.`);
+  else {
+    console.log(`             Vorrat leer  ${r.vorrat.map((v) => `${NAME[v.k] || v.k} ${v.leer}/${v.an} (${(v.anteil * 100).toFixed(1)} %)${v.vsch ? ` — ${v.vsch} verschoben, ${v.weg} verloren` : ''}`).join(' · ')}`);
+    console.log(`             Warteschlange am Ende ${r.warteschlange}`);
+    for (const v of r.vorrat) {
+      if (v.k === 'fx' || v.k === 'tx') continue;
+      // Gemessen wird der VERLUST, nicht der Fehlgriff. Ein Gegner, der
+      // eine Sekunde spaeter kommt, ist da; einer, der verfaellt, nicht.
+      // Wo nichts nachgeholt wird, ist jeder Fehlgriff ein Verlust — dann
+      // faellt derselbe Wert unter dieselbe Grenze.
+      const verlust = v.vsch ? v.verloren : v.anteil;
+      if (verlust > .02)
+        M.befund(`Sektor ${stage}: ${v.vsch ? v.weg : v.leer} von ${v.an} Anfragen an den Vorrat "${NAME[v.k] || v.k}" gingen VERLOREN (${(verlust * 100).toFixed(1)} %, Grenze 2 %). Das faellt still aus — ein Schuss, der nicht kommt, oder ein Gegner, der nicht erscheint, sieht im Feld aus wie „das Spiel reagiert manchmal nicht". Und beim Gegner ist es verkehrt herum: der Sektor wird duenner, gerade wenn der Spieler schlecht dasteht.`);
+    }
+  }
+
+  // E — bemalte Flaeche und bildfuellende Ebenen.
+  //
+  // In BILDSCHIRMEN gemessen, also schon anteilig: die Grenzen bleiben
+  // gueltig, wenn sich die Aufloesung aendert (Regel 2).
+  //
+  // Beide Zahlen sind BUDGETS MIT LUFT, keine Bestmarken: heute stehen
+  // 6,3 / 11,7 Bildschirme und 5 / 8 Ebenen. Eine Grenze, die genau auf
+  // dem heutigen Wert sitzt, faellt beim naechsten Sprite um und sagt
+  // nichts ueber den Fehler, um den es geht.
+  //
+  // Der Fehler, um den es geht, hat einen Namen: WAS SICH NICHT BEWEGT,
+  // WIRD GEBACKEN. Drei bildfuellende Ebenen lagen bis v71 uebereinander,
+  // aenderten sich innerhalb eines Sektors nie und kosteten trotzdem drei
+  // volle Bildschirme Ueberblendung je Bild. Eine ueberblendete Flaeche
+  // kostet dasselbe, ob sie zu vier Prozent deckt oder zu hundert.
+  if (r.flaeche > 14)
+    M.befund(`Sektor ${stage}: es werden ${r.flaeche.toFixed(2)} Bildschirme je Bild bemalt (Budget 14). Groesste Posten: ${r.posten.slice(0, 4).join(' · ')}. Auf einem Telefon ist die bemalte Flaeche der teure Posten, nicht die Zahl der Objekte.`);
+  if (r.ebenen.length > 9)
+    M.befund(`Sektor ${stage}: ${r.ebenen.length} bildfuellende Ebenen liegen uebereinander (Budget 9): ${r.ebenen.join(' → ')}. Jede kostet einen vollen Bildschirm Ueberblendung, auch die, die zu vier Prozent deckt. Was sich innerhalb eines Sektors nicht aendert, gehoert gebacken.`);
   console.log('');
 }
 

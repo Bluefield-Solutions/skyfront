@@ -283,6 +283,7 @@
                    vk: ln(sp.bullets), vgk: ln(sp.enemyBullets), vg: ln(sp.enemies),
                    vp: ln(sp.powerups), vfx: sp.fxPool ? sp.fxPool.length : 0,
                    vtx: sp.txtPool ? sp.txtPool.length : 0, tr: sp.poolTrims || 0,
+                   vor: sp.vorrat || null,
                    q: sp.qBudget, qab: sp.qAb || 0, qauf: sp.qAuf || 0,
                    qseit: sp.qSeit ? Math.round((sp.time.now - sp.qSeit) / 100) / 10 : -1,
                    sekt: sp.laufStart != null ? Math.round((sp.time.now - sp.laufStart) / 100) / 10 : -1,
@@ -583,6 +584,20 @@
           var L = schlimmsteLage;
           z.push('dabei war       Gegner ' + L.g + '  Kugeln ' + L.k + '/' + L.gk +
                  '  fx ' + L.fx + '  Bild ' + L.obj + '  Biom ' + L.b);
+          // STILLE FEHLER SICHTBAR MACHEN (B9). Angezeigt wird der ANTEIL,
+          // nicht die Stueckzahl: zehn Fehlgriffe bei zehn Anfragen sind
+          // ein Befund, zehn bei zwanzigtausend sind keiner.
+          if (L.vor) {
+            var na = { k: 'Kugeln', gk: 'Gegnerkugeln', g: 'Gegner', pu: 'Aufsammler', fx: 'fx', tx: 'Texte' };
+            var st = [];
+            for (var sc in na) {
+              var e = L.vor[sc];
+              if (!e || !e.an) continue;
+              var pr = e.leer / e.an * 100;
+              st.push(na[sc] + ' ' + (pr >= 0.05 ? pr.toFixed(1) + ' %' : '—') + (e.leer ? ' (' + e.leer + ')' : ''));
+            }
+            if (st.length) z.push('Vorrat leer     ' + st.join('  ·  ') + '   (fx und Texte sind gedeckelt, das ist Absicht)');
+          }
           z.push('Effekt-Budget   Q ' + (L.q == null ? '—' : L.q.toFixed(2)) +
                  '   ' + L.qab + 'x gefallen, ' + L.qauf + 'x gestiegen' +
                  (L.qseit >= 0 ? '   ·   letzte Änderung vor ' + L.qseit + ' s' : '   ·   nie geändert') +
@@ -649,6 +664,11 @@
           // OHNE DIESE DREI ZAHLEN IST EIN Q NICHT ZU LESEN: dieselbe 0,15
           // heisst „eben eingebrochen" oder „klebt seit einer Minute unten",
           // und nur die zweite Lesart ist ein Befund.
+          if (W.vor) {
+            var kz = [];
+            for (var c2 in W.vor) if (W.vor[c2] && W.vor[c2].an) kz.push(c2 + W.vor[c2].leer + '/' + W.vor[c2].an);
+            if (kz.length) eine.push('Leer ' + kz.join(' '));
+          }
           eine.push('Qab' + W.qab + ' Qauf' + W.qauf + ' seit' + W.qseit + 's Sektor' + W.sekt + 's');
           eine.push('Vorrat K' + W.vk + ' GK' + W.vgk + ' G' + W.vg + ' PU' + W.vp + ' fx' + W.vfx + ' tx' + W.vtx + ' Trims' + W.tr);
         }

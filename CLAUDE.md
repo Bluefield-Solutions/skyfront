@@ -716,6 +716,28 @@ Objekte in Sektor 106 von 28 % auf 9 %.
 **Das ist Ordnung, keine Leistung** — abgeschaltete Objekte kosten kein
 Zeichnen.
 
+**Die v68-Zahlen zur bemalten Flaeche waren FALSCH — korrigiert in v71.**
+Zwei eigene Messfehler, beide in dieselbe Richtung „Wirkung statt
+Kosten": mit der Deckkraft gewichtet (eine ueberblendete Flaeche kostet
+dasselbe, ob sie zu vier Prozent deckt oder zu hundert), und bei
+Phaser-FORMEN mit dem falschen Feld (`alpha` statt `fillAlpha`). Dazu ein
+dritter in die Gegenrichtung: Objekte mit `alpha 0` mitgezaehlt, die
+Phaser gar nicht erst einreicht. Richtig ist:
+
+| | bemalt je Bild | bildfuellende Ebenen |
+|---|---|---|
+| Sektor 3 (v70) | 8,30 Bildschirme | **7** |
+| Sektor 3 (v71) | **6,31** | **5** |
+| Sektor 106 (v70) | 13,61 | **10** |
+| Sektor 106 (v71) | **11,69** | **8** |
+
+Drei bildfuellende Ebenen (`gradeTop`, `gradeBot`, `stageOverlay`) lagen
+uebereinander, aenderten sich innerhalb eines Sektors NIE und kosteten
+trotzdem drei volle Bildschirme Ueberblendung je Bild — bei 4, 6 und
+4 Prozent Deckung. Seit v71 werden sie einmal je Biom zusammengebacken
+(Regel 60: was sich nicht bewegt, wird gebacken). Vorher und nachher
+angesehen, in Stadt und Lava: kein Unterschied im Ton.
+
 **Und der fx-Deckel ist es auch nicht (v68, Fehlanzeige).** Durchprobiert
 von 170 bis 45: Zeichenaufrufe 29 → 26, Rechenzeit 0,80 → 0,60 ms,
 bemalte Flaeche 5,87 → 5,96 Bildschirme. Nichts davon bewegt sich. Was
@@ -727,10 +749,9 @@ Sektor   3   bemalt 3,57 Bildschirme:  Rectangle 1,86 (7x) · <Ebene> 1,00 · �
 Sektor 106   bemalt 5,67 Bildschirme:  Rectangle 1,42 (7x) · <Ebene> 1,00 · e_weaver 0,98 (68x) · …
 ```
 
-Sieben Rechtecke bemalen in Sektor 3 **mehr Flaeche als alles andere
-zusammen**. Das ist der naechste Faden — dieselbe Form wie der
-Menuebefund aus v66. Bemalte Flaeche steht seit v68 als Pruefung E in
-`npm run sektor`, Grenze acht Bildschirme.
+Die Zahlen dieser Zeilen sind mit dem korrigierten Mass ueberholt — siehe
+oben. Bemalte Flaeche und Ebenenzahl stehen als Pruefung E in
+`npm run sektor`, mit Budget statt Bestmarke.
 
 **Die dritte Geraetemessung (v64) beantwortet sie NICHT.** Sie traegt die
 Marke `(im Menue gemessen — bitte IM GEFECHT messen)`: `lage()` gibt
