@@ -54,7 +54,8 @@
     "kopfzeile": "node tools/kopfzeile.mjs",
     "ruestung": "node tools/ruestung.mjs",
     "messtafel": "node tools/messtafel.mjs",
-    "zeichenwerk": "node tools/zeichenwerk.mjs"
+    "zeichenwerk": "node tools/zeichenwerk.mjs",
+    "sektor": "node tools/sektor.mjs"
   },
   "engines": {
     "node": ">=18"

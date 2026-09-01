@@ -34,6 +34,7 @@ Autark heisst autark: in der Einzeldatei sind alle 71 Bilder weiterhin
 
 ```
 npm run zeichenwerk Pufferwechsel je Bild, acht Schirme gegen einen Sektor
+npm run sektor     90 s Spielzeit je Sektor, ohne Zeichnen — Anzeigeliste
 npm run check      die Torkette: bauen, alle zwoelf starten, Bildtor, Farbtor
                    ~2,5 min oertlich, ~4 min auf GitHub
 npm run build      Einzeldatei
@@ -448,6 +449,28 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+61. **„Diese Umgebung kann die Last nicht herstellen" war ein Irrtum ueber
+   den Flaschenhals.** Vier Runden lang hiess es, die 519 Anzeigeobjekte
+   aus Sektor 106 seien hier nicht zu messen: neun Sekunden unter
+   SwiftShader ergaben 95 Objekte und keinen Gegner. Zu langsam war aber
+   nicht das RECHNEN, sondern das ZEICHNEN. Wer das Zeichnen abschaltet
+   und die Spielschleife von Hand taktet, rechnet 90 Sekunden Spielzeit
+   in gut vier Sekunden Wanduhr — mit derselben Wellensteuerung,
+   derselben Physik, denselben Vorraeten:
+
+       g.renderer.render = () => {};
+       for (let i = 0; i < N; i++) g.loop.step(t += 16.7);
+
+   Bevor etwas „auf dem Geraet gemessen werden muss", gehoert die Frage
+   gestellt, WELCHER Teil hier eigentlich nicht geht. Bildzeiten: nicht.
+   Alles, was Spiellogik ist: doch.
+
+   Und ein Rig traegt seine Verzerrung mit (Regel 12): der Spieler ist
+   unverwundbar und weicht nicht aus, trifft also weniger als ein Mensch —
+   es leben MEHR Gegner als im echten Spiel (54 hier gegen 15 auf dem
+   Geraet). Fuer die Frage „waechst die Liste" ist das die unguenstigere
+   Seite, und damit die richtige.
+
 60. **Ein Vor-Effekt ist kein Zierrat, sondern ein Zielwechsel je Bild.**
    `preFX.addGlow` auf einer Ueberschrift sieht aus wie eine Zeile Code und
    kostet, GEMESSEN, zwei Pufferwechsel je Bild und Objekt — solange der
@@ -592,12 +615,37 @@ Das `Q 0,35` selbst war ein eigener Befund und ist behoben (v64, Regel
 57): der Regler hob erst ueber 56 Bilder je Sekunde, das Geraet lieferte
 55,6 — er konnte nicht mehr hochkommen.
 
-**Offen und messbar offen:** woraus bestehen die 519 Anzeigeobjekte, wenn
-nur 15 Gegner und 86 Geschosse aktiv sind? Diese Umgebung kann die Last
-nicht herstellen. Die Spur heisst `trimPools()`: aufgeraeumt wird nur bei
-hoechstens ZWEI Gegnern im Bild, was ein spaeter Sektor nie hat. Die
-Messtafel nennt seit v64 die Vorraete und zaehlt die Aufraeumvorgaenge —
-die naechste Messung vom Geraet beantwortet es.
+**BEANTWORTET (v67), und zwar hier, ohne Geraet.** „Diese Umgebung kann
+die Last nicht herstellen" war ein Irrtum ueber den Flaschenhals: zu
+langsam ist das ZEICHNEN, nicht das Rechnen. `npm run sektor` schaltet
+das Zeichnen ab und taktet die Schleife von Hand — 90 Sekunden Spielzeit
+in gut vier Sekunden (Regel 61).
+
+Sektor 106, 90 s: die Anzeigeliste steigt in acht Sekunden auf rund 620
+und bleibt dort. **Kein Leck** — das mittlere gegen das letzte Drittel:
++2 %. Sie besteht aus lauter arbeitenden Dingen, nicht aus Muell: der
+groesste einzelne Block sind die **170 aktiven Effekte, also genau der
+fx-Deckel**, dazu rund 100 Gegnerkugeln und 50 Gegner.
+
+Die Spur `trimPools()` trug trotzdem etwas — nur nicht das, was vermutet
+war. Gemessen:
+
+| | Gegner im Mittel | Tor offen | aufgeraeumt in 90 s |
+|---|---|---|---|
+| Sektor 3 (v66) | 14 | 5,9 % | 8x |
+| Sektor 106 (v66) | 54 | **0,7 %** | **1x** |
+
+Die Bedingung hing an `enemies.countActive() > 2` und war damit genau
+dort zu, wo die Vorraete am groessten sind. Wovor sie schuetzte, ist
+ebenfalls gemessen: EIN Aufraeumen kostet 0,3 bis 0,9 ms, die naechsten
+elf je 0,0 — bei hoechstens einem Aufruf alle vier Sekunden. Eine Bremse
+gegen eine Last, die es nicht gibt. Seit v67 haengt sie an der Bildzeit
+und am Muellstand, beides anteilig: **23x statt 1x**, abgeschaltete
+Objekte in Sektor 106 von 28 % auf 9 %.
+
+**Das ist Ordnung, keine Leistung** — abgeschaltete Objekte kosten kein
+Zeichnen. Wer an der Bildzeit spaeter Sektoren etwas aendern will, muss
+an den fx-Deckel oder an die Zahl der Gegnerkugeln.
 
 **Die dritte Geraetemessung (v64) beantwortet sie NICHT.** Sie traegt die
 Marke `(im Menue gemessen — bitte IM GEFECHT messen)`: `lage()` gibt

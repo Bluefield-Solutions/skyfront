@@ -148,6 +148,13 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // AUFRAEUMEN WIEDER AN DIE GEGNERZAHL HAENGEN. Genau so stand es bis
+  // v66: in Sektor 106 traf „hoechstens zwei Gegner" auf 0,7 % der Bilder
+  // zu, und in 90 Sekunden wurde genau EINMAL aufgeraeumt.
+  ['Aufraeumen wieder nur bei hoechstens zwei Gegnern', '✗',
+    ['        if (this.echteBildzeit() > 1.5 * (1e3 / this.taktHz()) && x < E + b + I + G) return;',
+     '        if (this.enemies.countActive(!0) > 2 || this.boss && this.boss.active) return;'],
+    true, 'sektor', 'aufgeraeumt'],
   // DAS LEUCHTEN WIEDER ALS SHADER JE BILD statt gebacken. Genau so stand
   // es bis v65 an sieben Stellen: zwei Pufferwechsel je Bild und Objekt,
   // solange der Schirm steht — das Menue kam auf fuenf, ein laufender
@@ -540,6 +547,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'schirme' ? ['tools/schirme.mjs']
     : tor === 'messtafel' ? ['tools/messtafel.mjs']
     : tor === 'zeichenwerk' ? ['tools/zeichenwerk.mjs']
+    : tor === 'sektor' ? ['tools/sektor.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -591,7 +599,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel', zeichenwerk: 'Zeichenwerk' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel', zeichenwerk: 'Zeichenwerk', sektor: 'Sektor' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
@@ -704,6 +712,15 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', '__SKF_MESSZEILE fehlt'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne die Naht sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // Ohne Zugriff auf die Spielschleife kann der Sektor nichts rechnen.
+  name: 'Sektor ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/sektor.mjs', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'Spielschleife'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'ohne die Spielschleife sagt das Tor "nicht gemessen", Rückgabe 2',
 }, {
   // Ohne GL-Zugang kann das Zeichenwerk keinen einzigen Befehl zaehlen.
   name: 'Zeichenwerk ohne Messstelle (--ohne-naht)',

@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v66",
+    SKF_VERSION = "v67",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -65934,16 +65934,42 @@ ${n}` : "", {
         const R = this.game.loop;
         return R.rawDelta != null && R.rawDelta > 0 ? R.rawDelta : R.delta;
       }
-      // AUFGERAEUMT WIRD NUR IN EINER RUHEPAUSE: hoechstens alle vier
-      // Sekunden, kein Boss, und HOECHSTENS ZWEI Gegner im Bild. In einem
-      // spaeten Sektor stehen staendig fuenfzehn — dort kommt das nie vor.
-      // Die Vorraete bleiben dann auf ihrem Hoechststand, den ganzen
-      // Sektor lang. Ob das die 519 Anzeigeobjekte des Geraets erklaert,
-      // ist noch nicht gemessen: diese Umgebung kann die Last nicht
-      // herstellen. `poolTrims` zaehlt mit, damit die naechste Messung vom
-      // Geraet die Frage beantwortet, statt sie zu vermuten.
+      // AUFGERAEUMT WIRD NACH DER UHR, NICHT NACH DER GEGNERZAHL.
+      //
+      // Bis v66 stand hier `this.enemies.countActive() > 2` — aufgeraeumt
+      // wurde nur bei hoechstens ZWEI Gegnern im Bild und ohne Boss.
+      // GEMESSEN (tools/sektor.mjs, 90 s Spielzeit je Sektor):
+      //
+      //   Sektor   3   Gegner im Mittel 14   Tor offen 5,9 %   8x aufgeraeumt
+      //   Sektor 106   Gegner im Mittel 54   Tor offen 0,7 %   1x aufgeraeumt
+      //
+      // Das Tor war also genau dort zu, wo es gebraucht wurde. Und wovor
+      // es schuetzte, ist ebenfalls gemessen: EIN Aufraeumen kostet 0,3
+      // bis 0,9 ms, die naechsten elf hintereinander je 0,0 — bei einem
+      // Bildbudget von 16,7 ms und hoechstens einem Aufruf je vier
+      // Sekunden. Eine Bremse gegen eine Last, die es nicht gibt.
+      //
+      // Die neue Bedingung ist anteilig (Regel 2) und haengt an dem, was
+      // sie schuetzen soll: in einem Bild, das ohnehin schon deutlich
+      // ueber dem Budget liegt, wird gewartet — aber nur so lange, wie
+      // der Muell unter dem steht, was die Vorraete ohnehin halten
+      // duerfen. Sonst waere es dieselbe Falle wie vorher, denn in einem
+      // vollen Sektor ist JEDES Bild knapp.
+      //
+      // WAS DAS NICHT IST: der Hebel gegen die 519 Anzeigeobjekte. Die
+      // Liste laeuft nach acht Sekunden in eine Ebene und waechst nicht
+      // weiter; abgeschaltete Objekte kosten kein Zeichnen. Das hier ist
+      // Ordnung, keine Leistung.
       trimPools(R) {
-        R - this.lastPoolTrim < 4e3 || this.boss && this.boss.active || this.enemies.countActive(!0) > 2 || (this.lastPoolTrim = R, this.poolTrims++, this.trimGroup(this.bullets, 48, 16), this.trimGroup(this.enemyBullets, 48, 16), this.trimGroup(this.enemies, 20, 6), this.trimGroup(this.powerups, 10, 4), this.trimArrayPool(this.fxPool, 120, 24), this.trimArrayPool(this.txtPool, 60, 12))
+        if (R - this.lastPoolTrim < 4e3) return;
+        const E = 48,
+          b = 48,
+          I = 20,
+          G = 10,
+          v = (t) => t ? t.getLength() - t.countActive(!0) : 0,
+          x = v(this.bullets) + v(this.enemyBullets) + v(this.enemies) + v(this.powerups);
+        if (this.echteBildzeit() > 1.5 * (1e3 / this.taktHz()) && x < E + b + I + G) return;
+        this.lastPoolTrim = R, this.poolTrims++, this.trimGroup(this.bullets, E, 16), this.trimGroup(this.enemyBullets, b, 16), this.trimGroup(this.enemies, I, 6), this.trimGroup(this.powerups, G, 4), this.trimArrayPool(this.fxPool, 120, 24), this.trimArrayPool(this.txtPool, 60, 12)
       }
       trimGroup(R, E, b) {
         let I = R.getLength() - R.countActive(!0);
