@@ -539,6 +539,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'ruestung' ? ['tools/ruestung.mjs']
     : tor === 'schirme' ? ['tools/schirme.mjs']
     : tor === 'messtafel' ? ['tools/messtafel.mjs']
+    : tor === 'zeichenwerk' ? ['tools/zeichenwerk.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -590,7 +591,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel', zeichenwerk: 'Zeichenwerk' }[tor];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
