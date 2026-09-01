@@ -39,6 +39,30 @@
        0,7 % der Bilder zu, und es wurde in 90 Sekunden genau einmal
        aufgeraeumt.
     D  Der Anteil abgeschalteter Objekte in der Liste bleibt in Grenzen.
+    E  Die BEMALTE FLAECHE je Bild bleibt unter acht Bildschirmen.
+
+  ZU E, weil die Zahl eine Geschichte hat: Nach v67 lag der Verdacht auf
+  dem fx-Deckel — 170 aktive Effekte sind der groesste Block der
+  Anzeigeliste. Durchprobiert (170 · 130 · 100 · 70 · 45) ergab das eine
+  FEHLANZEIGE: Zeichenaufrufe 29 → 26, Rechenzeit 0,8 → 0,6 ms, bemalte
+  Flaeche 5,87 → 5,96 Bildschirme. Der Deckel bewegt nichts davon; die
+  Effekte sind klein und werden gebuendelt. Das Geraet hatte es ohnehin
+  schon gesagt: bei Q 0,35 stand der Deckel auf 89 und es reichte
+  trotzdem nicht.
+
+  Die Flaeche liegt woanders, und zwar in wenigen grossen Posten:
+
+      Rectangle 1,42 (7x) · e_weaver 1,06 (76x) · <Untergrund> 1,00 (1x)
+      · <Ebene> 0,55 · e_bomber 0,51 (32x) · <Ebene> 0,30 · gradeBot 0,22
+
+  Rund 3,4 der 5,9 Bildschirme sind bildfuellende EBENEN, nicht Gegner.
+  Das ist dieselbe Form wie der Menuebefund aus v66 — nur hier gemessen,
+  nicht dort. Bemalte Flaeche ist reine Geometrie und uebertraegt sich
+  eins zu eins aufs Telefon, anders als jede Millisekunde von hier.
+
+  Die Gegneranteile sind wegen des Rigs eine OBERGRENZE (es leben mehr
+  Gegner als im echten Spiel); die bildfuellenden Ebenen sind es nicht —
+  die liegen immer da.
 
   Und die Zerlegung wird ausgegeben: wem jedes Objekt gehoert. Das ist
   die Antwort auf SKY-268, und sie braucht kein Telefon mehr.
@@ -111,6 +135,26 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
   } catch (e) { g.renderer.render = altR; return { fehler: 'Schleife gestolpert: ' + e }; }
   const dauer = performance.now() - t0;
 
+  // BEMALTE FLAECHE je Bild, in Bildschirmen. Reine Geometrie — sie
+  // uebertraegt sich eins zu eins aufs Telefon, anders als jede
+  // Millisekunde aus dieser Umgebung (Regel 12).
+  const kam = sp.cameras.main, BREITE = kam.width / (kam.zoom || 1), HOEHE = kam.height / (kam.zoom || 1);
+  const SCHIRM = BREITE * HOEHE;
+  const posten = {};
+  let flaeche = 0;
+  const malt = (arr) => { for (const o of arr) {
+    if (o.list) { malt(o.list); continue; }
+    if (o.visible === false || o.active === false) continue;
+    const w = Math.abs(o.displayWidth || 0), h = Math.abs(o.displayHeight || 0);
+    if (!w || !h) continue;
+    const a = Math.min(w, BREITE * 2) * Math.min(h, HOEHE * 2) * (o.alpha == null ? 1 : o.alpha);
+    flaeche += a;
+    const k = o.texture && o.texture.key ? o.texture.key : o.type;
+    if (!posten[k]) posten[k] = [0, 0];
+    posten[k][0] += a; posten[k][1]++;
+  } };
+  malt(sp.children.list);
+
   // Wem gehoert jedes Objekt? Zugeordnet, nicht geraten.
   const flach = [];
   const geh = (arr) => { for (const o of arr) { flach.push(o); if (o.list) geh(o.list); } };
@@ -137,6 +181,11 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
     schritte, sekunden: schritte * SCHRITT / 1000, dauer: Math.round(dauer),
     offen, trims: sp.poolTrims || 0, verlauf,
     liste: flach.length, aus, fxAktiv: sp.fxActive || 0, fxCap: sp.fxCap || 0,
+    flaeche: flaeche / SCHIRM,
+    posten: Object.entries(posten).sort((a, b) => b[1][0] - a[1][0]).slice(0, 6)
+      // Erzeugte Texturen tragen einen Zufallsnamen und waeren im Bericht
+      // von Lauf zu Lauf verschieden — sie werden benannt, nicht gezeigt.
+      .map(([k, v]) => `${/^[0-9a-f-]{30,}$/.test(k) ? '<erzeugte Ebene>' : k} ${(v[0] / SCHIRM).toFixed(2)} (${v[1]}x)`),
     zaehl: Object.entries(zaehl).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`),
   };
 }, { stage, sekunden });
@@ -156,6 +205,7 @@ for (const stage of [3, 106]) {
   console.log(`             Anzeigeliste ${r.liste}, davon abgeschaltet ${r.aus} (${(r.aus / r.liste * 100).toFixed(0)} %)   fx ${r.fxAktiv}/${r.fxCap}`);
   console.log(`             aufgeraeumt ${r.trims}x   ·   hoechstens zwei Gegner: ${anteilOffen.toFixed(1)} % der Bilder`);
   console.log(`             ${r.zaehl.join(' · ')}`);
+  console.log(`             bemalt ${r.flaeche.toFixed(2)} Bildschirme je Bild:  ${r.posten.join(' · ')}`);
   const p = r.verlauf.map((v) => v[1]);
   const d = Math.floor(p.length / 3);
   const mitte = p.slice(d, d * 2), ende = p.slice(d * 2);
@@ -183,6 +233,10 @@ for (const stage of [3, 106]) {
   // D — wieviel Totes traegt die Liste mit?
   if (r.aus / r.liste > .45)
     M.befund(`Sektor ${stage}: ${(r.aus / r.liste * 100).toFixed(0)} % der Anzeigeliste sind abgeschaltete Objekte (${r.aus} von ${r.liste}). Sie kosten kein Zeichnen, aber jede Liste, die zur Haelfte aus Leichen besteht, wird bei jedem Durchgang mitgetragen.`);
+  // E — bemalte Flaeche. In BILDSCHIRMEN gemessen, also schon anteilig:
+  // die Grenze bleibt gueltig, wenn sich die Aufloesung aendert (Regel 2).
+  if (r.flaeche > 8)
+    M.befund(`Sektor ${stage}: es werden ${r.flaeche.toFixed(2)} Bildschirme je Bild bemalt (Grenze 8). Groesste Posten: ${r.posten.slice(0, 4).join(' · ')}. Auf einem Telefon ist die bemalte Flaeche der teure Posten, nicht die Zahl der Objekte.`);
   console.log('');
 }
 

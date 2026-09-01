@@ -449,6 +449,28 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
+   lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
+   Effekte sind der groesste Block der Anzeigeliste. Durchprobiert
+   (170 · 130 · 100 · 70 · 45) ergab das nichts:
+
+   | Deckel | Zeichenaufrufe | Rechnen p50 | bemalte Flaeche |
+   |---|---|---|---|
+   | 170 | 29 | 0,80 ms | 5,87 Bildschirme |
+   | 45 | 26 | 0,60 ms | 5,96 Bildschirme |
+
+   Die Effekte sind klein und werden gebuendelt. Das Geraet hatte es
+   ohnehin gesagt: bei Q 0,35 stand der Deckel auf 89 und es reichte
+   trotzdem nicht. **Nichts geaendert** — ein Deckel, der nichts bewegt,
+   kostet beim Senken nur Aussehen.
+
+   Was der Raum stattdessen zeigt: die Rechenzeit des ganzen Spiels liegt
+   bei **0,9 ms von 16,7**. Die Zeit steckt im ZEICHNEN, und dort in
+   wenigen grossen Posten — in Sektor 3 bemalen **sieben Rechtecke 1,86
+   Bildschirme**, mehr als alles andere zusammen. Bemalte Flaeche ist
+   reine Geometrie und uebertraegt sich eins zu eins aufs Telefon; sie
+   steht seit v68 als Pruefung E in `npm run sektor`.
+
 61. **„Diese Umgebung kann die Last nicht herstellen" war ein Irrtum ueber
    den Flaschenhals.** Vier Runden lang hiess es, die 519 Anzeigeobjekte
    aus Sektor 106 seien hier nicht zu messen: neun Sekunden unter
@@ -644,8 +666,23 @@ und am Muellstand, beides anteilig: **23x statt 1x**, abgeschaltete
 Objekte in Sektor 106 von 28 % auf 9 %.
 
 **Das ist Ordnung, keine Leistung** — abgeschaltete Objekte kosten kein
-Zeichnen. Wer an der Bildzeit spaeter Sektoren etwas aendern will, muss
-an den fx-Deckel oder an die Zahl der Gegnerkugeln.
+Zeichnen.
+
+**Und der fx-Deckel ist es auch nicht (v68, Fehlanzeige).** Durchprobiert
+von 170 bis 45: Zeichenaufrufe 29 → 26, Rechenzeit 0,80 → 0,60 ms,
+bemalte Flaeche 5,87 → 5,96 Bildschirme. Nichts davon bewegt sich. Was
+sich zeigt: das ganze Spiel RECHNET 0,9 ms von 16,7 — die Zeit steckt im
+Zeichnen. Und dort in wenigen grossen Posten:
+
+```
+Sektor   3   bemalt 3,57 Bildschirme:  Rectangle 1,86 (7x) · <Ebene> 1,00 · …
+Sektor 106   bemalt 5,67 Bildschirme:  Rectangle 1,42 (7x) · <Ebene> 1,00 · e_weaver 0,98 (68x) · …
+```
+
+Sieben Rechtecke bemalen in Sektor 3 **mehr Flaeche als alles andere
+zusammen**. Das ist der naechste Faden — dieselbe Form wie der
+Menuebefund aus v66. Bemalte Flaeche steht seit v68 als Pruefung E in
+`npm run sektor`, Grenze acht Bildschirme.
 
 **Die dritte Geraetemessung (v64) beantwortet sie NICHT.** Sie traegt die
 Marke `(im Menue gemessen — bitte IM GEFECHT messen)`: `lage()` gibt

@@ -148,6 +148,14 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // DREI BILDFUELLENDE EBENEN OBENDRAUF. Genau die Sorte Posten, die die
+  // bemalte Flaeche traegt: in Sektor 3 bemalen sieben Rechtecke 1,86
+  // Bildschirme — mehr als alles andere zusammen. Wer noch drei dazulegt,
+  // muss auffallen.
+  ['Drei bildfuellende Ebenen ins Gefecht legen', '✗',
+    ['}), this.ground = this.physics.add.group(), this.decor = this.physics.add.group()',
+     '}), this.ground = this.physics.add.group(), this.decor = this.physics.add.group(), [0, 1, 2].forEach(() => this.add.rectangle(J / 2, rt / 2, J, rt, 2237106, .9).setDepth(60))'],
+    true, 'sektor', 'Bildschirme je Bild'],
   // AUFRAEUMEN WIEDER AN DIE GEGNERZAHL HAENGEN. Genau so stand es bis
   // v66: in Sektor 106 traf „hoechstens zwei Gegner" auf 0,7 % der Bilder
   // zu, und in 90 Sekunden wurde genau EINMAL aufgeraeumt.
