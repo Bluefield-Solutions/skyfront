@@ -837,6 +837,30 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', 'ohne gebauten Pages-Stand'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'ohne gebauten Pages-Stand sagt das Tor "nicht gemessen", Rückgabe 2',
+}, {
+  // DIE PROBE ZUM LETZTEN METER.
+  //
+  // Bis v73 legte der Dienst-Arbeiter seine Huelle mit `addAll` ab. Das
+  // fragt durch den Zwischenspeicher des BROWSERS, und GitHub Pages
+  // liefert HTML mit max-age=600: der neue Arbeiter legte die ALTE Seite
+  // unter der NEUEN Marke ab, und weil die Marke stimmte, wurde sie nie
+  // wieder erneuert. Vierzehn Fassungen lang hat das kein Tor gesehen —
+  // gefunden hat es der Nutzer ("es steht immer V72 unten").
+  //
+  // Die Probe setzt den Arbeiter auf genau diesen Stand zurueck und
+  // verlangt, dass die Fassungsprobe anschlaegt. Sie kostet 40 Sekunden,
+  // weil sie die Seite viermal wirklich startet — das ist der Preis
+  // dafuer, den Weg zu messen statt den Quelltext zu lesen.
+  //
+  // Sie laesst dist/pages/sw.js auf dem alten Stand zurueck; das naechste
+  // `npm run pages` baut es richtig.
+  name: 'Auslieferung mit dem Arbeiter vor v74 (--probe-alter-arbeiter)',
+  cmd: ['tools/auslieferung.mjs', '--probe-alter-arbeiter'],
+  rotErwartet: true,
+  exitErwartet: 1,
+  mussEnthalten: ['nach 4 Starten NICHT da', 'nie auf dem Geraet'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'die Fassungsprobe sieht wirklich, wenn eine neue Fassung das Geraet nicht erreicht',
 },
 
 // ---- Der dritte Ausgang: 2 = "nicht gemessen" -------------------------

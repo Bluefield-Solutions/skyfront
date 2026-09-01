@@ -49,6 +49,10 @@ import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 const M = messstelle('Auslieferung', 'der Pages-Bau ist vollstaendig und lieferbar.');
 const OHNE_BROWSER = process.argv.includes('--ohne-browser');
 const PROBE_OHNE_MUSIK = process.argv.includes('--probe-ohne-musik');
+// Setzt den Dienst-Arbeiter auf den Stand VOR v74 zurueck: Huelle mit
+// `addAll`, also durch den Zwischenspeicher des Browsers. Verlangt wird,
+// dass die Fassungsprobe weiter unten genau das meldet.
+const PROBE_ALTER_ARBEITER = process.argv.includes('--probe-alter-arbeiter');
 
 // Die Schranke. 5 MB ist keine technische Grenze, sondern die Zusage: was
 // darueber liegt, ist nicht ausgelagert, und dann laedt das Telefon beim
@@ -79,8 +83,17 @@ try {
 
 if (!existsSync(`${AUS}/index.html`)) M.abbruch(`${AUS}/index.html fehlt.`);
 const html = readFileSync(`${AUS}/index.html`, 'utf8');
-const sw = existsSync(`${AUS}/sw.js`) ? readFileSync(`${AUS}/sw.js`, 'utf8') : null;
+let sw = existsSync(`${AUS}/sw.js`) ? readFileSync(`${AUS}/sw.js`, 'utf8') : null;
 if (sw === null) M.abbruch(`${AUS}/sw.js fehlt.`);
+
+if (PROBE_ALTER_ARBEITER) {
+  const zurueck = sw.replace('caches.open(MARKE).then(huelleLegen)', 'caches.open(MARKE).then(c => c.addAll(VORRAT))');
+  // Kam der Eingriff an? Ein nicht angekommener Eingriff sieht aus wie eine
+  // bestandene Probe — daran sind in diesem Projekt schon drei gescheitert.
+  if (zurueck === sw) M.abbruch('die Gegenprobe ist nicht angekommen: huelleLegen steht nicht im gebauten Arbeiter.');
+  writeFileSync(`${AUS}/sw.js`, zurueck);
+  sw = zurueck;
+}
 
 // Kam der Eingriff der Gegenprobe ueberhaupt an? Ein nicht angekommener
 // Eingriff sieht aus wie ein bestandenes Tor — drei von zehn Proben sind
