@@ -449,6 +449,23 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+66. **Ein Instrument, das bei jeder Unterbrechung zurueckspringt, misst
+   nicht den Vorgang, sondern die letzte Unterbrechung.** Die Messtafel
+   setzte zurueck, sobald `scene.isActive()` einmal falsch war — und
+   beim PAUSIEREN ist die Spielszene nicht aktiv. GEMESSEN: 8 Bilder vor
+   der Pause, 4 danach. Die v69-Zeile vom Geraet meldete daraufhin
+   `Q 0.15` bei „2,4 s / 144 Bilder" in Sektor 111, und aus ihr war NICHT
+   zu entscheiden, ob der Regler zu schnell gefallen war: die 2,4
+   Sekunden waren nicht das Alter des Sektors, sondern die Zeit seit dem
+   letzten Fortsetzen. Zurueckgesetzt wird jetzt, wenn der Sektor einen
+   NEUEN LAUF zaehlt (`laufNr`) — nicht, wenn er kurz stillsteht.
+
+   Und dieselbe Zeile hat noch etwas gezeigt: eine Zahl ohne ihre
+   Geschichte ist nicht zu lesen. Dasselbe `Q 0.15` heisst „eben
+   eingebrochen" oder „klebt seit einer Minute unten", und nur das zweite
+   ist ein Befund. Die Tafel nennt jetzt beides: wie oft gefallen, wie oft
+   gestiegen, vor wieviel Sekunden zuletzt, und wie alt der Sektor ist.
+
 63. **Was in beide Richtungen wirken soll, braucht in beiden Richtungen
    eine Bremse.** Der Effekt-Regler war getaktet — aber nur beim STEIGEN
    (alle 900 ms um 0,05). Das FALLEN lief ungebremst mit der Regel selbst,

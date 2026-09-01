@@ -44,6 +44,8 @@
               wird getrennt gebucht, sonst misst "laengste" die Messung.
     K  Ecke     Die Vier-Tipp-Ecke liegt auf Pause und Ton. Im Gefecht
               darf sie nicht zaehlen, ausserhalb muss sie es.
+    L  Pause    Eine Pause darf die Messung nicht wegwerfen, ein neuer
+              Lauf muss es.
 
   `--ohne-naht` nimmt `__SKF_MESSZEILE` weg und verlangt die Rueckgabe 2.
 */
@@ -495,6 +497,62 @@ console.log('\n  K  Faengt die Vier-Tipp-Ecke Pause und Ton ab?');
       if (nachMenue === vor2)
         M.befund(`ausserhalb des Gefechts wirken die vier Tipps nicht mehr (${vor2} → ${nachMenue}). Dann ist der Notweg zu, und wenn die Spielszene nicht hochkommt, ist die Tafel gar nicht mehr zu erreichen.`);
     }
+  }
+}
+
+// ---- L  Ueberlebt die Messung eine PAUSE? -----------------------------
+//
+// DER ANLASS: die v69-Zeile vom Geraet meldete `Q 0.15` bei „2,4 s /
+// 144 Bilder" in Sektor 111. Aus ihr war NICHT zu entscheiden, ob der
+// Regler zu schnell gefallen ist — denn die 2,4 s waren nicht das Alter
+// des Sektors. Bis v69 hing das Zuruecksetzen an `scene.isActive()`, und
+// beim PAUSIEREN ist die Spielszene nicht aktiv. Gemessen: 8 Bilder vor
+// der Pause, 4 danach. Wer pausiert, wirft seine Messung weg — und die
+// Zeile behauptet danach eine Laufzeit, die es nicht gab.
+//
+// Zurueckgesetzt wird jetzt, wenn der Sektor einen NEUEN LAUF zaehlt.
+// Geprueft wird beides (Regel 13): die Pause darf nichts wegwerfen, ein
+// neuer Lauf muss es.
+console.log('\n  L  Ueberlebt die Messung eine Pause?');
+{
+  const insGefecht = () => seite.evaluate(async () => {
+    const g = window.__game;
+    (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+    g.scene.start('Game', { stage: 1 });
+    for (let i = 0; i < 40; i++) {
+      await new Promise((f) => setTimeout(f, 200));
+      const s = (g.scene.scenes || []).find((x) => x.scene.key === 'Game' && x.scene.isActive());
+      if (!s) continue;
+      if (!s.stageStarted && typeof s.startStage === 'function') s.startStage();
+      if (s.player) return true;
+    }
+    return false;
+  });
+  if (!await insGefecht()) M.ungemessen('kommt fuer die Pausenprobe nicht ins Gefecht.');
+  else {
+    await seite.evaluate(() => { if (!window.__SKF_MESSAN()) window.__SKF_MESSTAFEL(); });
+    await seite.waitForTimeout(6000);
+    const vor = await bilder();
+    await seite.evaluate(() => { const s = window.__game.scene.getScene('Game'); s.pauseGame(); });
+    await seite.waitForTimeout(2000);
+    await seite.evaluate(() => { const g = window.__game; g.scene.stop('Pause'); g.scene.resume('Game'); });
+    await seite.waitForTimeout(3000);
+    const nach = await bilder();
+    console.log(`     Pause          Bilder ${vor} → ${nach}`);
+    gemessen++;
+    if (vor == null || nach == null) M.ungemessen('die Bilderzahl ist um die Pause herum nicht abzufragen.');
+    else if (nach < vor)
+      M.befund(`eine Pause setzt die Messung zurueck (${vor} → ${nach} Bilder). Wer pausiert, wirft seine Messung weg — und die kopierte Zeile behauptet danach eine Laufzeit, die es nicht gab. Genau daran war die v69-Messung nicht zu lesen.`);
+
+    // Und die Gegenrichtung: ein NEUER Lauf muss zuruecksetzen, sonst
+    // stehen Menuebilder und zwei Sektoren in einem Topf.
+    const vor2 = await bilder();
+    await insGefecht();
+    await seite.waitForTimeout(2500);
+    const nach2 = await bilder();
+    console.log(`     neuer Lauf     Bilder ${vor2} → ${nach2}`);
+    if (vor2 != null && nach2 != null && nach2 >= vor2)
+      M.befund(`ein neuer Sektor setzt die Messung NICHT zurueck (${vor2} → ${nach2} Bilder). Dann stehen zwei Laeufe in einer Zahl.`);
   }
 }
 

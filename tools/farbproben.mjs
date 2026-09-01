@@ -148,6 +148,13 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // DIE MESSUNG WIEDER AN `isActive` HAENGEN. Dann wirft jede Pause sie
+  // weg — und genau daran war die v69-Zeile vom Geraet nicht zu lesen:
+  // `Q 0.15` bei angeblich 2,4 Sekunden Laufzeit.
+  ['Messung haengt wieder an isActive statt am Lauf', '✗',
+    ['        var lauf = s0 && s0.laufNr != null ? s0.laufNr : null;\n        if (lauf != null && lauf !== letzterLauf) { letzterLauf = lauf; zuruecksetzen(); vorher = t; return; }',
+     '        var drin = !!(s0 && s0.scene && s0.scene.isActive && s0.scene.isActive());\n        if (drin && !letzterLauf) { letzterLauf = 1; zuruecksetzen(); vorher = t; return; }\n        if (!drin) letzterLauf = null;'],
+    true, 'messtafel', 'eine Pause setzt die Messung zurueck', HUELLE],
   // DAS FALLEN DES Q-REGLERS WIEDER UNGEBREMST. Genau so stand es bis
   // v68: die Regel laeuft dreimal je Sekunde, ein Ruckler von 90 ms schob
   // den Regler in 2,7 Sekunden auf den Boden. Gemessen auf dem Geraet,

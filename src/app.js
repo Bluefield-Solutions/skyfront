@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v69",
+    SKF_VERSION = "v70",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62699,7 +62699,7 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
       }
       create() {
         var d, u, c, g;
-        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.poolTrims = 0, this.lastPoolTrim = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
+        this.over = !1, this.endeKnoepfe = null, this.physics.world.timeScale = 1, this.tweens.timeScale = 1, this.slowActive = !1, this.fxPool = [], this.fxActive = 0, this.fpsEma = 60, this.fpsFrame = 0, this.bossWarned = !1, this.drones = [], this.dronesUntil = 0, this.txtPool = [], this.txtActive = 0, this.waveHigh = 0, this.lastBreather = 0, this.qBudget = 1, this.qUpAt = 0, this.bildMin = 16.7, this.poolTrims = 0, this.lastPoolTrim = 0, this.laufNr = (this.laufNr || 0) + 1, this.laufStart = this.time.now, this.qAb = 0, this.qAuf = 0, this.qSeit = 0, this.hitGrid.clear(), this.hitUsed.length = 0, this.hitCellPool.length = 0, this.hitTests = 0, this.frameHits = 0, this.frameMs.length = 0, this.worstMs = 0, this.worstMsAt = 0, this.slowFrames = 0, this.peakPB = 0, this.peakEB = 0, this.peakEN = 0, this.peakTests = 0, this.buildFxAtlas(), this.applyFxQuality(), this.boss = null, this.stage = this.startStageNum, this.score = 0, this.best = St("hs_best", 0), this.sea = this.add.tileSprite(0, 0, J, rt, "sea").setOrigin(0, 0).setDepth(0), this.swell = this.add.tileSprite(0, 0, J, rt, "swellBig").setOrigin(0, 0).setDepth(.4).setBlendMode(tt.BlendModes.SCREEN).setAlpha(0), this.sunglint = this.add.tileSprite(0, 0, J, rt, "sunglint").setOrigin(0, 0).setDepth(.7).setBlendMode(tt.BlendModes.ADD).setAlpha(0), this.gradeTop = this.add.image(0, 0, "gradeTop").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.gradeBot = this.add.image(0, 0, "gradeBot").setOrigin(0, 0).setDepth(1.5).setAlpha(0), this.fog = this.add.tileSprite(0, 0, J, rt, "fog").setOrigin(0, 0).setDepth(3).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN), this.clouds = this.add.tileSprite(0, 0, J, rt, "cloudsLayer").setOrigin(0, 0).setDepth(30).setAlpha(.5), this.rain = this.add.tileSprite(0, 0, J, rt, "rain").setOrigin(0, 0).setDepth(29).setAlpha(0).setBlendMode(tt.BlendModes.SCREEN);
         const R = 96;
         this.wallL = this.add.tileSprite(0, 0, R, rt, "canyonwallL").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.wallR = this.add.tileSprite(J - R, 0, R, rt, "canyonwallR").setOrigin(0, 0).setDepth(1.45).setVisible(!1), this.stageOverlay = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(2), this.spielfeld = this.add.rectangle(0, 0, J, rt, 0, 0).setOrigin(0, 0).setDepth(1.6).setVisible(!1), this.bullets = this.physics.add.group({
           defaultKey: "bullet_p",
@@ -66566,7 +66566,10 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
             this.fpsFrame = 0;
             const a = this.qBudget,
               m = qRegel(this.qBudget, this.fpsEma, this.taktHz(), b, this.qUpAt);
-            this.qBudget = m.q, this.qUpAt = m.qUpAt, this.qBudget !== a && this.applyBudget()
+            // Mitschreiben, WIE OFT und WANN — sonst steht in der Zeile ein
+            // Q von 0,15 ohne jeden Hinweis, ob es eben gefallen ist oder
+            // seit einer Minute unten klebt.
+            this.qBudget = m.q, this.qUpAt = m.qUpAt, this.qBudget !== a && (m.q < a ? this.qAb++ : this.qAuf++, this.qSeit = b, this.applyBudget())
           }
         }
         this.trimPools(b), this.player.update(b, this.game.loop.delta), this.player.powerVerloren && (this.player.powerVerloren = !1, this.pwrPuls(!1)), this.frameHits = 0, this.collideBulletsEnemies(), this.collideEnemyBulletsPlayer();

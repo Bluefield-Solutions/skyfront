@@ -283,6 +283,9 @@
                    vk: ln(sp.bullets), vgk: ln(sp.enemyBullets), vg: ln(sp.enemies),
                    vp: ln(sp.powerups), vfx: sp.fxPool ? sp.fxPool.length : 0,
                    vtx: sp.txtPool ? sp.txtPool.length : 0, tr: sp.poolTrims || 0,
+                   q: sp.qBudget, qab: sp.qAb || 0, qauf: sp.qAuf || 0,
+                   qseit: sp.qSeit ? Math.round((sp.time.now - sp.qSeit) / 100) / 10 : -1,
+                   sekt: sp.laufStart != null ? Math.round((sp.time.now - sp.laufStart) / 100) / 10 : -1,
                    b: sp.bodenKey || '?', w: sp.waveIndex != null ? sp.waveIndex : -1 };
         } catch (e) { return null; }
       }
@@ -291,8 +294,20 @@
       });
       // Wo wurde gemessen? Die Zahlen aus dem Menue sagen ueber das Gefecht
       // nichts — dort laeuft nichts ausser der Kulisse. Beim ersten Bild im
-      // Gefecht faengt die Messung deshalb von vorn an, genau einmal.
-      var warImSpiel = false;
+      // Gefecht faengt die Messung deshalb von vorn an.
+      //
+      // ABER NUR BEI EINEM NEUEN LAUF, nicht bei jeder Unterbrechung. Bis
+      // v69 hing das an `scene.isActive()` — und beim PAUSIEREN ist die
+      // Spielszene nicht aktiv. Gemessen: 8 Bilder vor der Pause, 4
+      // danach. Wer pausiert, wirft seine Messung weg, und die kopierte
+      // Zeile behauptet danach eine Laufzeit von zwei Sekunden fuer einen
+      // Sektor, der lange lief. Genau so kam die v69-Zeile mit „2,4 s"
+      // und `Q 0.15` zustande: aus ihr war nicht zu entscheiden, ob der
+      // Regler zu schnell gefallen ist oder ganz normal.
+      //
+      // Der Sektor zaehlt seine Laeufe jetzt selbst (`laufNr`), und
+      // zurueckgesetzt wird, wenn DIESE Zahl sich aendert.
+      var letzterLauf = null;
 
       // Der Streifen erscheint, sobald GEMESSEN wird — nicht erst, wenn man
       // aufklappt. Er ist damit selbst die Anzeige dafuer, dass die Messung
@@ -450,9 +465,8 @@
         // ueber das Gefecht nichts.
         var s0 = window.__game && window.__game.scene && window.__game.scene.getScene
                  ? window.__game.scene.getScene('Game') : null;
-        var drin = !!(s0 && s0.scene && s0.scene.isActive && s0.scene.isActive());
-        if (drin && !warImSpiel) { warImSpiel = true; zuruecksetzen(); vorher = t; return; }
-        if (!drin) warImSpiel = false;
+        var lauf = s0 && s0.laufNr != null ? s0.laufNr : null;
+        if (lauf != null && lauf !== letzterLauf) { letzterLauf = lauf; zuruecksetzen(); vorher = t; return; }
 
         if (vorher) {
           var d = t - vorher;
@@ -569,6 +583,10 @@
           var L = schlimmsteLage;
           z.push('dabei war       Gegner ' + L.g + '  Kugeln ' + L.k + '/' + L.gk +
                  '  fx ' + L.fx + '  Bild ' + L.obj + '  Biom ' + L.b);
+          z.push('Effekt-Budget   Q ' + (L.q == null ? '—' : L.q.toFixed(2)) +
+                 '   ' + L.qab + 'x gefallen, ' + L.qauf + 'x gestiegen' +
+                 (L.qseit >= 0 ? '   ·   letzte Änderung vor ' + L.qseit + ' s' : '   ·   nie geändert') +
+                 (L.sekt >= 0 ? '   ·   Sektor läuft ' + L.sekt + ' s' : ''));
           z.push('Vorräte dabei   Kugeln ' + L.vk + '  Gegnerkugeln ' + L.vgk + '  Gegner ' + L.vg +
                  '  Aufsammler ' + L.vp + '  fx ' + L.vfx + '  Texte ' + L.vtx + '   ·   aufgeräumt ' + L.tr + 'x');
         } else if (laengste > 0) {
@@ -628,6 +646,10 @@
           // Die Vorraete gehoeren in die MITGENOMMENE Zeile: sie sind die
           // Antwort auf „woraus besteht die Anzeigeliste", und ohne sie
           // muesste man dafuer ein zweites Mal fahren.
+          // OHNE DIESE DREI ZAHLEN IST EIN Q NICHT ZU LESEN: dieselbe 0,15
+          // heisst „eben eingebrochen" oder „klebt seit einer Minute unten",
+          // und nur die zweite Lesart ist ein Befund.
+          eine.push('Qab' + W.qab + ' Qauf' + W.qauf + ' seit' + W.qseit + 's Sektor' + W.sekt + 's');
           eine.push('Vorrat K' + W.vk + ' GK' + W.vgk + ' G' + W.vg + ' PU' + W.vp + ' fx' + W.vfx + ' tx' + W.vtx + ' Trims' + W.tr);
         }
         eine.push('5s ' + zahl(l5) + ' ms');
