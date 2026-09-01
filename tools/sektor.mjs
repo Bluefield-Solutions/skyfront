@@ -32,6 +32,9 @@
   WAS GEMESSEN WIRD:
 
     A  Der Sektor laeuft 90 s Spielzeit durch, ohne stehenzubleiben.
+       Gemessen werden DREI Sektoren: 3 (Stadt, Effekt 1), 61 (Gewitter,
+       Effekt 2 — vier bildfuellende Wetterebenen) und 106 (Lava,
+       Effekt 3).
     B  Die Anzeigeliste laeuft in eine EBENE. Waechst das letzte Drittel
        deutlich ueber das mittlere, laeuft etwas aus dem Ruder.
     C  Aufgeraeumt wird auch in einem VOLLEN Sektor. Bis v66 hing das an
@@ -179,9 +182,37 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
     posten[k][0] += a; posten[k][1]++; posten[k][2] = Math.max(posten[k][2], a / SCHIRM > .5 ? deck(o) : 0);
     // BILDFUELLENDE EBENEN einzeln zaehlen. Sie sind der Posten, den man
     // abstellen kann — ein Sprite mehr oder weniger ist Rauschen dagegen.
-    if (a / SCHIRM >= .9) ebenen.push({ was: k, deckt: Math.round(deck(o) * 100), tiefe: o.depth });
+    if (a / SCHIRM >= .9) ebenen.push({ o, was: k, deckt: Math.round(deck(o) * 100), tiefe: o.depth });
   } };
   malt(sp.children.list);
+
+  // STEHT SIE ODER BEWEGT SIE SICH? Das ist der Unterschied, auf den es
+  // ankommt: eine stehende bildfuellende Ebene ist IMMER backbar (Regel
+  // 60), eine bewegte ist eine gestalterische Entscheidung. Der
+  // Wettereffekt legt vier bewegte uebereinander; die abzuzaehlen wie
+  // eine vergessene Lasur waere derselbe Fehler wie mit Alpha zu
+  // gewichten — Wirkung und Kosten verwechselt.
+  //
+  // Gemessen wird es, nicht angenommen: Kachelversatz, Ort und Deckung
+  // jetzt gegen dieselben Werte sechzig Bilder spaeter.
+  //
+  // ABER NUR, WAS DAS RIG AUCH TREIBT. Der Modifikator (`src/modifier.js`)
+  // taktet sich selbst ueber `requestAnimationFrame`; die Schleife hier
+  // wird von Hand gestellt und ruft ihn nie auf. Seine Wetterebenen sind
+  // im Rig EINGEFROREN — sie „stehen" nicht, sie werden nur nicht
+  // bewegt. Wer sie als stehend zaehlt, meldet einen Befund ueber sein
+  // eigenes Werkzeug. Sie sind an `sp.__skf` zu erkennen und werden
+  // gezaehlt, aber nicht beurteilt.
+  const modifikator = new Set(Array.isArray(sp.__skf) ? sp.__skf : []);
+  const fingerabdruck = (o) => [o.tilePositionX, o.tilePositionY, o.x, o.y,
+    o.alpha, o.fillAlpha, o.angle, o.scaleX].map((z) => Math.round((z || 0) * 100)).join(',');
+  const vor = ebenen.map((e) => fingerabdruck(e.o));
+  for (let i = 0; i < 60; i++) g.loop.step(t += SCHRITT);
+  const nach = ebenen.map((e) => fingerabdruck(e.o));
+  ebenen.forEach((e, i) => {
+    e.mod = modifikator.has(e.o);
+    e.steht = !e.mod && vor[i] === nach[i];
+  });
 
   // Wem gehoert jedes Objekt? Zugeordnet, nicht geraten.
   const flach = [];
@@ -215,7 +246,9 @@ const lauf = (stage, sekunden) => seite.evaluate(async ({ stage, sekunden }) => 
     liste: flach.length, aus, fxAktiv: sp.fxActive || 0, fxCap: sp.fxCap || 0,
     flaeche: flaeche / SCHIRM,
     ebenen: ebenen.sort((a, b) => (a.tiefe || 0) - (b.tiefe || 0))
-      .map((e) => `${/^[0-9a-f-]{30,}$/.test(e.was) ? '<erzeugt>' : e.was}(${e.deckt}%)`),
+      .map((e) => `${/^[0-9a-f-]{30,}$/.test(e.was) ? '<erzeugt>' : e.was}(${e.deckt}%${e.steht ? ', steht' : ''}${e.mod ? ', Modifikator' : ''})`),
+    stehende: ebenen.filter((e) => e.steht).length,
+    modEbenen: ebenen.filter((e) => e.mod).length,
     posten: Object.entries(posten).sort((a, b) => b[1][0] - a[1][0]).slice(0, 6)
       // Erzeugte Texturen tragen einen Zufallsnamen und waeren im Bericht
       // von Lauf zu Lauf verschieden — sie werden benannt, nicht gezeigt.
@@ -232,7 +265,19 @@ console.log('  und ohne Ausweichen. Es leben deshalb MEHR Gegner als im echten S
 console.log('  Bildzeiten sagt das hier NICHT — die Schrittweite ist gesetzt.\n');
 
 let gemessen = 0;
-for (const stage of [3, 106]) {
+// DREI SEKTOREN, NICHT ZWEI — und der dritte ist der schwerste.
+//
+// Bis v71 mass dieses Tor Sektor 3 (Stadt) und 106 (Lava). Was es NIE
+// gesehen hat, ist der Wettereffekt aus `src/modifier.js`: `eff === 2`
+// legt VIER bildfuellende Ebenen uebereinander (Dunkelung, Boe, Regen,
+// Schwaden), und die gibt es nur ueber Alpen und Gewitter. Ein Tor, das
+// zwei von vier Tueren prueft, meldet gruen ueber ein Haus (Regel 47).
+//
+//   Biom → Effekt:  city/station/biolum 1 · alps/thunder 2
+//                   desert/dune/lava 3 · snow/frost/jungle 4
+//
+// Sektor 61 ist Gewitter, also Effekt 2.
+for (const stage of [3, 61, 106]) {
   const r = await lauf(stage, SEKUNDEN);
   if (r.fehler) { M.ungemessen(`Sektor ${stage}: ${r.fehler}`); continue; }
   gemessen++;
@@ -242,7 +287,8 @@ for (const stage of [3, 106]) {
   console.log(`             aufgeraeumt ${r.trims}x   ·   hoechstens zwei Gegner: ${anteilOffen.toFixed(1)} % der Bilder`);
   console.log(`             ${r.zaehl.join(' · ')}`);
   console.log(`             bemalt ${r.flaeche.toFixed(2)} Bildschirme je Bild:  ${r.posten.join(' · ')}`);
-  console.log(`             bildfuellende Ebenen ${r.ebenen.length}:  ${r.ebenen.join(' → ')}`);
+  console.log(`             bildfuellende Ebenen ${r.ebenen.length} — ${r.stehende} stehen, ${r.modEbenen} vom Modifikator (im Rig eingefroren, nicht beurteilt)`);
+  console.log(`             ${r.ebenen.join(' → ')}`);
   const p = r.verlauf.map((v) => v[1]);
   const d = Math.floor(p.length / 3);
   const mitte = p.slice(d, d * 2), ende = p.slice(d * 2);
@@ -314,8 +360,23 @@ for (const stage of [3, 106]) {
   // kostet dasselbe, ob sie zu vier Prozent deckt oder zu hundert.
   if (r.flaeche > 14)
     M.befund(`Sektor ${stage}: es werden ${r.flaeche.toFixed(2)} Bildschirme je Bild bemalt (Budget 14). Groesste Posten: ${r.posten.slice(0, 4).join(' · ')}. Auf einem Telefon ist die bemalte Flaeche der teure Posten, nicht die Zahl der Objekte.`);
-  if (r.ebenen.length > 9)
-    M.befund(`Sektor ${stage}: ${r.ebenen.length} bildfuellende Ebenen liegen uebereinander (Budget 9): ${r.ebenen.join(' → ')}. Jede kostet einen vollen Bildschirm Ueberblendung, auch die, die zu vier Prozent deckt. Was sich innerhalb eines Sektors nicht aendert, gehoert gebacken.`);
+  // GEZAEHLT WIRD, WAS STEHT.
+  //
+  // Ein erster Anlauf setzte ein Budget auf ALLE bildfuellenden Ebenen.
+  // Sektor 61 (Gewitter) hat zehn, weil der Wettereffekt vier bewegte
+  // uebereinanderlegt — also musste das Budget auf zwoelf hoch, und
+  // damit war es stumpf: die Gegenprobe, die die gebackenen Farbebenen
+  // wieder trennt, lief glatt durch. Ein Budget, das den Fehler nicht
+  // mehr faengt, gegen den es gebaut wurde, ist keins (Regel 5).
+  //
+  // Die Grenze gilt deshalb den STEHENDEN Ebenen. Eine stehende
+  // bildfuellende Ebene ist immer backbar; eine bewegte ist eine
+  // gestalterische Entscheidung, die ein Tor nicht trifft.
+  // Zwei, nicht fuenf: beurteilt wird nur, was das Rig auch treibt, und
+  // das sind heute in jedem Sektor GENAU EINE stehende Ebene (der
+  // gebackene Farbstich). Wer die drei wieder trennt, steht bei drei.
+  if (r.stehende > 2)
+    M.befund(`Sektor ${stage}: ${r.stehende} bildfuellende Ebenen STEHEN uebereinander (Budget 2) — sie aendern sich in sechzig Bildern um kein Haar: ${r.ebenen.filter((e) => /steht/.test(e)).join(' → ')}. Jede kostet einen vollen Bildschirm Ueberblendung, auch die, die zu vier Prozent deckt. Was steht, gehoert einmal gebacken statt je Bild gemischt.`);
   console.log('');
 }
 

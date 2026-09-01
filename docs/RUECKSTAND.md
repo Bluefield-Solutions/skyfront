@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v71.
+Stand: v72.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -67,10 +67,17 @@ dasselbe, ob sie zu vier Prozent deckt oder zu hundert.
 | Sektor 3 | 8,30 → **6,31** | 7 → **5** |
 | Sektor 106 | 13,61 → **11,69** | 10 → **8** |
 
-Drei stehende Ebenen sind zu einer geworden (v71). **Offen bleibt Sektor
-106 mit acht Ebenen** — darunter zwei mit 55 % und 30 % Deckung, die
-vermutlich Wetter sind und sich bewegen, also nicht bakbar. Nachgesehen
-ist das noch nicht.
+Drei stehende Ebenen sind zu einer geworden (v71). **Nachgesehen (v72):**
+was in Sektor 106 und 61 noch übereinanderliegt, kommt aus
+`src/modifier.js` — Wetter und Stimmung, mit drei verschiedenen
+Mischmodi (Multiply, Add, Normal). Nicht zusammenzubacken, ohne den
+Effekt abzuschaffen.
+
+**Neu gemessen und vorher nie gesehen: Sektor 61 (Gewitter) trägt zehn
+bildfüllende Ebenen** — der schwerste Schirm im Spiel. Vier davon legt
+der Regeneffekt übereinander (Dunkelung, Böe, Regen, Schwaden). Ob ein
+Gewitter das wert ist, ist eine **gestalterische Frage** und keine, die
+ein Tor beantwortet. Es hält jetzt fest, dass es zehn sind.
 
 Was **keine** Hebel sind, ist gemessen und braucht keinen zweiten Anlauf:
 der fx-Deckel (170 → 45 ändert nichts, v68), das Aufräumen der Vorräte

@@ -449,6 +449,31 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+67. **Ein Rig treibt nur, was es treibt — der Rest ist eingefroren, nicht
+   ruhig.** Das Sektor-Rig taktet die Spielschleife von Hand. Der
+   Modifikator (`src/modifier.js`) taktet sich aber SELBST, ueber
+   `requestAnimationFrame`, und wird dabei nie aufgerufen. Seine
+   Wetterebenen standen deshalb im Messprotokoll als „steht" — sie stehen
+   nicht, sie werden nur nicht bewegt. Wer das als Befund meldet, meldet
+   einen Befund ueber sein eigenes Werkzeug. Sie sind an `sp.__skf` zu
+   erkennen, werden gezaehlt und ausdruecklich NICHT beurteilt.
+
+   Das war der vierte Messfehler derselben Runde, alle in derselben
+   Familie: etwas gemessen, das nicht das Gemeinte war. Mit Alpha
+   gewichtet (Wirkung statt Kosten), `fillAlpha` mit `alpha` verwechselt,
+   `alpha 0` mitgezaehlt (erfundene Kosten), und jetzt eingefrorene
+   Ebenen fuer ruhende gehalten. Jeder einzelne sah fuer sich plausibel
+   aus.
+
+68. **Ein Budget, das den Fehler nicht mehr faengt, gegen den es gebaut
+   wurde, ist keins.** Sektor 61 (Gewitter) traegt zehn bildfuellende
+   Ebenen, weil der Wettereffekt vier bewegte uebereinanderlegt. Um ihn
+   durchzulassen, war das Budget auf zwoelf gehoben — und damit lief die
+   Gegenprobe, die die gebackenen Farbebenen wieder trennt, glatt durch.
+   Die Grenze gilt jetzt den STEHENDEN Ebenen: eine stehende ist immer
+   backbar, eine bewegte ist eine gestalterische Entscheidung, die ein
+   Tor nicht trifft. Budget zwei, heute eins, nach dem Rueckbau drei.
+
 66. **Ein Instrument, das bei jeder Unterbrechung zurueckspringt, misst
    nicht den Vorgang, sondern die letzte Unterbrechung.** Die Messtafel
    setzte zurueck, sobald `scene.isActive()` einmal falsch war — und
