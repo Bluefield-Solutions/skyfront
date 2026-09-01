@@ -42,6 +42,8 @@
 
       J  Umbau    Auf-/Zuklappen und Kopieren kosten selbst ein Bild. Es
               wird getrennt gebucht, sonst misst "laengste" die Messung.
+    K  Ecke     Die Vier-Tipp-Ecke liegt auf Pause und Ton. Im Gefecht
+              darf sie nicht zaehlen, ausserhalb muss sie es.
 
   `--ohne-naht` nimmt `__SKF_MESSZEILE` weg und verlangt die Rueckgabe 2.
 */
@@ -347,12 +349,19 @@ console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
     { name: 'Grauzone         50/s bei 60 Hz', q: .5, fps: 50, takt: 60, soll: 'bleibt' },
     { name: '120 Hz, 111/s', q: .35, fps: 111, takt: 120, soll: 'hoch' },
     { name: '120 Hz, 80/s', q: 1, fps: 80, takt: 120, soll: 'runter' },
+    // UND DAS FALLEN BRAUCHT DIESELBE BREMSE WIE DAS STEIGEN.
+    // Gemessen auf dem Geraet, SEKTOR 1: 58,8 Bilder je Sekunde, 89 % der
+    // Bilder unter 17 ms — und trotzdem `Q 0.15`. Ein Ruckler von 90 ms
+    // hat gereicht: die Regel laeuft dreimal je Sekunde und schob den
+    // Regler ungebremst auf den Boden.
+    { name: 'kurzer Ruckler, eben erst gefallen', q: 1, fps: 30, takt: 60, b: 1000, I: 700, soll: 'bleibt' },
+    { name: 'anhaltend langsam, Bremse abgelaufen', q: 1, fps: 30, takt: 60, b: 2000, I: 700, soll: 'runter' },
   ];
   const r = await seite.evaluate((faelle) => {
     if (typeof window.__SKF_QREGEL !== 'function') return { fehler: '__SKF_QREGEL fehlt' };
     return {
       raus: faelle.map((f) => {
-        const e = window.__SKF_QREGEL(f.q, f.fps, f.takt, 100000, 0);
+        const e = window.__SKF_QREGEL(f.q, f.fps, f.takt, f.b == null ? 100000 : f.b, f.I == null ? 0 : f.I);
         return { name: f.name, soll: f.soll, vor: f.q, nach: e.q,
                  tat: e.q > f.q ? 'hoch' : e.q < f.q ? 'runter' : 'bleibt' };
       }),
@@ -413,6 +422,79 @@ console.log('\n  J  Bucht die Tafel ihre eigene Arbeit getrennt?');
     if (d.umbauten > 0 && !(d.max > 0))
       M.befund('es sind eigene Bilder gebucht, aber keins hat eine Dauer — dann ist die Buchung eine Zaehlung ohne Messung.');
     gemessen++;
+  }
+}
+
+// ---- K  Faengt die Vier-Tipp-Ecke die Spielknoepfe ab? ----------------
+//
+// DER ANLASS, woertlich vom Nutzer: „Der Pause Button ging gerade nicht."
+// GEMESSEN an 393 x 852: die Leinwand liegt bei y 115..814, die Ecke ist
+// 71 px gross — und darin liegen PAUSE (370, 138) und TON (335, 138).
+// Vier Mal auf Pause tippen schaltete die Messung um und setzte sie
+// zurueck. Die vier Tipps sind seit v62 nur der Notweg fuer den Fall,
+// dass die Spielszene nicht hochkommt; im Gefecht duerfen sie nicht
+// zaehlen.
+//
+// Geprueft wird BEIDES (Regel 13): im Gefecht darf sich nichts aendern,
+// im Menue muss sich etwas aendern. Sonst hiesse „nichts passiert"
+// womoeglich nur, dass die Tipps ueberhaupt nicht ankommen.
+console.log('\n  K  Faengt die Vier-Tipp-Ecke Pause und Ton ab?');
+{
+  const insGefecht = () => seite.evaluate(async () => {
+    const g = window.__game;
+    (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+    g.scene.start('Game', { stage: 1 });
+    for (let i = 0; i < 40; i++) {
+      await new Promise((f) => setTimeout(f, 200));
+      const s = (g.scene.scenes || []).find((x) => x.scene.key === 'Game' && x.scene.isActive());
+      if (!s) continue;
+      if (!s.stageStarted && typeof s.startStage === 'function') s.startStage();
+      if (s.player) return true;
+    }
+    return false;
+  });
+  if (!await insGefecht()) M.ungemessen('kommt fuer die Eckenprobe nicht ins Gefecht.');
+  else {
+    await seite.waitForTimeout(1500);
+    const ort = await seite.evaluate(() => {
+      const g = window.__game;
+      const sp = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
+      const lw = document.querySelector('canvas').getBoundingClientRect();
+      const kam = sp.cameras.main, W = kam.width / kam.zoom, H = kam.height / kam.zoom;
+      const auf = (p) => ({ x: Math.round(lw.left + p.x / W * lw.width), y: Math.round(lw.top + p.y / H * lw.height) });
+      const ecke = Math.max(56, Math.min(lw.width, lw.height) * 0.18);
+      const drin = (p) => p.x >= lw.right - ecke && p.y >= lw.top && p.y <= lw.top + ecke;
+      const namen = ['pauseBtn', 'mute', 'messBtn'].filter((k) => sp[k] && drin(auf(sp[k])));
+      return { pause: sp.pauseBtn ? auf(sp.pauseBtn) : null, ecke: Math.round(ecke), namen };
+    });
+    if (!ort.pause) M.ungemessen('der Pauseknopf ist nicht zu verorten.');
+    else {
+      const vierMal = async (p) => {
+        for (let i = 0; i < 4; i++) { await seite.mouse.click(p.x, p.y); await seite.waitForTimeout(150); }
+        await seite.waitForTimeout(600);
+        return seite.evaluate(() => window.__SKF_MESSAN());
+      };
+      const vor = await seite.evaluate(() => window.__SKF_MESSAN());
+      const nachSpiel = await vierMal(ort.pause);
+      console.log(`     im Gefecht     Pause bei (${ort.pause.x},${ort.pause.y}), Ecke ${ort.ecke} px, darin: ${ort.namen.join(', ') || '—'}`);
+      console.log(`                    Messung ${vor} → ${nachSpiel}`);
+      gemessen++;
+      if (nachSpiel !== vor)
+        M.befund(`vier Tipps auf den PAUSEKNOPF schalten die Messung um (${vor} → ${nachSpiel}). In der oberen rechten Ecke liegen ${ort.namen.join(' und ')} — wer dort pausiert, schaltet nach dem vierten Mal die Messtafel und wirft die laufende Messung weg.`);
+
+      // Und die Gegenrichtung: ausserhalb des Gefechts MUSS die Ecke wirken.
+      await seite.evaluate(() => {
+        const g = window.__game;
+        (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+        g.scene.start('Menu');
+      });
+      await seite.waitForTimeout(1500);
+      const vor2 = await seite.evaluate(() => window.__SKF_MESSAN());
+      const nachMenue = await vierMal(ort.pause);
+      console.log(`     im Menue       Messung ${vor2} → ${nachMenue}`);
+      if (nachMenue === vor2)
+        M.befund(`ausserhalb des Gefechts wirken die vier Tipps nicht mehr (${vor2} → ${nachMenue}). Dann ist der Notweg zu, und wenn die Spielszene nicht hochkommt, ist die Tafel gar nicht mehr zu erreichen.`);
+    }
   }
 }
 

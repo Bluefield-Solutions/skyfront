@@ -265,6 +265,70 @@ for (const z of ZUSTAENDE) {
   console.log('');
 }
 
+// ---- E  Sagen die drei Combo-Anzeigen dasselbe? -----------------------
+//
+// DER ANLASS, woertlich vom Nutzer: „Das mit den Combos macht keinen
+// Sinn." Und das stimmte — drei Anzeigen, drei Geschichten:
+//
+//   Kopfzeile   `COMBO 12   ×2.5`   Zahl = Abschuesse, ×2,5 = Faktor
+//   Meldung     `COMBO ×12`         dieselbe 12, aber mit einem × davor
+//   Leiste      combo % 10 / 10     fuellte auf ZEHN, der Faktor steigt
+//                                   aber alle VIER
+//
+// Die Meldung behauptete Faktor zwoelf, waehrend die Kopfzeile 2,5
+// sagte. Und die Leiste zeigte den Weg zu einer Marke, an der sich am
+// Faktor nichts aendert — ab 28 Abschuessen steht er still, die Leiste
+// fuellte weiter.
+//
+// Geprueft wird jetzt die RECHNUNG, aus der alle drei kommen. Eine
+// Anzeige laesst sich nicht rechnen, ihre Quelle schon (Regel 4).
+console.log('\n  E  Sagen die drei Combo-Anzeigen dasselbe?');
+{
+  const faelle = [
+    { c: 0, faktor: 1, anteil: 0, max: false },
+    { c: 3, faktor: 1, anteil: .75, max: false },
+    { c: 4, faktor: 1.5, anteil: 0, max: false },
+    { c: 10, faktor: 2, anteil: .5, max: false },
+    { c: 12, faktor: 2.5, anteil: 0, max: false },
+    { c: 27, faktor: 4, anteil: .75, max: false },
+    { c: 28, faktor: 4.5, anteil: 1, max: true },
+    { c: 60, faktor: 4.5, anteil: 1, max: true },
+  ];
+  const r = await seite.evaluate((faelle) => {
+    if (typeof window.__SKF_COMBO !== 'function') return { fehler: '__SKF_COMBO fehlt' };
+    return { raus: faelle.map((f) => ({ ...f, ist: window.__SKF_COMBO(f.c) })) };
+  }, faelle);
+  if (r.fehler) M.ungemessen(`Combo: ${r.fehler}`);
+  else {
+    gemessen++;
+    for (const f of r.raus) {
+      const i = f.ist;
+      console.log(`     ${String(f.c).padStart(2)} Abschuesse → ×${i.faktor.toFixed(1)}   Leiste ${(i.anteil * 100).toFixed(0)} %${i.max ? '   MAX' : ''}`);
+      if (Math.abs(i.faktor - f.faktor) > 1e-9)
+        M.befund(`Combo ${f.c}: Faktor ${i.faktor}, erwartet ${f.faktor}.`);
+      if (Math.abs(i.anteil - f.anteil) > 1e-9)
+        M.befund(`Combo ${f.c}: die Leiste steht bei ${(i.anteil * 100).toFixed(0)} %, erwartet ${(f.anteil * 100).toFixed(0)} %. Eine Leiste, die auf eine andere Marke fuellt als die, an der der Faktor steigt, zeigt einen Weg zu nichts.`);
+      if (i.max !== f.max)
+        M.befund(`Combo ${f.c}: Anschlag ${i.max}, erwartet ${f.max}. Ein Balken, der weiterlaeuft, obwohl der Faktor steht, verspricht etwas, das es nicht gibt.`);
+    }
+    // Und die Reihenfolge muss stimmen: der Faktor darf nie fallen, und
+    // die Leiste muss genau dann bei null anfangen, wenn er gestiegen ist.
+    const kette = await seite.evaluate(() => {
+      const raus = [];
+      let vor = null;
+      for (let c = 0; c <= 40; c++) {
+        const w = window.__SKF_COMBO(c);
+        if (vor && w.faktor < vor.faktor) raus.push(`Faktor faellt bei ${c}: ${vor.faktor} → ${w.faktor}`);
+        if (vor && w.faktor > vor.faktor && w.anteil !== 0 && !w.max) raus.push(`bei ${c} steigt der Faktor, die Leiste steht aber bei ${w.anteil}`);
+        vor = w;
+      }
+      return raus;
+    });
+    for (const k of kette) M.befund(`Combo: ${k}`);
+  }
+  console.log('');
+}
+
 await browser.close();
 server.close();
 // KEIN abbruch() hier. Der frueher Abbruch haette verschluckt, was schon

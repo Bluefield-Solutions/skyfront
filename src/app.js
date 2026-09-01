@@ -54421,7 +54421,7 @@ return new ` + this.key + `();
     // findet. Sie zaehlt mit den Nachtraegen im Auditbericht — wer einen
     // Nachtrag schreibt, hebt sie. `tools/version.mjs` prueft beides
     // gegeneinander.
-    SKF_VERSION = "v68",
+    SKF_VERSION = "v69",
     UMRISS_PUNKTE = 1.6,     // Saumbreite in Anzeigepunkten
     UMRISS_DECK = .62,       // gerechnet: darunter traegt er auf Frost nicht
     LEUCHTE_PUNKTE = 2.4,    // Mindestradius der Kennleuchte in Anzeigepunkten
@@ -62368,10 +62368,45 @@ Geschütztürme lohnen sich  →  Beute & XP`, {
   //
   // Runter geht es weiter schneller als hoch (0,12 gegen 0,05): ein
   // Einbruch muss sofort weichen, die Rueckkehr darf sich Zeit lassen.
+  //
+  // ABER DAS FALLEN BRAUCHT DIESELBE BREMSE. Bis v68 war nur das Steigen
+  // getaktet (alle 900 ms), das Fallen nicht: die Regel laeuft alle
+  // 20 Bilder, also dreimal je Sekunde, und schob den Regler in 2,7
+  // Sekunden von 1,00 auf den Boden. Gemessen auf dem Geraet des
+  // Nutzers, SEKTOR 1: 58,8 Bilder je Sekunde, 89 % der Bilder unter
+  // 17 ms — und trotzdem `Q 0.15`. EIN Ruckler von 90 ms bei 7,9 s hat
+  // gereicht; zurueck haette es 17 Schritte zu je 0,9 s gebraucht, also
+  // fuenfzehn Sekunden Ruhe, die ein Sektor nicht hat.
+  //
+  // Jetzt faellt er hoechstens alle 600 ms. Von oben bis zum Boden sind
+  // das 4,8 Sekunden ANHALTEND zu langsamer Bilder — ein einzelner
+  // Ruckler kommt dagegen nicht mehr an. Runter bleibt schneller als
+  // hoch (0,12/600 ms gegen 0,05/900 ms), nur nicht mehr ungebremst.
   function qRegel(T, R, E, b, I) {
     const G = E * .78,
       v = E * .9;
-    return R < G ? { q: Math.max(.15, T - .12), qUpAt: I } : R > v && b - I > 900 ? { q: Math.min(1, T + .05), qUpAt: b } : { q: T, qUpAt: I }
+    return R < G ? b - I > 600 ? { q: Math.max(.15, T - .12), qUpAt: b } : { q: T, qUpAt: I } : R > v && b - I > 900 ? { q: Math.min(1, T + .05), qUpAt: b } : { q: T, qUpAt: I }
+  }
+
+  // DIE COMBO, an EINER Stelle gerechnet statt an dreien angezeigt.
+  //
+  // Bis v68 erzaehlten drei Anzeigen drei verschiedene Geschichten:
+  //   Kopfzeile   `COMBO 12   ×2.5`   Zahl = Abschuesse, ×2,5 = Faktor
+  //   Meldung     `COMBO ×12`         dieselbe 12, aber mit einem × davor
+  //   Leiste      combo % 10 / 10     fuellt auf ZEHN, der Faktor steigt
+  //                                   aber alle VIER
+  // Die Meldung behauptete also Faktor 12, waehrend die Kopfzeile 2,5
+  // sagte, und die Leiste zeigte einen Weg zu einer Marke, an der sich
+  // nichts aendert. Ab 28 Abschuessen steht der Faktor still, die Leiste
+  // fuellte weiter.
+  //
+  // Jetzt kommt alles aus dieser einen Funktion: die Leiste zeigt den Weg
+  // zum NAECHSTEN Faktorschritt, und wenn nichts mehr kommt, sagt sie das.
+  function comboWerte(T) {
+    const R = Math.floor(T / 4),
+      E = R >= 7,
+      b = 1 + Math.min(R, 7) * .5;
+    return { faktor: b, stufe: R, max: E, anteil: E ? 1 : T % 4 / 4, bisNaechste: E ? 0 : 4 - T % 4 }
   }
 
   function kopfFlaeche(T, R, E, b, I) {
@@ -64920,7 +64955,10 @@ ${G}`, {
           G = yt.COMBO_COLS[Math.min(I - 1, yt.COMBO_COLS.length - 1)];
         this.floatText(E, b - 24, `COMBO ${R}!`, G);
         const v = 26 + Math.min(I, 5) * 4,
-          x = this.add.text(J / 2, rt * .33, `COMBO ×${R}`, {
+          // `COMBO ×12` hiess: Faktor zwoelf. Der Faktor war 2,5, und die
+          // Kopfzeile sagte das auch. Hier steht jetzt die Zahl, die
+          // gemeint ist — und daneben der Faktor, der wirklich gilt.
+          x = this.add.text(J / 2, rt * .33, `COMBO ${R}   ×${comboWerte(R).faktor.toFixed(1)}`, {
             fontFamily: "sans-serif",
             fontSize: `${v}px`,
             color: G,
@@ -66350,7 +66388,7 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
         })
       }
       comboMult() {
-        return 1 + Math.min(Math.floor(this.combo / 4) * .5, 3.5)
+        return comboWerte(this.combo).faktor
       }
       rankInfo() {
         return pilotenRang()
@@ -66429,14 +66467,19 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
       updateHud() {
         this.scoreText.setText(`${this.score}`), this.pwrText.setText(this.feuerkraftWirkung());
         const R = !!(this.bossBar && this.boss && this.boss.active);
-        if (this.comboText && this.comboText.setText(!R && this.combo >= 2 ? `COMBO ${this.combo}   ×${this.comboMult().toFixed(1)}` : ""), this.comboBar && (this.comboBar.clear(), !R && this.combo >= 2)) {
-          const b = this.combo % 10 / 10,
+        if (this.comboText && this.comboText.setText(!R && this.combo >= 2 ? `COMBO ${this.combo}   ×${this.comboMult().toFixed(1)}${comboWerte(this.combo).max?" MAX":""}` : ""), this.comboBar && (this.comboBar.clear(), !R && this.combo >= 2)) {
+          // Die Leiste zeigt den Weg zum naechsten FAKTORSCHRITT — bis v68
+          // fuellte sie auf die Zehnermarke, an der sich am Faktor nichts
+          // aendert. Steht der Faktor am Anschlag, ist sie voll und
+          // bleibt es; ein Balken, der weiterlaeuft, ohne dass etwas
+          // kommt, verspricht etwas, das es nicht gibt.
+          const w = comboWerte(this.combo),
+            b = w.anteil,
             I = 132,
             G = J - 16 - 132,
             v = 122,
-            x = Math.floor(this.combo / 10),
             t = [7319807, 12579071, 10420160, 16769658, 16751162, 16739024],
-            l = t[Math.min(x, t.length - 1)];
+            l = t[Math.min(w.stufe, t.length - 1)];
           this.comboBar.fillStyle(1318956, .85).fillRoundedRect(G - 1, v - 1, I + 2, 7, 3), this.comboBar.fillStyle(l, 1).fillRoundedRect(G, v, Math.max(2, I * b), 5, 2.5)
         }
         this.resText && this.resText.setText(`⚙ ${this.runParts}   ◆ ${this.runCores}`), this.bombText.setText(`x${this.player?this.player.bombs:0}`), this.hud.clear(), this.hud.fillStyle(528409, .72).fillRoundedRect(8, 8, 180, 144, 9), this.hud.fillStyle(2772074, .75).fillRect(14, 59, 168, 1).fillRect(14, 95, 168, 1), kopfFlaeche(KOPFZEILE.tafel, 8, 8, 180, 144), this.zeichneKraftleiter();
@@ -66986,6 +67029,8 @@ fx ${this.fxActive}/${this.fxPool.length}  tx ${this.txtActive}/${this.txtPool.l
     window.__SKF_LEISTE = { zeigt: zeigtLeiste, ab: LEISTE_AB, hoch: LEISTE_HOCH };
     window.__SKF_KAPITEL = se, window.__SKF_BOSSDECKEL = bossStufeGedeckelt, window.__SKF_BOSSVORRAT = bossVorratHalten, window.__SKF_GEGNERWERTE = _t;
     window.__SKF_QREGEL = qRegel;
+    // Damit ein Tor die drei Anzeigen gegen EINE Rechnung pruefen kann.
+    window.__SKF_COMBO = comboWerte;
     window.__SKF_KOPFZEILE = KOPFZEILE;
     window.__SKF_STUFEN = Ut, window.__SKF_GEGNER = Ke, window.__SKF_PWR = {
       gewicht: PWR_GEWICHT,

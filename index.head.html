@@ -357,6 +357,24 @@
         // Oberkante bei y = 76, die Knopfreihe des Spiels bei y = 96 — die
         // alte Flaeche endete bei 56 und lag damit vollstaendig im schwarzen
         // Rand. Wer in die sichtbare obere rechte Ecke tippte, traf nie.
+        // IM GEFECHT ZAEHLEN DIE VIER TIPPS NICHT.
+        //
+        // Gemessen an 393 x 852: die Leinwand liegt bei y 115..814, die
+        // Ecke ist 71 px gross — und darin liegen PAUSE (370, 138) und TON
+        // (335, 138). Vier Mal auf Pause tippen schaltete damit die Messung
+        // aus, beziehungsweise an, und setzte sie zurueck. Rueckmeldung des
+        // Nutzers: „Der Pause Button ging gerade nicht."
+        //
+        // Die vier Tipps sind seit v62 nur noch der NOTWEG fuer den Fall,
+        // dass die Spielszene gar nicht hochkommt — den sichtbaren Weg gibt
+        // es im Gefecht als 📊-Knopf. Genau dann laeuft die Szene nicht,
+        // also kostet diese Sperre nichts und nimmt der Ecke ihren
+        // Doppelsinn.
+        try {
+          var sp = window.__game && window.__game.scene && window.__game.scene.getScene
+                   ? window.__game.scene.getScene('Game') : null;
+          if (sp && sp.scene && sp.scene.isActive && sp.scene.isActive()) { tipps = 0; return; }
+        } catch (e) {}
         var lw = document.querySelector('canvas');
         var k = lw ? lw.getBoundingClientRect() : { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
         var ecke = Math.max(56, Math.min(k.right - k.left, k.bottom - k.top) * 0.18);

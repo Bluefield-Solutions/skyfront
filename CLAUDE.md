@@ -449,6 +449,37 @@ Jede hat mindestens eine Runde gekostet.
    Aufsammler, fx, Texte) und zaehlt die Aufraeumvorgaenge mit. Die
    naechste Kopierzeile beantwortet die Frage, statt sie zu verlaengern.
 
+63. **Was in beide Richtungen wirken soll, braucht in beiden Richtungen
+   eine Bremse.** Der Effekt-Regler war getaktet — aber nur beim STEIGEN
+   (alle 900 ms um 0,05). Das FALLEN lief ungebremst mit der Regel selbst,
+   also dreimal je Sekunde um 0,12: von 1,00 auf den Boden in 2,7
+   Sekunden. Gemessen auf dem Geraet, **Sektor 1**: 58,8 Bilder je
+   Sekunde, 89 % der Bilder unter 17 ms — und trotzdem `Q 0.15`. EIN
+   Ruckler von 90 ms hat gereicht, und zurueck haette es fuenfzehn
+   Sekunden Ruhe gebraucht. Wer eine Groesse nach oben taktet und nach
+   unten nicht, hat keinen Regler gebaut, sondern eine Rutsche.
+
+64. **Ein zweiter Weg zu derselben Sache wird zur Falle, sobald der erste
+   sichtbar ist.** Die vier Tipps in die obere rechte Ecke waren der
+   Notweg zur Messtafel, bevor es den 📊-Knopf gab. GEMESSEN an
+   393 x 852: die Ecke ist 71 px gross, und darin liegen PAUSE (370, 138)
+   und TON (335, 138). Vier Mal pausieren schaltete damit die Messung um
+   und warf die laufende Messung weg. Rueckmeldung des Nutzers: „Der
+   Pause Button ging gerade nicht." Ein Notweg gilt fuer den Fall, fuer
+   den er gemacht ist — hier: die Spielszene kommt nicht hoch. Genau dann
+   laeuft sie nicht, also kostet die Sperre nichts.
+
+65. **Eine Zahl, die an drei Stellen ANGEZEIGT wird, muss an EINER Stelle
+   gerechnet werden.** Die Combo hatte drei Anzeigen und drei
+   Geschichten: die Kopfzeile `COMBO 12 ×2.5`, die Meldung `COMBO ×12`
+   (dieselbe 12, aber mit einem Kreuz davor — also Faktor zwoelf statt
+   2,5), und eine Leiste, die auf die ZEHNERMARKE fuellte, waehrend der
+   Faktor alle VIER steigt und ab 28 stillsteht. Rueckmeldung des
+   Nutzers: „Das mit den Combos macht keinen Sinn." Er hatte recht, und
+   kein Tor hatte es je gesehen, weil jede Anzeige fuer sich richtig
+   aussah. Jetzt kommt alles aus `comboWerte()`, und das Kopfzeilentor
+   prueft die Rechnung an acht Faellen.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

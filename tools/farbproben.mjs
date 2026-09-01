@@ -148,6 +148,25 @@ const PROBEN = [
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
     true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+  // DAS FALLEN DES Q-REGLERS WIEDER UNGEBREMST. Genau so stand es bis
+  // v68: die Regel laeuft dreimal je Sekunde, ein Ruckler von 90 ms schob
+  // den Regler in 2,7 Sekunden auf den Boden. Gemessen auf dem Geraet,
+  // Sektor 1: 58,8 Bilder je Sekunde und trotzdem Q 0,15.
+  ['Q-Regler faellt wieder ungebremst', '✗',
+    ['return R < G ? b - I > 600 ? { q: Math.max(.15, T - .12), qUpAt: b } : { q: T, qUpAt: I } : R > v',
+     'return R < G ? { q: Math.max(.15, T - .12), qUpAt: I } : R > v'],
+    true, 'messtafel', 'kurzer Ruckler'],
+  // DIE VIER-TIPP-ECKE WIEDER AUCH IM GEFECHT. Dann liegt sie erneut auf
+  // Pause und Ton: vier Mal pausieren schaltet die Messung um.
+  ['Vier-Tipp-Ecke zaehlt wieder im Gefecht', '✗',
+    ['          if (sp && sp.scene && sp.scene.isActive && sp.scene.isActive()) { tipps = 0; return; }\n', ''],
+    true, 'messtafel', 'PAUSEKNOPF', HUELLE],
+  // DIE COMBO-LEISTE WIEDER AUF DIE ZEHNERMARKE. Dann zeigt sie den Weg
+  // zu einer Stelle, an der sich am Faktor nichts aendert.
+  ['Combo-Leiste wieder auf die Zehnermarke', '✗',
+    ['return { faktor: b, stufe: R, max: E, anteil: E ? 1 : T % 4 / 4, bisNaechste: E ? 0 : 4 - T % 4 }',
+     'return { faktor: b, stufe: R, max: E, anteil: T % 10 / 10, bisNaechste: E ? 0 : 4 - T % 4 }'],
+    true, 'kopf', 'die Leiste steht bei'],
   // DREI BILDFUELLENDE EBENEN OBENDRAUF. Genau die Sorte Posten, die die
   // bemalte Flaeche traegt: in Sektor 3 bemalen sieben Rechtecke 1,86
   // Bildschirme — mehr als alles andere zusammen. Wer noch drei dazulegt,
@@ -366,9 +385,22 @@ const PROBEN = [
   // Hintergrundbild: "bg_lava_07" kommt genau einmal vor, "boss: 2," allein
   // kaeme 39 Mal. Ohne den Anker waere der Eingriff nicht angekommen, und
   // ein nicht angekommener Eingriff sieht aus wie ein bestandenes Tor.
-  ['Kapitel XI wiederholt Kapitel XII Zeichen fuer Zeichen', '✗', [
-    'bg: "bg_lava_07",\n      sky: 3805702,\n      skyAlpha: .14,\n      cloud: .15,\n      boss: 2,',
-    'bg: "bg_lava_07",\n      sky: 3805702,\n      skyAlpha: .14,\n      cloud: .15,\n      boss: 3,'],
+  // DIESE PROBE WAR VERROTTET UND HAT ES SELBST GEMELDET (v69).
+  //
+  // Sie hing an `boss: 2` in Lavaplanet 7 — dort steht heute `boss: 4`.
+  // Der Eingriff kam nicht mehr an, und das Werkzeug sagte genau das:
+  // „Eingriff NICHT ANGEKOMMEN — Stelle 0x gefunden". Ohne diese Prüfung
+  // hätte die Probe seit unbekannt vielen Runden gegrünt, ohne je etwas
+  // zu tun (Regel 3).
+  //
+  // Der neue Eingriff hängt nicht mehr an einer Zahl, die sich beim
+  // Balancieren bewegt, sondern an der Kapitelgrenze: bekommt XII
+  // denselben Start wie XI, decken beide dieselben zehn Sektoren ab und
+  // tragen zwangsläufig dieselbe Bossreihe. Ein Zeichen, und es ist
+  // zugleich ein Fehler, den es wirklich geben könnte.
+  ['Kapitel XII beginnt beim selben Sektor wie XI', '✗', [
+    'roman: "XII",\n      start: 111,',
+    'roman: "XII",\n      start: 101,'],
     true, 'zeit', 'wiederholen die Bossreihe'],
   // Und die andere Haelfte: das letzte Kapitel schwaecher als das vorletzte.
   ['letztes Kapitel faellt hinter das vorletzte zurueck', '✗', [
