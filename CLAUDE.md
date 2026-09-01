@@ -522,6 +522,32 @@ Jede hat mindestens eine Runde gekostet.
    aussah. Jetzt kommt alles aus `comboWerte()`, und das Kopfzeilentor
    prueft die Rechnung an acht Faellen.
 
+66. **Ausliefern und ankommen sind zwei Dinge, und nur eines davon war
+   geprueft.** Rueckmeldung des Nutzers zu v73: „Ich habe die App jetzt
+   mehrfach geschlossen, weggeschoben und gestartet, aber es steht immer
+   V72 unten." Zwei Ursachen, und die zweite ist der Fehler:
+
+   Der Dienst-Arbeiter legte seine Huelle mit `cache.addAll(['./', …])`
+   ab. `addAll` fragt durch den Zwischenspeicher des BROWSERS, und
+   GitHub Pages liefert HTML mit `max-age=600`. Der neue Arbeiter legte
+   damit die ALTE Seite unter der NEUEN Marke ab — und weil die Marke
+   stimmte, wurde sie nie wieder erneuert. Das Geraet blieb stehen, bis
+   jemand den Speicher von Hand loeschte.
+
+   Vierzehn Fassungen lang stand in dieser Datei „die Web-App
+   aktualisiert sich danach von selbst". Geprueft war davon genau ein
+   Teil: dass sich EIN Arbeiter anmeldet. Ob je ein ZWEITER durchkommt,
+   hat kein Tor je gemessen — und das ist der Weg, auf dem eine Lieferung
+   das Geraet erreicht.
+
+   Das Auslieferungstor misst es jetzt am echten Weg: die alte Fassung
+   ist installiert, die neue liegt auf dem Server, und gezaehlt wird, wie
+   oft man starten muss. Der Testserver sendet dafuer `max-age=600` wie
+   GitHub Pages — ohne diese Zeile koennte die Probe den Fehler gar nicht
+   sehen. Gemessen: mit `addAll` nach VIER Starten nicht da, mit
+   `fetch(pfad, { cache: 'reload' })` nach ZWEI. Zusage sind zwei: der
+   erste Start holt den neuen Arbeiter, der zweite wird von ihm bedient.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert
@@ -837,4 +863,7 @@ ohne Vermutung.
   einer technisch und einer grafisch.** Grafik ist ihm wichtig.
 - Getestet wird auf dem **iPhone hochkant**, 390 px breit. Das ist das
   Zielgeraet, nicht der Schreibtisch.
-- Gepusht wird auf `main`; die Web-App aktualisiert sich danach von selbst.
+- Gepusht wird auf `main`. Die Web-App holt sich die neue Fassung dann in
+  ZWEI Starts: der erste holt den neuen Dienst-Arbeiter, der zweite wird
+  von ihm bedient. Das ist keine Behauptung mehr, sondern eine Zahl aus
+  dem Auslieferungstor (siehe Regel 66).

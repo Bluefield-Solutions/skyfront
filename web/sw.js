@@ -25,8 +25,31 @@ const BILDER = __BILDER__;
 // werden: ein <audio>-Element fragt in Bereichen (Range), ein <img> nicht.
 const MUSIK = __MUSIK__;
 
+// Die Huelle ablegen — und zwar am Zwischenspeicher des Browsers VORBEI.
+//
+// `addAll` fragt durch den Zwischenspeicher. GitHub Pages liefert HTML mit
+// `Cache-Control: max-age=600`. Der neue Arbeiter legt dann die ALTE Seite
+// unter der NEUEN Marke ab — und weil die Marke stimmt, wird sie nie wieder
+// erneuert. Das Geraet bleibt auf der alten Fassung stehen, bis jemand den
+// Speicher von Hand loescht.
+//
+// Gemessen im Auslieferungstor gegen einen Server mit max-age=600:
+// mit `addAll` kam die neue Fassung nach VIER Starten nicht an, mit
+// `cache: 'reload'` nach zwei. Das ist der ganze Unterschied.
+//
+// Schlaegt einer der drei fehl, wird gar nicht installiert: dann bedient
+// weiter der alte Arbeiter. Eine halb abgelegte Huelle waere schlimmer —
+// sie wuerde ohne Netz eine kaputte Seite zeigen statt der alten heilen.
+async function huelleLegen(c) {
+  await Promise.all(VORRAT.map(async pfad => {
+    const a = await fetch(pfad, { cache: 'reload' });
+    if (!a || a.status !== 200) throw new Error('Huelle unvollstaendig: ' + pfad);
+    await c.put(pfad, a);
+  }));
+}
+
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(MARKE).then(c => c.addAll(VORRAT)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(MARKE).then(huelleLegen).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {

@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v73.
+Stand: v74.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -143,6 +143,8 @@ Damit niemand zweimal dasselbe aufmacht — alles im Audit belegt:
 | Anzeigeliste: kein Leck, Zusammensetzung bekannt | v67 |
 | Ein Sektor rechnet sich in vier Sekunden durch (`npm run sektor`) | v67 |
 | B9: stille Vorratsfehler gezählt, Gegner werden verschoben statt verworfen | v71 |
+| Messung ist ein Schalter, kein Aufklapper | v73 |
+| **Eine neue Fassung kam auf dem Gerät nie an** — der Dienst-Arbeiter legte die alte Seite unter der neuen Marke ab (`addAll` durch den Browser-Zwischenspeicher). Gemessen: vorher nach vier Starten nicht da, jetzt nach zwei | v74 |
 
 ---
 

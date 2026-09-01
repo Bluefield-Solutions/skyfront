@@ -172,12 +172,23 @@ catch { M.ungemessen('Playwright nicht gefunden — im Browser nichts gemessen.'
 const TYP = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json',
   '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.webp': 'image/webp',
   '.jpg': 'image/jpeg', '.gif': 'image/gif', '.mp3': 'audio/mpeg' };
+// Was der Server STATT der Datei ausliefert. Bleibt leer, ausser waehrend
+// der Fassungsprobe ganz unten — dort liegt hier die neue Fassung.
+const ERSATZ = new Map();
+
+// GitHub Pages liefert HTML mit `Cache-Control: max-age=600`. Ohne diese
+// Zeile misst die Fassungsprobe gegen einen Server, der jede Datei frisch
+// herausgibt — und dann kann sie den Fehler, den sie sucht, gar nicht
+// sehen. Der Zwischenspeicher des Browsers IST hier der Messgegenstand.
+const HTTP_SPEICHER = 600;
+
 const server = createServer((anfrage, antwort) => {
   let pfad = decodeURIComponent(anfrage.url.split('?')[0]);
   if (pfad === '/') pfad = '/index.html';
   const datei = join(AUS, normalize(pfad).replace(/^(\.\.[/\\])+/, ''));
-  if (!existsSync(datei) || statSync(datei).isDirectory()) { antwort.writeHead(404).end(); return; }
-  const roh = readFileSync(datei);
+  const ersatz = ERSATZ.get(pfad);
+  if (ersatz === undefined && (!existsSync(datei) || statSync(datei).isDirectory())) { antwort.writeHead(404).end(); return; }
+  const roh = ersatz === undefined ? readFileSync(datei) : Buffer.from(ersatz);
   const typ = TYP[extname(datei)] || 'application/octet-stream';
   const bereich = anfrage.headers.range;
   // Auch der Server muss Bereiche koennen, sonst misst der Bereichsabruf
@@ -193,7 +204,10 @@ const server = createServer((anfrage, antwort) => {
     }).end(roh.slice(von, bis + 1));
     return;
   }
-  antwort.writeHead(200, { 'Content-Type': typ, 'Content-Length': roh.length, 'Accept-Ranges': 'bytes' }).end(roh);
+  antwort.writeHead(200, {
+    'Content-Type': typ, 'Content-Length': roh.length, 'Accept-Ranges': 'bytes',
+    'Cache-Control': `max-age=${HTTP_SPEICHER}`,
+  }).end(roh);
 });
 await new Promise((f) => server.listen(0, '127.0.0.1', f));
 const adresse = `http://127.0.0.1:${server.address().port}/`;
@@ -207,6 +221,8 @@ seite.on('pageerror', (e) => fehler.push(String(e)));
 seite.on('console', (m) => { if (m.type() === 'error') fehler.push(m.text()); });
 
 let hoch = false;
+// Ausserhalb von `if (hoch)`, weil die Fassungsprobe ganz unten daran haengt.
+let arbeiter = null;
 try {
   await seite.goto(adresse);
   await seite.waitForFunction(() => window.__game && window.__game.scene, null, { timeout: 90000 });
@@ -250,7 +266,7 @@ if (hoch) {
   }
 
   // Der Dienst-Arbeiter, und an ihm der Bereichsabruf.
-  const arbeiter = await seite.evaluate(async () => {
+  arbeiter = await seite.evaluate(async () => {
     if (!navigator.serviceWorker) return { da: false };
     const reg = await navigator.serviceWorker.ready.catch(() => null);
     if (!reg) return { da: false };
@@ -271,6 +287,59 @@ if (hoch) {
     console.log(`    Bereichsabruf       ${arbeiter.status} · ${arbeiter.bytes} Bytes · ${arbeiter.spanne}`);
     if (arbeiter.status !== 206) M.befund(`der Bereichsabruf aus dem Speicher gibt ${arbeiter.status} statt 206 — Safari spielt die Musik dann nicht.`);
     if (arbeiter.bytes !== 1000) M.befund(`der Bereichsabruf gibt ${arbeiter.bytes} Bytes statt der verlangten 1000.`);
+  }
+}
+
+// ---- Kommt eine neue Fassung ueberhaupt an? --------------------------------
+//
+// DER FALL: auf dem Telefon liegt die abgelegte App, auf dem Server liegt
+// seit einer Minute eine neue Fassung. Wie oft muss man starten, bis man
+// sie sieht?
+//
+// Bis hierher hat dieses Tor nur geprueft, dass sich EIN Arbeiter anmeldet.
+// Ob je ein ZWEITER durchkommt, hat kein Tor gemessen — und genau das ist
+// der Weg, auf dem eine Lieferung das Geraet erreicht. Ein Spiel, das
+// ausgeliefert wird und nicht ankommt, ist nicht ausgeliefert.
+//
+// ZWEI Starts sind die Zusage: der erste holt den neuen Arbeiter, der
+// zweite wird von ihm bedient. Drei sind ein Befund.
+const STARTS_MAX = 2;
+if (hoch && arbeiter && arbeiter.fuehrt) {
+  const KENNZEICHEN = 'SKF-FASSUNGSPROBE';
+  const marke2 = marke === 'deadbeef' ? 'cafebabe' : 'deadbeef';
+  // Eine Auslieferung veraendert BEIDES: die Seite und die Marke des
+  // Arbeiters. Nur die Seite zu tauschen waere keine Auslieferung — dann
+  // gaebe es keinen Anlass, den Arbeiter zu erneuern, und die Probe
+  // wuerde eine Selbstverstaendlichkeit messen.
+  ERSATZ.set('/index.html', html.replace('<title>', `<title>${KENNZEICHEN} `));
+  ERSATZ.set('/sw.js', sw.replaceAll(`skyfront-${marke}`, `skyfront-${marke2}`));
+
+  // Kam der Eingriff an? Ein nicht angekommener Eingriff sieht aus wie eine
+  // bestandene Probe.
+  const geliefert = await seite.evaluate(async () => {
+    const a = await fetch('./sw.js', { cache: 'no-store' });
+    return a.text();
+  });
+  if (!geliefert.includes(`skyfront-${marke2}`)) {
+    M.ungemessen('die neue Fassung liegt nicht auf dem Server — Fassungsprobe nicht gemessen.');
+  } else {
+    let starts = 0, angekommen = false;
+    while (starts < 4 && !angekommen) {
+      starts++;
+      // Der echte Weg, nicht der bequeme: die Seite wird neu geladen, und
+      // was danach passiert, macht ihr eigenes Anmeldeskript.
+      try { await seite.goto(adresse, { waitUntil: 'load', timeout: 60000 }); }
+      catch { /* das Spiel laedt laenger als der Titel — der steht schon */ }
+      await new Promise((f) => setTimeout(f, 4000));
+      angekommen = (await seite.title()).includes(KENNZEICHEN);
+    }
+    console.log(`\n    Neue Fassung        ${angekommen ? `nach ${starts} Start(en) da` : 'nach 4 Starten NICHT da'}   (Zusage: ${STARTS_MAX})`);
+    if (!angekommen) {
+      M.befund('eine neue Fassung erreicht die abgelegte App auch nach vier Starten nicht — '
+        + 'die Auslieferung landet auf der Seite und nie auf dem Geraet.');
+    } else if (starts > STARTS_MAX) {
+      M.befund(`eine neue Fassung braucht ${starts} Starts statt ${STARTS_MAX}, bis sie auf dem Geraet ankommt.`);
+    }
   }
 }
 
