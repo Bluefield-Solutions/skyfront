@@ -548,6 +548,40 @@ Jede hat mindestens eine Runde gekostet.
    `fetch(pfad, { cache: 'reload' })` nach ZWEI. Zusage sind zwei: der
    erste Start holt den neuen Arbeiter, der zweite wird von ihm bedient.
 
+67. **Eine Gegenprobe haengt an einer Stelle in der Quelle — und Stellen
+   wandern.** Dreimal in sechs Fassungen ist eine Probe verrottet: ihr
+   Eingriff traf nicht mehr, wo er sitzen sollte, und sie belegte seither
+   nichts. v69 (`boss: 2` → 4), v73 (`boss: 3` → 4), v75
+   (`this.endeKnoepfe = [` traf ab v56 ZWEI Stellen).
+
+   Der dritte Fall ist der lehrreiche: die zweite Fundstelle entstand als
+   KORREKTUR eines Fehlers, den eine Nachbarprobe bewacht. Eine
+   Verbesserung hat eine Gegenprobe erschlagen — und beide sahen gruen aus.
+
+   Die Pruefung dagegen gab es die ganze Zeit. Sie stand nur am falschen
+   Ort: ohne `--alle` wird jede Probe mit Neubau uebersprungen, BEVOR ihr
+   Anker geprueft wird. Ausgerechnet die Pruefung, die Drift findet, war an
+   den Lauf gekettet, der fuenfzig Minuten dauert und im Alltag nicht
+   stattfindet. Jetzt ist sie das 27. Tor und kostet 0,16 s.
+
+   **Wer einen Anker waehlt, waehlt keine Zahl, die sich beim Balancieren
+   bewegt, und keinen Ausschnitt, den ein spaeterer Zusatz ein zweites Mal
+   erzeugen kann.** Kapitelgrenze statt Bosszahl. Und: eine Aenderung, die
+   eine zweite Fundstelle schafft, ist eine Aenderung an den Proben — auch
+   wenn sie wie eine Verbesserung am Spiel aussieht.
+
+68. **Eine Pruefung, deren Preis niemand kennt, wird weggelassen, wenn es
+   eilt.** Der Probensatz lief in einen Zeitdeckel und wurde abgewuergt;
+   erst daran fiel auf, dass seine Dauer nirgends stand — weder im ganzen
+   noch je Probe. Fuer die Modusproben gab es die Messung einmal, und sie
+   war lehrreich: 174 von 230 s lagen in ZWEI Bildtor-Laeufen, daraus wurde
+   `--ohnebild`. Fuer den ganzen Satz wurde die Frage nie gestellt.
+
+   Er misst sich jetzt selbst und schreibt seine Messstelle dazu: auf
+   diesem Rechner, in diesem Lauf, nicht uebertragbar. Vergleichbar ist
+   nur, was INNERHALB eines Laufs nebeneinander steht — Regel 12 fuer
+   Sekunden.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

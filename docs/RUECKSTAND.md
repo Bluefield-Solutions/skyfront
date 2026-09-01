@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v74.
+Stand: v75.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -144,6 +144,8 @@ Damit niemand zweimal dasselbe aufmacht — alles im Audit belegt:
 | Ein Sektor rechnet sich in vier Sekunden durch (`npm run sektor`) | v67 |
 | B9: stille Vorratsfehler gezählt, Gegner werden verschoben statt verworfen | v71 |
 | Messung ist ein Schalter, kein Aufklapper | v73 |
+| **Drei verrottete Gegenproben** (v69/v73/v75) — die Ankerprüfung lief nur im 50-min-Satz, jetzt 27. Tor mit 0,16 s | v75 |
+| Der Probensatz kannte seine eigene Laufzeit nicht | v75 |
 | **Eine neue Fassung kam auf dem Gerät nie an** — der Dienst-Arbeiter legte die alte Seite unter der neuen Marke ab (`addAll` durch den Browser-Zwischenspeicher). Gemessen: vorher nach vier Starten nicht da, jetzt nach zwei | v74 |
 
 ---

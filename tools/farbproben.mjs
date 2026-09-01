@@ -16,6 +16,7 @@
 */
 import { readFileSync, writeFileSync, existsSync, copyFileSync, unlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
 const ALLE = process.argv.includes('--alle');
 // Nur die Modusproben. Sie brauchen keinen Eingriff in src/app.js und
@@ -36,6 +37,17 @@ const OHNE_BILD = process.argv.includes('--ohnebild');
 // der Lauf src/app.js zurueckschreibt. Ein Filter ist die einfachere
 // Antwort als Disziplin.
 const NUR = (process.argv.find((a) => a.startsWith('--nur=')) || '').slice(6).toLowerCase();
+// --anker: NUR nachsehen, ob jeder Eingriff seine Stelle noch genau einmal
+// findet — ohne einen einzigen Torlauf, ohne Neubau, ohne die Quelle
+// anzufassen. Eine Sekunde statt fuenfzig Minuten.
+//
+// Der Anlass sind drei tote Proben in sechs Fassungen (v69, v73, v75). Alle
+// drei sahen in jedem gruenen Lauf gruen aus, weil der volle Satz
+// `--alle` braucht und der im Alltag nicht laeuft: ohne `--alle` wird die
+// Ankerpruefung fuer jede Probe mit Neubau vorher uebersprungen. Damit war
+// ausgerechnet die Pruefung, die Drift findet, an den teuersten Lauf
+// gekettet.
+const NUR_ANKER = process.argv.includes('--anker');
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
 // Nicht jeder Eingriff sitzt in src/app.js. Die Messtafel haengt in der
@@ -485,8 +497,20 @@ const PROBEN = [
     true, 'waerme', 'werden erst beim Spawnen gebacken'],
   // Und die zwei Knoepfe aus dem Ergebnisbildschirm nehmen: dann fuehrt
   // aus ihm kein Weg mehr heraus, den man sehen kann.
+  //
+  // DRITTE VERROTTETE ALTPROBE, gefunden in v75. Der Anker war
+  // `this.endeKnoepfe = [` und traf bis v55 genau eine Stelle. Dann bekam
+  // der SIEGES-Schirm seine eigene Tippflaeche (`= [{`) — und derselbe
+  // Anker traf ab da zwei. Die Probe lief seither ins Leere.
+  //
+  // Bitter daran: die zweite Stelle entstand als KORREKTUR eines Fehlers,
+  // den eine andere Probe hier bewacht. Eine Verbesserung hat eine
+  // Gegenprobe erschlagen, und niemandem ist es aufgefallen, weil beide
+  // gruen aussahen. Der Anker haengt jetzt am Zeilenumbruch: der
+  // Niederlagen-Schirm oeffnet die Liste mehrzeilig, der Sieges-Schirm
+  // einzeilig.
   ['Ergebnisbildschirm ohne Knoepfe', '\u2717',
-    ['this.endeKnoepfe = [', 'this.endeKnoepfe = null && ['],
+    ['this.endeKnoepfe = [\n', 'this.endeKnoepfe = null && [\n'],
     true, 'ende', 'statt zwei'],
   // Den Elite-Ring zurueck auf vierzehn Kugeln — der Zustand bis v45.
   // Dann haelt ein einziger Elite 45 Geschosse gleichzeitig im Bild, und
@@ -573,6 +597,67 @@ const PROBEN = [
 
 if (!existsSync(APP)) { console.error('✗ src/app.js fehlt'); process.exit(1); }
 
+/* ---------- --anker: findet jeder Eingriff seine Stelle noch? ----------- */
+//
+// DER ANLASS, und er ist derselbe Fehler dreimal:
+//
+//   v69  „Kapitel XII beginnt beim selben Sektor wie XI" hing an `boss: 2`,
+//        dort stand nach dem Balancieren `boss: 4`.
+//   v73  „letztes Kapitel faellt hinter das vorletzte zurueck" hing an
+//        `boss: 3` — dieselbe Sorte Zahl, dieselbe Drift.
+//   v75  „Ergebnisbildschirm ohne Knoepfe" traf ZWEI Stellen, seit der
+//        Siegesschirm seine eigene Tippflaeche bekam.
+//
+// Alle drei sahen in jedem gruenen Lauf gruen aus. Die Ankerpruefung gab es
+// naemlich schon — aber nur INNERHALB des vollen Satzes, und der braucht
+// `--alle` und fuenfzig Minuten. Ohne `--alle` wird jede Probe mit Neubau
+// uebersprungen, BEVOR ihr Anker geprueft wird. Ausgerechnet die Pruefung,
+// die Drift findet, war damit an den teuersten Lauf gekettet — und der
+// laeuft im Alltag nicht.
+//
+// Hier steht sie allein: ein Lesen je Datei, kein Torlauf, kein Neubau,
+// die Quelle wird nicht angefasst. Eine Sekunde.
+//
+// Sie prueft NICHT, ob eine Probe noch das Richtige beweist. Ein Anker kann
+// eindeutig sein und trotzdem an der falschen Stelle sitzen — das faengt
+// nur der volle Satz. Sie prueft genau eines: dass der Eingriff ankommt.
+// Ein nicht angekommener Eingriff sieht aus wie ein bestandenes Tor.
+if (NUR_ANKER) {
+  const M = messstelle('Probenanker', 'jeder Eingriff findet seine Stelle noch genau einmal.');
+  // Die Naht ist die Quelle selbst. Ohne sie ist nichts zu zaehlen.
+  if (OHNE_NAHT) {
+    M.ungemessen('die Quelle ist nicht zu lesen — ohne sie sind die Anker nicht zu zaehlen.');
+    M.urteil();
+  }
+  const inhalt = new Map();
+  const lies = (d) => {
+    if (!inhalt.has(d)) inhalt.set(d, existsSync(d) ? readFileSync(d, 'utf8') : null);
+    return inhalt.get(d);
+  };
+  // Die Gegenprobe: einen Anker verdrehen, der heute sitzt. Verlangt wird,
+  // dass genau er gemeldet wird — nicht irgendein roter Lauf.
+  const TOTER_ANKER = process.argv.includes('--probe-toter-anker');
+
+  console.log('Probenanker\n');
+  let geprueft = 0, tot = 0;
+  for (const [name, , [anker], , , , datei = APP] of PROBEN) {
+    const roh = lies(datei);
+    if (roh === null) { M.ungemessen(`${datei} fehlt — Anker von „${name}" nicht gezaehlt.`); continue; }
+    const suche = TOTER_ANKER && geprueft === 0 ? anker + '/*tot*/' : anker;
+    const n = roh.split(suche).length - 1;
+    geprueft++;
+    if (n !== 1) {
+      tot++;
+      console.log(`  ✗ ${name}`);
+      console.log(`      ${n}x in ${datei}, 1x erwartet   ·   ${JSON.stringify(anker.slice(0, 60))}`);
+      M.befund(`„${name}": der Eingriff sitzt ${n}x in ${datei} statt 1x — diese Probe belegt nichts mehr.`);
+    }
+  }
+  console.log(`\n  ${geprueft} Anker geprueft, ${tot} verrottet.`);
+  M.urteil(`${geprueft} Anker, alle genau einmal in der Quelle.`);
+}
+
+
 // Zwei Laeufe zugleich waeren toedlich: beide sichern src/app.js, beide
 // schreiben es am Ende zurueck — und der zweite legt den Stand des ersten
 // ueber die Arbeit, die inzwischen entstanden ist. Genau das ist in v36
@@ -649,6 +734,18 @@ for (const [tor, name] of ALLE ? [['farb', 'Farbtor'], ['form', 'Formentor'], ['
 console.log('');
 }
 
+// Was der Satz KOSTET, stand nirgends. Er lief in einen Zeitdeckel von
+// fuenfzig Minuten, und erst daran fiel auf, dass niemand seine Dauer kennt
+// — nicht die des Satzes und schon gar nicht die der einzelnen Probe. Eine
+// Pruefung, deren Preis unbekannt ist, wird irgendwann weggelassen, und zwar
+// genau dann, wenn es eilt.
+//
+// Regel 12 gilt auch fuer Sekunden: gemessen wird hier je Probe, um den
+// Eingriff herum (Neubau + Torlauf), auf dem Rechner, auf dem der Satz
+// gerade laeuft. Uebertragbar ist das nicht — vergleichbar innerhalb eines
+// Laufs schon, und darum geht es: welche Probe traegt die Zeit.
+const satzStart = Date.now();
+const dauern = [];
 let fehler = 0, gelaufen = 0;
 for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN).filter(([n]) => !NUR || n.toLowerCase().includes(NUR))) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
@@ -660,8 +757,10 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
     fehler++; continue;
   }
   writeFileSync(datei, roh.replace(alt, neu));
+  const t0 = Date.now();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
   const r = torLauf(!neubau, tor);
+  dauern.push([name, (Date.now() - t0) / 1000]);
   gelaufen++;
   if (!r.rot) { console.log(`✗ ${name}: Tor blieb GRÜN — Prüfung ${pruefung} greift nicht`); fehler++; }
   else if (pruefung !== '✗' && !new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
@@ -861,6 +960,30 @@ const MODUSPROBEN = [{
   mussEnthalten: ['nach 4 Starten NICHT da', 'nie auf dem Geraet'],
   darfNichtEnthalten: ['GRÜN — '],
   beweist: 'die Fassungsprobe sieht wirklich, wenn eine neue Fassung das Geraet nicht erreicht',
+}, {
+  // DIE PROBE ZUR ANKERPRUEFUNG — die Waechterin ueber die Waechter braucht
+  // selbst eine, sonst ist sie genau das, was sie sucht.
+  //
+  // --probe-toter-anker verdreht den Anker der ERSTEN Probe im Satz.
+  // Verlangt wird, dass genau sie gemeldet wird, mit Zahl (0x statt 1x) und
+  // Namen — nicht bloss irgendein roter Lauf. Ein Tor, das rot wird, ohne
+  // zu sagen WORAN, hilft beim Suchen nicht.
+  name: 'Probenanker mit verdrehtem Anker (--probe-toter-anker)',
+  cmd: ['tools/farbproben.mjs', '--anker', '--probe-toter-anker'],
+  rotErwartet: true,
+  exitErwartet: 1,
+  mussEnthalten: ['0x in src/app.js, 1x erwartet', '1 verrottet', 'belegt nichts mehr'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'die Ankerpruefung sieht einen verrotteten Anker und benennt ihn',
+}, {
+  // Und der dritte Ausgang.
+  name: 'Probenanker ohne Messstelle (--ohne-naht)',
+  cmd: ['tools/farbproben.mjs', '--anker', '--ohne-naht'],
+  rotErwartet: false,
+  exitErwartet: 2,
+  mussEnthalten: ['NICHT GEMESSEN', 'Quelle ist nicht zu lesen'],
+  darfNichtEnthalten: ['GRÜN — jeder'],
+  beweist: 'ohne die Quelle sagt die Ankerpruefung "nicht gemessen", Rückgabe 2',
 },
 
 // ---- Der dritte Ausgang: 2 = "nicht gemessen" -------------------------
@@ -903,8 +1026,10 @@ if (ALLE || NUR_MODUS) {
   console.log('');
   for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor'))).filter((m) => !NUR || m.name.toLowerCase().includes(NUR))) {
     let text = '', rot = false, code = 0;
+    const t0 = Date.now();
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
     catch (e) { code = e.status; rot = true; text = (e.stdout || '') + (e.stderr || ''); }
+    dauern.push([m.name, (Date.now() - t0) / 1000]);
     modusGelaufen++;
     const mangel = [];
     // Rueckgabe 2 heisst "nicht (vollstaendig) gemessen" und ist KEIN
@@ -948,4 +1073,28 @@ if (readFileSync(APP, 'utf8') !== readFileSync(SICHER, 'utf8'))
 
 console.log(`\n${gelaufen} Probe(n) gelaufen, ${fehler} ohne Wirkung.`);
 if (modusGelaufen) console.log(`${modusGelaufen} Modusprobe(n) gelaufen, ${modusFehler} ohne Wirkung.`);
+
+// ---- Was hat das gekostet? -------------------------------------------------
+//
+// Nicht nur die Summe: die Summe sagt „zu teuer" und sonst nichts. Die
+// Verteilung sagt, WO die Zeit liegt — und ob sich am billigen Ende
+// ueberhaupt etwas holen laesst. Beim ersten Messen lagen 174 von 230 s
+// der Modusproben in ZWEI Bildtor-Laeufen; daraus wurde `--ohnebild`.
+// Dieselbe Frage ist fuer den ganzen Satz nie gestellt worden.
+if (dauern.length) {
+  const gesamt = (Date.now() - satzStart) / 1000;
+  const summe = dauern.reduce((s, [, d]) => s + d, 0);
+  const teuerste = [...dauern].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const min = (x) => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, '0')}`;
+  console.log(`\nLaufzeit  ${min(gesamt)} min gesamt · ${dauern.length} gemessene Proben, zusammen ${min(summe)} min`);
+  console.log(`          Median ${(dauern.map(([, d]) => d).sort((a, b) => a - b)[dauern.length >> 1]).toFixed(1)} s je Probe`);
+  console.log('\n  die acht teuersten:');
+  for (const [n, d] of teuerste) {
+    const anteil = Math.round(d / summe * 100);
+    console.log(`    ${String(d.toFixed(1)).padStart(6)} s  ${String(anteil).padStart(2)} %  ${n}`);
+  }
+  console.log(`\n  Gemessen auf diesem Rechner, in diesem Lauf. Nicht uebertragbar —`);
+  console.log(`  vergleichbar ist nur, was INNERHALB eines Laufs nebeneinander steht.`);
+}
+
 process.exit(fehler + modusFehler ? 1 : 0);

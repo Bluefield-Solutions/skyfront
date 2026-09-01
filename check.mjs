@@ -197,6 +197,16 @@ const TORE = [
   // und beide Feuerstellen verlangen Stufe > 0.
   { schluessel: 'ruestung', lauf: 'Rüstung (Kauf → Wirkung → Anzeige)', zeile: 'Rüstung (Kauf wirkt)', datei: 'tools/ruestung.mjs' },
   { schluessel: 'auslieferung', lauf: 'Auslieferung (Pages-Bau, im Browser)', zeile: 'Auslieferung (Web-App)', datei: 'tools/auslieferung.mjs' },
+  // Die Waechter ueber die Waechter, und sie kostet 0,16 s.
+  //
+  // Drei Gegenproben sind in sechs Fassungen verrottet (v69, v73, v75):
+  // ihr Eingriff traf die Stelle nicht mehr, an der er sitzen sollte, und
+  // sie belegten seither nichts. Alle drei sahen in jedem gruenen Lauf
+  // gruen aus. Die Pruefung dagegen gab es schon — aber nur INNERHALB des
+  // vollen Probensatzes, und der braucht `--alle` und fuenfzig Minuten.
+  // Ausgerechnet die Pruefung, die Drift findet, war an den Lauf gekettet,
+  // der im Alltag nicht stattfindet.
+  { schluessel: 'probenanker', lauf: 'Probenanker (76 Eingriffe in der Quelle)', zeile: 'Probenanker (76 Eingriffe)', datei: 'tools/farbproben.mjs --anker' },
 ];
 
 const torZeilen = [];
