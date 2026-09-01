@@ -201,12 +201,19 @@
         var neu = offen ? 'auf' : 'zu';
         if (neu === knopfStand) return;
         knopfStand = neu;
+        // EIN SCHALTER, KEIN AUFKLAPPER (v73). Rueckmeldung des Nutzers:
+        // „Ich haette gern oben einfach so einen Anschalter Messung und
+        // irgendwann druecke ich dann nochmal Messung aus. Dann kann ich
+        // alles, was gemessen wurde, direkt einmal kopieren."
+        //
+        // Waehrend der Messung steht hier NICHTS — kein Streifen, kein
+        // Knopf, nichts ueber der Leinwand. Erst beim Ausschalten steht
+        // das Ergebnis da, mit dem Knopf, um den es geht.
         knoepfe.innerHTML = offen
           ? '<span class="knopf haupt" data-tat="kopieren">Kopieren</span>'
-            + '<span class="knopf" data-tat="reset">Zuruecksetzen</span>'
-            + '<span class="knopf" data-tat="zu">▾ Einklappen</span>'
-            + '<span class="knopf" data-tat="aus">Messung aus</span>'
-          : '<span class="knopf haupt" data-tat="auf">▴ Aufklappen</span>';
+            + '<span class="knopf" data-tat="neu">Neu messen</span>'
+            + '<span class="knopf" data-tat="zu">Schliessen</span>'
+          : '';
       }
       var proben = [], vorher = 0, start = 0;
       var laengste = 0, laengsteBei = 0, letzte5 = [];
@@ -308,14 +315,19 @@
       //
       // Der Sektor zaehlt seine Laeufe jetzt selbst (`laufNr`), und
       // zurueckgesetzt wird, wenn DIESE Zahl sich aendert.
-      var letzterLauf = null;
+      // Wurde die Messung ausserhalb des Gefechts eingeschaltet? Dann
+      // einmal von vorn anfangen, sobald der erste Sektor laeuft.
+      var startAusserhalb = false;
 
       // Der Streifen erscheint, sobald GEMESSEN wird — nicht erst, wenn man
       // aufklappt. Er ist damit selbst die Anzeige dafuer, dass die Messung
       // laeuft; ein Schalter, dessen Stand man nicht sieht, wird vergessen.
       function malen() {
         var vorherKlasse = tafel.className;
-        tafel.className = an ? (offen ? 'an' : 'an klein') : '';
+        // Sichtbar ist die Tafel NUR im Ergebniszustand. Waehrend gemessen
+        // wird, liegt nichts ueber der Leinwand — der gruene Ring am
+        // 📊-Knopf im Spiel ist die ganze Anzeige, die es braucht.
+        tafel.className = offen ? 'an' : '';
         // Nur ein echter Formwechsel ist ein Umbau. Ein malen() ohne
         // Klassenwechsel zeichnet bloss neu und kostet nicht mehr als jede
         // andere Auffrischung — das als Umbau zu buchen hiesse, sich die
@@ -329,12 +341,29 @@
       function messenSetzen(zustand) {
         if (an === zustand) { malen(); return; }
         an = zustand; merken('mess_an', an);
-        if (an) zuruecksetzen();
+        if (an) {
+          // ANSCHALTEN: von vorn anfangen, nichts anzeigen. Gespielt wird
+          // jetzt, nicht abgelesen.
+          zuruecksetzen(); offen = !1; endeMs = 0;
+          try {
+            var sp0 = window.__game && window.__game.scene && window.__game.scene.getScene
+                      ? window.__game.scene.getScene('Game') : null;
+            startAusserhalb = !(sp0 && sp0.scene && sp0.scene.isActive && sp0.scene.isActive());
+          } catch (e) { startAusserhalb = !1 }
+        } else {
+          // AUSSCHALTEN: die Uhr anhalten, einmal zeichnen, stehenlassen.
+          // Was jetzt dasteht, ist die ganze Messung — ein Knopf weiter
+          // liegt sie in der Zwischenablage.
+          endeMs = performance.now(); offen = proben.length > 0; zeichnen();
+        }
+        merken('mess_offen', offen);
         malen();
       }
       function offenSetzen(zustand) { offen = zustand; merken('mess_offen', offen); malen(); }
-      function anzeigen(zustand) { messenSetzen(zustand); if (zustand) offenSetzen(true); }
+      function anzeigen(zustand) { messenSetzen(zustand); }
+      var endeMs = 0;
       function zuruecksetzen() {
+        endeMs = 0;
         proben.length = 0; letzte5.length = 0;
         laengste = 0; laengsteBei = 0; bilder = 0;
         pausen = 0; pausenMs = 0; versteckt = false;
@@ -410,10 +439,10 @@
         var k = e.target && e.target.getAttribute && e.target.getAttribute('data-tat');
         if (!k) return;
         e.preventDefault();
-        if (k === 'reset') { zuruecksetzen(); eigenTat = 'Zuruecksetzen'; return; }
         if (k === 'kopieren') { kopieren(); eigenTat = 'Kopieren'; }
-        if (k === 'auf') offenSetzen(true);
+        if (k === 'neu') { messenSetzen(!1); messenSetzen(!0); }
         if (k === 'zu') offenSetzen(false);
+        if (k === 'auf') offenSetzen(true);
         if (k === 'aus') messenSetzen(false);
       }, { passive: false });
 
@@ -464,10 +493,18 @@
         if (!an) { vorher = t; return; }
         // Beim ersten Bild im Gefecht von vorn anfangen: Menuewerte sagen
         // ueber das Gefecht nichts.
+        // EINMAL, NICHT JEDES MAL.
+        //
+        // Wer im Menue einschaltet, misst sonst die Kulisse mit — also
+        // faengt die Messung beim ersten Bild IM GEFECHT von vorn an.
+        // Aber nur dieses eine Mal: wer drei Sektoren am Stueck spielt,
+        // will am Ende alle drei in einer Zeile haben, nicht die letzte.
+        // Bis v72 setzte jeder neue Sektor zurueck.
         var s0 = window.__game && window.__game.scene && window.__game.scene.getScene
                  ? window.__game.scene.getScene('Game') : null;
-        var lauf = s0 && s0.laufNr != null ? s0.laufNr : null;
-        if (lauf != null && lauf !== letzterLauf) { letzterLauf = lauf; zuruecksetzen(); vorher = t; return; }
+        if (startAusserhalb && s0 && s0.scene && s0.scene.isActive && s0.scene.isActive()) {
+          startAusserhalb = !1; zuruecksetzen(); vorher = t; return;
+        }
 
         if (vorher) {
           var d = t - vorher;
@@ -542,7 +579,9 @@
         var hzSchnell = schnellMs > 0 ? 1000 / schnellMs : 0;
         var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;
         var budget = 1000 / (takt || 60);
-        var lauf = (performance.now() - start) / 1000;
+        // Nach dem Ausschalten steht die Uhr. Sonst waechst die Laufzeit
+        // im Ergebnis weiter, obwohl nichts mehr gemessen wird.
+        var lauf = ((endeMs || performance.now()) - start) / 1000;
         var g = window.__game, s = null;
         try { s = g && g.scene && g.scene.getScene && g.scene.getScene('Game'); } catch (e) {}
         var imSpiel = s && s.scene && s.scene.isActive && s.scene.isActive();
@@ -639,8 +678,7 @@
           var rate = med > 0 ? 1000 / med : 30;
           letzteZeile = 'SKYFRONT-MESSUNG ' + ver + ' | NOCH NICHTS GEMESSEN — bitte im Gefecht '
             + Math.max(1, Math.ceil((GENUG - proben.length) / rate)) + ' s laufen lassen und dann kopieren.';
-          werte.innerHTML = offen ? z.join('\n')
-            : '<b>MESSUNG LÄUFT</b>   noch ' + Math.max(1, Math.ceil((GENUG - proben.length) / rate)) + ' s bis zur ersten Zahl';
+          if (offen) werte.innerHTML = z.join('\n');
           return;
         }
         var eine = ['SKYFRONT-MESSUNG ' + ver];
@@ -689,10 +727,12 @@
         // Eingeklappt steht die Kurzfassung da: die drei Zahlen, wegen
         // derer man ueberhaupt misst. Zum Ablesen aufklappen, zum Spielen
         // zuklappen — gemessen wird in beiden Faellen.
-        werte.innerHTML = offen ? z.join('\n')
-          : '<b>' + zahl(1000 / (med || 1), 0) + '/s</b>   p95 <span class="' + kl(p95, budget * 1.6) + '">'
-            + zahl(p95) + '</span> ms   längste <span class="' + kl(laengste, 50) + '">' + zahl(laengste) + '</span> ms'
-            + (imSpiel ? '' : '   <span class="warn">(Menü)</span>');
+        // WAEHREND DER MESSUNG WIRD NICHTS GESCHRIEBEN (v73). Die Zeile
+        // wird gerechnet — die Naht braucht sie —, aber sie geht nicht in
+        // die Anzeigeliste des Browsers. Damit hat die Tafel waehrend des
+        // Messens ueberhaupt keine Kosten mehr, und die Umbau-Buchung aus
+        // v65 wird zur Vorsichtsmassnahme statt zur Notwendigkeit.
+        if (offen) werte.innerHTML = z.join('\n');
       }
     })();
   </script>

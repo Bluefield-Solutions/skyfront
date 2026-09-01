@@ -132,10 +132,14 @@ const PROBEN = [
   // den der Nutzer gemeldet hat („man kann das Flugzeug kaum sauber
   // steuern"). Verlangt wird, dass das Tor die WIRKUNG benennt, nicht nur
   // rot wird.
-  ['Messtafel faengt wieder Beruehrungen ab', '✗',
-    ['      pointer-events:none}\n    #messung .knopf{pointer-events:auto}',
-     '      pointer-events:auto}\n    #messung .knopf{pointer-events:auto}'],
-    true, 'messtafel', 'erreicht das Spiel nicht', HUELLE],
+  // DIE TAFEL WIEDER WAEHREND DER MESSUNG ZEIGEN. Bis v72 stand sie als
+  // Streifen ueber dem Spiel; Rueckmeldung des Nutzers zweimal: „der
+  // Aufklapper stoert total das Fliegen" und „ich haette gern einfach
+  // einen Anschalter".
+  ['Messtafel steht wieder waehrend der Messung ueber der Leinwand', '✗',
+    ["        tafel.className = offen ? 'an' : '';",
+     "        tafel.className = an ? (offen ? 'an' : 'an klein') : '';"],
+    true, 'messtafel', 'liegt etwas ueber der Leinwand', HUELLE],
   // Und der Takt wieder aus der GEMESSENEN Rate: dann geht die Tafel beim
   // Einbruch mit und faerbt ein p95 von 350 ms gruen.
   //
@@ -159,10 +163,13 @@ const PROBEN = [
   // DIE MESSUNG WIEDER AN `isActive` HAENGEN. Dann wirft jede Pause sie
   // weg — und genau daran war die v69-Zeile vom Geraet nicht zu lesen:
   // `Q 0.15` bei angeblich 2,4 Sekunden Laufzeit.
-  ['Messung haengt wieder an isActive statt am Lauf', '✗',
-    ['        var lauf = s0 && s0.laufNr != null ? s0.laufNr : null;\n        if (lauf != null && lauf !== letzterLauf) { letzterLauf = lauf; zuruecksetzen(); vorher = t; return; }',
-     '        var drin = !!(s0 && s0.scene && s0.scene.isActive && s0.scene.isActive());\n        if (drin && !letzterLauf) { letzterLauf = 1; zuruecksetzen(); vorher = t; return; }\n        if (!drin) letzterLauf = null;'],
-    true, 'messtafel', 'eine Pause setzt die Messung zurueck', HUELLE],
+  // JEDER NEUE SEKTOR SETZT WIEDER ZURUECK. Genau so stand es bis v72 —
+  // und wer drei Sektoren am Stueck spielt, haette am Ende nur den
+  // letzten in der Zeile.
+  ['Jeder neue Sektor setzt die Messung wieder zurueck', '✗',
+    ['        if (startAusserhalb && s0 && s0.scene && s0.scene.isActive && s0.scene.isActive()) {\n          startAusserhalb = !1; zuruecksetzen(); vorher = t; return;\n        }',
+     '        var lauf2 = s0 && s0.laufNr != null ? s0.laufNr : null;\n        if (lauf2 != null && lauf2 !== window.__letzterLauf) { window.__letzterLauf = lauf2; zuruecksetzen(); vorher = t; return; }'],
+    true, 'messtafel', 'wirft die Messung weg', HUELLE],
   // DAS FALLEN DES Q-REGLERS WIEDER UNGEBREMST. Genau so stand es bis
   // v68: die Regel laeuft dreimal je Sekunde, ein Ruckler von 90 ms schob
   // den Regler in 2,7 Sekunden auf den Boden. Gemessen auf dem Geraet,
@@ -213,20 +220,19 @@ const PROBEN = [
     ['      const k = leuchtschrift(this, E, 7327999, 18),',
      '      const k = (E.preFX && E.preFX.addGlow && E.preFX.addGlow(7327999, 4, 0, !1, .08, 18), null),'],
     true, 'zeichenwerk', 'Pufferwechsel je Bild'],
-  // DIE TAFEL SCHREIBT SICH IHRE EIGENE ARBEIT NICHT MEHR ZU: der
-  // Formwechsel wird nicht mehr gemeldet, also faellt die Bildluecke des
-  // Aufklappens wieder in „laengste". Genau so entstand die Frage, ob die
-  // 115 ms der dritten Geraetemessung vom Spiel kamen oder vom Ablesen.
-  ['Messtafel bucht das Aufklappen nicht mehr als eigene Arbeit', '✗',
-    ['        if (tafel.className !== vorherKlasse) eigenTat = \'Form\';\n', ''],
-    true, 'messtafel', 'nicht als genau ein eigenes Bild', HUELLE],
-  // Und die Gegenrichtung (Regel 13): jedes Auffrischungsbild als eigene
-  // Arbeit buchen. Dann faellt die halbe Messung aus der Statistik und die
-  // Tafel rechnet sich gruen — ohne dass ein Zaehler auffaellt, wenn das
-  // Tor nur die eine Richtung prueft.
-  ['Messtafel bucht auch gewoehnliche Auffrischungen als eigene Arbeit', '✗',
-    ['          } else if (eigenTat) {', '          } else if (eigenTat || gezeichnet) {'],
-    true, 'messtafel', 'ohne dass etwas umgebaut wurde', HUELLE],
+  // DIE TAFEL SCHREIBT SICH WAEHREND DER MESSUNG WIEDER NEU. Seit v73 ist
+  // sie dabei unsichtbar — jedes Schreiben waere Arbeit, die niemand
+  // sieht und die trotzdem in den Bildzeiten landet.
+  ['Messtafel schreibt sich waehrend der Messung neu', '✗',
+    ['        if (offen) werte.innerHTML = z.join(\'\\n\');\n      }',
+     '        werte.innerHTML = z.join(\'\\n\');\n      }'],
+    true, 'messtafel', 'schreibt sich waehrend der Messung neu', HUELLE],
+  // UND DIE GEGENRICHTUNG: beim Ausschalten NICHT zeichnen. Dann bleibt
+  // die Tafel leer, und die ganze Messung war umsonst.
+  ['Messtafel fuellt sich beim Ausschalten nicht', '✗',
+    ['          endeMs = performance.now(); offen = proben.length > 0; zeichnen();',
+     '          endeMs = performance.now(); offen = proben.length > 0;'],
+    true, 'messtafel', 'steht kein Ergebnis', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
   // gesehen — die Pause war der einzige Schirm, den keines betrat.
@@ -426,9 +432,14 @@ const PROBEN = [
     'roman: "XII",\n      start: 101,'],
     true, 'zeit', 'wiederholen die Bossreihe'],
   // Und die andere Haelfte: das letzte Kapitel schwaecher als das vorletzte.
+  // ZWEITE VERROTTETE ALTPROBE, gefunden in v73: sie hing an `boss: 3` in
+  // Biolumineszenz 1 — dort steht heute `boss: 4`. Wie die
+  // Kapitelgrenzen-Probe (v69) haengt sie jetzt nicht mehr an einer Zahl,
+  // die sich beim Balancieren bewegt: das letzte Kapitel bekommt den
+  // START des vorletzten, faellt damit zwangslaeufig hinter es zurueck.
   ['letztes Kapitel faellt hinter das vorletzte zurueck', '✗', [
-    'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 3,',
-    'bg: "bg_biolum_01",\n      sky: 656664,\n      skyAlpha: .16,\n      cloud: .14,\n      boss: 1,'],
+    'roman: "XII",\n      start: 111,',
+    'roman: "XII",\n      start: 91,'],
     true, 'zeit', 'SCHWAECHERE Bosse'],
   // Und die Gegenrichtung: mehr Wellen je Sektor, bis das Wellenfenster
   // ueber die 90 s geht. Der Deckel darauf ist seit v40 da, weil an ihm

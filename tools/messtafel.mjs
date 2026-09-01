@@ -40,8 +40,9 @@
   „unbekannt" und misst gegen 60 Hz. Genau das wird hier geprueft — und es
   ist die einzige Pruefung dieses Projekts, der die lahme Umgebung NUETZT.
 
-      J  Umbau    Auf-/Zuklappen und Kopieren kosten selbst ein Bild. Es
-              wird getrennt gebucht, sonst misst "laengste" die Messung.
+      J  Ruhe     Waehrend der Messung ruehrt sich die Tafel nicht: sie ist
+              unsichtbar und wird nicht geschrieben. Beim Ausschalten
+              fuellt sie sich.
     K  Ecke     Die Vier-Tipp-Ecke liegt auf Pause und Ton. Im Gefecht
               darf sie nicht zaehlen, ausserhalb muss sie es.
     L  Pause    Eine Pause darf die Messung nicht wegwerfen, ein neuer
@@ -54,7 +55,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { messstelle, OHNE_NAHT } from './messstelle.mjs';
 
-const M = messstelle('Messtafel', 'die Messung laeuft auch eingeklappt, und das Aufklappen wirft sie nicht weg.');
+const M = messstelle('Messtafel', 'ein Schalter an, spielen, ein Schalter aus, kopieren — und dazwischen liegt nichts ueber der Leinwand.');
 
 if (!existsSync('dist/Skyfront.html')) M.abbruch('dist/Skyfront.html fehlt — erst bauen.');
 let chromium;
@@ -145,8 +146,11 @@ await seite.waitForTimeout(6000);
   gemessen++;
   console.log(`  B  an             an=${s.an}  Klasse=${JSON.stringify(s.klasse)}  Knöpfe ${JSON.stringify(s.knoepfe)}`);
   if (!s.an) M.befund('der Knopf schaltet die Messung nicht an.');
-  if (!/klein/.test(String(s.klasse))) M.befund(`angeschaltet steht die Tafel nicht als Streifen da (Klasse ${JSON.stringify(s.klasse)}) — sie soll das Spiel nicht zudecken.`);
-  if (!s.knoepfe.some((k) => /Aufklappen/.test(k))) M.befund(`eingeklappt fehlt der Knopf zum Aufklappen (${JSON.stringify(s.knoepfe)}).`);
+  // EIN SCHALTER, KEIN AUFKLAPPER (v73, woertlich vom Nutzer): waehrend
+  // der Messung liegt NICHTS ueber der Leinwand. Bis v72 stand dort ein
+  // Streifen, den man erst wegklappen musste, um zu spielen.
+  if (s.klasse) M.befund(`waehrend der Messung liegt etwas ueber der Leinwand (Klasse ${JSON.stringify(s.klasse)}). Gespielt wird jetzt, nicht abgelesen — sichtbar sein soll nur der gruene Ring am Knopf.`);
+  if (s.knoepfe.length) M.befund(`waehrend der Messung stehen Knoepfe da (${JSON.stringify(s.knoepfe)}). Der einzige Knopf, den es dann braucht, ist der im Spiel.`);
 }
 
 // ---- C  eingeklappt weitermessen — DER PUNKT --------------------------
@@ -191,17 +195,26 @@ const nachher = await bilder();
   else if (!(nachher > vorher)) M.befund(`eingeklappt steigt die Bilderzahl nicht (${vorher} → ${nachher}). Die Messung laeuft nur, solange man hinsieht — und der Fall, in dem man misst, ist genau der andere.`);
 }
 
-// ---- D  aufklappen setzt nicht zurueck --------------------------------
-if (!await tippen('auf')) M.ungemessen('der Knopf „Aufklappen" ist nicht da.');
+// ---- D  ausschalten zeigt das Ergebnis, ohne es wegzuwerfen ----------
+if (!await seite.evaluate(() => { window.__SKF_MESSTAFEL(); return true; })) M.ungemessen('der Schalter ist nicht zu erreichen.');
 else {
   await seite.waitForTimeout(1500);
   const s = await stand(), nach = await bilder();
   gemessen++;
-  console.log(`  D  aufgeklappt    Klasse=${JSON.stringify(s.klasse)}  Bilder ${nach}  Knöpfe ${JSON.stringify(s.knoepfe)}`);
-  if (/klein/.test(String(s.klasse))) M.befund('das Aufklappen wirkt nicht — die Tafel bleibt ein Streifen.');
-  if (nach != null && nachher != null && nach < nachher) M.befund(`das Aufklappen setzt die Messung zurueck (${nachher} → ${nach} Bilder). Dann wirft das Ablesen weg, was man ablesen wollte.`);
-  for (const w of ['Kopieren', 'Einklappen', 'Messung aus'])
-    if (!s.knoepfe.some((k) => k.includes(w))) M.befund(`aufgeklappt fehlt der Knopf „${w}" (${JSON.stringify(s.knoepfe)}).`);
+  console.log(`  D  ausgeschaltet  an=${s.an}  Klasse=${JSON.stringify(s.klasse)}  Bilder ${nach}  Knöpfe ${JSON.stringify(s.knoepfe)}`);
+  if (s.an) M.befund('der zweite Druck schaltet die Messung nicht aus.');
+  if (!s.klasse) M.befund('nach dem Ausschalten steht kein Ergebnis da. Dann war die Messung umsonst.');
+  for (const w of ['Kopieren', 'Neu messen', 'Schliessen'])
+    if (!s.knoepfe.some((k) => k.includes(w))) M.befund(`im Ergebnis fehlt der Knopf „${w}" (${JSON.stringify(s.knoepfe)}).`);
+  if (nach != null && nachher != null && nach < nachher) M.befund(`das Ausschalten wirft die Messung weg (${nachher} → ${nach} Bilder). Genau die will man danach lesen.`);
+  // Und die Uhr muss stehen: sonst waechst die Laufzeit im Ergebnis
+  // weiter, obwohl nichts mehr gemessen wird.
+  const t1 = (s.text.match(/(\d+) s\s+\d+ Bilder/) || [])[1];
+  await seite.waitForTimeout(2500);
+  const t2 = ((await stand()).text.match(/(\d+) s\s+\d+ Bilder/) || [])[1];
+  console.log(`     Laufzeit im Ergebnis  ${t1} s → ${t2} s`);
+  if (t1 != null && t2 != null && Number(t2) > Number(t1))
+    M.befund(`die Laufzeit waechst im Ergebnis weiter (${t1} s → ${t2} s), obwohl nicht mehr gemessen wird.`);
 }
 
 // ---- E  die Kopierzeile ------------------------------------------------
@@ -236,6 +249,10 @@ else {
 }
 
 // ---- G  der Schalter ueberlebt ein Neuladen ---------------------------
+// Vorher wieder ANSCHALTEN: Pruefung D hat ihn ausgemacht, und geprueft
+// werden soll, ob ein LAUFENDER Schalter das Neuladen uebersteht.
+await seite.evaluate(() => { if (!window.__SKF_MESSAN()) window.__SKF_MESSTAFEL(); });
+await seite.waitForTimeout(800);
 await seite.reload();
 await seite.waitForFunction(() => window.__game, null, { timeout: 90000 });
 await seite.waitForTimeout(2500);
@@ -247,24 +264,16 @@ await seite.waitForTimeout(2500);
   else if (!s.an) M.befund('nach einem Neuladen ist die Messung aus. Eine Messung, die beim Nachladen still ausgeht, ist keine.');
 }
 
-// ---- H  Der Streifen darf keine Finger fangen -------------------------
+// ---- H  Waehrend der Messung liegt NICHTS ueber der Leinwand ---------
 //
-// DER ANLASS, woertlich: „der Aufklapper stoert total das Fliegen, man
-// kann das Flugzeug kaum sauber steuern." Seit v62 steht die Tafel
-// eingeklappt WAEHREND DES SPIELS da, und ein festes Element ueber der
-// Leinwand schluckt jeden Zug, der auf ihm beginnt — genau dort, wo der
-// Daumen liegt.
-//
-// Gemessen wird BEIDES: was an der Stelle liegt (elementFromPoint) und
-// was passiert, wenn man dort zu ziehen anfaengt. Das erste ist die
-// Mechanik, das zweite die Wirkung — und nur das zweite ist die Frage
-// des Nutzers.
-console.log('\n  H  Faengt der Streifen Finger?');
+// DER ANLASS, woertlich: „der Aufklapper stoert total das Fliegen" (v63)
+// und dann „Ich haette gern oben einfach so einen Anschalter" (v73). Bis
+// v72 stand waehrend der Messung ein Streifen ueber dem Spiel, den man
+// durchlaessig machen musste. Seit v73 steht dort gar nichts — und das
+// laesst sich schaerfer pruefen als Durchlaessigkeit: an keiner Stelle
+// der Leinwand darf etwas anderes liegen als die Leinwand.
+console.log('\n  H  Liegt waehrend der Messung etwas ueber der Leinwand?');
 {
-  // Nach Pruefung G steht die Seite frisch geladen im Menue — dort gibt es
-  // kein Flugzeug zu steuern. Erst wieder ins Gefecht, sonst misst die
-  // Zugprobe nur, dass es keine Szene gibt (und meldet das als „null",
-  // was wie ein Befund aussieht und keiner ist).
   await seite.evaluate(async () => {
     const g = window.__game;
     (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
@@ -277,54 +286,27 @@ console.log('\n  H  Faengt der Streifen Finger?');
       if (sz.player) return;
     }
   });
-  await seite.waitForTimeout(2000);
-  // Zurueck in den eingeklappten Zustand: darum geht es.
-  await tippen('zu');
-  await seite.waitForTimeout(1200);
-  const punkte = await seite.evaluate(() => {
-    const t = document.getElementById('messung');
-    if (!t) return { fehler: 'keine Tafel' };
-    const r = t.getBoundingClientRect();
-    if (!(r.width > 0 && r.height > 0)) return { fehler: 'der Streifen hat keine Flaeche' };
-    const mitte = { x: Math.round(r.left + r.width * 0.5), y: Math.round(r.top + r.height * 0.5) };
-    const links = { x: Math.round(r.left + r.width * 0.85), y: Math.round(r.top + r.height * 0.35) };
-    const treffer = (p) => { const e = document.elementFromPoint(p.x, p.y); return e ? (e.id || e.tagName + (e.className ? '.' + e.className : '')) : null; };
-    return { rahmen: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
-             mitte, links, wasMitte: treffer(mitte), wasLinks: treffer(links) };
+  await seite.evaluate(() => { if (!window.__SKF_MESSAN()) window.__SKF_MESSTAFEL(); });
+  await seite.waitForTimeout(1500);
+  const fremd = await seite.evaluate(() => {
+    const lw = document.querySelector('canvas');
+    if (!lw) return { fehler: 'keine Leinwand' };
+    const r = lw.getBoundingClientRect();
+    const raus = [];
+    for (const [nx, ny] of [[.5, .2], [.5, .5], [.5, .8], [.2, .9], [.8, .9], [.5, .95]]) {
+      const x = Math.round(r.left + r.width * nx), y = Math.round(r.top + r.height * ny);
+      const e = document.elementFromPoint(x, y);
+      const wer = e ? (e.id || e.tagName) : 'nichts';
+      if (wer !== 'CANVAS') raus.push(`(${x},${y}) → ${wer}`);
+    }
+    return { raus, an: window.__SKF_MESSAN(), klasse: document.getElementById('messung').className };
   });
-  if (punkte.fehler) M.ungemessen(`Streifen: ${punkte.fehler}`);
+  if (fremd.fehler) M.ungemessen(`Leinwand: ${fremd.fehler}`);
   else {
     gemessen++;
-    console.log(`     Streifen ${punkte.rahmen.join(',')} — an (${punkte.mitte.x},${punkte.mitte.y}) liegt ${JSON.stringify(punkte.wasMitte)}`);
-    if (/messung|messwerte/.test(String(punkte.wasMitte)))
-      M.befund(`der eingeklappte Streifen faengt Beruehrungen ab: an (${punkte.mitte.x},${punkte.mitte.y}) liegt ${JSON.stringify(punkte.wasMitte)} statt der Leinwand. Wer dort zu ziehen anfaengt, steuert nicht das Flugzeug.`);
-
-    // Und die Wirkung: auf dem Streifen zu ziehen anfangen und nachsehen,
-    // ob das Spiel den Zug bekommt.
-    const zieht = async (x, y) => {
-      await seite.evaluate(() => {
-        const g = window.__game;
-        const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
-        if (sz) sz.dragging = false;
-      });
-      await seite.mouse.move(x, y);
-      await seite.mouse.down();
-      await seite.mouse.move(x, y - 60, { steps: 4 });
-      const d = await seite.evaluate(() => {
-        const g = window.__game;
-        const sz = (g.scene.scenes || []).find((s) => s.scene.key === 'Game' && s.scene.isActive());
-        return sz ? !!sz.dragging : null;
-      });
-      await seite.mouse.up();
-      return d;
-    };
-    // Erst eine Stelle, an der sicher die Leinwand liegt — sonst misst die
-    // Probe nur, dass Ziehen ueberhaupt nicht ankommt (Regel 13).
-    const frei = await zieht(195, 500);
-    const drauf = await zieht(punkte.mitte.x, punkte.mitte.y);
-    console.log(`     Ziehen auf freier Fläche: ${frei}   ·   auf dem Streifen: ${drauf}`);
-    if (frei !== true) M.ungemessen('das Ziehen kommt selbst auf freier Flaeche nicht an — die Wirkung ist nicht gemessen.');
-    else if (drauf !== true) M.befund('ein Zug, der auf dem Streifen beginnt, erreicht das Spiel nicht — das Flugzeug laesst sich dort nicht steuern.');
+    console.log(`     an=${fremd.an}  Klasse=${JSON.stringify(fremd.klasse)}  Fremdes an sechs Stellen: ${fremd.raus.length ? fremd.raus.join(' · ') : 'nichts'}`);
+    if (fremd.raus.length)
+      M.befund(`waehrend der Messung liegt etwas ueber der Leinwand: ${fremd.raus.join(' · ')}. Gespielt wird waehrend der Messung — was dort liegt, faengt Finger.`);
   }
 }
 
@@ -393,37 +375,58 @@ console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
 //
 // Geprueft wird nach Regel 13 in BEIDE Richtungen: ohne Umbau darf der
 // Zaehler nicht steigen, sonst zaehlt er etwas anderes mit.
-console.log('\n  J  Bucht die Tafel ihre eigene Arbeit getrennt?');
+console.log('\n  J  Ruehrt sich die Tafel waehrend der Messung?');
 {
-  const eigen = () => seite.evaluate(() => typeof window.__SKF_MESSEIGEN === 'function' ? window.__SKF_MESSEIGEN() : null);
-  const a = await eigen();
-  if (a === null) M.ungemessen('__SKF_MESSEIGEN fehlt — was die Tafel sich selbst zuschreibt, ist nicht abzufragen.');
+  // BIS v72 MUSSTE SIE SICH RUEHREN: der Streifen stand ueber dem Spiel
+  // und wurde alle dreissig Bilder neu geschrieben, das Aufklappen kostete
+  // ein eigenes Bild, und beides musste getrennt gebucht werden (v65,
+  // Regel 59), damit „laengste" nicht die Messung mass.
+  //
+  // Seit v73 ist die Tafel waehrend der Messung unsichtbar und wird nicht
+  // geschrieben. Damit ist die sauberste Buchung die, die man nicht
+  // braucht — und pruefbar ist es schaerfer als vorher: der Inhalt der
+  // Tafel darf sich waehrend der Messung nicht um ein Zeichen aendern.
+  const inhalt = () => seite.evaluate(() => {
+    const w = document.getElementById('messwerte');
+    return { text: w ? String(w.innerHTML) : null, an: window.__SKF_MESSAN(),
+             eigen: typeof window.__SKF_MESSEIGEN === 'function' ? window.__SKF_MESSEIGEN().umbauten : null };
+  });
+  await seite.evaluate(() => { if (window.__SKF_MESSAN()) window.__SKF_MESSTAFEL(); window.__SKF_MESSTAFEL(); });
+  // ERST REIF WERDEN LASSEN. Unter der Reife schreibt die Tafel ohnehin
+  // nichts — dann meldet der Vergleich „unveraendert" ueber eine Tafel,
+  // die gar nicht dazu kam, sich zu schreiben. Genau daran ist ein
+  // erster Anlauf gescheitert, und die Gegenprobe hat es gefunden.
+  if (!await reifWarten(90000)) M.ungemessen('die Tafel wird fuer die Ruheprobe nicht reif.');
+  const a = await inhalt();
+  // GEWARTET WIRD AUF BILDER, NICHT AUF DIE UHR (Regel 2). Die Tafel
+  // schreibt sich hoechstens alle dreissig Bilder — hier unter
+  // SwiftShader ist das eine halbe Minute. Ein erster Anlauf wartete
+  // sechs Sekunden und meldete „unveraendert" ueber eine Tafel, die
+  // sich sehr wohl schrieb.
+  {
+    const start = await bilder();
+    const bis = Date.now() + 90000;
+    while (Date.now() < bis) {
+      await seite.waitForTimeout(1000);
+      const jetzt = await bilder();
+      if (jetzt != null && start != null && jetzt - start >= 40) break;
+    }
+  }
+  const b = await inhalt();
+  if (a.text === null) M.ungemessen('das Wertefeld der Tafel ist nicht zu lesen.');
   else {
-    // Erst die Gegenprobe: NICHTS tun. Steigt der Zaehler auch dann, misst
-    // er nicht den Umbau, sondern irgendetwas.
-    await seite.waitForTimeout(3000);
-    const b = await eigen();
-    console.log(`     nichts getan      Umbauten ${a.umbauten} → ${b.umbauten}`);
-    if (b.umbauten !== a.umbauten)
-      M.befund(`der Umbau-Zaehler steigt, ohne dass etwas umgebaut wurde (${a.umbauten} → ${b.umbauten}). Dann bucht die Tafel gewoehnliche Bilder als eigene Arbeit und rechnet sich die Zahlen schoen.`);
-
-    // Und jetzt mit Umbau: aufklappen ist genau EIN Formwechsel.
-    await tippen('auf');
-    await seite.waitForTimeout(2000);
-    const c = await eigen();
-    console.log(`     aufgeklappt       Umbauten ${b.umbauten} → ${c.umbauten}   laengster ${c.max.toFixed(1)} ms`);
-    if (c.umbauten !== b.umbauten + 1)
-      M.befund(`das Aufklappen wird nicht als genau ein eigenes Bild gebucht (${b.umbauten} → ${c.umbauten}). Dann steht die Aufklapp-Bildluecke als Ruckler des Spiels in „laengste" — und die Messung misst die Messung.`);
-
-    await tippen('kopieren');
-    await seite.waitForTimeout(2000);
-    const d = await eigen();
-    console.log(`     kopiert           Umbauten ${c.umbauten} → ${d.umbauten}   Vergleichsbilder ${d.mitZeichnen}/${d.ohne}`);
-    if (!(d.umbauten > c.umbauten))
-      M.befund(`das Kopieren wird nicht als eigenes Bild gebucht (${c.umbauten} → ${d.umbauten}).`);
-    if (d.umbauten > 0 && !(d.max > 0))
-      M.befund('es sind eigene Bilder gebucht, aber keins hat eine Dauer — dann ist die Buchung eine Zaehlung ohne Messung.');
     gemessen++;
+    console.log(`     waehrend der Messung  an=${b.an}  Inhalt unveraendert: ${a.text === b.text ? 'ja' : 'NEIN'}  (${a.text.length} Zeichen)`);
+    if (!b.an) M.ungemessen('die Messung lief waehrend der Probe gar nicht.');
+    else if (a.text !== b.text)
+      M.befund(`die Tafel schreibt sich waehrend der Messung neu (${a.text.length} → ${b.text.length} Zeichen). Sie ist dabei unsichtbar — jedes Schreiben ist also Arbeit, die niemand sieht und die in den Bildzeiten landet.`);
+    // Und beim Ausschalten MUSS sie sich fuellen, sonst war alles umsonst.
+    await seite.evaluate(() => window.__SKF_MESSTAFEL());
+    await seite.waitForTimeout(1500);
+    const c = await inhalt();
+    console.log(`     nach dem Ausschalten  ${c.text.length} Zeichen`);
+    if (!(c.text.length > 40))
+      M.befund(`nach dem Ausschalten steht kein Ergebnis in der Tafel (${c.text.length} Zeichen).`);
   }
 }
 
@@ -544,15 +547,37 @@ console.log('\n  L  Ueberlebt die Messung eine Pause?');
     else if (nach < vor)
       M.befund(`eine Pause setzt die Messung zurueck (${vor} → ${nach} Bilder). Wer pausiert, wirft seine Messung weg — und die kopierte Zeile behauptet danach eine Laufzeit, die es nicht gab. Genau daran war die v69-Messung nicht zu lesen.`);
 
-    // Und die Gegenrichtung: ein NEUER Lauf muss zuruecksetzen, sonst
-    // stehen Menuebilder und zwei Sektoren in einem Topf.
+    // UND EIN NEUER SEKTOR DARF EBENFALLS NICHTS WEGWERFEN (seit v73).
+    //
+    // Bis v72 setzte jeder neue Sektor zurueck. Der Nutzer will aber
+    // einschalten, spielen, ausschalten, kopieren — und dann alles in
+    // einer Zeile haben, nicht nur den letzten Sektor.
     const vor2 = await bilder();
     await insGefecht();
     await seite.waitForTimeout(2500);
     const nach2 = await bilder();
-    console.log(`     neuer Lauf     Bilder ${vor2} → ${nach2}`);
-    if (vor2 != null && nach2 != null && nach2 >= vor2)
-      M.befund(`ein neuer Sektor setzt die Messung NICHT zurueck (${vor2} → ${nach2} Bilder). Dann stehen zwei Laeufe in einer Zahl.`);
+    console.log(`     neuer Sektor   Bilder ${vor2} → ${nach2}`);
+    if (vor2 != null && nach2 != null && nach2 < vor2)
+      M.befund(`ein neuer Sektor wirft die Messung weg (${vor2} → ${nach2} Bilder). Wer drei Sektoren am Stueck spielt, will am Ende alle drei in einer Zeile haben.`);
+
+    // Die Gegenrichtung: wer im MENUE einschaltet, misst sonst die
+    // Kulisse mit — dort faengt sie beim ersten Bild im Gefecht einmal
+    // von vorn an.
+    await seite.evaluate(() => {
+      const g = window.__game;
+      (g.scene.scenes || []).forEach((s) => { if (s.scene.key !== 'Boot' && s.scene.isActive()) g.scene.stop(s.scene.key); });
+      g.scene.start('Menu');
+    });
+    await seite.waitForTimeout(1200);
+    await seite.evaluate(() => { if (window.__SKF_MESSAN()) window.__SKF_MESSTAFEL(); window.__SKF_MESSTAFEL(); });
+    await seite.waitForTimeout(4000);
+    const imMenue = await bilder();
+    await insGefecht();
+    await seite.waitForTimeout(2500);
+    const imGefecht = await bilder();
+    console.log(`     Start im Menue Bilder ${imMenue} → ${imGefecht} (nach dem Betreten)`);
+    if (imMenue != null && imGefecht != null && imGefecht >= imMenue)
+      M.befund(`im Menue eingeschaltet und dann ins Gefecht: die Messung faengt NICHT von vorn an (${imMenue} → ${imGefecht} Bilder). Dann stehen Menuebilder in einer Zeile, die vom Gefecht handeln soll.`);
   }
 }
 
