@@ -613,6 +613,35 @@ Jede hat mindestens eine Runde gekostet.
    hat hier eine Runde gespart, die sonst in die Beschleunigung des Baus
    gegangen waere.
 
+71. **Zwei Namen fuer dieselbe Sache sind zwei Zeilen im Bericht — und
+   damit eine halbierte Zahl.** Der Laufzeitbericht fuehrte `lage` mit
+   230 s und `ueberlappung` mit 158 s als getrennte Posten; es ist
+   DASSELBE Tor, nur einmal als Kuerzel und einmal als Dateiname. Jede
+   Zeile sah harmlos aus, zusammen sind es 388 s und Platz drei.
+
+   Das ist Regel 70, angewandt auf den Bericht, der Regel 70 belegt: ich
+   habe die Regel geschrieben und sie im selben Zug gebrochen.
+
+   Und es blieb nicht bei der Anzeige. Derselbe Doppelname stand im
+   FILTER: `--ohne-tor=lage` haette die zwei Hauptproben weggelassen und
+   die Modusprobe desselben Tors trotzdem laufen lassen — und der Lauf
+   haette gemeldet, das Tor sei ausgelassen. Ein Schalter, der die Haelfte
+   tut und das Ganze meldet, ist schlimmer als keiner.
+
+   **Wo ein Name zweimal vorkommt, gehoert die Zuordnung an EINE Stelle.**
+   In dieser Datei stand sie dreimal: in `torLauf`, in der Namenstabelle,
+   und im Bericht.
+
+72. **Eine Probe kostet nicht, was ihr Tor kostet — und der Irrtum geht in
+   beide Richtungen.** Gemessen: Ueberlappung 68,3 s in der Kette, 115,1 s
+   als Probe (Faktor 1,7, weil Bau, Zurueckschreiben und ein ZWEITER Bau
+   dazugehoeren). Farbtor umgekehrt: 4,0 s als Probe statt 8 s, weil die
+   statischen Proben es mit `--nurstatisch` rufen.
+
+   Eine Hochrechnung aus den Torzeiten haette in beiden Faellen falsch
+   gelegen und dabei plausibel ausgesehen. Deshalb misst der Satz je Probe
+   und nicht je Tor.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

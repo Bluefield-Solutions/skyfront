@@ -60,7 +60,7 @@ const NUR_ANKER = process.argv.includes('--anker');
 // Was dabei aufgegeben wird, steht am Ende des Laufs — namentlich. Ein
 // weggelassener Satz Proben, den niemand aufzaehlt, ist ein Satz Proben,
 // von dem irgendwann jeder glaubt, er sei gelaufen.
-const OHNE_TOR = (process.argv.find((a) => a.startsWith('--ohne-tor=')) || '').slice(11)
+const OHNE_TOR_ROH = (process.argv.find((a) => a.startsWith('--ohne-tor=')) || '').slice(11)
   .split(',').map((x) => x.trim()).filter(Boolean);
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
@@ -698,6 +698,34 @@ process.on('exit', () => {
   if (existsSync(HUELLE_SICHER)) { copyFileSync(HUELLE_SICHER, HUELLE); unlinkSync(HUELLE_SICHER); }
 });
 
+// Kuerzel -> Werkzeug. Bis hierher gab es diese Zuordnung ZWEIMAL: einmal
+// als Kette von Fragezeichen in torLauf, einmal als Namenstabelle weiter
+// unten. Der Laufzeitbericht brauchte sie ein drittes Mal — und ohne sie
+// stand dasselbe Tor zweimal in der Tafel, unter Kuerzel und Dateinamen:
+// `lage` mit 230 s und `ueberlappung` mit 158 s sind DASSELBE Tor. Jede
+// der beiden Zeilen sah harmlos aus, zusammen sind es 388 s.
+//
+// Das ist derselbe Fehler wie eine Ebene hoeher (Regel 70), nur in meinem
+// eigenen Bericht: nach der falschen Achse gruppiert verschwindet ein
+// Block in mehreren Zeilen.
+const WERKZEUG = {
+  farb: 'farbtor', form: 'formen', boden: 'untergrund', kraft: 'feuerkraft',
+  speicher: 'speicher', rhythmus: 'rhythmus', formation: 'formationen',
+  zeit: 'zeitachse', muster: 'bossmuster', steuer: 'steuerung',
+  bogen: 'geschossbogen', waerme: 'vorwaermen', ende: 'niederlage',
+  dichte: 'geschossdichte', klang: 'klang', musik: 'musik',
+  lage: 'ueberlappung', kopf: 'kopfzeile', ruestung: 'ruestung',
+  schirme: 'schirme', messtafel: 'messtafel', zeichenwerk: 'zeichenwerk',
+  sektor: 'sektor',
+};
+
+// Der Schalter meint ein TOR, nicht eine Schreibweise: `--ohne-tor=lage`
+// und `--ohne-tor=ueberlappung` sind dasselbe. Ohne diese Normierung haette
+// `--ohne-tor=lage` die zwei Hauptproben weggelassen und die Modusprobe
+// desselben Tors trotzdem laufen lassen — 158 der 388 Sekunden waeren
+// geblieben, und der Lauf haette behauptet, das Tor sei ausgelassen.
+const OHNE_TOR = OHNE_TOR_ROH.map((x) => WERKZEUG[x] || x);
+
 const torLauf = (statisch, tor = 'farb') => {
   const cmd = tor === 'form' ? ['tools/formen.mjs']
     : tor === 'boden' ? ['tools/untergrund.mjs']
@@ -764,7 +792,7 @@ const weggelassen = [];
 let fehler = 0, gelaufen = 0;
 for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN)
   .filter(([n]) => !NUR || n.toLowerCase().includes(NUR))
-  .filter(([n, , , , t = 'farb']) => { if (OHNE_TOR.includes(t)) { weggelassen.push([n, t]); return false; } return true; })) {
+  .filter(([n, , , , t = 'farb']) => { const w = WERKZEUG[t] || t; if (OHNE_TOR.includes(w)) { weggelassen.push([n, w]); return false; } return true; })) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const quelle = datei === HUELLE ? HUELLE_SICHER : SICHER;
   const roh = readFileSync(quelle, 'utf8');
@@ -777,7 +805,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
   const t0 = Date.now();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
   const r = torLauf(!neubau, tor);
-  dauern.push([name, (Date.now() - t0) / 1000, tor]);
+  dauern.push([name, (Date.now() - t0) / 1000, WERKZEUG[tor] || tor]);
   gelaufen++;
   if (!r.rot) { console.log(`✗ ${name}: Tor blieb GRÜN — Prüfung ${pruefung} greift nicht`); fehler++; }
   else if (pruefung !== '✗' && !new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
@@ -1041,7 +1069,13 @@ const MODUSPROBEN = [{
 let modusFehler = 0, modusGelaufen = 0;
 if (ALLE || NUR_MODUS) {
   console.log('');
-  for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor'))).filter((m) => !NUR || m.name.toLowerCase().includes(NUR))) {
+  for (const m of MODUSPROBEN.filter((m) => !(OHNE_BILD && m.cmd[0].includes('bildtor')))
+    .filter((m) => !NUR || m.name.toLowerCase().includes(NUR))
+    .filter((m) => {
+      const w = m.cmd[0].replace(/^tools\//, '').replace(/\.mjs$/, '');
+      if (OHNE_TOR.includes(w)) { weggelassen.push([m.name, w]); return false; }
+      return true;
+    })) {
     let text = '', rot = false, code = 0;
     const t0 = Date.now();
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }

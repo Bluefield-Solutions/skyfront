@@ -56,7 +56,7 @@
     "messtafel": "node tools/messtafel.mjs",
     "zeichenwerk": "node tools/zeichenwerk.mjs",
     "sektor": "node tools/sektor.mjs",
-    "probenmittel": "node tools/farbproben.mjs --alle --ohne-tor=messtafel,ruestung"
+    "probenmittel": "node tools/farbproben.mjs --alle --ohne-tor=messtafel,ruestung,lage"
   },
   "engines": {
     "node": ">=18"
