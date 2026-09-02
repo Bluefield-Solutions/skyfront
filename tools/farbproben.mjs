@@ -48,6 +48,20 @@ const NUR = (process.argv.find((a) => a.startsWith('--nur=')) || '').slice(6).to
 // ausgerechnet die Pruefung, die Drift findet, an den teuersten Lauf
 // gekettet.
 const NUR_ANKER = process.argv.includes('--anker');
+// --ohne-tor=messtafel,ruestung: Proben weglassen, die an einem TEUREN Tor
+// haengen. Nicht Proben weglassen, sondern TORE — das ist der Unterschied,
+// den die Messung erst sichtbar gemacht hat.
+//
+// Die Liste der teuersten PROBEN sah flach aus: acht Stueck zu je vier bis
+// fuenf Prozent, nichts zu holen. Das ist eine Taeuschung der Sortierung.
+// Ein Tor kostet immer dasselbe, und die teuren Proben haengen an wenigen:
+// die neun Messtafel-Proben tragen allein 23 der 51 Minuten.
+//
+// Was dabei aufgegeben wird, steht am Ende des Laufs — namentlich. Ein
+// weggelassener Satz Proben, den niemand aufzaehlt, ist ein Satz Proben,
+// von dem irgendwann jeder glaubt, er sei gelaufen.
+const OHNE_TOR = (process.argv.find((a) => a.startsWith('--ohne-tor=')) || '').slice(11)
+  .split(',').map((x) => x.trim()).filter(Boolean);
 const APP = 'src/app.js';
 const SICHER = 'src/app.js.probe';
 // Nicht jeder Eingriff sitzt in src/app.js. Die Messtafel haengt in der
@@ -746,8 +760,11 @@ console.log('');
 // Laufs schon, und darum geht es: welche Probe traegt die Zeit.
 const satzStart = Date.now();
 const dauern = [];
+const weggelassen = [];
 let fehler = 0, gelaufen = 0;
-for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN).filter(([n]) => !NUR || n.toLowerCase().includes(NUR))) {
+for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN)
+  .filter(([n]) => !NUR || n.toLowerCase().includes(NUR))
+  .filter(([n, , , , t = 'farb']) => { if (OHNE_TOR.includes(t)) { weggelassen.push([n, t]); return false; } return true; })) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const quelle = datei === HUELLE ? HUELLE_SICHER : SICHER;
   const roh = readFileSync(quelle, 'utf8');
@@ -760,7 +777,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
   const t0 = Date.now();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
   const r = torLauf(!neubau, tor);
-  dauern.push([name, (Date.now() - t0) / 1000]);
+  dauern.push([name, (Date.now() - t0) / 1000, tor]);
   gelaufen++;
   if (!r.rot) { console.log(`✗ ${name}: Tor blieb GRÜN — Prüfung ${pruefung} greift nicht`); fehler++; }
   else if (pruefung !== '✗' && !new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
@@ -1029,7 +1046,7 @@ if (ALLE || NUR_MODUS) {
     const t0 = Date.now();
     try { text = execFileSync('node', m.cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
     catch (e) { code = e.status; rot = true; text = (e.stdout || '') + (e.stderr || ''); }
-    dauern.push([m.name, (Date.now() - t0) / 1000]);
+    dauern.push([m.name, (Date.now() - t0) / 1000, m.cmd[0].replace(/^tools\//, '').replace(/\.mjs$/, '')]);
     modusGelaufen++;
     const mangel = [];
     // Rueckgabe 2 heisst "nicht (vollstaendig) gemessen" und ist KEIN
@@ -1071,6 +1088,11 @@ if (ALLE || NUR_MODUS) {
 if (readFileSync(APP, 'utf8') !== readFileSync(SICHER, 'utf8'))
   console.log('\n⚠ src/app.js weicht am Ende von der Ausgangskopie ab — hat jemand waehrend des Laufs daran gearbeitet? Die Aenderung ist dann verloren.');
 
+if (weggelassen.length) {
+  console.log(`\n(—) ${weggelassen.length} Probe(n) WEGGELASSEN (--ohne-tor=${OHNE_TOR.join(',')}) — diese sind NICHT gelaufen:`);
+  for (const [n, t] of weggelassen) console.log(`      ${n}   (${t})`);
+}
+
 console.log(`\n${gelaufen} Probe(n) gelaufen, ${fehler} ohne Wirkung.`);
 if (modusGelaufen) console.log(`${modusGelaufen} Modusprobe(n) gelaufen, ${modusFehler} ohne Wirkung.`);
 
@@ -1092,6 +1114,24 @@ if (dauern.length) {
   for (const [n, d] of teuerste) {
     const anteil = Math.round(d / summe * 100);
     console.log(`    ${String(d.toFixed(1)).padStart(6)} s  ${String(anteil).padStart(2)} %  ${n}`);
+  }
+  // Und die Gruppierung, die wirklich etwas sagt: JE TOR.
+  //
+  // Die Liste der teuersten Proben sah nach einer flachen Verteilung aus —
+  // acht Stueck zu je vier bis fuenf Prozent, nichts zu holen. Das ist
+  // eine Taeuschung der Sortierung: die teuren Proben haengen an WENIGEN
+  // Toren, und ein Tor kostet immer dasselbe. Wer sparen will, laesst
+  // nicht Proben weg, sondern Tore — und weiss dann auch, was er dabei
+  // aufgibt.
+  const jeTor = new Map();
+  for (const [, d, t] of dauern) {
+    const e = jeTor.get(t) || { n: 0, s: 0 };
+    e.n++; e.s += d; jeTor.set(t, e);
+  }
+  console.log('\n  je Tor:');
+  for (const [t, e] of [...jeTor].sort((a, b) => b[1].s - a[1].s)) {
+    console.log(`    ${String(e.s.toFixed(0)).padStart(5)} s  ${String(Math.round(e.s / summe * 100)).padStart(2)} %  `
+      + `${String(e.n).padStart(2)} Proben a ${(e.s / e.n).toFixed(1)} s   ${t}`);
   }
   console.log(`\n  Gemessen auf diesem Rechner, in diesem Lauf. Nicht uebertragbar —`);
   console.log(`  vergleichbar ist nur, was INNERHALB eines Laufs nebeneinander steht.`);

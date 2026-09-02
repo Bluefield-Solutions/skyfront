@@ -16,10 +16,21 @@ import { ladeChromium, startbar } from './tools/boot.mjs';
 // im Pruefbericht stand danach "✅ ohne Befund", obwohl nichts gemessen
 // wurde. Ein Tor, das nichts geprueft hat, darf nicht aussehen wie eines,
 // das bestanden hat.
+// Was jedes Tor kostet. Bis v75 stand die Verteilung nur als Satz im
+// Kopf dieser Datei ("302 s, davon 174 s das Bildtor") — gemessen einmal,
+// bei damals achtzehn Toren, und seither nie wieder. Inzwischen sind es
+// siebenundzwanzig, und niemand wusste, welche die Zeit tragen.
+//
+// Eine Zahl, die einmal gemessen und dann aufgeschrieben wurde, altert
+// still: sie sieht bis zuletzt aus wie eine Messung. Deshalb misst die
+// Kette jetzt bei JEDEM Lauf mit und schreibt es in den Bericht.
+const dauern = [];
 function step(label, cmd) {
   console.log(`\n▶ ${label}`);
+  const t0 = Date.now();
   try { execSync(cmd, { stdio: 'inherit' }); return 0; }
   catch (e) { if (e.status === 2) return 2; throw e; }
+  finally { dauern.push([label, (Date.now() - t0) / 1000]); }
 }
 
 // Wer ein "nicht gemessen" hinnimmt, und wer nicht.
@@ -37,7 +48,17 @@ const STRENG = process.argv.includes('--streng') || process.env.SKF_STRENG === '
 
 // Die Stufung.
 //
-// Gemessen: die Kette kostet seriell 302 s, davon 174 s allein das Bildtor.
+// Gemessen (v75, dieser Rechner, ohne Grafikkarte): 14:10 min ueber 30
+// Schritte, OHNE das Bildtor. Die teuersten drei sind Messtafel 154 s,
+// Ruestung 89 s, Zeichenwerk 69 s; zwanzig weitere teilen sich 27 %.
+//
+// Hier stand bis v75: "302 s, davon 174 s allein das Bildtor". Das war
+// einmal gemessen, bei damals ACHTZEHN Toren, und ist danach nie wieder
+// nachgesehen worden — waehrend neun Tore dazukamen. Eine Zahl, die einmal
+// gemessen und dann aufgeschrieben wurde, altert still: sie sieht bis
+// zuletzt aus wie eine Messung. Deshalb steht die Verteilung jetzt im
+// Bericht und entsteht bei JEDEM Lauf neu.
+//
 // Wer bei jeder Aenderung fuenf Minuten wartet, prueft am Ende seltener —
 // und das ist teurer als ein Tor, das erst in der CI laeuft.
 //
@@ -249,6 +270,31 @@ if (ok) {
 const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 let md = `# Skyfront — Check-Report\n\n_${date}_\n\n`;
 
+// Die Zeittafel. Nicht nur die Summe: die Summe sagt "zu lang" und sonst
+// nichts. Erst die Verteilung sagt, WO sie liegt — und ob am billigen Ende
+// ueberhaupt etwas zu holen waere. Genau diese Frage hat beim Probensatz
+// die Antwort umgedreht: der Neubau, den ich fuer den Kostentreiber hielt,
+// kostet 0,66 s. Die Zeit lag ganz in den Torlaeufen.
+function zeitTafel() {
+  if (!dauern.length) return '';
+  const summe = dauern.reduce((s, [, d]) => s + d, 0);
+  const min = (x) => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, '0')}`;
+  const sortiert = [...dauern].sort((a, b) => b[1] - a[1]);
+  let t = `\n### Laufzeit — ${min(summe)} min ueber ${dauern.length} Schritte\n\n`;
+  t += '| Schritt | Dauer | Anteil |\n|---|--:|--:|\n';
+  for (const [n, d] of sortiert.slice(0, 10))
+    t += `| ${n} | ${d.toFixed(1)} s | ${Math.round(d / summe * 100)} % |\n`;
+  const rest = sortiert.slice(10);
+  if (rest.length) {
+    const r = rest.reduce((s, [, d]) => s + d, 0);
+    t += `| _${rest.length} weitere_ | ${r.toFixed(1)} s | ${Math.round(r / summe * 100)} % |\n`;
+  }
+  t += `\n_Gemessen in diesem Lauf, auf dem Rechner, der ihn gefahren hat — `;
+  t += `unter SwiftShader also ohne Grafikkarte. Nicht uebertragbar, `;
+  t += `vergleichbar nur untereinander._\n`;
+  return t;
+}
+
 if (existsSync('dist/boot-report.txt')) {
   const lines = readFileSync('dist/boot-report.txt', 'utf8').split('\n').filter(l => /^[✓✗]/.test(l));
   md += '| Datei | Status | Fehler |\n|---|:--:|:--:|\n' + masterZeile + torZeilen.join('');
@@ -266,6 +312,7 @@ if (existsSync('dist/boot-report.txt')) {
   // mit Rueckgabe 1 endete — der Bericht sagte das Gegenteil des Ergebnisses.
   if (STRENG && ungemessen.length) ok = false;
   md += `\n**Ergebnis:** ${ok ? '✅ bestanden' : '❌ fehlgeschlagen'}\n`;
+  md += zeitTafel();
 } else {
   md += (ok ? '✅ Alle Builds erzeugt. ' : '❌ Build fehlgeschlagen. ') +
     '_Boot-Test nicht gelaufen (Playwright nicht installiert) — nur Struktur-Prüfung._\n';

@@ -582,6 +582,37 @@ Jede hat mindestens eine Runde gekostet.
    nur, was INNERHALB eines Laufs nebeneinander steht — Regel 12 fuer
    Sekunden.
 
+69. **Eine gemessene Zahl, die aufgeschrieben wird, altert still.** Im Kopf
+   von `check.mjs` stand „gemessen: die Kette kostet seriell 302 s, davon
+   174 s allein das Bildtor". Stimmte — bei ACHTZEHN Toren. Inzwischen sind
+   es siebenundzwanzig, und der vergleichbare Wert liegt bei 850 s statt
+   128. Faktor sechs, und niemandem ist es aufgefallen, weil „gemessen"
+   davorstand.
+
+   Das ist die tueckischere Haelfte von Regel 12. Eine Zahl OHNE Messstelle
+   erkennt man; eine Zahl MIT Messstelle, die niemand mehr nachfaehrt,
+   nicht. Sie wird nicht falsch, weil jemand einen Fehler macht, sondern
+   weil alle alles richtig machen und die Welt weitergeht.
+
+   Deshalb gilt: **jede Zahl, die im Text steht, gehoert in den Bericht.**
+   Torkette und Probensatz messen ihre Laufzeit jetzt bei jedem Lauf selbst.
+
+70. **Nach der falschen Achse sortiert sieht jede Verteilung flach aus.**
+   Der Probensatz kostet 67 min. Die acht teuersten PROBEN lagen bei je
+   vier bis fuenf Prozent — nichts zu holen, schien es. Nach TOR gruppiert
+   traegt die Messtafel allein 23 der 51 Minuten: neun Proben an einem Tor,
+   das 154 s kostet.
+
+   Beide Zahlen stammen aus demselben Lauf. Die Sortierung nach Einzelposten
+   verteilt einen Block auf viele Zeilen und laesst ihn verschwinden. Wer
+   einen Hebel sucht, gruppiert nach dem, was den Preis BESTIMMT — hier das
+   Tor, nicht die Probe.
+
+   Und dazu, aus derselben Runde: 60 der 74 Proben verlangen einen Neubau,
+   also war der Neubau der Verdaechtige. Ein Bau kostet **0,66 s**. Regel 9
+   hat hier eine Runde gespart, die sonst in die Beschleunigung des Baus
+   gegangen waere.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert
