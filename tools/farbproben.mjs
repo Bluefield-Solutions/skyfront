@@ -258,7 +258,11 @@ const PROBEN = [
   ['Messtafel fuellt sich beim Ausschalten nicht', '✗',
     ['          endeMs = performance.now(); offen = proben.length > 0; zeichnen();',
      '          endeMs = performance.now(); offen = proben.length > 0;'],
-    true, 'messtafel:D', 'steht kein Ergebnis', HUELLE],
+    // NACHGEMESSEN in v79: mit `--bis=D` blieb diese Probe GRUEN. Der Satz
+    // "steht kein Ergebnis" steht in D UND in J; angeschlagen hat J. Ein zu
+    // enger Zuschnitt macht eine Probe wirkungslos — und der Satz meldet es,
+    // weil jede Probe verlangt, dass das Tor rot wird.
+    true, 'messtafel:J', 'steht kein Ergebnis', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
   // gesehen — die Pause war der einzige Schirm, den keines betrat.
