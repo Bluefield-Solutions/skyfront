@@ -331,61 +331,123 @@ Rand, sobald das Motiv stimmt. Sie hat beide bisherigen Lieferungen mit
 ### B-5 · AMBOSSKREUZER → `boss_ambosskreuzer.png`
 
 > **Einstellung im Werkzeug, VOR dem Prompt:**
-> Seitenverhältnis **1,30 : 1 quer** (nächstliegende Voreinstellung: **4:3**),
-> Größe **1300 × 1000 px**.
-> Nur **wenig** breiter als hoch — nicht 16:9, nicht 2:1. Von den fünf ist dies
-> das ausgewogenste Format; die Breite kommt aus den Querarmen, nicht aus einer
-> Spannweite.
+> Seitenverhältnis **1,80 : 1 quer** (nächstliegende Voreinstellung: **16:9**),
+> Größe **1600 × 900 px**. Ausgabe **PNG mit echtem Alphakanal**.
+>
+> **Dritte Fassung (v78). Was die beiden Lieferungen gelehrt haben:**
+>
+> *Anlauf 1* traf das damals bestellte Format 1,30 sogar (gemessen 1,32 bei
+> Inhalt 1399 × 1061) und war trotzdem falsch: die Querarme trugen nur
+> **24 %** der Höhe, der Rest war Rumpf. Ein Seitenverhältnis sagt nur, wie
+> das Rechteck steht — nichts über die Verteilung INNERHALB der Silhouette.
+>
+> *Anlauf 2* mit 1,80 und der Vier-Teile-Regel brachte die Arme auf
+> geschätzte 39 % — der Sprung, auf den es ankam. Zwei Reste blieben: der
+> Bug lief noch als lange Spitze aus (geschätzt 37 % statt höchstens 25 %),
+> und der Hintergrund war offenbar weiß statt durchsichtig.
+>
+> **Daraus die drei Verschärfungen dieser Fassung:**
+> 1. Der Alphakanal wird ausdrücklich verlangt und im Negativprompt
+>    abgesichert. Er war nie strittig — er stand nur nicht als Anweisung da.
+> 2. Der Bug ist ein **stumpfer Meißel**, kein Dreieck. „Kurz" hat nicht
+>    gereicht; die Form muss benannt werden.
+> 3. Für das Aussehen: nicht mehr Detail, sondern **weniger und größer**.
+>    Eine gleichmäßige Decke aus kleinen Kästchen liest sich unruhig, nicht
+>    massiv. Was massiv aussehen lässt, sind große ruhige Platten mit
+>    wenigen sehr dunklen Trennfugen und harten Hell-Dunkel-Sprüngen.
+>
+> **Und eine Regel aus dem Spiel, die vorher in keinem Bildauftrag stand:**
+> `npm run farbtor` hält zwei Farbbänder frei — **rot-orange** für jedes
+> Gegnerprojektil, **weiß-cyan** für jedes Spielerprojektil. Ein Boss mit
+> großen leuchtenden Flächen in diesen Tönen nimmt der Gefahrenanzeige ihre
+> Bedeutung. Kleine Punktlichter sind in Ordnung, Flächen nicht.
 
 ```
 Top-down orthographic view, camera directly overhead, no perspective distortion, no tilt,
-no vanishing point. Subject: an enormous cruciform battlecruiser, nose pointing DOWN
-toward the bottom edge of the frame, engine cluster at the top edge.
-Proportions: only slightly wider than tall — the cross arms span about one and a third
-times the length of the spine, no more. A landscape composition, but a nearly balanced
-one: this is a blocky, massive shape, not a wide flying wing and not a plank.
-Silhouette: a CROSS, and it must read as a cross at a glance. One long armoured spine runs
-from the nose at the bottom to the engine block at the top. Two thick cross arms stick out
-sideways from that spine at right angles — straight out to the left and right, not swept
-back like wings — set at about one third of the length from the nose. The arms are deep
-and blocky, ending in blunt armoured caps. The stern carries four recessed engine bells.
-Between the arms and the stern the spine is narrow, so the four notches of the cross stand
-clearly against the background.
+no vanishing point. Subject: an enormous anvil-shaped cruciform battlecruiser, nose
+pointing DOWN toward the bottom edge of the frame, engine block at the top edge.
+
+PROPORTIONS — read this before anything else and let it override any instinct to draw a
+long ship. This is a WIDE, LOW, MASSIVE slab. Total width is about one and four fifths of
+the total height. Divide the height into four equal parts from top to bottom:
+  · the engine block occupies at most ONE part,
+  · the cross arms occupy at least TWO parts — they are the dominant mass of the ship,
+  · the nose occupies at most ONE part.
+If in doubt, make the arms deeper and the nose shorter. There is no long fuselage.
+
+THE NOSE is a blunt chisel, not a spearhead: a short broad wedge whose tip is cut off flat
+across, so the bottom edge of the ship is a wide straight line, not a point. It must look
+like a battering ram built to smash, never like a blade.
+
+Silhouette: an ANVIL, and it must read as a broad anvil at a glance, even at thumbnail
+size. Two enormously deep, thick armoured arms run straight out to the left and to the
+right — perfectly horizontal, not swept, not tapering — each ending in a blunt squared-off
+armoured cap as deep as the arm itself. Between them sits a broad slab-sided central hull.
+The four notches where arms meet hull are shallow and square, just deep enough for the
+cross to read, never deep cuts that leave a thin spine.
+
+HOW TO MAKE IT LOOK MASSIVE AND HANDSOME — this is about restraint, not about more detail.
+Build it to read at three distances: from far away one bold silhouette; at middle distance
+four or five large armoured masses; only close up the seams and rivets. Use large calm
+armour plates separated by few but very deep, almost black shadow gaps. Do NOT cover the
+hull in an even carpet of small boxes, pipes and greebles — many small parts read busy and
+light, a few huge parts read heavy. Give every major plate a wide chamfered bevel along its
+edge so the key light catches a bright hard line there; those bright edges against the
+near-black gaps are what make metal look solid.
+
+Value and material: near-black in the recessed gaps, mid-tone cold rolled steel on the flat
+plates, bright cool highlights on the top chamfers. Darker blued and burnt steel on the arm
+caps, the armour belts and the engine block; lighter steel on the central hull plates. That
+material contrast gives the silhouette internal structure without adding clutter.
+Weathering is restrained and purposeful: soot streaks trailing back from the engine bells,
+rust bleeding from a few rivet lines, impact scoring on the leading armour, worn bare metal
+on the chamfered edges.
+
 Armament: two large main gun batteries with twin barrels mounted on top of the cross arms,
-three smaller hull turrets spaced along the spine, one heavy launcher tube set into the
-nose.
-Surface: semi-realistic hard-surface military design, brushed gunmetal and deep slate
-armour plating in heavy overlapping layers, weld beams, exposed structural ribs, rivet
-rows, armoured bulkheads, battle scarring and scorch marks.
-Accents: amber floodlights in recessed wells along the spine, dull orange heat glow at the
-engine bells.
-Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
-the lower right, deep cast shadows between the armour layers and under the cross arms,
+three smaller hull turrets spaced across the central hull, one heavy launcher tube set into
+the blunt nose. Keep the barrels short and thick.
+
+COLOUR RESTRICTION, important for the game this is for: the ship must NOT carry any large
+glowing red or orange surface, and no glowing white or cyan lines, strips or fields. Those
+two colour bands are reserved for projectiles and the ship must never compete with them.
+Glow is limited to a handful of small recessed amber point lights and a dull orange heat
+ring deep inside the engine bells.
+
+Lighting: one strong key light from the upper left at 45 degrees, soft cool ambient fill
+from the lower right, deep cast shadows between the armour layers and under the cross arms,
 crisp specular highlights on the raised armour edges.
-Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave a
-clear empty transparent margin of about 2 percent of the frame on all four sides — no part
-of the subject, not even a barrel tip or an antenna, may touch or be cut off by a frame
-edge.
-Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
-vignette, no frame, no text, no logos.
+
+Framing: centred, occupying about 94 percent of the frame width. Leave a clear empty
+transparent margin of at least 3 percent of the frame on all four sides — no part of the
+subject, not even a barrel tip or an antenna, may touch or be cut off by a frame edge.
+
+OUTPUT: PNG with a real alpha channel. The background must be fully transparent — empty
+alpha, not a white fill, not a grey fill, not a checkerboard pattern, not a sky. No ground
+shadow, no vignette, no frame, no text, no logos.
+
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
 silhouette.
 ```
 
 **Negativ:**
 ```
-portrait composition, tall narrow composition, panoramic composition, flying wing,
-swept wings, delta wing, wide wingspan, plank shape, arrowhead, oval hull,
-subject touching frame edge, cartoon, anime, cel shading, toy,
-plastic toy, thick outline, comic book, photorealistic photograph, studio product render,
-background, sky, clouds, ground, terrain, shadow on ground, vignette, frame, border,
-text, watermark, signature, insignia, emblem, badge, heraldry, crest,
-national marking, roundel, swastika, hooked cross, iron cross, runes,
-military decal, painted symbol, logo on hull, red fuselage, crimson hull, blurry, soft focus, upscaled,
-low detail, tilted view, three-quarter view, side view
+white background, solid background, opaque background, filled background, grey background,
+sky background, no alpha, flattened image, drop shadow on background,
+long fuselage, long hull, elongated ship, long pointed nose, pointed prow, long tapering
+bow, spearhead, arrowhead, dagger shape, sword shape, long stern, thin spine, narrow spine,
+slender hull, tall cross, tall narrow composition, portrait composition, square composition,
+thin arms, tapering arms, swept wings, delta wing, flying wing, wide wingspan, oval hull,
+busy greebles, greeble carpet, uniform small detail, cluttered surface, tiny pipes,
+low contrast, flat lighting, washed out,
+glowing red panels, glowing orange panels, large red glow, neon strips, glowing white lines,
+cyan glow, energy field,
+subject touching frame edge, cropped barrel, cartoon, anime, cel shading, toy, plastic toy,
+thick outline, comic book, photorealistic photograph, studio product render, ground,
+terrain, clouds, vignette, frame, border, text, watermark, signature, stencil lettering,
+serial number, insignia, emblem, badge, heraldry, crest, national marking, roundel,
+swastika, hooked cross, iron cross, runes, military decal, painted symbol, logo on hull,
+blurry, soft focus, upscaled, low detail, tilted view, three-quarter view, side view
 ```
-
----
 
 ### Was `npm run bildpruefung` danach sagt
 

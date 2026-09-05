@@ -122,6 +122,24 @@ const tippen = (tat) => seite.evaluate((tat) => {
 // Bilderzahl nirgends, und gerade eingeklappt soll sie geprueft werden.
 const bilder = () => seite.evaluate(() => typeof window.__SKF_MESSBILDER === 'function' ? window.__SKF_MESSBILDER() : null);
 
+// Was jede der zwoelf Pruefungen kostet.
+//
+// Der Anlass: dieses Tor traegt 40 % des ganzen Probensatzes — zehn Proben
+// haengen daran, jede kostet 158 s. Bevor irgendetwas gekuerzt wird, muss
+// dastehen, WO die Zeit liegt; sonst wird an der falschen Stelle gespart
+// und die Empfindlichkeit ist weg, ohne dass die Zeit faellt.
+//
+// Fuenfundvierzig Sekunden stehen als feste Wartezeiten im Quelltext. Wo
+// die uebrigen liegen, sagt keine Datei — also misst das Tor es selbst.
+const taktStart = Date.now();
+let taktLetzt = taktStart;
+const takte = [];
+const takt = (name) => {
+  const jetzt = Date.now();
+  takte.push([name, (jetzt - taktLetzt) / 1000]);
+  taktLetzt = jetzt;
+};
+
 console.log('Messtafel\n');
 console.log('  gemessen am gebauten Spiel, 390 x 844 (iPhone hochkant)\n');
 let gemessen = 0;
@@ -138,6 +156,8 @@ let gemessen = 0;
   }
 }
 
+takt('A  aus');
+
 // ---- B  anschalten -----------------------------------------------------
 await seite.evaluate(() => { window.__SKF_MESSTAFEL && window.__SKF_MESSTAFEL(); });
 await seite.waitForTimeout(6000);
@@ -152,6 +172,8 @@ await seite.waitForTimeout(6000);
   if (s.klasse) M.befund(`waehrend der Messung liegt etwas ueber der Leinwand (Klasse ${JSON.stringify(s.klasse)}). Gespielt wird jetzt, nicht abgelesen — sichtbar sein soll nur der gruene Ring am Knopf.`);
   if (s.knoepfe.length) M.befund(`waehrend der Messung stehen Knoepfe da (${JSON.stringify(s.knoepfe)}). Der einzige Knopf, den es dann braucht, ist der im Spiel.`);
 }
+
+takt('B  anschalten');
 
 // ---- C  eingeklappt weitermessen — DER PUNKT --------------------------
 // GEWARTET WIRD AUF DIE BEDINGUNG, NICHT AUF DIE UHR.
@@ -195,6 +217,8 @@ const nachher = await bilder();
   else if (!(nachher > vorher)) M.befund(`eingeklappt steigt die Bilderzahl nicht (${vorher} → ${nachher}). Die Messung laeuft nur, solange man hinsieht — und der Fall, in dem man misst, ist genau der andere.`);
 }
 
+takt('C  eingeklappt messen');
+
 // ---- D  ausschalten zeigt das Ergebnis, ohne es wegzuwerfen ----------
 if (!await seite.evaluate(() => { window.__SKF_MESSTAFEL(); return true; })) M.ungemessen('der Schalter ist nicht zu erreichen.');
 else {
@@ -217,6 +241,8 @@ else {
     M.befund(`die Laufzeit waechst im Ergebnis weiter (${t1} s → ${t2} s), obwohl nicht mehr gemessen wird.`);
 }
 
+takt('D  ausschalten');
+
 // ---- E  die Kopierzeile ------------------------------------------------
 {
   const s = await stand();
@@ -233,6 +259,8 @@ else {
   }
 }
 
+takt('E  Kopierzeile');
+
 // ---- F  der Takt darf beim Einbruch nicht mitgehen --------------------
 //
 // Hier rechnet SwiftShader mit rund drei Bildern je Sekunde. Genau dann
@@ -247,6 +275,8 @@ else {
   if (langsam && !/unbekannt/.test(s.text) && !/—/.test(zeileTakt))
     M.befund(`bei ${s.text.match(/([\d.,]+)\/s/)[1]} Bildern je Sekunde behauptet die Tafel einen Bildschirmtakt: ${JSON.stringify(zeileTakt.trim())}. Der Takt gehoert zum Bildschirm, nicht zur Leistung.`);
 }
+
+takt('F  Takt');
 
 // ---- G  der Schalter ueberlebt ein Neuladen ---------------------------
 // Vorher wieder ANSCHALTEN: Pruefung D hat ihn ausgemacht, und geprueft
@@ -263,6 +293,8 @@ await seite.waitForTimeout(2500);
   if (s.an === null) M.ungemessen('nach dem Neuladen ist __SKF_MESSAN nicht da.');
   else if (!s.an) M.befund('nach einem Neuladen ist die Messung aus. Eine Messung, die beim Nachladen still ausgeht, ist keine.');
 }
+
+takt('G  Neuladen');
 
 // ---- H  Waehrend der Messung liegt NICHTS ueber der Leinwand ---------
 //
@@ -309,6 +341,8 @@ console.log('\n  H  Liegt waehrend der Messung etwas ueber der Leinwand?');
       M.befund(`waehrend der Messung liegt etwas ueber der Leinwand: ${fremd.raus.join(' · ')}. Gespielt wird waehrend der Messung — was dort liegt, faengt Finger.`);
   }
 }
+
+takt('H  ueber der Leinwand');
 
 // ---- I  Kommt die Effekt-Absenkung je zurueck? ------------------------
 //
@@ -362,6 +396,8 @@ console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
     }
   }
 }
+
+takt('I  Effekt-Absenkung');
 
 // ---- J  Bucht die Tafel ihre eigene Arbeit getrennt? ------------------
 //
@@ -429,6 +465,8 @@ console.log('\n  J  Ruehrt sich die Tafel waehrend der Messung?');
       M.befund(`nach dem Ausschalten steht kein Ergebnis in der Tafel (${c.text.length} Zeichen).`);
   }
 }
+
+takt('J  Tafel ruehrt sich');
 
 // ---- K  Faengt die Vier-Tipp-Ecke die Spielknoepfe ab? ----------------
 //
@@ -502,6 +540,8 @@ console.log('\n  K  Faengt die Vier-Tipp-Ecke Pause und Ton ab?');
     }
   }
 }
+
+takt('K  Vier-Tipp-Ecke');
 
 // ---- L  Ueberlebt die Messung eine PAUSE? -----------------------------
 //
@@ -583,6 +623,13 @@ console.log('\n  L  Ueberlebt die Messung eine Pause?');
 
 await browser.close();
 server.close();
+takt('L  Pause');
+
+console.log('\n  Laufzeit je Pruefung   (dieser Rechner, dieser Lauf, SwiftShader ohne Grafikkarte)');
+for (const [n, d] of [...takte].sort((a, b) => b[1] - a[1]))
+  console.log(`    ${String(d.toFixed(1)).padStart(6)} s   ${Math.round(d / ((Date.now() - taktStart) / 1000) * 100).toString().padStart(2)} %   ${n}`);
+console.log(`    ${((Date.now() - taktStart) / 1000).toFixed(1)} s   zusammen`);
+
 console.log('');
 if (!gemessen) M.ungemessen('nichts gemessen — es steht keine Zahl zur Verfuegung.');
 M.urteil();

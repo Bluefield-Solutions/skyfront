@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v77.
+Stand: v78.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -149,6 +149,9 @@ Damit niemand zweimal dasselbe aufmacht — alles im Audit belegt:
 | Torkette und Probensatz messen ihre Laufzeit selbst; die Zahl im Kopf von `check.mjs` war um Faktor 6 veraltet | v76 |
 | `npm run probenmittel` — nach **Tor** weglassen statt nach Probe, halbiert den Satz und zählt namentlich auf, was fehlt | v76 |
 | Die Aufteilung je Tor ist **gemessen**: Messtafel 40 %, Rüstung 11 %, Überlappung 10 % — `probenmittel` spart 40 von 67 min | v77 |
+| Das Messtafel-Tor misst seine zwölf Prüfungen einzeln: J trägt 36 %, und zwar an **Spielbildern**, nicht an festen Wartezeiten | v78 |
+| B-5 in dritter Fassung; Farbbänder und Alphakanal stehen jetzt im Auftrag; drei Gegner hatten gar keinen Abnahmeeintrag | v78 |
+| `docs/chatgpt/` — Bildpaket für ein ChatGPT-Projekt: das **Schiff** trägt das Verhältnis, weil dort kein 16:9 einstellbar ist | v78 |
 | **Eine neue Fassung kam auf dem Gerät nie an** — der Dienst-Arbeiter legte die alte Seite unter der neuen Marke ab (`addAll` durch den Browser-Zwischenspeicher). Gemessen: vorher nach vier Starten nicht da, jetzt nach zwei | v74 |
 
 ---

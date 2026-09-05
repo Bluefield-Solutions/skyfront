@@ -46,7 +46,13 @@ const AUFTRAG = {
   // Silhouette — kein Ring, eine Scheibe. Am Seitenverhaeltnis 1:1 faellt
   // das nicht auf, an der Detaildichte auch nicht.
   boss_ringfestung:   { breite: 1150, hoehe: 1150, mitteOffen: true },
-  boss_ambosskreuzer: { breite: 1300, hoehe: 1000 },
+  // v78: von 1300x1000 (1,30) auf 1300x722 (1,80). Die Lieferung vom 02.09.
+  // traf 1,30 sogar (gemessen 1,32) und war trotzdem falsch: die Querarme
+  // trugen nur 24 % der Hoehe, der Rest war Rumpf. Ein Seitenverhaeltnis
+  // sagt nichts ueber die VERTEILUNG innerhalb der Silhouette — es sagt nur,
+  // wie das Rechteck steht. Der Auftrag verlangt die Verteilung jetzt in
+  // Worten; hier steht die Aussenform, die dabei herauskommen muss.
+  boss_ambosskreuzer: { breite: 1300, hoehe: 722 },
 
   // Kein Boss, sondern ein schwerer Gegner zwischendurch: die Begleitung
   // des Lanzentraegers, die seinen Angriff vorher einmal zeigt.
@@ -62,6 +68,24 @@ const AUFTRAG = {
   // Wer spaeter eine zweite Lanzenwache bestellt, haelt sich an 0,38 —
   // damit die beiden nebeneinander gleich gross wirken.
   gegner_lanzenwache: { breite: 225, hoehe: 590 },
+
+  // Die drei offenen Gegner. Sie standen hier NICHT — und eine gelieferte
+  // gegner_elite.png waere damit als "steht nicht im Auftrag, kein Soll,
+  // keine Aussage" durchgelaufen: Rueckgabe 2 statt einer Pruefung. Genau
+  // die zwei Fehler, an denen der erste Anlauf scheiterte (zu klein,
+  // falsches Format), haette niemand gefangen.
+  //
+  // Die Zahlen sind gerechnet wie bei der Lanzenwache und nicht geraten:
+  // Weltbreite mal zwei ist die Textur, mal dem ueblichen Aufschlag 1,25
+  // ist die verlangte INHALTSbreite. Die Hoehe folgt dem
+  // Seitenverhaeltnis der Textur aus docs/BILDAUFTRAEGE-GEGNER.md.
+  //
+  //   elite    108 Welt → 216 Textur × 1,25 = 270   Verhaeltnis 216/173 = 1,25
+  //   carrier  148      → 296          ×      = 370               295/151 = 1,95
+  //   rotor     67      → 134          ×      = 169               135/121 = 1,11
+  gegner_elite:       { breite: 270, hoehe: 216 },
+  gegner_carrier:     { breite: 370, hoehe: 190 },
+  gegner_rotor:       { breite: 169, hoehe: 152 },
 };
 
 // Ist in dem Bild bei SEINER Groesse wirklich Detail — oder ist es schon

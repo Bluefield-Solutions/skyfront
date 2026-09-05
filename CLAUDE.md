@@ -642,6 +642,35 @@ Jede hat mindestens eine Runde gekostet.
    gelegen und dabei plausibel ausgesehen. Deshalb misst der Satz je Probe
    und nicht je Tor.
 
+73. **Meine plausibelste Ursache lag in einer einzigen Runde DREIMAL
+   daneben.** Das ist keine Pechserie mehr, das ist ein Muster:
+
+   · Der Probensatz kostet 67 min, 60 von 74 Proben verlangen einen Neubau
+     — also war der Neubau der Verdaechtige. Ein Bau kostet **0,66 s**.
+   · Die Probenzeit sei die Torzeit, nahm ich an. Ueberlappung: 68,3 s in
+     der Kette, **115,1 s** als Probe. Farbtor umgekehrt 4,0 statt 8 s.
+   · Das Messtafel-Tor haelt vierzig Sekunden feste Wartezeiten im
+     Quelltext — also waren die der Grund fuer die 158 s. Sie tragen ein
+     Viertel; die teuerste Pruefung wartet auf **40 Spielbilder**.
+
+   Alle drei Vermutungen waren plausibel, und alle drei haetten zu Arbeit
+   an der falschen Stelle gefuehrt. Regel 9 sagt „vor dem Justieren den
+   Raum ansehen"; diese Runde sagt, wie oft man das vergisst, wenn die
+   Erklaerung nahe liegt. **Erst die Verteilung, dann der Hebel — und die
+   Verteilung entsteht durch Messen, nicht durch Lesen.**
+
+74. **Eine Wartezeit, die auf Spielbilder wartet, ist die Messstelle, nicht
+   Verschwendung.** Pruefung J des Messtafel-Tors wartet auf 40 Bilder,
+   weil die Tafel sich hoechstens alle dreissig Bilder schreibt — unter
+   SwiftShader 14 s. Ein erster Anlauf wartete stattdessen sechs Sekunden
+   auf der Uhr und meldete „unveraendert" ueber eine Tafel, die sich sehr
+   wohl schrieb.
+
+   Wer solche Wartezeiten kuerzt, kauft Sekunden mit einem blinden Tor.
+   Die Zeit gehoert dort gespart, wo sie NICHTS traegt — hier: der
+   Probensatz ruft das Tor zehnmal und laesst jedes Mal alle zwoelf
+   Pruefungen laufen, obwohl jede Probe nur eine braucht.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert
