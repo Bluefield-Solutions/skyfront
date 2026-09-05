@@ -134,10 +134,47 @@ const bilder = () => seite.evaluate(() => typeof window.__SKF_MESSBILDER === 'fu
 const taktStart = Date.now();
 let taktLetzt = taktStart;
 const takte = [];
+// --bis=<Buchstabe>: bei dieser Pruefung aufhoeren.
+//
+// DER ANLASS: der Probensatz ruft dieses Tor ZEHNMAL, und jedes Mal laufen
+// alle zwoelf Pruefungen — obwohl jede Probe nur EINE braucht und der Satz
+// das ohnehin am Befundtext prueft. Elf Zwoelftel laufen je Probe umsonst.
+//
+// Warum `--bis` und nicht `--nur`: die Pruefungen bauen aufeinander auf.
+// B schaltet die Messung an, D schaltet sie aus, G laedt die Seite neu.
+// Eine einzelne herauszugreifen liefe gegen einen Zustand, den sie nie
+// vorfindet — und ein Tor, das am falschen Zustand misst, meldet Unsinn.
+// Von A an bis zur gesuchten ist die kuerzeste ehrliche Fassung.
+//
+// In der Torkette wird der Schalter NICHT gesetzt: dort laeuft die volle
+// Zwoelferrunde. Ein Teillauf sagt das laut, damit er nie fuer einen
+// vollstaendigen gehalten wird.
+const BIS = (process.argv.find((a) => a.startsWith('--bis=')) || '').slice(6).toUpperCase();
+
 const takt = (name) => {
   const jetzt = Date.now();
   takte.push([name, (jetzt - taktLetzt) / 1000]);
   taktLetzt = jetzt;
+};
+
+function abschluss() {
+  console.log('\n  Laufzeit je Pruefung   (dieser Rechner, dieser Lauf, SwiftShader ohne Grafikkarte)');
+  for (const [n, d] of [...takte].sort((a, b) => b[1] - a[1]))
+    console.log(`    ${String(d.toFixed(1)).padStart(6)} s   ${Math.round(d / ((Date.now() - taktStart) / 1000) * 100).toString().padStart(2)} %   ${n}`);
+  console.log(`    ${((Date.now() - taktStart) / 1000).toFixed(1)} s   zusammen`);
+  if (BIS) console.log(`\n  TEILLAUF: nur A bis ${BIS} gelaufen — die uebrigen Pruefungen sind NICHT gemessen.`);
+  console.log('');
+  if (!gemessen) M.ungemessen('nichts gemessen — es steht keine Zahl zur Verfuegung.');
+  M.urteil();
+}
+
+// Nach jedem Takt: ist hier Schluss? Schliesst den Browser, damit kein
+// Chromium stehenbleibt — bei zehn Proben je Lauf waere das teuer.
+const halt = async (b) => {
+  if (BIS !== b) return;
+  await browser.close();
+  server.close();
+  abschluss();
 };
 
 console.log('Messtafel\n');
@@ -157,6 +194,7 @@ let gemessen = 0;
 }
 
 takt('A  aus');
+await halt('A');
 
 // ---- B  anschalten -----------------------------------------------------
 await seite.evaluate(() => { window.__SKF_MESSTAFEL && window.__SKF_MESSTAFEL(); });
@@ -174,6 +212,7 @@ await seite.waitForTimeout(6000);
 }
 
 takt('B  anschalten');
+await halt('B');
 
 // ---- C  eingeklappt weitermessen — DER PUNKT --------------------------
 // GEWARTET WIRD AUF DIE BEDINGUNG, NICHT AUF DIE UHR.
@@ -218,6 +257,7 @@ const nachher = await bilder();
 }
 
 takt('C  eingeklappt messen');
+await halt('C');
 
 // ---- D  ausschalten zeigt das Ergebnis, ohne es wegzuwerfen ----------
 if (!await seite.evaluate(() => { window.__SKF_MESSTAFEL(); return true; })) M.ungemessen('der Schalter ist nicht zu erreichen.');
@@ -242,6 +282,7 @@ else {
 }
 
 takt('D  ausschalten');
+await halt('D');
 
 // ---- E  die Kopierzeile ------------------------------------------------
 {
@@ -260,6 +301,7 @@ takt('D  ausschalten');
 }
 
 takt('E  Kopierzeile');
+await halt('E');
 
 // ---- F  der Takt darf beim Einbruch nicht mitgehen --------------------
 //
@@ -277,6 +319,7 @@ takt('E  Kopierzeile');
 }
 
 takt('F  Takt');
+await halt('F');
 
 // ---- G  der Schalter ueberlebt ein Neuladen ---------------------------
 // Vorher wieder ANSCHALTEN: Pruefung D hat ihn ausgemacht, und geprueft
@@ -295,6 +338,7 @@ await seite.waitForTimeout(2500);
 }
 
 takt('G  Neuladen');
+await halt('G');
 
 // ---- H  Waehrend der Messung liegt NICHTS ueber der Leinwand ---------
 //
@@ -343,6 +387,7 @@ console.log('\n  H  Liegt waehrend der Messung etwas ueber der Leinwand?');
 }
 
 takt('H  ueber der Leinwand');
+await halt('H');
 
 // ---- I  Kommt die Effekt-Absenkung je zurueck? ------------------------
 //
@@ -398,6 +443,7 @@ console.log('\n  I  Effekt-Absenkung: kommt sie zurück?');
 }
 
 takt('I  Effekt-Absenkung');
+await halt('I');
 
 // ---- J  Bucht die Tafel ihre eigene Arbeit getrennt? ------------------
 //
@@ -467,6 +513,7 @@ console.log('\n  J  Ruehrt sich die Tafel waehrend der Messung?');
 }
 
 takt('J  Tafel ruehrt sich');
+await halt('J');
 
 // ---- K  Faengt die Vier-Tipp-Ecke die Spielknoepfe ab? ----------------
 //
@@ -542,6 +589,7 @@ console.log('\n  K  Faengt die Vier-Tipp-Ecke Pause und Ton ab?');
 }
 
 takt('K  Vier-Tipp-Ecke');
+await halt('K');
 
 // ---- L  Ueberlebt die Messung eine PAUSE? -----------------------------
 //
@@ -624,12 +672,4 @@ console.log('\n  L  Ueberlebt die Messung eine Pause?');
 await browser.close();
 server.close();
 takt('L  Pause');
-
-console.log('\n  Laufzeit je Pruefung   (dieser Rechner, dieser Lauf, SwiftShader ohne Grafikkarte)');
-for (const [n, d] of [...takte].sort((a, b) => b[1] - a[1]))
-  console.log(`    ${String(d.toFixed(1)).padStart(6)} s   ${Math.round(d / ((Date.now() - taktStart) / 1000) * 100).toString().padStart(2)} %   ${n}`);
-console.log(`    ${((Date.now() - taktStart) / 1000).toFixed(1)} s   zusammen`);
-
-console.log('');
-if (!gemessen) M.ungemessen('nichts gemessen — es steht keine Zahl zur Verfuegung.');
-M.urteil();
+abschluss();

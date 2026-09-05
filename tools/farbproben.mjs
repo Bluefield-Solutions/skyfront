@@ -145,14 +145,14 @@ const PROBEN = [
   // hinsieht — und der Fall, in dem man misst, ist genau der andere.
   ['Messtafel misst nur, solange sie offen ist', '✗',
     ['        if (!an) { vorher = t; return; }', '        if (!an || !offen) { vorher = t; return; }'],
-    true, 'messtafel', 'steigt die Bilderzahl nicht', HUELLE],
+    true, 'messtafel:C', 'steigt die Bilderzahl nicht', HUELLE],
   // Die Schwellen der Effekt-Absenkung zurueck auf feste Zahlen: dann
   // liegt zwischen 46 und 56 wieder ein totes Band, und genau darin lebt
   // das Geraet des Nutzers (55,6 Bilder je Sekunde). Der Regler faellt
   // einmal und kommt nie zurueck.
   ['Effekt-Absenkung wieder mit festen Schwellen (46/56)', '✗',
     ['    const G = E * .78,\n      v = E * .9;', '    const G = 46,\n      v = 56;'],
-    true, 'messtafel', 'knapp am Takt'],
+    true, 'messtafel:I', 'knapp am Takt'],
   // Der Tafel die Durchlaessigkeit nehmen: dann faengt der eingeklappte
   // Streifen wieder jeden Zug ab, der auf ihm beginnt — genau der Fehler,
   // den der Nutzer gemeldet hat („man kann das Flugzeug kaum sauber
@@ -165,7 +165,7 @@ const PROBEN = [
   ['Messtafel steht wieder waehrend der Messung ueber der Leinwand', '✗',
     ["        tafel.className = offen ? 'an' : '';",
      "        tafel.className = an ? (offen ? 'an' : 'an klein') : '';"],
-    true, 'messtafel', 'liegt etwas ueber der Leinwand', HUELLE],
+    true, 'messtafel:B', 'liegt etwas ueber der Leinwand', HUELLE],
   // Und der Takt wieder aus der GEMESSENEN Rate: dann geht die Tafel beim
   // Einbruch mit und faerbt ein p95 von 350 ms gruen.
   //
@@ -177,7 +177,7 @@ const PROBEN = [
   ['Bildschirmtakt wieder aus der gemessenen Rate', '✗',
     ['var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : 0;',
      'var takt = hzSchnell > 100 ? 120 : hzSchnell > 75 ? 90 : hzSchnell > 45 ? 60 : Math.round(hzSchnell);'],
-    true, 'messtafel', 'Takt gehoert zum Bildschirm', HUELLE],
+    true, 'messtafel:F', 'Takt gehoert zum Bildschirm', HUELLE],
   // GEGNER BEI VOLLEM VORRAT WIEDER WEGWERFEN statt nachholen. Genau so
   // stand es bis v70: in Sektor 106 liefen 197 von 1008 Anfragen leer —
   // fast jeder fuenfte Gegner erschien nicht, still, und der Sektor wurde
@@ -195,7 +195,7 @@ const PROBEN = [
   ['Jeder neue Sektor setzt die Messung wieder zurueck', '✗',
     ['        if (startAusserhalb && s0 && s0.scene && s0.scene.isActive && s0.scene.isActive()) {\n          startAusserhalb = !1; zuruecksetzen(); vorher = t; return;\n        }',
      '        var lauf2 = s0 && s0.laufNr != null ? s0.laufNr : null;\n        if (lauf2 != null && lauf2 !== window.__letzterLauf) { window.__letzterLauf = lauf2; zuruecksetzen(); vorher = t; return; }'],
-    true, 'messtafel', 'wirft die Messung weg', HUELLE],
+    true, 'messtafel:D', 'wirft die Messung weg', HUELLE],
   // DAS FALLEN DES Q-REGLERS WIEDER UNGEBREMST. Genau so stand es bis
   // v68: die Regel laeuft dreimal je Sekunde, ein Ruckler von 90 ms schob
   // den Regler in 2,7 Sekunden auf den Boden. Gemessen auf dem Geraet,
@@ -203,12 +203,12 @@ const PROBEN = [
   ['Q-Regler faellt wieder ungebremst', '✗',
     ['return R < G ? b - I > 600 ? { q: Math.max(.15, T - .12), qUpAt: b } : { q: T, qUpAt: I } : R > v',
      'return R < G ? { q: Math.max(.15, T - .12), qUpAt: I } : R > v'],
-    true, 'messtafel', 'kurzer Ruckler'],
+    true, 'messtafel:I', 'kurzer Ruckler'],
   // DIE VIER-TIPP-ECKE WIEDER AUCH IM GEFECHT. Dann liegt sie erneut auf
   // Pause und Ton: vier Mal pausieren schaltet die Messung um.
   ['Vier-Tipp-Ecke zaehlt wieder im Gefecht', '✗',
     ['          if (sp && sp.scene && sp.scene.isActive && sp.scene.isActive()) { tipps = 0; return; }\n', ''],
-    true, 'messtafel', 'PAUSEKNOPF', HUELLE],
+    true, 'messtafel:K', 'PAUSEKNOPF', HUELLE],
   // DIE COMBO-LEISTE WIEDER AUF DIE ZEHNERMARKE. Dann zeigt sie den Weg
   // zu einer Stelle, an der sich am Faktor nichts aendert.
   ['Combo-Leiste wieder auf die Zehnermarke', '✗',
@@ -252,13 +252,13 @@ const PROBEN = [
   ['Messtafel schreibt sich waehrend der Messung neu', '✗',
     ['        if (offen) werte.innerHTML = z.join(\'\\n\');\n      }',
      '        werte.innerHTML = z.join(\'\\n\');\n      }'],
-    true, 'messtafel', 'schreibt sich waehrend der Messung neu', HUELLE],
+    true, 'messtafel:J', 'schreibt sich waehrend der Messung neu', HUELLE],
   // UND DIE GEGENRICHTUNG: beim Ausschalten NICHT zeichnen. Dann bleibt
   // die Tafel leer, und die ganze Messung war umsonst.
   ['Messtafel fuellt sich beim Ausschalten nicht', '✗',
     ['          endeMs = performance.now(); offen = proben.length > 0; zeichnen();',
      '          endeMs = performance.now(); offen = proben.length > 0;'],
-    true, 'messtafel', 'steht kein Ergebnis', HUELLE],
+    true, 'messtafel:D', 'steht kein Ergebnis', HUELLE],
   // Dem PAUSENSCHIRM eine Ueberlappung einbauen: der Knopf „Level neu
   // starten" wandert auf „Fortsetzen". Bis v60 haette das kein Tor
   // gesehen — die Pause war der einzige Schirm, den keines betrat.
@@ -726,7 +726,11 @@ const WERKZEUG = {
 // geblieben, und der Lauf haette behauptet, das Tor sei ausgelassen.
 const OHNE_TOR = OHNE_TOR_ROH.map((x) => WERKZEUG[x] || x);
 
-const torLauf = (statisch, tor = 'farb') => {
+const torLauf = (statisch, torRoh = 'farb') => {
+  // 'messtafel:D' heisst: das Messtafel-Tor, aber nur bis Pruefung D.
+  // Der Zusatz haengt an der PROBE, nicht am Tor — dieselbe Pruefung wird
+  // von verschiedenen Proben an verschiedenen Stellen gebraucht.
+  const [tor, bis] = String(torRoh).split(':');
   const cmd = tor === 'form' ? ['tools/formen.mjs']
     : tor === 'boden' ? ['tools/untergrund.mjs']
     : tor === 'kraft' ? ['tools/feuerkraft.mjs']
@@ -750,6 +754,7 @@ const torLauf = (statisch, tor = 'farb') => {
     : tor === 'zeichenwerk' ? ['tools/zeichenwerk.mjs']
     : tor === 'sektor' ? ['tools/sektor.mjs']
     : ['tools/farbtor.mjs', ...(statisch ? ['--nurstatisch'] : [])];
+  if (bis) cmd.push('--bis=' + bis);
   try {
     execFileSync('node', cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     return { rot: false, text: '' };
@@ -792,7 +797,7 @@ const weggelassen = [];
 let fehler = 0, gelaufen = 0;
 for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = APP] of (NUR_MODUS ? [] : PROBEN)
   .filter(([n]) => !NUR || n.toLowerCase().includes(NUR))
-  .filter(([n, , , , t = 'farb']) => { const w = WERKZEUG[t] || t; if (OHNE_TOR.includes(w)) { weggelassen.push([n, w]); return false; } return true; })) {
+  .filter(([n, , , , t = 'farb']) => { const b = String(t).split(':')[0]; const w = WERKZEUG[b] || b; if (OHNE_TOR.includes(w)) { weggelassen.push([n, w]); return false; } return true; })) {
   if (neubau && !ALLE) { console.log(`(—) ${name} — braucht Neubau, mit --alle`); continue; }
   const quelle = datei === HUELLE ? HUELLE_SICHER : SICHER;
   const roh = readFileSync(quelle, 'utf8');
@@ -805,7 +810,8 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
   const t0 = Date.now();
   if (neubau) execFileSync('node', ['build.mjs'], { stdio: 'ignore' });
   const r = torLauf(!neubau, tor);
-  dauern.push([name, (Date.now() - t0) / 1000, WERKZEUG[tor] || tor]);
+  const torBasis = String(tor).split(':')[0];
+  dauern.push([name, (Date.now() - t0) / 1000, WERKZEUG[torBasis] || torBasis]);
   gelaufen++;
   if (!r.rot) { console.log(`✗ ${name}: Tor blieb GRÜN — Prüfung ${pruefung} greift nicht`); fehler++; }
   else if (pruefung !== '✗' && !new RegExp(`^\\s*· ${pruefung}:`, 'm').test(r.text)) {
@@ -817,7 +823,7 @@ for (const [name, pruefung, [alt, neu], neubau, tor = 'farb', erwartet, datei = 
     console.log(`✗ ${name}: rot, aber „${erwartet}" kommt im Befund nicht vor — ${zeilen}`);
     fehler++;
   } else {
-    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel', zeichenwerk: 'Zeichenwerk', sektor: 'Sektor' }[tor];
+    const torName = { farb: 'Farbtor', form: 'Formentor', boden: 'Untergrund-Tafel', kraft: 'Feuerkraft', speicher: 'Speicher-Tafel', rhythmus: 'Rhythmus-Tafel', formation: 'Formationentafel', zeit: 'Zeitachse', muster: 'Bossmuster', steuer: 'Steuerung', bogen: 'Bildbogen', waerme: 'Vorwaermen', ende: 'Ergebnis', dichte: 'Geschossdichte', klang: 'Klang', musik: 'Musik', lage: 'Überlappung', kopf: 'Kopfzeile', ruestung: 'Rüstung', schirme: 'Schirme', messtafel: 'Messtafel', zeichenwerk: 'Zeichenwerk', sektor: 'Sektor' }[torBasis];
     // Farbtor und Untergrund-Tafel melden mit "· ", das Formentor mit "✗ ".
     // Gezeigt wird die Zeile, die die ERWARTUNG erfuellt hat — nicht die
     // erste beste. Sonst steht im Protokoll ein Befund, der mit dem
