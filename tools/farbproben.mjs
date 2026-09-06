@@ -132,14 +132,14 @@ const PROBEN = [
   // das SAGT, nicht dass es irgendwie rot wird.
   ['Kauf einer Sekundaerwaffe laesst die Stufe wieder auf 0', '✗',
     ['vt("secondary", T), T !== "none" && this.upg("sec") < 1 && this.setUpg("sec", 1)',
-     'vt("secondary", T)'], true, 'ruestung', 'Stufe 0'],
+     'vt("secondary", T)'], true, 'ruestung:B', 'Stufe 0'],
   // Und der zweite Teil: wieder BEIDE Beiflugschiffe zeichnen, das
   // ungekaufte nur kleiner und grauer. So stand es bis v57, und so
   // entstand der Eindruck, der Kauf sei wirkungslos.
   ['Beiflug wieder immer beide zeichnen (das ungekaufte nur kleiner)', '✗',
     ['this.wingmen = [-48, 48].slice(0, q.upg("wingman")).map((A) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(.32).setTint(10477823).setDepth(9),\n          dx: A,\n          fires: !0\n        }))',
      'this.wingmen = [-48, 48].map((A, m) => ({\n          img: this.add.image(this.player.x + A, this.player.y + 26, this.player.texture.key).setScale(m < q.upg("wingman") ? .32 : .24).setTint(m < q.upg("wingman") ? 10477823 : 9090252).setDepth(9),\n          dx: A,\n          fires: m < q.upg("wingman")\n        }))'],
-    true, 'ruestung', 'gezeichnet'],
+    true, 'ruestung:A', 'gezeichnet'],
   // DER FEHLER, DEN DER NUTZER GEMELDET HAT: die Messschleife steigt bei
   // eingeklappter Tafel wieder aus. Dann misst man nur, solange man
   // hinsieht — und der Fall, in dem man misst, ist genau der andere.

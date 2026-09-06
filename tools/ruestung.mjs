@@ -72,6 +72,57 @@ const server = createServer((an, aw) => {
 await new Promise((f) => server.listen(0, '127.0.0.1', f));
 const adresse = `http://127.0.0.1:${server.address().port}/Skyfront.html`;
 
+// Was jede der neun Pruefungen kostet.
+//
+// Der Anlass: dieses Tor traegt nach der Messtafel den zweiten Posten im
+// Probensatz — sechs Proben, je 72,3 s, zusammen 14 %. Bevor irgendetwas
+// gekuerzt oder zugeschnitten wird, muss dastehen, WO die Zeit liegt.
+// Beim Messtafel-Tor lag sie nicht dort, wo ich sie vermutet hatte, und
+// dieselbe Vermutung waere hier genauso naheliegend gewesen.
+const taktStart = Date.now();
+let taktLetzt = taktStart;
+const takte = [];
+// --bis=<Buchstabe>, wie im Messtafel-Tor und aus demselben Grund: eine
+// Gegenprobe braucht nur die eine Pruefung, an der ihr Eingriff sitzt.
+//
+// ABER NUR ZWEI der fuenf Proben bekommen einen Zuschnitt, und das ist
+// gerechnet, nicht gespart-um-des-Sparens-willen:
+//
+//   Beiflug        → A   spart 72,2 s
+//   Sekundaerwaffe → B   spart 42,1 s
+//   Hauptwaffe     → E   spart 18,6 s
+//   Tier-Bonus     → H   spart  1,1 s
+//   Module         → H   spart  1,1 s
+//
+// 114 der 135 Sekunden liegen in den ersten beiden. Fuer die letzten drei
+// waere der Zuschnitt eine zusaetzliche Stelle, an der eine Probe still
+// wirkungslos werden kann — fuer eine Sekunde. Die bleiben ungeschnitten.
+const BIS = (process.argv.find((a) => a.startsWith('--bis=')) || '').slice(6).toUpperCase();
+
+const takt = (name) => {
+  const jetzt = Date.now();
+  takte.push([name, (jetzt - taktLetzt) / 1000]);
+  taktLetzt = jetzt;
+};
+
+function abschluss() {
+  console.log('\n  Laufzeit je Pruefung   (dieser Rechner, dieser Lauf, SwiftShader ohne Grafikkarte)');
+  for (const [n, d] of [...takte].sort((a, b) => b[1] - a[1]))
+    console.log(`    ${String(d.toFixed(1)).padStart(6)} s   ${Math.round(d / ((Date.now() - taktStart) / 1000) * 100).toString().padStart(2)} %   ${n}`);
+  console.log(`    ${((Date.now() - taktStart) / 1000).toFixed(1)} s   zusammen`);
+  if (BIS) console.log(`\n  TEILLAUF: nur A bis ${BIS} gelaufen — die uebrigen Pruefungen sind NICHT gemessen.`);
+  console.log('');
+  if (!gemessen) M.ungemessen('nichts gemessen — es steht keine Zahl zur Verfuegung.');
+  M.urteil();
+}
+
+const halt = async (b) => {
+  if (BIS !== b) return;
+  await browser.close();
+  server.close();
+  abschluss();
+};
+
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 const seite = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, deviceScaleFactor: 2 });
 await seite.addInitScript(() => { try { localStorage.setItem('seen_tut', '1'); localStorage.setItem('gold', '999999'); } catch (e) {} });
@@ -203,6 +254,9 @@ for (const gekauft of [0, 1, 2]) {
   if (w.feuernd !== gekauft) M.befund(`Beiflug: ${gekauft} gekauft, aber ${w.feuernd} feuernd.`);
 }
 
+takt('A  Beiflug');
+await halt('A');
+
 // ---- B  Sekundärwaffe: der Kauf allein muss reichen --------------------
 console.log('\n  B  Sekundärwaffe (Kauf über den Weg des Ladens, ohne weiteren Ausbau)');
 for (const art of ['side', 'seeker']) {
@@ -268,6 +322,9 @@ for (const art of ['side', 'seeker']) {
   }
 }
 
+takt('B  Sekundaerwaffe');
+await halt('B');
+
 // ---- C  Schild und Drohnen: wirken und zeigen, wie lange ---------------
 console.log('\n  C  Spezial: wirkt es, und steht die Dauer am Knopf?');
 for (const [gadget, frage] of [['shield', 'sz.player.isShielded(sz.time.now)'], ['drones', 'sz.drones.length > 0']]) {
@@ -304,6 +361,9 @@ for (const [gadget, frage] of [['shield', 'sz.player.isShielded(sz.time.now)'], 
   if (!/\d/.test(String(w.dauerText || '')) || !w.sichtbar) M.befund(`${gadget}: der Knopf zeigt keine sichtbare Restdauer (${JSON.stringify(w.dauerText)}, sichtbar ${w.sichtbar}) — ein laufendes Spezial sieht aus wie ein nachladendes.`);
 }
 
+takt('C  Spezial');
+await halt('C');
+
 // ---- D  Die Ausrüstungszeile ------------------------------------------
 console.log('\n  D  Ausrüstungszeile');
 {
@@ -321,6 +381,9 @@ console.log('\n  D  Ausrüstungszeile');
     }
   }
 }
+
+takt('D  Ausruestungszeile');
+await halt('D');
 
 // ---- E  Hauptwaffe: der Kauf muss im Gefecht ankommen ------------------
 console.log('\n  E  Hauptwaffe');
@@ -359,6 +422,9 @@ console.log('\n  E  Hauptwaffe');
   }
 }
 
+takt('E  Hauptwaffe');
+await halt('E');
+
 // ---- F  Zweiter Spezial-Slot ------------------------------------------
 console.log('\n  F  Zweiter Spezial-Slot');
 for (const frei of [0, 1]) {
@@ -371,6 +437,9 @@ for (const frei of [0, 1]) {
   if (frei === 1 && r.wert.length !== 2) M.befund(`Zweiter Spezial-Slot: freigeschaltet und ein zweites Spezial gewaehlt, aber ${r.wert.length} Knopf/Knoepfe im Gefecht.`);
   if (frei === 0 && r.wert.length !== 1) M.befund(`Zweiter Spezial-Slot: NICHT freigeschaltet, aber ${r.wert.length} Knoepfe im Gefecht.`);
 }
+
+takt('F  zweiter Slot');
+await halt('F');
 
 // ---- G  Ein frisch gekauftes Spezial wirkt auf Grundstaerke -----------
 //
@@ -400,6 +469,9 @@ console.log('\n  G  Spezial frisch gekauft (Stufe 0) gegen ausgebaut (Stufe 2)')
   if (zahlen.length === 2 && !(zahlen[1].dauer > zahlen[0].dauer))
     M.befund(`Spezial: Stufe 2 wirkt ${zahlen[1].dauer} ms, Stufe 0 ${zahlen[0].dauer} ms. Der Ausbau aendert nichts.`);
 }
+
+takt('G  Spezial frisch gekauft');
+await halt('G');
 
 // ---- H  Ein angelegtes Modul wirkt ------------------------------------
 //
@@ -438,6 +510,9 @@ console.log('\n  H  Module');
       M.befund(`Tier-Bonus: vier Module im Lager aendern die Kritchance nicht (${(eins.crit*100).toFixed(1)} % gegen ${(sack.crit*100).toFixed(1)} %). Der Bestand soll mitzaehlen.`);
   }
 }
+
+takt('H  Module');
+await halt('H');
 
 // ---- I  Steht die Sammelregel auf dem Modul-Schirm? -------------------
 //
@@ -484,6 +559,5 @@ console.log('\n  I  Steht die Sammelregel auf dem Modul-Schirm?');
 
 await browser.close();
 server.close();
-console.log('');
-if (!gemessen) M.ungemessen('nichts gemessen — es steht keine Zahl zur Verfuegung.');
-M.urteil();
+takt('I  Sammelregel');
+abschluss();
