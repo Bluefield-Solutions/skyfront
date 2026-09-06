@@ -707,6 +707,20 @@ Jede hat mindestens eine Runde gekostet.
    Luecken ab. Wer nach einem Wort sucht, das auch im Verbot vorkommt,
    schneidet das Verbot vorher heraus.
 
+77. **Ein Hebel wird gebaut, wo er traegt — nicht ueberall, wo er passt.**
+   Fuenf Ruestungs-Proben haetten einen Zuschnitt bekommen koennen; zwei
+   davon sparen 114 s, die drei anderen zusammen 21, davon zwei je EINE
+   Sekunde. Jeder Zuschnitt ist aber auch eine Stelle, an der eine Probe
+   still wirkungslos werden kann — bei der Messtafel waren zwei von neun zu
+   eng. Wo der Ertrag eine Sekunde ist und das Risiko dasselbe bleibt, wird
+   nicht geschnitten.
+
+   Und die Rechnung dazu gehoert VOR den Eingriff, nicht danach: sie stand
+   diesmal aus gemessenen Einzelzeiten da (108 s vorhergesagt, 104,7
+   gemessen) — die erste Hochrechnung in dieser Runde, die traf. Die vier
+   davor kamen aus Vermutungen ueber die Ursache statt aus Messungen der
+   Teile.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

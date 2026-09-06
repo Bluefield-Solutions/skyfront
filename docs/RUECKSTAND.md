@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v80.
+Stand: v81.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -155,6 +155,7 @@ Damit niemand zweimal dasselbe aufmacht — alles im Audit belegt:
 | Messtafel-Proben mit `--bis` zugeschnitten: **26,4 → 14,1 min**, zwei Zuschnitte waren zu eng und wurden vom Lauf gefunden | v79 |
 | Der volle Probensatz **gemessen**: 67:15 → **53:55 min**, 99 Proben, 0 ohne Wirkung; `probenmittel` bleibt richtig | v79 |
 | Die Farbbänder fehlten in **acht von neun** Bildaufträgen; das Bestelltor prüft die Regeln jetzt in jedem Block | v80 |
+| Rüstungstor gemessen: 90,0 s über elf Sektoreintritte, nichts zu kürzen — zwei von fünf Proben zugeschnitten, 1,75 min | v81 |
 | **Eine neue Fassung kam auf dem Gerät nie an** — der Dienst-Arbeiter legte die alte Seite unter der neuen Marke ab (`addAll` durch den Browser-Zwischenspeicher). Gemessen: vorher nach vier Starten nicht da, jetzt nach zwei | v74 |
 
 ---
