@@ -1043,6 +1043,26 @@ const MODUSPROBEN = [{
   mussEnthalten: ['NICHT GEMESSEN', 'Quelle ist nicht zu lesen'],
   darfNichtEnthalten: ['GRÜN — jeder'],
   beweist: 'ohne die Quelle sagt die Ankerpruefung "nicht gemessen", Rückgabe 2',
+}, {
+  // DIE PROBE ZU DEN REGELN IM AUFTRAGSBLOCK.
+  //
+  // Die Farbbaender stehen seit jeher im Farbtor und standen bis v78 in
+  // KEINEM der neun Bildauftraege — der Rotor-Auftrag verlangte sogar
+  // ausdruecklich ein rotes Blinklicht, also genau das, was das Tor
+  // spaeter abgelehnt haette. Ein Auftrag, der eine gepruefte Regel nicht
+  // nennt, wird geliefert und dann abgewiesen; das kostet eine Runde je
+  // Bild.
+  //
+  // --probe-ohne-regel nimmt EINEM Block die Farbregel weg und verlangt,
+  // dass genau er gemeldet wird. Der Eingriff prueft zuerst, ob er
+  // ueberhaupt angekommen ist.
+  name: 'Bestellung ohne Farbregel im Block (--probe-ohne-regel)',
+  cmd: ['tools/bestellung.mjs', '--probe-ohne-regel'],
+  rotErwartet: true,
+  exitErwartet: 1,
+  mussEnthalten: ['Auftrag "boss5": die Farbbaender', 'fehlt im Block'],
+  darfNichtEnthalten: ['GRÜN — '],
+  beweist: 'das Bestelltor sieht, wenn ein Auftragsblock eine geprüfte Regel nicht nennt',
 },
 
 // ---- Der dritte Ausgang: 2 = "nicht gemessen" -------------------------

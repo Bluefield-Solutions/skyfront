@@ -688,6 +688,25 @@ Jede hat mindestens eine Runde gekostet.
    Und die eine Probe, fuer die es NICHTS zu sparen gab, bleibt ungekuerzt
    stehen. Eine Fehlanzeige ist ein Ergebnis (Regel 62).
 
+76. **Was ein Tor prueft, muss der Auftrag nennen — sonst wird es geliefert
+   und dann abgelehnt.** Das Farbtor haelt seit jeher zwei Baender frei
+   (rot-orange fuer Gegnerprojektile, weiss-cyan fuer Eigenfeuer). In den
+   neun Bildauftraegen stand das bis v78 NIRGENDS — und der Rotor-Auftrag
+   verlangte sogar ausdruecklich „a small red beacon on the spine", also
+   genau das, was das Tor spaeter abgewiesen haette.
+
+   Aufgeschrieben reicht nicht: `npm run bestellung` zaehlt jetzt in jedem
+   Block nach, ob die Farbregel, das Hoheitszeichen-Verbot und der
+   Alphakanal darin stehen — und ob der POSITIVE Prompt nichts Rotes am
+   Schiff verlangt. Der erste Lauf fand fuenf echte Luecken.
+
+   **Ein Tor, das seine eigene Regel fuer einen Verstoss haelt, ist
+   schlimmer als keines.** Mein erstes Muster traf die Verbotszeile selbst
+   („no large glowing red or orange surface") und meldete fuenf Befunde,
+   die es nicht gab — das faerbt den Bogen rot und lenkt von den echten
+   Luecken ab. Wer nach einem Wort sucht, das auch im Verbot vorkommt,
+   schneidet das Verbot vorher heraus.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

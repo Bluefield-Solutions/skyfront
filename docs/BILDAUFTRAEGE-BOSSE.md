@@ -76,6 +76,17 @@ Negativprompt, Dateiname. Nichts davon muss zusammengesetzt werden.
    findet das; es findet nur, wer hineinsieht. Deshalb steht es im
    Negativprompt jedes Auftrags — und deshalb wird jede Lieferung vor dem
    Einbau angesehen.
+6. **Zwei gesperrte Farbbänder.** `npm run farbtor` hält **rot-orange**
+   (jedes Gegnerprojektil) und **weiß-cyan** (jedes Spielerprojektil) frei.
+   Ein Boss mit großen leuchtenden Flächen in diesen Tönen nimmt der
+   Gefahrenanzeige ihre Bedeutung. Erlaubt sind wenige kleine versenkte
+   Bernsteinlichter und ein matter oranger Hitzering tief in den Düsen —
+   keine Flächen, keine Streifen, keine roten Blinklichter.
+
+   Diese Regel stand bis v78 in **keinem** der neun Bildaufträge, obwohl das
+   Farbtor sie seit jeher prüft. Eine Regel, die ein Tor prüft, aber der
+   Auftrag nicht nennt, wird geliefert und dann abgelehnt.
+
 4. **Der Rand wird ausdrücklich verlangt.** B-1 kam mit 4 Bildpunkten oben
    statt der nötigen 6 und musste von Hand nachgezogen werden. Seither steht
    in jedem Prompt, dass nichts die Bildkante berühren darf.
@@ -294,13 +305,16 @@ exposed conduit runs along the band. Restrained detail — this reads at a glanc
 not as a city.
 Accents: amber warning lights on the turret housings, a few pale cyan strips in the
 recessed channels.
+COLOUR RESTRICTION, important for the game this is for: no large glowing red or orange
+surface, and no glowing white or cyan lines, strips or fields. Those two colour bands are
+reserved for projectiles and the ship must never compete with them.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, so the upper-left arc of the band is bright and the lower-right arc falls
 into shadow. Clear directional shading across the plating.
 Framing: the ring is centred and its outer edge occupies about 96 percent of the frame.
 Leave a clear empty transparent margin of about 2 percent on all four sides — no barrel
 tip may touch or be cut off by a frame edge.
-Background: fully transparent, and the hole in the middle is background as well — fully
+OUTPUT: PNG with a real alpha channel. Background: fully transparent, and the hole in the middle is background as well — fully
 transparent, right up to the inner edge of the band. No ground shadow, no sky, no clouds,
 no ground, no vignette, no frame, no text, no logos, no emblems, no markings.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a

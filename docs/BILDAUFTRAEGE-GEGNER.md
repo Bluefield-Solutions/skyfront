@@ -45,6 +45,23 @@ Dieselben Regeln wie bei den Bossen, sie haben sich bewährt:
 5. **Groß bestellen.** Die Zielgröße macht `npm run einbau`; wer klein
    liefert, wird von der Sperre abgewiesen (seit SKY-233).
 
+**Zwei gesperrte Farbbänder.** `npm run farbtor` hält sie frei, damit ein
+Spieler nie überlegen muss, ob etwas ihn trifft oder ihm gehört:
+
+* **rot-orange** = jedes Gegnerprojektil (Gefahr)
+* **weiß-cyan** = jedes Spielerprojektil (Eigenfeuer)
+
+Ein Gegner mit großen leuchtenden Flächen in diesen Tönen nimmt der
+Gefahrenanzeige ihre Bedeutung — und die drei hier stehen am längsten im
+Bild. Erlaubt sind wenige kleine versenkte Bernsteinlichter und ein matter
+Hitzering tief in den Düsen. Keine Flächen, keine Streifen, keine roten
+Blinklichter.
+
+*Diese Regel stand bis v78 in keinem der neun Bildaufträge, obwohl das
+Farbtor sie seit jeher prüft — und der Rotor-Auftrag verlangte sogar
+ausdrücklich „a small red beacon on the spine". Eine Regel, die ein Tor
+prüft, aber der Auftrag nicht nennt, wird geliefert und dann abgelehnt.*
+
 **Keine Hoheitszeichen, keine Abzeichen, keine Symbole.** Kein
 Landeplatten-Emblem, kein Wappen, kein Zeichen auf einer Fläche — auch
 kein erfundenes. Bildmodelle greifen für „militärische Markierung" auf
@@ -90,21 +107,29 @@ armour plating, visible panel seams, a few rivet lines, worn leading edges. Keep
 detail restrained — this is a fighter, not a capital ship.
 Accents: amber running lights at the wingtips, a deep bronze heat ring around each engine
 nozzle.
+COLOUR RESTRICTION, important for the game this is for: no large glowing red or orange
+surface, and no glowing white or cyan lines, strips or fields. Those two colour bands are
+reserved for projectiles and this ship must never compete with them.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading across the plating.
 Framing: centred, occupying about 96 percent of the frame in its longest direction. Leave
 a clear empty transparent margin of about 2 percent on all four sides — nothing may touch
 or be cut off by a frame edge.
-Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
-vignette, no frame, no text, no logos.
+OUTPUT: PNG with a real alpha channel. The background must be fully transparent — empty
+alpha, not a white fill, not a grey fill, not a checkerboard pattern, not a sky.
+No ground shadow, no clouds, no vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
 silhouette.
 ```
 
 **Negativ:**
 ```
+white background, solid background, opaque background, no alpha, flattened image,
 portrait composition, tall narrow composition, long fuselage, airliner, bomber, capital
-ship, over-detailed, busy greebles, subject touching frame edge, cartoon, anime,
+ship, over-detailed, busy greebles, greeble carpet, low contrast,
+glowing red panels, glowing orange panels, large red glow, neon strips, glowing white lines,
+cyan glow, energy field,
+subject touching frame edge, cartoon, anime,
 cel shading, toy, plastic toy, thick outline, comic book, photorealistic photograph,
 studio product render, background, sky, clouds, ground, terrain, shadow on ground,
 vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
@@ -140,21 +165,29 @@ armour plating in large flat panels, visible seams, rivet rows, scorch marks nea
 launch bays, worn edges. Keep the detail restrained — large readable panels, not fine
 greebling.
 Accents: amber deck lights along both long edges, dull orange glow inside the launch bays.
+COLOUR RESTRICTION, important for the game this is for: no large glowing red or orange
+surface, and no glowing white or cyan lines, strips or fields. Those two colour bands are
+reserved for projectiles and this ship must never compete with them.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, clear directional shading, the sponsons casting shadow onto the hull.
 Framing: centred, occupying about 96 percent of the frame width. Leave a clear empty
 transparent margin of about 2 percent on all four sides — nothing may touch or be cut off
 by a frame edge.
-Background: fully transparent, no ground shadow, no sky, no clouds, no ground, no
-vignette, no frame, no text, no logos.
+OUTPUT: PNG with a real alpha channel. The background must be fully transparent — empty
+alpha, not a white fill, not a grey fill, not a checkerboard pattern, not a sky.
+No ground shadow, no clouds, no vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
 silhouette.
 ```
 
 **Negativ:**
 ```
+white background, solid background, opaque background, no alpha, flattened image,
 portrait composition, square composition, tall narrow composition, slender fighter,
-swept wings, delta wing, over-detailed, busy greebles, subject touching frame edge,
+swept wings, delta wing, over-detailed, busy greebles, greeble carpet, low contrast,
+glowing red panels, glowing orange panels, large red glow, neon strips, glowing white lines,
+cyan glow, energy field,
+subject touching frame edge,
 cartoon, anime, cel shading, toy, plastic toy, thick outline, comic book, photorealistic
 photograph, studio product render, background, sky, clouds, ground, terrain, shadow on
 ground, vignette, frame, border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,
@@ -186,24 +219,32 @@ Armament: a chin turret under the nose, two stub wings with rocket pods.
 Surface: semi-realistic hard-surface military design, brushed gunmetal and olive-grey
 armour plating, visible panel seams, rivet lines, exhaust staining behind the engine
 housing, worn edges. Keep the detail restrained.
-Accents: amber navigation lights on the stub wings, a small red beacon on the spine.
+Accents: small amber navigation lights on the stub wings.
+COLOUR RESTRICTION, important for the game this is for: no large glowing red or orange
+surface, and no glowing white or cyan lines, strips or fields. Those two colour bands are
+reserved for projectiles and this ship must never compete with them.
 Lighting: one strong key light from the upper left at 45 degrees, soft ambient fill from
 the lower right, the rotor blades casting soft shadows onto the hull below them.
 Framing: centred, occupying about 96 percent of the frame. Leave a clear empty transparent
 margin of about 2 percent on all four sides — no blade tip may touch or be cut off by a
 frame edge.
-Background: fully transparent — the gaps between the four rotor blades are background too
-and must be fully transparent. No ground shadow, no sky, no clouds, no ground, no
-vignette, no frame, no text, no logos.
+OUTPUT: PNG with a real alpha channel. The background must be fully transparent — empty
+alpha, not a white fill, not a grey fill, not a checkerboard pattern, not a sky — and the
+four gaps BETWEEN the rotor blades are background too and must be fully transparent.
+No ground shadow, no clouds, no vignette, no frame, no text, no logos.
 Rendering: sharp crisp native detail at full resolution, instantly readable as a
 silhouette.
 ```
 
 **Negativ:**
 ```
-motion blur, blurred rotor, rotor disc, translucent disc, spinning blur, two blades,
+white background, solid background, opaque background, no alpha, flattened image,
+filled rotor disc, motion blur, blurred rotor, rotor disc, translucent disc, spinning blur, two blades,
 portrait composition, landscape composition, fixed-wing aircraft, jet, over-detailed,
-busy greebles, cropped blades, subject touching frame edge, cartoon, anime, cel shading,
+busy greebles, greeble carpet, low contrast,
+glowing red panels, glowing orange panels, red beacon, large red glow, neon strips,
+glowing white lines, cyan glow, energy field,
+cropped blades, subject touching frame edge, cartoon, anime, cel shading,
 toy, plastic toy, thick outline, comic book, photorealistic photograph, studio product
 render, background, sky, clouds, ground, terrain, shadow on ground, vignette, frame,
 border, text, watermark, signature, insignia, emblem, badge, heraldry, crest,

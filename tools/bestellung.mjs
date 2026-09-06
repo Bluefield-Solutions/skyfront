@@ -117,6 +117,65 @@ if (existsSync(VERWORFEN)) {
   }
 }
 
+// ---- Traegt jeder Auftragsblock die zwei Regeln, die ein Tor prueft? -----
+//
+// DER ANLASS: die Farbbaender stehen seit jeher im Farbtor — rot-orange
+// fuer Gegnerprojektile, weiss-cyan fuer Eigenfeuer — und standen bis v78
+// in KEINEM der neun Bildauftraege. Der Rotor-Auftrag verlangte sogar
+// ausdruecklich "a small red beacon on the spine", also genau das, was das
+// Tor spaeter abgelehnt haette.
+//
+// Dasselbe fuer die Hoheitszeichen: in einer Lieferung standen zwei
+// Hakenkreuze auf den Landeplattformen. Kein Werkzeug findet das im Bild —
+// aber ob es im NEGATIVPROMPT steht, ist nachzaehlbar.
+//
+// Eine Regel, die ein Tor prueft, aber der Auftrag nicht nennt, wird
+// geliefert und dann abgelehnt. Das kostet eine Runde je Bild.
+// Die Gegenprobe zu dieser Pruefung: EINEM Block die Farbregel wegnehmen.
+// Ein Tor, das nie etwas meldet, ist kein Beweis — und diese Pruefung ist
+// gerade erst entstanden, hat also noch nie etwas gefunden ausser den fuenf
+// Luecken, fuer die sie gebaut wurde.
+const PROBE_OHNE_REGEL = process.argv.includes('--probe-ohne-regel');
+
+console.log('\n  Regeln in den Auftragsbloecken');
+const PFLICHT = [
+  ['COLOUR RESTRICTION', 'die Farbbaender (rot-orange / weiss-cyan)'],
+  ['swastika', 'das Hoheitszeichen-Verbot im Negativprompt'],
+  ['alpha channel', 'der Alphakanal'],
+];
+let bloecke = 0;
+for (const k of Object.keys(BOGEN)) {
+  let t = block(k);
+  if (!t) { M.befund(`kein Auftragsblock zu "${k}" — der Prompt ist nicht zu finden.`); continue; }
+  bloecke++;
+  if (PROBE_OHNE_REGEL && k === 'boss5') {
+    // Kam der Eingriff an? Ein nicht angekommener Eingriff sieht aus wie
+    // eine bestandene Probe — drei sind in diesem Projekt daran gescheitert.
+    if (!/COLOUR RESTRICTION/i.test(t)) M.abbruch('die Gegenprobe ist nicht angekommen: boss5 traegt die Farbregel gar nicht.');
+    t = t.replace(/COLOUR RESTRICTION/gi, 'colour note');
+  }
+  const fehlt = PFLICHT.filter(([n]) => !t.toLowerCase().includes(n.toLowerCase())).map(([, w]) => w);
+  console.log(`    ${k.padEnd(14)} ${fehlt.length ? 'FEHLT: ' + fehlt.join(' · ') : 'vollstaendig'}`);
+  for (const w of fehlt) M.befund(`Auftrag "${k}": ${w} fehlt im Block.`);
+  // Und der Widerspruch, an dem der Rotor haengt: ein rotes Blinklicht im
+  // POSITIVEN Prompt, waehrend das Farbtor Rot fuer die Gefahr reserviert.
+  //
+  // ERSTER ANLAUF WAR FALSCH und hat es sofort gezeigt: das Muster traf die
+  // VERBOTSZEILE selbst ("no large glowing red or orange surface") und
+  // meldete fuenf Befunde, die es nicht gab. Ein Tor, das seine eigene
+  // Regel fuer einen Verstoss haelt, ist schlimmer als keines — es macht
+  // den Bogen rot und lenkt von den echten Luecken ab.
+  //
+  // Deshalb wird die Verbotszeile vorher herausgeschnitten, und gesucht
+  // wird nur nach dem, was ein Bild WIRKLICH rot machen wuerde.
+  const positiv = (t.split('**Negativ:**')[0] || '')
+    .replace(/COLOUR RESTRICTION[\s\S]*?(?:\n\n|$)/gi, '');
+  const rot = positiv.match(/\b(red beacon|red light|red strip|red glow|red panel)\b/i);
+  if (rot)
+    M.befund(`Auftrag "${k}": der Prompt verlangt "${rot[1]}" am Schiff — das rot-orange Band gehoert den Gegnerprojektilen.`);
+}
+if (!bloecke) M.ungemessen('kein einziger Auftragsblock gelesen.');
+
 // Ein Auftrag ohne Prompt ist keiner. Das ist die einzige Pruefung hier,
 // und sie greift genau dann, wenn jemand die Einbauliste erweitert und den
 // Bogen vergisst — der Fall, in dem eine Bestellung still verschwindet.
