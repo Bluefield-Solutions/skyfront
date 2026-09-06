@@ -195,7 +195,11 @@ const PROBEN = [
   ['Jeder neue Sektor setzt die Messung wieder zurueck', '✗',
     ['        if (startAusserhalb && s0 && s0.scene && s0.scene.isActive && s0.scene.isActive()) {\n          startAusserhalb = !1; zuruecksetzen(); vorher = t; return;\n        }',
      '        var lauf2 = s0 && s0.laufNr != null ? s0.laufNr : null;\n        if (lauf2 != null && lauf2 !== window.__letzterLauf) { window.__letzterLauf = lauf2; zuruecksetzen(); vorher = t; return; }'],
-    true, 'messtafel:D', 'wirft die Messung weg', HUELLE],
+    // KEIN Zuschnitt, und das ist gemessen: mit `--bis=D` blieb die Probe
+    // GRUEN. Der Satz "wirft die Messung weg" steht in D und in L —
+    // angeschlagen hat L, die LETZTE Pruefung. Fuer diese eine Probe gibt
+    // es also nichts zu sparen; sie braucht die ganze Kette.
+    true, 'messtafel', 'wirft die Messung weg', HUELLE],
   // DAS FALLEN DES Q-REGLERS WIEDER UNGEBREMST. Genau so stand es bis
   // v68: die Regel laeuft dreimal je Sekunde, ein Ruckler von 90 ms schob
   // den Regler in 2,7 Sekunden auf den Boden. Gemessen auf dem Geraet,
