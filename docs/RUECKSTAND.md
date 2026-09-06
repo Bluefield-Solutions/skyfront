@@ -7,7 +7,7 @@ Wer wissen will, *was als Nächstes*, liest hier.
 **Geprüft ist am Code, nicht am Dokument.** Ein Audit sagt, was jemand
 einmal gefunden hat; ob es noch gilt, sagt nur die Quelle.
 
-Stand: v78.
+Stand: v79.
 
 > **Diese Datei stand vierzig Versionen lang auf „v28".** Nichts hat sie
 > geprüft — der Rückstand des Rückstandsverzeichnisses fiel niemandem auf,
@@ -152,6 +152,7 @@ Damit niemand zweimal dasselbe aufmacht — alles im Audit belegt:
 | Das Messtafel-Tor misst seine zwölf Prüfungen einzeln: J trägt 36 %, und zwar an **Spielbildern**, nicht an festen Wartezeiten | v78 |
 | B-5 in dritter Fassung; Farbbänder und Alphakanal stehen jetzt im Auftrag; drei Gegner hatten gar keinen Abnahmeeintrag | v78 |
 | `docs/chatgpt/` — Bildpaket für ein ChatGPT-Projekt: das **Schiff** trägt das Verhältnis, weil dort kein 16:9 einstellbar ist | v78 |
+| Messtafel-Proben mit `--bis` zugeschnitten: **26,4 → 14,1 min**, zwei Zuschnitte waren zu eng und wurden vom Lauf gefunden | v79 |
 | **Eine neue Fassung kam auf dem Gerät nie an** — der Dienst-Arbeiter legte die alte Seite unter der neuen Marke ab (`addAll` durch den Browser-Zwischenspeicher). Gemessen: vorher nach vier Starten nicht da, jetzt nach zwei | v74 |
 
 ---

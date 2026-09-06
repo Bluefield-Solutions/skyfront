@@ -671,6 +671,23 @@ Jede hat mindestens eine Runde gekostet.
    Probensatz ruft das Tor zehnmal und laesst jedes Mal alle zwoelf
    Pruefungen laufen, obwohl jede Probe nur eine braucht.
 
+75. **Wer eine Pruefung zuschneidet, muss wissen, WELCHE Stelle anschlaegt
+   — und derselbe Befundtext steht oft an zweien.** Neun Messtafel-Proben
+   bekamen einen Zuschnitt (`--bis=<Pruefung>`); ZWEI davon waren zu eng,
+   weil ihr erwarteter Satz in zwei Pruefungen steht: „steht kein Ergebnis"
+   in D und J, „wirft die Messung weg" in D und L. Der Zuschnitt traf
+   jeweils die falsche.
+
+   Gefunden hat es der Probenlauf in derselben Runde, weil ein zu enger
+   Zuschnitt die Probe WIRKUNGSLOS macht und der Satz genau das meldet.
+   Dieselbe Sorte Fehler liess drei Gegenproben ueber Versionen hinweg tot
+   dastehen (v69, v73, v75) — dort fehlte die Rueckmeldung, hier gab es
+   sie sofort. **Eine Aenderung, die einen eigenen Fehlermodus hat, gehoert
+   dorthin, wo dieser Modus laut wird.**
+
+   Und die eine Probe, fuer die es NICHTS zu sparen gab, bleibt ungekuerzt
+   stehen. Eine Fehlanzeige ist ein Ergebnis (Regel 62).
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert
