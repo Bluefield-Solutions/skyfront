@@ -721,6 +721,25 @@ Jede hat mindestens eine Runde gekostet.
    davor kamen aus Vermutungen ueber die Ursache statt aus Messungen der
    Teile.
 
+78. **Eine einzelne Messung ist keine Vergleichsgroesse.** Nach einer
+   Aenderung stand 80,9 s gegen 72,4 s vorher, und ich hatte fuer diese
+   acht Sekunden drei Erklaerungen — Maschinenlast, ein Szenenstart, ein
+   fehlerhafter Schnitt. Alle drei falsch. Sauber gegengemessen, dieselbe
+   Datei, ein Unterschied: ohne die Aenderung 80,0 / 81,4 / 80,5, mit ihr
+   80,5 / 80,0. **Die Differenz gibt es nicht.**
+
+   Der Fehler lag nicht in den Erklaerungen, sondern davor: die 72,4 s
+   waren EINE Zahl. Wer n=1 gegen n=4 stellt, misst die Streuung und nennt
+   sie Wirkung. Regel 12 sagt, dass jede Zahl ihre Messstelle traegt —
+   diese hier sagt, dass eine Zahl ohne Streuung noch gar keine
+   Vergleichsgroesse ist.
+
+   Und drittens: der erste Schnitt fuer die Gegenmessung entfernte zu viel,
+   die Laeufe brachen ab, die Ausgabe war leer. Das haette wie „dreimal
+   ohne Wirkung" ausgesehen. Gemerkt nur daran, dass GAR KEINE Zahl kam.
+   Ein Eingriff fuer eine Gegenmessung prueft, was er stehen laesst — nicht
+   nur, was er wegnimmt.
+
 62. **Vor dem Justieren den Raum ansehen — und die Fehlanzeige stehen
    lassen.** Der fx-Deckel war nach v67 der plausibelste Hebel: 170 aktive
    Effekte sind der groesste Block der Anzeigeliste. Durchprobiert

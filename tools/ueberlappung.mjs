@@ -113,6 +113,22 @@ const server = createServer((an, aw) => {
 await new Promise((f) => server.listen(0, '127.0.0.1', f));
 const adresse = `http://127.0.0.1:${server.address().port}/Skyfront.html`;
 
+// Was jeder Schirm kostet.
+//
+// Der Anlass: dieses Tor ist mit 132,3 s je Probe der TEUERSTE Einzelposten
+// im Probensatz — teurer als Messtafel (83,2) und Ruestung (72,3). Anders
+// als die beiden hat es keine benannten Pruefungen, sondern eine Schleife
+// ueber neun Menueschirme. Also wird je Schirm getaktet: die Frage ist, ob
+// alle neun gleich viel kosten oder ob einer heraussticht.
+const taktStart = Date.now();
+let taktLetzt = taktStart;
+const takte = [];
+const takt = (name) => {
+  const jetzt = Date.now();
+  takte.push([name, (jetzt - taktLetzt) / 1000]);
+  taktLetzt = jetzt;
+};
+
 const browser = await chromium.launch({ args: ['--no-sandbox', '--disable-gpu', '--use-gl=swiftshader'] });
 const seite = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, deviceScaleFactor: 2 });
 await seite.goto(adresse);
@@ -122,6 +138,43 @@ await seite.waitForTimeout(2500);
 // Die Naht: ohne die Leseschnittstelle der Anzeigeliste gibt es nichts zu
 // messen. `--ohne-naht` nimmt sie weg und verlangt die Rueckgabe 2.
 if (OHNE_NAHT) await seite.evaluate(() => { window.__game.scene.getScene = () => null; });
+
+// IST DIE NAHT UEBERHAUPT DA? Einmal fragen, nicht neunmal vergeblich.
+//
+// GEMESSEN: der normale Lauf kostet 72,4 s, der Lauf OHNE Naht 142 s —
+// fast das Doppelte, und er misst nichts. Der Grund: jeder der neun
+// Schirme wartet zweimal fest drei Sekunden auf nachgeladene Bilder, und
+// das tat er auch dann, wenn `scene.getScene` gar keine Szene mehr
+// hergibt. Neun Mal sechs Sekunden fuer neun Mal dieselbe Fehlanzeige.
+//
+// Eine Messung, die nicht stattfinden kann, soll das schnell sagen und
+// nicht teurer sein als die Messung selbst. Hier steht die Frage EINMAL,
+// mit einer Schranke von drei Sekunden: kommt eine Szene zurueck, laeuft
+// alles weiter wie bisher; kommt keine, ist Schluss mit Rueckgabe 2.
+{
+  // OHNE eine Szene zu starten: beim Hochlauf laeuft ohnehin schon eine,
+  // und nach deren Schluessel zu fragen beantwortet dieselbe Frage — gibt
+  // `getScene` etwas her oder nicht.
+  //
+  // NACHGEMESSEN, weil ich es zweimal falsch erklaert habe: die Nahtfrage
+  // kostet den normalen Lauf NICHTS. Dieselbe Datei, dreimal ohne sie
+  // (80,0 / 81,4 / 80,5) gegen zweimal mit ihr (80,5 / 80,0). Die 72,4 s
+  // aus dem allerersten Lauf waren keine Vergleichsgroesse, sondern eine
+  // einzelne Zahl ohne Streuung.
+  const nahtDa = await seite.evaluate(() => {
+    const g = window.__game;
+    if (!g || !g.scene || typeof g.scene.getScene !== 'function') return false;
+    const laufend = (g.scene.getScenes(true) || [])[0];
+    if (!laufend) return false;
+    return !!g.scene.getScene(laufend.scene.key);
+  });
+  if (!nahtDa) {
+    M.ungemessen('scene.getScene gibt keine Szene her — ohne sie ist kein Schirm zu vermessen.');
+    await browser.close();
+    server.close();
+    M.urteil();
+  }
+}
 
 console.log('Überlappung\n');
 console.log('  gemessen bei 390 x 844 (iPhone hochkant), Welt 540 x 960\n');
@@ -192,7 +245,10 @@ const schnitt = (a, b) => {
 };
 
 let gemessen = 0;
+takt('Hochlauf + Gegnerband');
+
 for (const s of SCHIRME) {
+  const schirmStart = Date.now();
   const daten = await seite.evaluate(async ({ key, arg }) => {
     const g = window.__game;
     try {
@@ -360,6 +416,8 @@ for (const s of SCHIRME) {
     }
   }
   if (BILD) await seite.screenshot({ path: `dist/ueberlappung-${s.key}.png` });
+  takte.push([`Schirm ${s.key}`, (Date.now() - schirmStart) / 1000]);
+  taktLetzt = Date.now();
 }
 
 // ---- Die Knoepfe ueber der Leinwand, bei verschiedenen Bildschirmen ----
@@ -413,4 +471,11 @@ if (!gemessen) M.ungemessen('kein Schirm messbar.');
 
 await browser.close();
 server.close();
+takt('Knoepfe bei drei Bildschirmen');
+
+console.log('\n  Laufzeit je Abschnitt   (dieser Rechner, dieser Lauf, SwiftShader ohne Grafikkarte)');
+for (const [n, d] of [...takte].sort((a, b) => b[1] - a[1]))
+  console.log(`    ${String(d.toFixed(1)).padStart(6)} s   ${Math.round(d / ((Date.now() - taktStart) / 1000) * 100).toString().padStart(2)} %   ${n}`);
+console.log(`    ${((Date.now() - taktStart) / 1000).toFixed(1)} s   zusammen`);
+
 M.urteil(`${gemessen} Menüschirme, ${bilder.da} Gegnerbilder geladen.`);

@@ -898,9 +898,13 @@ const MODUSPROBEN = [{
   cmd: ['tools/ueberlappung.mjs', '--ohne-naht'],
   rotErwartet: false,
   exitErwartet: 2,
-  mussEnthalten: ['NICHT GEMESSEN', 'Szene nicht erreichbar'],
-  darfNichtEnthalten: ['GRÜN — '],
-  beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen", Rückgabe 2',
+  // v82: der Wortlaut hat sich geaendert, weil die Nahtfrage jetzt EINMAL
+  // vorne steht statt neunmal in der Schleife. Vorher meldete jeder der
+  // neun Schirme "Szene nicht erreichbar" — und der Lauf kostete 142 s,
+  // fast das Doppelte der echten Messung. Jetzt 13 s.
+  mussEnthalten: ['NICHT GEMESSEN', 'gibt keine Szene her'],
+  darfNichtEnthalten: ['GRÜN — ', 'Szene nicht erreichbar'],
+  beweist: 'ohne Anzeigeliste sagt das Tor "nicht gemessen", Rückgabe 2 — und zwar sofort statt nach neun vergeblichen Schirmen',
 }, {
   // Ohne die Naht kennt das Kopfzeilentor die Rechtecke nicht, die die
   // Kopfzeile zeichnet — Tafel, Kraftleiter, Lebensgurt und Bossleiste
